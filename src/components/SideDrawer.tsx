@@ -75,7 +75,8 @@ export function SideDrawer({ open, onClose }: Props) {
   const navigate = useNavigate();
 
   const items: NavItem[] = [
-    { label: "Forecast", path: "/", icon: "map_search" },
+    { label: "Map", path: "/", icon: "map_search" },
+    { label: "Planner", path: "/planner", icon: "event_note" },
     { label: "About", path: "/about", icon: "info" },
   ];
 

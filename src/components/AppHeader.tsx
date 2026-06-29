@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { H3Resolution } from "../config/dataPaths";
 import type { Period } from "../data/periods";
 import { ExpectedActivityPill } from "./ExpectedActivityPill";
@@ -38,8 +37,6 @@ type Props = {
   onOpenInfo: () => void;
   onOpenMenu: () => void;
   onBrandClick?: () => void;
-  compareEnabled?: boolean;
-  onExitCompareMode?: () => void;
 };
 
 export function AppHeader({
@@ -68,11 +65,7 @@ export function AppHeader({
   onOpenInfo,
   onOpenMenu,
   onBrandClick,
-  compareEnabled = false,
-  onExitCompareMode,
 }: Props) {
-  const [compareModeHovered, setCompareModeHovered] = useState(false);
-
   return (
     <header className="header" data-tour="top-bar">
       <div className="header__left">
@@ -99,69 +92,52 @@ export function AppHeader({
       </div>
 
       <div className="header__right">
-        {compareEnabled ? (
-          <button
-            type="button"
-            className="compareModePill compareModePill--button"
-            aria-label="Exit compare mode"
-            onClick={onExitCompareMode}
-            onMouseEnter={() => setCompareModeHovered(true)}
-            onMouseLeave={() => setCompareModeHovered(false)}
-            onFocus={() => setCompareModeHovered(true)}
-            onBlur={() => setCompareModeHovered(false)}
-          >
-            {compareModeHovered ? "EXIT" : "COMPARE MODE"}
-          </button>
-        ) : (
-          <>
-            <div className="headerForecast">
-              <ForecastPeriodPill
-                periods={forecastPeriods}
-                selectedIndex={forecastIndex}
-                onChangeIndex={onForecastIndexChange}
-                isPlaying={forecastPlaybackPlaying}
-                onPlayingChange={onForecastPlaybackPlayingChange}
-                playDir={forecastPlaybackDirection}
-                onPlayDirChange={onForecastPlaybackDirectionChange}
-                disabled={forecastPeriods.length === 0}
-                tourId="forecast-period"
-              />
-              <div
-                className={`headerForecast__notice${showForecastNotice ? " is-visible" : ""}`}
-                role="status"
-                aria-live="polite"
-              >
-                {forecastNoticeText}
-              </div>
-              {fallbackNoticeVisible && (
-                <div className="headerForecast__fallback" role="status" aria-live="polite">
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    history
-                  </span>
-                  <span>{fallbackNoticeText}</span>
-                </div>
-              )}
-            </div>
-
-            <ExpectedActivityPill
-              currentCount={expectedActivityCount}
-              vsPriorWeek={expectedActivityVsPriorWeek}
-              vs12WeekAvg={expectedActivityVs12WeekAvg}
-              trend={expectedActivityTrend}
-              chart={expectedActivityChart}
+        <>
+          <div className="headerForecast">
+            <ForecastPeriodPill
+              periods={forecastPeriods}
+              selectedIndex={forecastIndex}
+              onChangeIndex={onForecastIndexChange}
+              isPlaying={forecastPlaybackPlaying}
+              onPlayingChange={onForecastPlaybackPlayingChange}
+              playDir={forecastPlaybackDirection}
+              onPlayDirChange={onForecastPlaybackDirectionChange}
+              disabled={forecastPeriods.length === 0}
+              tourId="forecast-period"
             />
-          </>
-        )}
+            <div
+              className={`headerForecast__notice${showForecastNotice ? " is-visible" : ""}`}
+              role="status"
+              aria-live="polite"
+            >
+              {forecastNoticeText}
+            </div>
+            {fallbackNoticeVisible && (
+              <div className="headerForecast__fallback" role="status" aria-live="polite">
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  history
+                </span>
+                <span>{fallbackNoticeText}</span>
+              </div>
+            )}
+          </div>
 
-        {!compareEnabled && (
-          <H3ResolutionPill
-            value={resolution === "H4" ? 4 : resolution === "H5" ? 5 : 6}
-            onChange={(next) =>
-              onResolutionChange(next === 4 ? "H4" : next === 5 ? "H5" : "H6")
-            }
-            tourId="resolution"
+          <ExpectedActivityPill
+            currentCount={expectedActivityCount}
+            vsPriorWeek={expectedActivityVsPriorWeek}
+            vs12WeekAvg={expectedActivityVs12WeekAvg}
+            trend={expectedActivityTrend}
+            chart={expectedActivityChart}
           />
-        )}
+        </>
+
+        <H3ResolutionPill
+          value={resolution === "H4" ? 4 : resolution === "H5" ? 5 : 6}
+          onChange={(next) =>
+            onResolutionChange(next === 4 ? "H4" : next === 5 ? "H5" : "H6")
+          }
+          tourId="resolution"
+        />
 
         <button
           className="iconBtn"

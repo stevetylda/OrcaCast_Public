@@ -15,7 +15,6 @@ export const dataMetaFileSchema = z
   .object({
     data_version: z.string().trim().optional(),
     generated_at: z.string().trim().optional(),
-    active_explainability_context: z.string().trim().optional(),
     version: z.string().trim().optional(),
     build_id: z.string().trim().optional(),
     buildId: z.string().trim().optional(),

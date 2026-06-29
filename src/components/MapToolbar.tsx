@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { HotspotsSettingsSection } from "./map/settings/HotspotsSettingsSection";
 import { PALETTES, getPalette, type PaletteId } from "../constants/palettes";
-import type { ForecastDisplayMode } from "./ForecastMap/types";
 
 type Props = {
-  onSelectLastWeek: (mode: "previous" | "selected") => void;
-  lastWeekMode: "none" | "previous" | "selected" | "both";
-  showLastWeek: boolean;
   hotspotsEnabled: boolean;
   onHotspotsEnabledChange: (value: boolean) => void;
   hotspotMode: "modeled" | "custom";
@@ -15,49 +11,15 @@ type Props = {
   onHotspotPercentileChange: (value: number) => void;
   hotspotTotalCells: number | null;
   hotspotModeledCount: number | null;
-  onOpenTimeseries: () => void;
   poiFilters: { Park: boolean; Marina: boolean; Ferry: boolean };
   onTogglePoiAll: () => void;
   onTogglePoiType: (type: "Park" | "Marina" | "Ferry") => void;
-  compareEnabled: boolean;
-  compareDisabled: boolean;
-  compareDisabledReason?: string;
   selectedPaletteId: PaletteId;
   onPaletteChange: (paletteId: PaletteId) => void;
-  displayMode: ForecastDisplayMode;
-  onDisplayModeChange: (mode: ForecastDisplayMode) => void;
-  onToggleCompare: () => void;
   className?: string;
 };
 
-function ToolButton({
-  icon,
-  label,
-  onClick,
-  tourId,
-}: {
-  icon: string;
-  label: string;
-  onClick: () => void;
-  tourId?: string;
-}) {
-  return (
-    <button
-      className="toolBtn"
-      onClick={onClick}
-      title={label}
-      aria-label={label}
-      data-tour={tourId}
-    >
-      <span className="material-symbols-rounded">{icon}</span>
-    </button>
-  );
-}
-
 export function MapToolbar({
-  onSelectLastWeek,
-  lastWeekMode,
-  showLastWeek,
   hotspotsEnabled,
   onHotspotsEnabledChange,
   hotspotMode,
@@ -66,53 +28,21 @@ export function MapToolbar({
   onHotspotPercentileChange,
   hotspotTotalCells,
   hotspotModeledCount,
-  onOpenTimeseries,
   poiFilters,
   onTogglePoiAll,
   onTogglePoiType,
-  compareEnabled,
-  compareDisabled,
-  compareDisabledReason,
   selectedPaletteId,
   onPaletteChange,
-  displayMode,
-  onDisplayModeChange,
-  onToggleCompare,
   className,
 }: Props) {
-  const lastWeekRef = useRef<HTMLDivElement | null>(null);
   const poiRef = useRef<HTMLDivElement | null>(null);
   const hotspotRef = useRef<HTMLDivElement | null>(null);
   const paletteRef = useRef<HTMLDivElement | null>(null);
-  const displayModeRef = useRef<HTMLDivElement | null>(null);
-  const [lastWeekOpen, setLastWeekOpen] = useState(false);
   const [poiOpen, setPoiOpen] = useState(false);
   const [hotspotOpen, setHotspotOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [displayModeOpen, setDisplayModeOpen] = useState(false);
-  const hasPrevious = lastWeekMode === "previous" || lastWeekMode === "both";
-  const hasSelected = lastWeekMode === "selected" || lastWeekMode === "both";
   const poiActive = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
   const activePalette = getPalette(selectedPaletteId);
-
-  useEffect(() => {
-    if (!lastWeekOpen) return;
-    const onDocClick = (event: MouseEvent) => {
-      if (!lastWeekRef.current) return;
-      if (lastWeekRef.current.contains(event.target as Node)) return;
-      setLastWeekOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setLastWeekOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [lastWeekOpen]);
 
   useEffect(() => {
     if (!poiOpen) return;
@@ -171,97 +101,8 @@ export function MapToolbar({
     };
   }, [paletteOpen]);
 
-  useEffect(() => {
-    if (!displayModeOpen) return;
-    const onDocClick = (event: MouseEvent) => {
-      if (!displayModeRef.current) return;
-      if (displayModeRef.current.contains(event.target as Node)) return;
-      setDisplayModeOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setDisplayModeOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [displayModeOpen]);
-
   return (
     <div className={className ? `toolbar ${className}` : "toolbar"} data-tour="toolbar">
-      <div
-        ref={lastWeekRef}
-        className={`toolMenu${lastWeekOpen ? " toolMenu--open" : ""}`}
-      >
-        <button
-          className={`toolBtn${
-            showLastWeek
-              ? lastWeekMode === "both"
-                ? " toolBtn--active toolBtn--activeBoth"
-                : lastWeekMode === "previous"
-                  ? " toolBtn--active toolBtn--activePrev"
-                  : " toolBtn--active toolBtn--activeNext"
-              : ""
-          }`}
-          onClick={() => setLastWeekOpen((v) => !v)}
-          title="Add last week sightings"
-          aria-label="Add last week sightings"
-          data-tour="history"
-        >
-          <span className="material-symbols-rounded">history</span>
-        </button>
-
-        {lastWeekOpen && (
-          <div className="toolMenu__popover" role="menu" aria-label="Last week sightings">
-            <button
-              className={`toolMenu__option${
-                showLastWeek && hasPrevious ? " toolMenu__option--active" : ""
-              } toolMenu__option--prev`}
-              onClick={() => {
-                onSelectLastWeek("previous");
-                setLastWeekOpen(false);
-              }}
-              title="Prior week sightings"
-              aria-label="Prior week sightings"
-            >
-              <span className="material-symbols-rounded">keyboard_double_arrow_left</span>
-            </button>
-            <button
-              className={`toolMenu__option${
-                showLastWeek && hasSelected ? " toolMenu__option--active" : ""
-              } toolMenu__option--next`}
-              onClick={() => {
-                onSelectLastWeek("selected");
-                setLastWeekOpen(false);
-              }}
-              title="Selected week sightings"
-              aria-label="Selected week sightings"
-            >
-              <span className="material-symbols-rounded">keyboard_double_arrow_right</span>
-            </button>
-          </div>
-        )}
-      </div>
-      <ToolButton
-        icon="timeline"
-        label="Open timeseries"
-        onClick={onOpenTimeseries}
-        tourId="timeseries"
-      />
-      <button
-        className={`toolBtn toolBtn--compare${compareEnabled ? " toolBtn--active" : ""}`}
-        onClick={onToggleCompare}
-        title={compareDisabled ? compareDisabledReason ?? "Compare unavailable" : "Compare mode"}
-        aria-label="Compare mode"
-        aria-pressed={compareEnabled}
-        data-tour="tools-compare-toggle"
-        disabled={compareDisabled}
-      >
-        <span className="material-symbols-rounded">compare_arrows</span>
-      </button>
       <div ref={poiRef} className={`toolMenu${poiOpen ? " toolMenu--open" : ""}`}>
         <button
           className={`toolBtn${poiActive ? " toolBtn--active" : ""}`}
@@ -393,55 +234,6 @@ export function MapToolbar({
                 </button>
               );
             })}
-          </div>
-        )}
-      </div>
-      <div ref={displayModeRef} className={`toolMenu${displayModeOpen ? " toolMenu--open" : ""}`}>
-        <button
-          className={`toolBtn${displayMode === "smooth" ? " toolBtn--active" : ""}`}
-          onClick={() => setDisplayModeOpen((v) => !v)}
-          aria-label="Display mode"
-          title="Display mode"
-        >
-          <span className="toolBtn__iconStack" aria-hidden="true">
-            <span className="material-symbols-rounded toolBtn__iconBase">
-              {displayMode === "smooth" ? "blur_on" : "hexagon"}
-            </span>
-            <span className="material-symbols-rounded toolBtn__iconBadge">settings</span>
-          </span>
-        </button>
-        {displayModeOpen && (
-          <div className="toolMenu__popover toolMenu__popover--stack" role="menu" aria-label="Display mode">
-            <button
-              type="button"
-              className={`toolDrawer__paletteRow${displayMode === "hex" ? " isSelected" : ""}`}
-              onClick={() => {
-                onDisplayModeChange("hex");
-                setDisplayModeOpen(false);
-              }}
-              role="menuitemradio"
-              aria-checked={displayMode === "hex"}
-            >
-              <span className="toolDrawer__paletteLabel">Hex Grid</span>
-              <span className="toolDrawer__paletteCheck material-symbols-rounded" aria-hidden="true">
-                {displayMode === "hex" ? "check" : ""}
-              </span>
-            </button>
-            <button
-              type="button"
-              className={`toolDrawer__paletteRow${displayMode === "smooth" ? " isSelected" : ""}`}
-              onClick={() => {
-                onDisplayModeChange("smooth");
-                setDisplayModeOpen(false);
-              }}
-              role="menuitemradio"
-              aria-checked={displayMode === "smooth"}
-            >
-              <span className="toolDrawer__paletteLabel">KDE / Blur</span>
-              <span className="toolDrawer__paletteCheck material-symbols-rounded" aria-hidden="true">
-                {displayMode === "smooth" ? "check" : ""}
-              </span>
-            </button>
           </div>
         )}
       </div>

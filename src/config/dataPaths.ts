@@ -51,24 +51,6 @@ export function getShapPathForPeriod(
   );
 }
 
-function h3ResolutionToNumber(resolution: H3Resolution): number {
-  return Number(resolution.replace("H", ""));
-}
-
-export function getKdeBandsPathForPeriod(
-  resolution: H3Resolution,
-  year: number,
-  statWeek: number,
-  runId: string,
-  folder = "forecast_geojson/kde_bands"
-): string {
-  const resNum = h3ResolutionToNumber(resolution);
-  if (folder.endsWith("weekly_blurred")) {
-    return withBase(`data/${folder}/${year}_${statWeek}_${resolution}_CONTOUR.geojson`);
-  }
-  return withBase(`data/${folder}/${runId}/r${resNum}/W_${year}_${statWeek}.geojson`);
-}
-
 export function getForecastPath(
   resolution: H3Resolution,
   opts: { kind?: "latest" | "explicit"; explicitPath?: string } = {}

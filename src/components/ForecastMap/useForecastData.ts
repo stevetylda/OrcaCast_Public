@@ -15,9 +15,6 @@ type UseForecastDataArgs = {
   forecastPath?: string;
   fallbackForecastPath?: string;
   modelId: string;
-  derivedValuesByCell?: Record<string, number>;
-  derivedValueProperty: string;
-  derivedFillExpr?: unknown[];
   onGridCellCount?: (count: number) => void;
   useExternalColorScale: boolean;
   paletteColors: string[];
@@ -29,8 +26,6 @@ type UseForecastDataArgs = {
   modeledHotspotThresholdRef: MutableRefObject<number | undefined>;
   valuesByCellRef: MutableRefObject<Record<string, number>>;
   colorScaleValuesRef: MutableRefObject<Record<string, number> | undefined>;
-  derivedValuePropertyRef: MutableRefObject<string>;
-  derivedFillExprRef: MutableRefObject<FillColorSpec | undefined>;
   sortedValuesDescRef: MutableRefObject<number[]>;
   totalCellsRef: MutableRefObject<number>;
   shimmerThresholdRef: MutableRefObject<number | undefined>;
@@ -45,9 +40,6 @@ export function useForecastData({
   forecastPath,
   fallbackForecastPath,
   modelId,
-  derivedValuesByCell,
-  derivedValueProperty,
-  derivedFillExpr,
   onGridCellCount,
   useExternalColorScale,
   paletteColors,
@@ -59,8 +51,6 @@ export function useForecastData({
   modeledHotspotThresholdRef,
   valuesByCellRef,
   colorScaleValuesRef,
-  derivedValuePropertyRef,
-  derivedFillExprRef,
   sortedValuesDescRef,
   totalCellsRef,
   shimmerThresholdRef,
@@ -103,62 +93,47 @@ export function useForecastData({
       try {
         const grid = await loadGrid(resolution);
         let values: Record<string, number> = {};
-        const usingDerivedValues = Boolean(derivedValuesByCell);
-        const valueProperty = derivedValuePropertyRef.current || "prob";
 
-        if (usingDerivedValues) {
-          values = derivedValuesByCell ?? {};
-        } else {
-          try {
-            let forecast;
-            if (forecastPath) {
-              try {
-                forecast = await loadForecast(resolution, { kind: "explicit", explicitPath: forecastPath, modelId });
-              } catch (err) {
-                if (fallbackForecastPath && fallbackForecastPath !== forecastPath) {
-                  console.warn("[Forecast] explicit path failed, falling back to latest period", err);
-                  forecast = await loadForecast(resolution, {
-                    kind: "explicit",
-                    explicitPath: fallbackForecastPath,
-                    modelId,
-                  });
-                } else {
-                  throw err;
-                }
+        try {
+          let forecast;
+          if (forecastPath) {
+            try {
+              forecast = await loadForecast(resolution, { kind: "explicit", explicitPath: forecastPath, modelId });
+            } catch (err) {
+              if (fallbackForecastPath && fallbackForecastPath !== forecastPath) {
+                console.warn("[Forecast] explicit path failed, falling back to latest period", err);
+                forecast = await loadForecast(resolution, {
+                  kind: "explicit",
+                  explicitPath: fallbackForecastPath,
+                  modelId,
+                });
+              } else {
+                throw err;
               }
-            } else if (fallbackForecastPath) {
-              forecast = await loadForecast(resolution, {
-                kind: "explicit",
-                explicitPath: fallbackForecastPath,
-                modelId,
-              });
             }
-            values = forecast?.values ?? {};
-          } catch (err) {
-            console.warn("[Forecast] failed to load", err);
-            onFatalDataError?.(
-              normalizeDataLoadError(
-                err,
-                forecastPath ?? fallbackForecastPath ?? `forecast:${resolution}`
-              )
-            );
-            return;
+          } else if (fallbackForecastPath) {
+            forecast = await loadForecast(resolution, {
+              kind: "explicit",
+              explicitPath: fallbackForecastPath,
+              modelId,
+            });
           }
+          values = forecast?.values ?? {};
+        } catch (err) {
+          console.warn("[Forecast] failed to load", err);
+          onFatalDataError?.(
+            normalizeDataLoadError(
+              err,
+              forecastPath ?? fallbackForecastPath ?? `forecast:${resolution}`
+            )
+          );
+          return;
         }
 
         if (cancelled) return;
 
-        const joined = attachProbabilities(grid, values, valueProperty);
-        if (usingDerivedValues) {
-          legendSpecRef.current = null;
-          setLegendSpec(null);
-          fillExprRef.current = derivedFillExprRef.current ?? fillExprRef.current;
-          hotspotThresholdRef.current = undefined;
-          modeledHotspotThresholdRef.current = undefined;
-          shimmerThresholdRef.current = undefined;
-        } else {
-          applyScaleToCurrentValues(values);
-        }
+        const joined = attachProbabilities(grid, values, "prob");
+        applyScaleToCurrentValues(values);
 
         if (DEBUG_MAP) {
           const vals = Object.values(values)
@@ -182,7 +157,7 @@ export function useForecastData({
         }
 
         const featureValues = (joined.features ?? [])
-          .map((feature) => Number((feature.properties as Record<string, unknown> | null)?.[valueProperty] ?? 0))
+          .map((feature) => Number((feature.properties as Record<string, unknown> | null)?.prob ?? 0))
           .filter((v) => Number.isFinite(v));
         sortedValuesDescRef.current = [...featureValues].sort((a, b) => b - a);
         totalCellsRef.current = featureValues.length;
@@ -219,9 +194,6 @@ export function useForecastData({
     forecastPath,
     fallbackForecastPath,
     modelId,
-    derivedValuesByCell,
-    derivedValueProperty,
-    derivedFillExpr,
     onGridCellCount,
     useExternalColorScale,
     paletteColors,

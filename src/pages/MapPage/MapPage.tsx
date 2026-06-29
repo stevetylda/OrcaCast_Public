@@ -1,15 +1,11 @@
 import { lazy, Suspense, useState } from "react";
 import { WelcomeModal } from "../../components/WelcomeModal";
 import { startMapTour } from "../../tour/startMapTour";
-import "../../features/models/models.css";
 import { MapPageErrorBoundary } from "./MapPageErrorBoundary";
 import { MapPageLayout } from "./MapPageLayout";
 import { useMapPageController } from "./useMapPageController";
 
 const InfoModal = lazy(() => import("../../components/InfoModal").then((m) => ({ default: m.InfoModal })));
-const TimeseriesModal = lazy(() =>
-  import("../../components/modals/TimeseriesModal").then((m) => ({ default: m.TimeseriesModal }))
-);
 const GridDetailModal = lazy(() =>
   import("../../components/modals/GridDetailModal").then((m) => ({ default: m.GridDetailModal }))
 );
@@ -39,17 +35,6 @@ export function MapPage() {
               onClose={() => controller.setInfoOpen(false)}
               onStartTour={() => startMapTour()}
               darkMode={controller.darkMode}
-            />
-          )}
-          {controller.timeseriesOpen && (
-            <TimeseriesModal
-              open={controller.timeseriesOpen}
-              onClose={() => controller.setTimeseriesOpen(false)}
-              darkMode={controller.darkMode}
-              currentWeek={controller.currentWeek}
-              forecastPeriodLabel={controller.forecastPeriodText}
-              forecastPath={controller.forecastPath}
-              resolution={controller.resolution}
             />
           )}
           {controller.gridDetailOpen && (

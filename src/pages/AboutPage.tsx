@@ -1,7 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PageShell } from "../components/PageShell";
+import { appConfig } from "../config/appConfig";
+import { getCachedDataMeta, loadDataMeta, type DataMeta } from "../data/meta";
 
 export function AboutPage() {
+  const [dataMeta, setDataMeta] = useState<DataMeta | null>(() => getCachedDataMeta());
+
+  useEffect(() => {
+    let active = true;
+    loadDataMeta()
+      .then((meta) => {
+        if (active) setDataMeta(meta);
+      })
+      .catch(() => {
+        if (active) setDataMeta(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <PageShell
       title="About"
@@ -85,6 +103,35 @@ export function AboutPage() {
                   <span className="aboutMono">~36 km² (≈14 mi²)</span>
                 </div>
                 <div className="aboutGridCell">Local hotspots</div>
+              </div>
+            </section>
+
+            <div className="aboutDivider" />
+
+            <section className="aboutSection">
+              <h2>Model</h2>
+              <p className="aboutSubtle">
+                OrcaCast currently uses a single composite forecast model for the map.
+              </p>
+              <div className="aboutModelGrid" role="group" aria-label="Model details">
+                <div className="aboutModelCard">
+                  <span className="aboutModelLabel">Model</span>
+                  <strong>{appConfig.compositeModelLabel}</strong>
+                  <span className="aboutModelMeta">{appConfig.compositeModelId}</span>
+                </div>
+                <div className="aboutModelCard">
+                  <span className="aboutModelLabel">Version</span>
+                  <strong>{appConfig.modelVersion}</strong>
+                </div>
+                {dataMeta ? (
+                  <div
+                    className="aboutModelCard"
+                    title={dataMeta.generated_at ? `Generated ${dataMeta.generated_at}` : "Dataset metadata"}
+                  >
+                    <span className="aboutModelLabel">Data</span>
+                    <strong>{dataMeta.data_version}</strong>
+                  </div>
+                ) : null}
               </div>
             </section>
 

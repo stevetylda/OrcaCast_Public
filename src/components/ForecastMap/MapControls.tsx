@@ -1,16 +1,13 @@
 import { memo } from "react";
 import { ProbabilityLegend } from "../ProbabilityLegend";
 import type { HeatScale } from "../../map/colorScale";
-import type { DeltaLegendSpec } from "../../map/deltaMap";
 import { trackRender } from "../../debug/perf";
 
 type MapControlsProps = {
   hotspotsEnabled: boolean;
   hasForecastLegend: boolean;
-  disableHotspots: boolean;
   legendOpen: boolean;
   legendSpec: HeatScale | null;
-  deltaLegend: DeltaLegendSpec | null;
   onHotspotsEnabledChange: (next: boolean) => void;
   onLegendToggle: () => void;
 };
@@ -18,10 +15,8 @@ type MapControlsProps = {
 export const MapControls = memo(function MapControls({
   hotspotsEnabled,
   hasForecastLegend,
-  disableHotspots,
   legendOpen,
   legendSpec,
-  deltaLegend,
   onHotspotsEnabledChange,
   onLegendToggle,
 }: MapControlsProps) {
@@ -33,16 +28,13 @@ export const MapControls = memo(function MapControls({
           <button
             className={
               hotspotsEnabled
-                ? `iconBtn legendClusterBtn legendHotspots legendHotspots--active${(!hasForecastLegend || disableHotspots) ? " legendClusterBtn--disabled" : ""}`
-                : `iconBtn legendClusterBtn legendHotspots${(!hasForecastLegend || disableHotspots) ? " legendClusterBtn--disabled" : ""}`
+                ? `iconBtn legendClusterBtn legendHotspots legendHotspots--active${!hasForecastLegend ? " legendClusterBtn--disabled" : ""}`
+                : `iconBtn legendClusterBtn legendHotspots${!hasForecastLegend ? " legendClusterBtn--disabled" : ""}`
             }
-            onClick={() => {
-              if (disableHotspots) return;
-              onHotspotsEnabledChange(!hotspotsEnabled);
-            }}
+            onClick={() => onHotspotsEnabledChange(!hotspotsEnabled)}
             aria-label="Toggle hotspots"
             data-tour="hotspots"
-            disabled={!hasForecastLegend || disableHotspots}
+            disabled={!hasForecastLegend}
           >
             <span className="material-symbols-rounded">local_fire_department</span>
           </button>
@@ -57,7 +49,7 @@ export const MapControls = memo(function MapControls({
           <span className="material-symbols-rounded">legend_toggle</span>
         </button>
       </div>
-      {legendOpen && <ProbabilityLegend scale={legendSpec} deltaLegend={deltaLegend} />}
+      {legendOpen && <ProbabilityLegend scale={legendSpec} />}
     </>
   );
 });

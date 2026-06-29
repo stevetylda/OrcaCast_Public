@@ -10,6 +10,9 @@ import "./styles/map.css";
 import "./styles/components.css";
 
 const AboutPage = lazy(() => import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })));
+const PlannerPage = lazy(() =>
+  import("./pages/PlannerPage").then((m) => ({ default: m.PlannerPage }))
+);
 
 function AppFrame() {
   const { darkMode } = useMapState();
@@ -20,6 +23,7 @@ function AppFrame() {
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<MapPage />} />
+          <Route path="/planner" element={<PlannerPage />} />
           <Route path="/about" element={<AboutPage />} />
         </Routes>
       </Suspense>

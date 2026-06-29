@@ -5,7 +5,6 @@ import { dataMetaFileSchema, parseWithSchema } from "./validation";
 export type DataMeta = {
   data_version: string;
   generated_at: string;
-  active_explainability_context?: string;
 };
 
 const FALLBACK_DATA_VERSION = "";
@@ -45,11 +44,6 @@ function normalizeMeta(payload: Record<string, unknown>): DataMeta {
       typeof payload.generated_at === "string" && payload.generated_at.trim().length > 0
         ? payload.generated_at.trim()
         : "",
-    active_explainability_context:
-      typeof payload.active_explainability_context === "string" &&
-      payload.active_explainability_context.trim().length > 0
-        ? payload.active_explainability_context.trim()
-        : undefined,
   };
 }
 

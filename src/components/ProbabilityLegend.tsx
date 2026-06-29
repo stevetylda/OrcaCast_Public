@@ -1,9 +1,7 @@
 import { ZERO_COLOR, type HeatScale } from "../map/colorScale";
-import type { DeltaLegendSpec } from "../map/deltaMap";
 
 type Props = {
   scale?: HeatScale | null;
-  deltaLegend?: DeltaLegendSpec | null;
 };
 
 function formatPercentile(value: number): string {
@@ -30,32 +28,7 @@ function buildBinTooltip(
   return `${label} = ${pMinPct}-${pMaxPct}th percentile (or p=${pMin}-${pMax})`;
 }
 
-function DeltaLegend({ spec }: { spec: DeltaLegendSpec }) {
-  const gradient = `linear-gradient(90deg, ${spec.colors.join(", ")})`;
-  return (
-    <div className="legend" aria-label="Delta legend" data-tour="legend">
-      <div className="legend__header">
-        <div className="legend__title">{spec.title}</div>
-      </div>
-      <div className="legend__deltaBar" style={{ background: gradient }} />
-      <div className="legend__deltaTicks" aria-hidden="true">
-        <span>{spec.minLabel}</span>
-        <span>{spec.midLabel}</span>
-        <span>{spec.maxLabel}</span>
-      </div>
-      <div className="legend__deltaHints" aria-hidden="true">
-        <span>{spec.minHint}</span>
-        <span>{spec.maxHint}</span>
-      </div>
-      <div className="legend__note">{spec.note}</div>
-    </div>
-  );
-}
-
-export function ProbabilityLegend({ scale, deltaLegend }: Props) {
-  if (deltaLegend) {
-    return <DeltaLegend spec={deltaLegend} />;
-  }
+export function ProbabilityLegend({ scale }: Props) {
   if (!scale) return null;
   const { binColorsRgba, labels, binRanges } = scale;
   const nonZeroLabels = labels.slice(1, 1 + binColorsRgba.length);
