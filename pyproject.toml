@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orcacast-python-utils"
+version = "0.1.0"
+description = "Python utilities for OrcaCast data preparation and explainability artifacts."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "geopandas>=0.14",
+  "shapely>=2.0",
+]
+
+[project.scripts]
+orcacast-cli = "src.cli.__main__:main"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["src", "src.*"]

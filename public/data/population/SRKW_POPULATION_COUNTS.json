@@ -1,0 +1,506 @@
+{
+  "schema_version": 1,
+  "ecotype": "SRKW",
+  "source": {
+    "path": "data/raw/orca_population/Number of Southern Resident killer whales.xlsx",
+    "sheet": "Chart Data"
+  },
+  "validation": {
+    "total_mismatch_count": 1,
+    "total_mismatches": [
+      {
+        "census_year": 2011,
+        "pod_sum": 89,
+        "all_pods": 88
+      }
+    ]
+  },
+  "latest": {
+    "census_year": 2025,
+    "j_pod": 27,
+    "k_pod": 14,
+    "l_pod": 33,
+    "all_pods": 74,
+    "pod_sum": 74,
+    "total_matches_pod_sum": true
+  },
+  "rows": [
+    {
+      "census_year": 1973,
+      "j_pod": 14,
+      "k_pod": 15,
+      "l_pod": 37,
+      "all_pods": 66,
+      "pod_sum": 66,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1974,
+      "j_pod": 15,
+      "k_pod": 16,
+      "l_pod": 39,
+      "all_pods": 70,
+      "pod_sum": 70,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1975,
+      "j_pod": 15,
+      "k_pod": 15,
+      "l_pod": 41,
+      "all_pods": 71,
+      "pod_sum": 71,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1976,
+      "j_pod": 16,
+      "k_pod": 14,
+      "l_pod": 40,
+      "all_pods": 70,
+      "pod_sum": 70,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1977,
+      "j_pod": 18,
+      "k_pod": 15,
+      "l_pod": 46,
+      "all_pods": 79,
+      "pod_sum": 79,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1978,
+      "j_pod": 18,
+      "k_pod": 15,
+      "l_pod": 46,
+      "all_pods": 79,
+      "pod_sum": 79,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1979,
+      "j_pod": 19,
+      "k_pod": 15,
+      "l_pod": 47,
+      "all_pods": 81,
+      "pod_sum": 81,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1980,
+      "j_pod": 19,
+      "k_pod": 15,
+      "l_pod": 49,
+      "all_pods": 83,
+      "pod_sum": 83,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1981,
+      "j_pod": 19,
+      "k_pod": 15,
+      "l_pod": 47,
+      "all_pods": 81,
+      "pod_sum": 81,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1982,
+      "j_pod": 19,
+      "k_pod": 14,
+      "l_pod": 45,
+      "all_pods": 78,
+      "pod_sum": 78,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1983,
+      "j_pod": 19,
+      "k_pod": 14,
+      "l_pod": 43,
+      "all_pods": 76,
+      "pod_sum": 76,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1984,
+      "j_pod": 17,
+      "k_pod": 14,
+      "l_pod": 43,
+      "all_pods": 74,
+      "pod_sum": 74,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1985,
+      "j_pod": 18,
+      "k_pod": 14,
+      "l_pod": 45,
+      "all_pods": 77,
+      "pod_sum": 77,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1986,
+      "j_pod": 17,
+      "k_pod": 16,
+      "l_pod": 48,
+      "all_pods": 81,
+      "pod_sum": 81,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1987,
+      "j_pod": 18,
+      "k_pod": 17,
+      "l_pod": 49,
+      "all_pods": 84,
+      "pod_sum": 84,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1988,
+      "j_pod": 19,
+      "k_pod": 18,
+      "l_pod": 48,
+      "all_pods": 85,
+      "pod_sum": 85,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1989,
+      "j_pod": 18,
+      "k_pod": 17,
+      "l_pod": 50,
+      "all_pods": 85,
+      "pod_sum": 85,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1990,
+      "j_pod": 18,
+      "k_pod": 18,
+      "l_pod": 53,
+      "all_pods": 89,
+      "pod_sum": 89,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1991,
+      "j_pod": 20,
+      "k_pod": 17,
+      "l_pod": 55,
+      "all_pods": 92,
+      "pod_sum": 92,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1992,
+      "j_pod": 19,
+      "k_pod": 16,
+      "l_pod": 56,
+      "all_pods": 91,
+      "pod_sum": 91,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1993,
+      "j_pod": 21,
+      "k_pod": 17,
+      "l_pod": 59,
+      "all_pods": 97,
+      "pod_sum": 97,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1994,
+      "j_pod": 20,
+      "k_pod": 19,
+      "l_pod": 57,
+      "all_pods": 96,
+      "pod_sum": 96,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1995,
+      "j_pod": 22,
+      "k_pod": 18,
+      "l_pod": 58,
+      "all_pods": 98,
+      "pod_sum": 98,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1996,
+      "j_pod": 22,
+      "k_pod": 19,
+      "l_pod": 56,
+      "all_pods": 97,
+      "pod_sum": 97,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1997,
+      "j_pod": 21,
+      "k_pod": 19,
+      "l_pod": 52,
+      "all_pods": 92,
+      "pod_sum": 92,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1998,
+      "j_pod": 22,
+      "k_pod": 18,
+      "l_pod": 49,
+      "all_pods": 89,
+      "pod_sum": 89,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 1999,
+      "j_pod": 20,
+      "k_pod": 17,
+      "l_pod": 48,
+      "all_pods": 85,
+      "pod_sum": 85,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2000,
+      "j_pod": 19,
+      "k_pod": 17,
+      "l_pod": 47,
+      "all_pods": 83,
+      "pod_sum": 83,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2001,
+      "j_pod": 20,
+      "k_pod": 18,
+      "l_pod": 42,
+      "all_pods": 80,
+      "pod_sum": 80,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2002,
+      "j_pod": 20,
+      "k_pod": 19,
+      "l_pod": 43,
+      "all_pods": 82,
+      "pod_sum": 82,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2003,
+      "j_pod": 22,
+      "k_pod": 19,
+      "l_pod": 41,
+      "all_pods": 82,
+      "pod_sum": 82,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2004,
+      "j_pod": 23,
+      "k_pod": 21,
+      "l_pod": 43,
+      "all_pods": 87,
+      "pod_sum": 87,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2005,
+      "j_pod": 24,
+      "k_pod": 20,
+      "l_pod": 43,
+      "all_pods": 87,
+      "pod_sum": 87,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2006,
+      "j_pod": 24,
+      "k_pod": 19,
+      "l_pod": 41,
+      "all_pods": 84,
+      "pod_sum": 84,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2007,
+      "j_pod": 25,
+      "k_pod": 19,
+      "l_pod": 43,
+      "all_pods": 87,
+      "pod_sum": 87,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2008,
+      "j_pod": 24,
+      "k_pod": 19,
+      "l_pod": 40,
+      "all_pods": 83,
+      "pod_sum": 83,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2009,
+      "j_pod": 27,
+      "k_pod": 19,
+      "l_pod": 40,
+      "all_pods": 86,
+      "pod_sum": 86,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2010,
+      "j_pod": 26,
+      "k_pod": 19,
+      "l_pod": 41,
+      "all_pods": 86,
+      "pod_sum": 86,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2011,
+      "j_pod": 27,
+      "k_pod": 20,
+      "l_pod": 42,
+      "all_pods": 88,
+      "pod_sum": 89,
+      "total_matches_pod_sum": false
+    },
+    {
+      "census_year": 2012,
+      "j_pod": 26,
+      "k_pod": 19,
+      "l_pod": 37,
+      "all_pods": 82,
+      "pod_sum": 82,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2013,
+      "j_pod": 26,
+      "k_pod": 19,
+      "l_pod": 37,
+      "all_pods": 82,
+      "pod_sum": 82,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2014,
+      "j_pod": 25,
+      "k_pod": 19,
+      "l_pod": 34,
+      "all_pods": 78,
+      "pod_sum": 78,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2015,
+      "j_pod": 27,
+      "k_pod": 19,
+      "l_pod": 35,
+      "all_pods": 81,
+      "pod_sum": 81,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2016,
+      "j_pod": 29,
+      "k_pod": 19,
+      "l_pod": 35,
+      "all_pods": 83,
+      "pod_sum": 83,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2017,
+      "j_pod": 24,
+      "k_pod": 18,
+      "l_pod": 35,
+      "all_pods": 77,
+      "pod_sum": 77,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2018,
+      "j_pod": 23,
+      "k_pod": 18,
+      "l_pod": 34,
+      "all_pods": 75,
+      "pod_sum": 75,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2019,
+      "j_pod": 22,
+      "k_pod": 17,
+      "l_pod": 34,
+      "all_pods": 73,
+      "pod_sum": 73,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2020,
+      "j_pod": 22,
+      "k_pod": 17,
+      "l_pod": 33,
+      "all_pods": 72,
+      "pod_sum": 72,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2021,
+      "j_pod": 24,
+      "k_pod": 17,
+      "l_pod": 33,
+      "all_pods": 74,
+      "pod_sum": 74,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2022,
+      "j_pod": 25,
+      "k_pod": 16,
+      "l_pod": 32,
+      "all_pods": 73,
+      "pod_sum": 73,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2023,
+      "j_pod": 25,
+      "k_pod": 16,
+      "l_pod": 34,
+      "all_pods": 75,
+      "pod_sum": 75,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2024,
+      "j_pod": 25,
+      "k_pod": 15,
+      "l_pod": 33,
+      "all_pods": 73,
+      "pod_sum": 73,
+      "total_matches_pod_sum": true
+    },
+    {
+      "census_year": 2025,
+      "j_pod": 27,
+      "k_pod": 14,
+      "l_pod": 33,
+      "all_pods": 74,
+      "pod_sum": 74,
+      "total_matches_pod_sum": true
+    }
+  ]
+}

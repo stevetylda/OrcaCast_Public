@@ -1,0 +1,53 @@
+{
+  "name": "orcacast-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc -b --pretty false",
+    "test": "node --import ./scripts/register-ts-loader.mjs ./scripts/run-tests.ts",
+    "build": "tsc -b && vite build",
+    "analyze": "npm run build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "repo:check": "bash scripts/check_artifacts.sh",
+    "data:validate": "bash scripts/check_artifacts.sh"
+  },
+  "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.33.1-dev57.0",
+    "d3-shape": "^3.2.0",
+    "driver.js": "^1.4.0",
+    "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.17.0",
+    "plotly.js-dist-min": "^2.35.2",
+    "pmtiles": "^3.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "react-plotly.js": "^2.6.0",
+    "react-router-dom": "^6.30.0",
+    "reactflow": "^11.11.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/d3-shape": "^3.1.8",
+    "@types/geojson": "^7946.0.16",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "npm:rolldown-vite@7.2.5"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.2.5"
+  }
+}

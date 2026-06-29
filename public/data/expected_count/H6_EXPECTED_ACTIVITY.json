@@ -1,0 +1,811 @@
+{
+  "resolution": 6,
+  "rows": [
+    {
+      "year": 2025,
+      "stat_week": 1,
+      "period": 1,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 9.699033052985472,
+      "lower_ci": 0.0,
+      "upper_ci": 29.41375975413552
+    },
+    {
+      "year": 2025,
+      "stat_week": 2,
+      "period": 2,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 13.559286607044953,
+      "lower_ci": 0.0,
+      "upper_ci": 33.274013308194995
+    },
+    {
+      "year": 2025,
+      "stat_week": 3,
+      "period": 3,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 9.422708157081772,
+      "lower_ci": 0.0,
+      "upper_ci": 29.137434858231817
+    },
+    {
+      "year": 2025,
+      "stat_week": 4,
+      "period": 4,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.709811305317461,
+      "lower_ci": 0.0,
+      "upper_ci": 25.424538006467508
+    },
+    {
+      "year": 2025,
+      "stat_week": 5,
+      "period": 5,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 10.42637701108995,
+      "lower_ci": 0.0,
+      "upper_ci": 30.141103712239996
+    },
+    {
+      "year": 2025,
+      "stat_week": 6,
+      "period": 6,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 10.94069827569195,
+      "lower_ci": 0.0,
+      "upper_ci": 30.655424976841996
+    },
+    {
+      "year": 2025,
+      "stat_week": 7,
+      "period": 7,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 7.019526684768193,
+      "lower_ci": 0.0,
+      "upper_ci": 26.734253385918237
+    },
+    {
+      "year": 2025,
+      "stat_week": 8,
+      "period": 8,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 11.027385483393697,
+      "lower_ci": 0.0,
+      "upper_ci": 30.742112184543743
+    },
+    {
+      "year": 2025,
+      "stat_week": 9,
+      "period": 9,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 1.0476288699808052,
+      "lower_ci": 0.0,
+      "upper_ci": 20.76235557113085
+    },
+    {
+      "year": 2025,
+      "stat_week": 10,
+      "period": 10,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 3.072915893358731,
+      "lower_ci": 0.0,
+      "upper_ci": 22.787642594508775
+    },
+    {
+      "year": 2025,
+      "stat_week": 11,
+      "period": 11,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.991928723310752,
+      "lower_ci": 0.0,
+      "upper_ci": 25.7066554244608
+    },
+    {
+      "year": 2025,
+      "stat_week": 12,
+      "period": 12,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 12.975101820088675,
+      "lower_ci": 0.0,
+      "upper_ci": 32.689828521238724
+    },
+    {
+      "year": 2025,
+      "stat_week": 13,
+      "period": 13,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 8.346200268858727,
+      "lower_ci": 0.0,
+      "upper_ci": 28.060926970008772
+    },
+    {
+      "year": 2025,
+      "stat_week": 14,
+      "period": 14,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.895582263871795,
+      "lower_ci": 0.0,
+      "upper_ci": 25.61030896502184
+    },
+    {
+      "year": 2025,
+      "stat_week": 15,
+      "period": 15,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 4.175974220750923,
+      "lower_ci": 0.0,
+      "upper_ci": 23.89070092190097
+    },
+    {
+      "year": 2025,
+      "stat_week": 16,
+      "period": 16,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 7.1641998668222024,
+      "lower_ci": 0.0,
+      "upper_ci": 26.878926567972247
+    },
+    {
+      "year": 2025,
+      "stat_week": 17,
+      "period": 17,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.3223571411906,
+      "lower_ci": 0.0,
+      "upper_ci": 25.037083842340646
+    },
+    {
+      "year": 2025,
+      "stat_week": 18,
+      "period": 18,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 2.962252586615435,
+      "lower_ci": 0.0,
+      "upper_ci": 22.67697928776548
+    },
+    {
+      "year": 2025,
+      "stat_week": 19,
+      "period": 19,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 3.0266747226607063,
+      "lower_ci": 0.0,
+      "upper_ci": 22.74140142381075
+    },
+    {
+      "year": 2025,
+      "stat_week": 20,
+      "period": 20,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 1.4818766241375982,
+      "lower_ci": 0.0,
+      "upper_ci": 21.196603325287644
+    },
+    {
+      "year": 2025,
+      "stat_week": 21,
+      "period": 21,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 4.769401064493002,
+      "lower_ci": 0.0,
+      "upper_ci": 24.48412776564305
+    },
+    {
+      "year": 2025,
+      "stat_week": 22,
+      "period": 22,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.760358141809116,
+      "lower_ci": 0.0,
+      "upper_ci": 25.475084842959163
+    },
+    {
+      "year": 2025,
+      "stat_week": 23,
+      "period": 23,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 2.296760051836838,
+      "lower_ci": 0.0,
+      "upper_ci": 22.011486752986883
+    },
+    {
+      "year": 2025,
+      "stat_week": 24,
+      "period": 24,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 3.068610450712854,
+      "lower_ci": 0.0,
+      "upper_ci": 22.7833371518629
+    },
+    {
+      "year": 2025,
+      "stat_week": 25,
+      "period": 25,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 1.5283599716236296,
+      "lower_ci": 0.0,
+      "upper_ci": 21.243086672773675
+    },
+    {
+      "year": 2025,
+      "stat_week": 26,
+      "period": 26,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 7.517528159237282,
+      "lower_ci": 0.0,
+      "upper_ci": 27.23225486038733
+    },
+    {
+      "year": 2025,
+      "stat_week": 27,
+      "period": 27,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 2.127865517001217,
+      "lower_ci": 0.0,
+      "upper_ci": 21.84259221815126
+    },
+    {
+      "year": 2025,
+      "stat_week": 28,
+      "period": 28,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 2.27003245690347,
+      "lower_ci": 0.0,
+      "upper_ci": 21.984759158053514
+    },
+    {
+      "year": 2025,
+      "stat_week": 29,
+      "period": 29,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 2.060894506104188,
+      "lower_ci": 0.0,
+      "upper_ci": 21.775621207254233
+    },
+    {
+      "year": 2025,
+      "stat_week": 30,
+      "period": 30,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 6.659097279493714,
+      "lower_ci": 0.0,
+      "upper_ci": 26.37382398064376
+    },
+    {
+      "year": 2025,
+      "stat_week": 31,
+      "period": 31,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.468950092976305,
+      "lower_ci": 0.0,
+      "upper_ci": 25.18367679412635
+    },
+    {
+      "year": 2025,
+      "stat_week": 32,
+      "period": 32,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 4.405579548924914,
+      "lower_ci": 0.0,
+      "upper_ci": 24.12030625007496
+    },
+    {
+      "year": 2025,
+      "stat_week": 33,
+      "period": 33,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.547876898448434,
+      "lower_ci": 0.0,
+      "upper_ci": 25.262603599598478
+    },
+    {
+      "year": 2025,
+      "stat_week": 34,
+      "period": 34,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.857174946093309,
+      "lower_ci": 0.0,
+      "upper_ci": 25.571901647243354
+    },
+    {
+      "year": 2025,
+      "stat_week": 35,
+      "period": 35,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 6.307552236100253,
+      "lower_ci": 0.0,
+      "upper_ci": 26.0222789372503
+    },
+    {
+      "year": 2025,
+      "stat_week": 36,
+      "period": 36,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 10.292255403630266,
+      "lower_ci": 0.0,
+      "upper_ci": 30.006982104780313
+    },
+    {
+      "year": 2025,
+      "stat_week": 37,
+      "period": 37,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 16.392241773266765,
+      "lower_ci": 0.0,
+      "upper_ci": 36.10696847441681
+    },
+    {
+      "year": 2025,
+      "stat_week": 38,
+      "period": 38,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 6.130804835888973,
+      "lower_ci": 0.0,
+      "upper_ci": 25.84553153703902
+    },
+    {
+      "year": 2025,
+      "stat_week": 39,
+      "period": 39,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 6.20378237875382,
+      "lower_ci": 0.0,
+      "upper_ci": 25.918509079903863
+    },
+    {
+      "year": 2025,
+      "stat_week": 40,
+      "period": 40,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 15.487823556465411,
+      "lower_ci": 0.0,
+      "upper_ci": 35.20255025761546
+    },
+    {
+      "year": 2025,
+      "stat_week": 41,
+      "period": 41,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 22.413934620061877,
+      "lower_ci": 5.825308133974378,
+      "upper_ci": 42.12866132121192
+    },
+    {
+      "year": 2025,
+      "stat_week": 42,
+      "period": 42,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 6.659385845180687,
+      "lower_ci": 0.0,
+      "upper_ci": 26.374112546330732
+    },
+    {
+      "year": 2025,
+      "stat_week": 43,
+      "period": 43,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 18.346738087510076,
+      "lower_ci": 1.758111601422577,
+      "upper_ci": 38.06146478866012
+    },
+    {
+      "year": 2025,
+      "stat_week": 44,
+      "period": 44,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 24.968353357650848,
+      "lower_ci": 8.37972687156335,
+      "upper_ci": 44.6830800588009
+    },
+    {
+      "year": 2025,
+      "stat_week": 45,
+      "period": 45,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 28.746466573027664,
+      "lower_ci": 12.157840086940165,
+      "upper_ci": 48.46119327417771
+    },
+    {
+      "year": 2025,
+      "stat_week": 46,
+      "period": 46,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 17.504132422969583,
+      "lower_ci": 0.9155059368820844,
+      "upper_ci": 37.21885912411963
+    },
+    {
+      "year": 2025,
+      "stat_week": 47,
+      "period": 47,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 22.692785241883495,
+      "lower_ci": 6.104158755795996,
+      "upper_ci": 42.40751194303354
+    },
+    {
+      "year": 2025,
+      "stat_week": 48,
+      "period": 48,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 15.02948907517178,
+      "lower_ci": 0.0,
+      "upper_ci": 34.74421577632182
+    },
+    {
+      "year": 2025,
+      "stat_week": 49,
+      "period": 49,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 6.2077395243829825,
+      "lower_ci": 0.0,
+      "upper_ci": 25.92246622553303
+    },
+    {
+      "year": 2025,
+      "stat_week": 50,
+      "period": 50,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 2.393858178354678,
+      "lower_ci": 0.0,
+      "upper_ci": 22.108584879504722
+    },
+    {
+      "year": 2025,
+      "stat_week": 51,
+      "period": 51,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 10.882642384661715,
+      "lower_ci": 0.0,
+      "upper_ci": 30.59736908581176
+    },
+    {
+      "year": 2025,
+      "stat_week": 52,
+      "period": 52,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 6.832794761073336,
+      "lower_ci": 0.0,
+      "upper_ci": 26.54752146222338
+    },
+    {
+      "year": 2026,
+      "stat_week": 1,
+      "period": 1,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 11.663987559199647,
+      "lower_ci": 0.0,
+      "upper_ci": 31.378714260349692
+    },
+    {
+      "year": 2026,
+      "stat_week": 2,
+      "period": 2,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 5.931070066548042,
+      "lower_ci": 0.0,
+      "upper_ci": 25.645796767698087
+    },
+    {
+      "year": 2026,
+      "stat_week": 3,
+      "period": 3,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 4,
+      "period": 4,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 5,
+      "period": 5,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 1.52279964518989,
+      "lower_ci": 0.0,
+      "upper_ci": 21.237526346339934
+    },
+    {
+      "year": 2026,
+      "stat_week": 6,
+      "period": 6,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 4.835083569818999,
+      "lower_ci": 0.0,
+      "upper_ci": 24.549810270969044
+    },
+    {
+      "year": 2026,
+      "stat_week": 7,
+      "period": 7,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.5053280772389721,
+      "lower_ci": 0.0,
+      "upper_ci": 20.220054778389017
+    },
+    {
+      "year": 2026,
+      "stat_week": 8,
+      "period": 8,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 3.1388214841340107,
+      "lower_ci": 0.0,
+      "upper_ci": 22.853548185284055
+    },
+    {
+      "year": 2026,
+      "stat_week": 9,
+      "period": 9,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 10,
+      "period": 10,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 7.528973741254442,
+      "lower_ci": 0.0,
+      "upper_ci": 27.24370044240449
+    },
+    {
+      "year": 2026,
+      "stat_week": 11,
+      "period": 11,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 1.573814801119262,
+      "lower_ci": 0.0,
+      "upper_ci": 21.288541502269307
+    },
+    {
+      "year": 2026,
+      "stat_week": 12,
+      "period": 12,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 3.897278468787958,
+      "lower_ci": 0.0,
+      "upper_ci": 23.612005169938
+    },
+    {
+      "year": 2026,
+      "stat_week": 13,
+      "period": 13,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 1.5935309156930373,
+      "lower_ci": 0.0,
+      "upper_ci": 21.308257616843083
+    },
+    {
+      "year": 2026,
+      "stat_week": 14,
+      "period": 14,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 7.503657024790956,
+      "lower_ci": 0.0,
+      "upper_ci": 27.218383725941003
+    },
+    {
+      "year": 2026,
+      "stat_week": 15,
+      "period": 15,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.7727915538497574,
+      "lower_ci": 0.0,
+      "upper_ci": 20.487518254999802
+    },
+    {
+      "year": 2026,
+      "stat_week": 16,
+      "period": 16,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 3.0878525548696283,
+      "lower_ci": 0.0,
+      "upper_ci": 22.802579256019673
+    },
+    {
+      "year": 2026,
+      "stat_week": 17,
+      "period": 17,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 18,
+      "period": 18,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 19,
+      "period": 19,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 20,
+      "period": 20,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 21,
+      "period": 21,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 22,
+      "period": 22,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 23,
+      "period": 23,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 24,
+      "period": 24,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 25,
+      "period": 25,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 0.0,
+      "lower_ci": 0.0,
+      "upper_ci": 19.714726701150045
+    },
+    {
+      "year": 2026,
+      "stat_week": 26,
+      "period": 26,
+      "model_name": "ets",
+      "typical_error": 4.450723562977665,
+      "expected_count": 1.2205273077809213,
+      "lower_ci": 0.0,
+      "upper_ci": 20.93525400893097
+    }
+  ],
+  "metadata": {
+    "best_model_name": "ets",
+    "backtest": [
+      {
+        "model_name": "seasonal_naive",
+        "mae": 8.788461538461538,
+        "rmse": 13.32074726478615,
+        "typical_error": 5.0,
+        "n_forecasts": 52
+      },
+      {
+        "model_name": "ets",
+        "mae": 6.81332453956714,
+        "rmse": 10.166276212861671,
+        "typical_error": 4.450723562977665,
+        "n_forecasts": 52
+      },
+      {
+        "model_name": "neg_binomial_fourier",
+        "mae": 10.280464952970037,
+        "rmse": 11.647122179416401,
+        "typical_error": 10.52476803926744,
+        "n_forecasts": 52
+      }
+    ]
+  }
+}
