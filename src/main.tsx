@@ -1,10 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import App from "./app/App";
 import "driver.js/dist/driver.css";
-import { MapPageFailureState } from "./pages/MapPage/MapPageFailureState";
-import { normalizeDataLoadError } from "./data/errors";
-import { primeDataMeta } from "./data/meta";
+import { WatchPageFailureState } from "./pages/WatchPage";
+import { normalizeDataLoadError } from "./shared/data/errors";
+import { primeDataMeta } from "./shared/data/meta";
 
 async function bootstrap() {
   const root = ReactDOM.createRoot(document.getElementById("root")!);
@@ -19,7 +19,7 @@ async function bootstrap() {
     const dataError = normalizeDataLoadError(error, "/data/meta.json");
     root.render(
       <React.StrictMode>
-        <MapPageFailureState
+        <WatchPageFailureState
           title="Data failed to load"
           message="A required metadata file could not be parsed."
           failingPath={dataError.path}
