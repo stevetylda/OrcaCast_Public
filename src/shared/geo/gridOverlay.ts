@@ -31,11 +31,13 @@ const HOVER_CORE_ID = "grid-hover-core";
 const SURFACE_SOURCE_ID = "grid-surface";
 const SURFACE_LAYER_ID = "grid-surface-raster";
 const GRID_SUBTLE_BORDER = "rgba(8,18,44,0.22)";
-const SURFACE_MAX_SIDE = 1280;
-const SURFACE_MIN_SIDE = 512;
-const SURFACE_MAX_PIXELS = 1_400_000;
-const IDW_POWER = 2;
-const IDW_NEIGHBORS = 16;
+const SURFACE_MAX_SIDE = 1800;
+const SURFACE_MIN_SIDE = 720;
+const SURFACE_MAX_PIXELS = 1_850_000;
+const SURFACE_VIEWPORT_PADDING_FRACTION = 0.14;
+const SURFACE_BOUNDS_ROUNDING = 100_000;
+const IDW_POWER = 2.35;
+const IDW_NEIGHBORS = 8;
 const IDW_EPSILON = 1e-7;
 const MAX_MERCATOR_LAT = 85.05112878;
 const DEG_TO_RAD = Math.PI / 180;
@@ -83,38 +85,6 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-function clampMercatorLat(lat: number) {
-  return clamp(lat, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
-}
-
-function mercatorY(lat: number) {
-  const rad = clampMercatorLat(lat) * DEG_TO_RAD;
-  return Math.log(Math.tan(Math.PI / 4 + rad / 2)) * RAD_TO_DEG;
-}
-
-function inverseMercatorY(y: number) {
-  return (2 * Math.atan(Math.exp(y * DEG_TO_RAD)) - Math.PI / 2) * RAD_TO_DEG;
-}
-
-function lngToCanvasX(lng: number, bounds: SurfaceBounds, width: number) {
-  const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-9);
-  return ((lng - bounds.minLng) / lngSpan) * (width - 1);
-}
-
-function latToCanvasY(lat: number, bounds: SurfaceBounds, height: number) {
-  const maxY = mercatorY(bounds.maxLat);
-  const minY = mercatorY(bounds.minLat);
-  const ySpan = Math.max(maxY - minY, 1e-9);
-  return ((maxY - mercatorY(lat)) / ySpan) * (height - 1);
-}
-
-function canvasYToLat(y: number, bounds: SurfaceBounds, height: number) {
-  const maxY = mercatorY(bounds.maxLat);
-  const minY = mercatorY(bounds.minLat);
-  const t = y / Math.max(height - 1, 1);
-  return inverseMercatorY(maxY - t * (maxY - minY));
-}
-
 function getFeatureProbability(properties: GeoJsonProperties | null | undefined) {
   return Number((properties as Record<string, unknown> | null)?.prob ?? 0);
 }
@@ -143,7 +113,107 @@ function getFeatureCenter(feature: Feature): [number, number] | null {
   return [sumLng / coords.length, sumLat / coords.length];
 }
 
-function buildSurfaceSamples(fc: FeatureCollection) {
+function mercatorY(lat: number) {
+  const clampedLat = clamp(lat, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
+  const rad = clampedLat * DEG_TO_RAD;
+  return Math.log(Math.tan(Math.PI / 4 + rad / 2)) * RAD_TO_DEG;
+}
+
+function inverseMercatorY(y: number) {
+  return (2 * Math.atan(Math.exp(y * DEG_TO_RAD)) - Math.PI / 2) * RAD_TO_DEG;
+}
+
+function lngToCanvasX(lng: number, bounds: SurfaceBounds, width: number) {
+  const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-9);
+  return ((lng - bounds.minLng) / lngSpan) * (width - 1);
+}
+
+function latToCanvasY(lat: number, bounds: SurfaceBounds, height: number) {
+  const maxY = mercatorY(bounds.maxLat);
+  const minY = mercatorY(bounds.minLat);
+  const ySpan = Math.max(maxY - minY, 1e-9);
+  return ((maxY - mercatorY(lat)) / ySpan) * (height - 1);
+}
+
+function canvasYToLat(y: number, bounds: SurfaceBounds, height: number) {
+  const maxY = mercatorY(bounds.maxLat);
+  const minY = mercatorY(bounds.minLat);
+  const t = y / Math.max(height - 1, 1);
+  return inverseMercatorY(maxY - t * (maxY - minY));
+}
+
+function normalizeBounds(bounds: SurfaceBounds): SurfaceBounds {
+  return {
+    minLng: Math.min(bounds.minLng, bounds.maxLng),
+    maxLng: Math.max(bounds.minLng, bounds.maxLng),
+    minLat: Math.min(bounds.minLat, bounds.maxLat),
+    maxLat: Math.max(bounds.minLat, bounds.maxLat),
+  };
+}
+
+function padBounds(bounds: SurfaceBounds, fraction = SURFACE_VIEWPORT_PADDING_FRACTION): SurfaceBounds {
+  const lngPad = Math.max(bounds.maxLng - bounds.minLng, 1e-6) * fraction;
+  const latPad = Math.max(bounds.maxLat - bounds.minLat, 1e-6) * fraction;
+  return {
+    minLng: bounds.minLng - lngPad,
+    maxLng: bounds.maxLng + lngPad,
+    minLat: clamp(bounds.minLat - latPad, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT),
+    maxLat: clamp(bounds.maxLat + latPad, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT),
+  };
+}
+
+function intersectBounds(a: SurfaceBounds, b: SurfaceBounds): SurfaceBounds | null {
+  const minLng = Math.max(a.minLng, b.minLng);
+  const maxLng = Math.min(a.maxLng, b.maxLng);
+  const minLat = Math.max(a.minLat, b.minLat);
+  const maxLat = Math.min(a.maxLat, b.maxLat);
+  if (maxLng <= minLng || maxLat <= minLat) return null;
+  return { minLng, maxLng, minLat, maxLat };
+}
+
+function getMapViewportBounds(map: MapLibreMap): SurfaceBounds | null {
+  const mapBounds = map.getBounds();
+  if (!mapBounds) return null;
+  return normalizeBounds({
+    minLng: mapBounds.getWest(),
+    maxLng: mapBounds.getEast(),
+    minLat: mapBounds.getSouth(),
+    maxLat: mapBounds.getNorth(),
+  });
+}
+
+function resolveSurfaceRenderBounds(map: MapLibreMap, forecastBounds: SurfaceBounds): SurfaceBounds {
+  const viewportBounds = getMapViewportBounds(map);
+  if (!viewportBounds) return forecastBounds;
+  const paddedViewport = padBounds(viewportBounds);
+  return intersectBounds(paddedViewport, forecastBounds) ?? forecastBounds;
+}
+
+function roundForSignature(value: number) {
+  return Math.round(value * SURFACE_BOUNDS_ROUNDING) / SURFACE_BOUNDS_ROUNDING;
+}
+
+type SurfaceInput = {
+  samples: SurfaceSample[];
+  bounds: SurfaceBounds;
+  maxDistance: number;
+  bucketSize: number;
+  buckets: Map<string, SurfaceSample[]>;
+};
+
+const surfaceInputCache = new WeakMap<FeatureCollection, SurfaceInput | null>();
+let surfaceRasterCache:
+  | {
+      fc: FeatureCollection;
+      signature: string;
+      raster: SurfaceRaster;
+    }
+  | null = null;
+
+function buildSurfaceSamples(fc: FeatureCollection): SurfaceInput | null {
+  const cached = surfaceInputCache.get(fc);
+  if (cached !== undefined) return cached;
+
   const rawSamples: Array<{ lng: number; lat: number; prob: number }> = [];
   let minLng = Number.POSITIVE_INFINITY;
   let maxLng = Number.NEGATIVE_INFINITY;
@@ -168,7 +238,10 @@ function buildSurfaceSamples(fc: FeatureCollection) {
     rawSamples.push({ lng, lat, prob });
   });
 
-  if (rawSamples.length === 0) return null;
+  if (rawSamples.length === 0) {
+    surfaceInputCache.set(fc, null);
+    return null;
+  }
 
   const samples: SurfaceSample[] = rawSamples.map((sample) => ({
     ...sample,
@@ -176,23 +249,36 @@ function buildSurfaceSamples(fc: FeatureCollection) {
     projY: mercatorY(sample.lat),
   }));
 
-  return {
+  const maxDistance = estimateMaxDistance(samples);
+  const bucketSize = Math.max(maxDistance, 1e-6);
+  const surface = {
     samples,
-    bounds: { minLng, maxLng, minLat, maxLat },
+    bounds: normalizeBounds({ minLng, maxLng, minLat, maxLat }),
+    maxDistance,
+    bucketSize,
+    buckets: buildBucketIndex(samples, bucketSize),
   };
+  surfaceInputCache.set(fc, surface);
+  return surface;
 }
 
-function computeRasterDimensions(bounds: SurfaceBounds) {
+function computeRasterDimensions(bounds: SurfaceBounds, map: MapLibreMap) {
+  const canvas = map.getCanvas();
+  const dpr = clamp(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, 1, 2);
+  const viewportMaxSide = Math.max(canvas.clientWidth || 0, canvas.clientHeight || 0) * dpr;
+  const maxSide = clamp(Math.round(viewportMaxSide), SURFACE_MIN_SIDE, SURFACE_MAX_SIDE);
+
   const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-6);
   const mercatorSpan = Math.max(mercatorY(bounds.maxLat) - mercatorY(bounds.minLat), 1e-6);
   const aspect = lngSpan / mercatorSpan;
-  let width = aspect >= 1 ? SURFACE_MAX_SIDE : Math.round(SURFACE_MAX_SIDE * aspect);
-  let height = aspect >= 1 ? Math.round(SURFACE_MAX_SIDE / aspect) : SURFACE_MAX_SIDE;
+  let width = aspect >= 1 ? maxSide : Math.round(maxSide * aspect);
+  let height = aspect >= 1 ? Math.round(maxSide / aspect) : maxSide;
+
   width = clamp(width, SURFACE_MIN_SIDE, SURFACE_MAX_SIDE);
   height = clamp(height, SURFACE_MIN_SIDE, SURFACE_MAX_SIDE);
   while (width * height > SURFACE_MAX_PIXELS) {
-    width = Math.max(SURFACE_MIN_SIDE, Math.round(width * 0.92));
-    height = Math.max(SURFACE_MIN_SIDE, Math.round(height * 0.92));
+    width = Math.max(SURFACE_MIN_SIDE, Math.round(width * 0.94));
+    height = Math.max(SURFACE_MIN_SIDE, Math.round(height * 0.94));
     if (width === SURFACE_MIN_SIDE && height === SURFACE_MIN_SIDE) break;
   }
   return { width, height };
@@ -220,7 +306,7 @@ function estimateMaxDistance(samples: SurfaceSample[]) {
     if (Number.isFinite(minDistance)) nearest.push(minDistance);
   }
   const spacing = median(nearest.filter((value) => Number.isFinite(value) && value > 0));
-  return spacing > 0 ? spacing * 4.5 : 0.5;
+  return spacing > 0 ? spacing * 3.05 : 0.5;
 }
 
 function parseCssColor(color: string): RGBA {
@@ -293,6 +379,12 @@ function sampleColor(value: number, stopValues: number[], stopColors: RGBA[]): R
   return [...stopColors[stopColors.length - 1]] as RGBA;
 }
 
+
+
+function surfaceAlphaForValue(value: number, _stopValues: number[], baseAlpha: number) {
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return clamp(baseAlpha, 0, 1);
+}
 
 function getBucketKey(x: number, y: number) {
   return `${x}:${y}`;
@@ -395,19 +487,43 @@ function maskSurfaceToFootprint(
     drawGeometryPath(ctx, geometry, bounds, canvas.width, canvas.height);
   });
   ctx.fillStyle = "#ffffff";
-  ctx.fill("evenodd");
+  ctx.fill();
   ctx.globalCompositeOperation = "source-over";
 }
 
+function createSurfaceRasterSignature(
+  fc: FeatureCollection,
+  bounds: SurfaceBounds,
+  width: number,
+  height: number,
+  paletteColors: string[],
+  scale?: HeatScale | null
+) {
+  const scaleSignature = scale
+    ? [scale.thresholds.join(","), scale.binColorsRgba.join(","), scale.binRanges.map((range) => `${range.probMin}:${range.probMax}`).join("|")].join(";")
+    : "no-scale";
+  const boundsSignature = [bounds.minLng, bounds.maxLng, bounds.minLat, bounds.maxLat]
+    .map(roundForSignature)
+    .join(",");
+  return [fc.features?.length ?? 0, boundsSignature, width, height, paletteColors.join(","), scaleSignature].join("::");
+}
+
 function buildSurfaceRaster(
+  map: MapLibreMap,
   fc: FeatureCollection,
   paletteColors: string[],
   scale?: HeatScale | null
 ): SurfaceRaster | null {
   const surface = buildSurfaceSamples(fc);
   if (!surface) return null;
-  const { samples, bounds } = surface;
-  const { width, height } = computeRasterDimensions(bounds);
+  const { samples, bounds: forecastBounds, buckets, bucketSize, maxDistance } = surface;
+  const bounds = resolveSurfaceRenderBounds(map, forecastBounds);
+  const { width, height } = computeRasterDimensions(bounds, map);
+  const signature = createSurfaceRasterSignature(fc, bounds, width, height, paletteColors, scale);
+  if (surfaceRasterCache?.fc === fc && surfaceRasterCache.signature === signature) {
+    return surfaceRasterCache.raster;
+  }
+
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -416,9 +532,6 @@ function buildSurfaceRaster(
 
   const imageData = ctx.createImageData(width, height);
   const pixels = imageData.data;
-  const maxDistance = estimateMaxDistance(samples);
-  const bucketSize = Math.max(maxDistance, 1e-6);
-  const buckets = buildBucketIndex(samples, bucketSize);
   const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-6);
   const { stopValues, stopColors } = buildColorStops(samples, paletteColors, scale);
 
@@ -434,17 +547,22 @@ function buildSurfaceRaster(
         continue;
       }
       const [r, g, b, a] = sampleColor(value, stopValues, stopColors);
+      const alpha = surfaceAlphaForValue(value, stopValues, a);
+      if (alpha <= 0) {
+        pixels[pixelIndex + 3] = 0;
+        continue;
+      }
       pixels[pixelIndex] = Math.round(clamp(r, 0, 255));
       pixels[pixelIndex + 1] = Math.round(clamp(g, 0, 255));
       pixels[pixelIndex + 2] = Math.round(clamp(b, 0, 255));
-      pixels[pixelIndex + 3] = Math.round(clamp(a, 0, 1) * 255);
+      pixels[pixelIndex + 3] = Math.round(alpha * 255);
     }
   }
 
   ctx.putImageData(imageData, 0, 0);
   maskSurfaceToFootprint(canvas, fc, bounds);
 
-  return {
+  const raster: SurfaceRaster = {
     dataUrl: canvas.toDataURL("image/png"),
     coordinates: [
       [bounds.minLng, bounds.maxLat],
@@ -453,6 +571,8 @@ function buildSurfaceRaster(
       [bounds.minLng, bounds.minLat],
     ],
   };
+  surfaceRasterCache = { fc, signature, raster };
+  return raster;
 }
 
 function removeLayerIfExists(map: MapLibreMap, id: string) {
@@ -890,7 +1010,7 @@ export function addSurfaceOverlay(
   darkMode: boolean,
   scale?: HeatScale | null
 ) {
-  const raster = buildSurfaceRaster(fc, paletteColors, scale);
+  const raster = buildSurfaceRaster(map, fc, paletteColors, scale);
   if (!raster) return;
 
   const source = map.getSource(SURFACE_SOURCE_ID) as ImageSource | undefined;
@@ -910,7 +1030,7 @@ export function addSurfaceOverlay(
   }
 
   if (map.getLayer(SURFACE_LAYER_ID)) {
-    map.setPaintProperty(SURFACE_LAYER_ID, "raster-opacity", darkMode ? 0.84 : 0.76);
+    map.setPaintProperty(SURFACE_LAYER_ID, "raster-opacity", 1);
     map.setPaintProperty(SURFACE_LAYER_ID, "raster-fade-duration", 180);
     return;
   }
@@ -921,7 +1041,7 @@ export function addSurfaceOverlay(
       type: "raster",
       source: SURFACE_SOURCE_ID,
       paint: {
-        "raster-opacity": darkMode ? 0.84 : 0.76,
+        "raster-opacity": 1,
         "raster-fade-duration": 180,
         "raster-resampling": "linear",
       },

@@ -757,6 +757,23 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
 
   useEffect(() => {
     const map = mapRef.current;
+    if (!map || !mapReady || surfaceMode !== "surface") return;
+
+    const handleSurfaceViewportChange = () => {
+      if (!overlayRef.current || !mapRef.current || mapRef.current !== map) return;
+      requestForecastRender(map);
+    };
+
+    map.on("moveend", handleSurfaceViewportChange);
+    map.on("zoomend", handleSurfaceViewportChange);
+    return () => {
+      map.off("moveend", handleSurfaceViewportChange);
+      map.off("zoomend", handleSurfaceViewportChange);
+    };
+  }, [mapReady, requestForecastRender, surfaceMode]);
+
+  useEffect(() => {
+    const map = mapRef.current;
     if (!map || !mapReady) return;
     const zeroModeledHotspots =
       hotspotMode === "modeled" &&
