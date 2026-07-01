@@ -3,10 +3,21 @@ import { AppFooter } from "../../shared/components/AppFooter";
 import { ForecastMap, type ForecastMapProps } from "../../features/map";
 import { SuggestedPlacesPanel } from "../../features/watch/components/SuggestedPlacesPanel";
 import { WeekTimelineBar } from "../../features/watch/components/WeekTimelineBar";
+import { TripPlannerHistogram } from "../../features/watch/components/TripPlannerHistogram";
 import { WatchPageFailureState } from "./WatchPageFailureState";
 import { trackRender } from "../../shared/debug/perf";
+import {
+  aggregateTripPlannerOccurrence,
+  buildTripPlannerRange,
+  loadTripPlannerOccurrencePayload,
+  type TripLengthOption,
+  type TripPlannerOccurrenceResult,
+  type TripPlannerRange,
+} from "../../shared/data/tripPlanner";
 import type { WatchPageController } from "./useWatchPageController";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+
+type PanelView = "this-week" | "trip-planner";
 
 type WatchPageLayoutProps = {
   controller: WatchPageController;
@@ -15,6 +26,15 @@ type WatchPageLayoutProps = {
 export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   trackRender("WatchPageLayout");
   const [sidebarOffsetPx, setSidebarOffsetPx] = useState(0);
+  const [plannerPanelOpen, setPlannerPanelOpen] = useState(true);
+  const [plannerPanelView, setPlannerPanelView] = useState<PanelView>("this-week");
+  const [tripStartDate, setTripStartDate] = useState("");
+  const [tripCity, setTripCity] = useState("");
+  const [tripLength, setTripLength] = useState<TripLengthOption>("1 day");
+  const [tripPlannerSearched, setTripPlannerSearched] = useState(false);
+  const [tripOccurrence, setTripOccurrence] = useState<TripPlannerOccurrenceResult | null>(null);
+  const [tripOccurrenceLoading, setTripOccurrenceLoading] = useState(false);
+  const [tripOccurrenceError, setTripOccurrenceError] = useState<string | null>(null);
   const {
     primaryMapRef,
     darkMode,
@@ -64,6 +84,51 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     retryPageLoad,
   } = controller;
 
+  const tripPlannerRange = useMemo<TripPlannerRange | null>(
+    () => buildTripPlannerRange(tripStartDate, tripLength),
+    [tripLength, tripStartDate]
+  );
+  const tripPlannerActive = plannerPanelOpen && plannerPanelView === "trip-planner";
+
+  useEffect(() => {
+    if (!tripPlannerSearched || !tripPlannerRange || !tripPlannerActive) {
+      if (!tripPlannerSearched) {
+        setTripOccurrence(null);
+        setTripOccurrenceError(null);
+      }
+      setTripOccurrenceLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setTripOccurrenceLoading(true);
+    setTripOccurrenceError(null);
+    loadTripPlannerOccurrencePayload(resolution)
+      .then((payload) => {
+        if (cancelled) return;
+        setTripOccurrence(aggregateTripPlannerOccurrence(payload, tripPlannerRange));
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setTripOccurrence(null);
+        setTripOccurrenceError(error instanceof Error ? error.message : String(error));
+      })
+      .finally(() => {
+        if (!cancelled) setTripOccurrenceLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resolution, tripPlannerActive, tripPlannerRange, tripPlannerSearched]);
+
+  const emptyTripValues = useMemo<Record<string, number>>(() => ({}), []);
+  const tripExternalValues = useMemo(
+    () => (tripPlannerActive && tripPlannerSearched && tripOccurrence ? tripOccurrence.values : undefined),
+    [tripOccurrence, tripPlannerActive, tripPlannerSearched]
+  );
+  const tripPulseMap = tripPlannerActive && (!tripPlannerSearched || tripOccurrenceLoading);
+
   const mainMapKey = `map-main-${mapResetNonce}`;
 
   const commonHeaderProps = {
@@ -72,6 +137,43 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     onOpenInfo: () => controller.setInfoOpen(true),
     onOpenMenu: () => setMenuOpen(true),
     onBrandClick: handleResetMap,
+    rightSlot: (
+      <div className="headerModeActions" aria-label="Planner views">
+        <button
+          type="button"
+          className={`headerModeAction${plannerPanelOpen && plannerPanelView === "this-week" ? " headerModeAction--active" : ""}`}
+          onClick={() => {
+            setPlannerPanelView("this-week");
+            setPlannerPanelOpen(true);
+          }}
+          aria-pressed={plannerPanelOpen && plannerPanelView === "this-week"}
+        >
+          <span className="material-symbols-rounded" aria-hidden="true">
+            travel_explore
+          </span>
+          <span>This Week</span>
+        </button>
+        <button
+          type="button"
+          className={`headerModeAction headerModeAction--planner${
+            plannerPanelOpen && plannerPanelView === "trip-planner" ? " headerModeAction--active" : ""
+          }`}
+          onClick={() => {
+            setPlannerPanelView("trip-planner");
+            setPlannerPanelOpen(true);
+            setTripPlannerSearched(false);
+            setTripOccurrence(null);
+            setTripOccurrenceError(null);
+          }}
+          aria-pressed={plannerPanelOpen && plannerPanelView === "trip-planner"}
+        >
+          <span className="material-symbols-rounded" aria-hidden="true">
+            route
+          </span>
+          <span>Trip Planner</span>
+        </button>
+      </div>
+    ),
   };
 
   const watchMapShellStyle = useMemo(
@@ -100,8 +202,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     onGridCellCount: setHotspotTotalCells,
     onGridCellExpand: openGridDetail,
     onFatalDataError: reportFatalDataError,
-    suggestedPlaces,
-    selectedPlaceId,
+    suggestedPlaces: tripPlannerActive ? [] : suggestedPlaces,
+    selectedPlaceId: tripPlannerActive ? null : selectedPlaceId,
     onPlaceSelect: (place) => setSelectedPlaceId(place.id),
     sidebarOffsetPx,
   } satisfies Pick<
@@ -167,33 +269,82 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
               modelId,
               selectedWeek: currentWeek,
               selectedWeekYear: currentWeekYear,
-              forecastPath,
-              fallbackForecastPath: latestForecastPath,
+              forecastPath: tripPlannerActive ? undefined : forecastPath,
+              fallbackForecastPath: tripPlannerActive ? undefined : latestForecastPath,
+              externalValues: tripPlannerActive ? tripExternalValues ?? emptyTripValues : undefined,
+              pulseAllGridCells: tripPulseMap,
+              mapModeLabel: tripPlannerSearched
+                ? "Loading seasonal occurrence map…"
+                : "Choose dates, then search seasonal occurrence",
             },
             true
           )}
 
           <SuggestedPlacesPanel
-            places={suggestedPlaces}
-            selectedPlaceId={selectedPlaceId}
+            places={tripPlannerActive ? [] : suggestedPlaces}
+            selectedPlaceId={tripPlannerActive ? null : selectedPlaceId}
             isLoading={suggestedPlacesLoading}
             error={suggestedPlacesError}
             mapRef={primaryMapRef}
             unitsMode={unitsMode}
+            activeView={plannerPanelView}
+            open={plannerPanelOpen}
+            onClose={() => setPlannerPanelOpen(false)}
             onSelectPlace={(place) => setSelectedPlaceId(place.id)}
             onLayoutChange={setSidebarOffsetPx}
+            tripStartDate={tripStartDate}
+            onTripStartDateChange={(value) => {
+              setTripStartDate(value);
+              setTripPlannerSearched(false);
+              setTripOccurrence(null);
+            }}
+            tripCity={tripCity}
+            onTripCityChange={setTripCity}
+            tripLength={tripLength}
+            onTripLengthChange={(value) => {
+              setTripLength(value);
+              setTripPlannerSearched(false);
+              setTripOccurrence(null);
+            }}
+            tripPlannerSearched={tripPlannerSearched}
+            tripPlannerLoading={tripOccurrenceLoading}
+            tripPlannerError={tripOccurrenceError}
+            tripPlannerRange={tripPlannerRange}
+            tripOccurrenceSummary={tripOccurrence}
+            onTripPlannerSearch={() => {
+              setTripPlannerSearched(true);
+              setTripOccurrence(null);
+              setTripOccurrenceError(null);
+            }}
+            onTripPlannerEdit={() => {
+              setTripPlannerSearched(false);
+              setTripOccurrence(null);
+              setTripOccurrenceError(null);
+            }}
           />
 
-          <WeekTimelineBar
-            periods={periods}
-            selectedIndex={Math.max(0, forecastIndex)}
-            onChangeIndex={setForecastIndex}
-            isPlaying={forecastPlaybackPlaying}
-            onPlayingChange={setForecastPlaybackPlaying}
-            playDir={forecastPlaybackDirection}
-            onPlayDirChange={setForecastPlaybackDirection}
-            rightInsetPx={sidebarOffsetPx}
-          />
+          {tripPlannerActive ? (
+            <TripPlannerHistogram
+              histogram={tripOccurrence?.histogram ?? []}
+              selectedRange={tripPlannerRange}
+              loading={tripOccurrenceLoading}
+              error={tripOccurrenceError}
+              selectedCount={tripOccurrence?.selectedCount ?? 0}
+              activeCells={tripOccurrence?.activeCells ?? 0}
+              rightInsetPx={sidebarOffsetPx}
+            />
+          ) : (
+            <WeekTimelineBar
+              periods={periods}
+              selectedIndex={Math.max(0, forecastIndex)}
+              onChangeIndex={setForecastIndex}
+              isPlaying={forecastPlaybackPlaying}
+              onPlayingChange={setForecastPlaybackPlaying}
+              playDir={forecastPlaybackDirection}
+              onPlayDirChange={setForecastPlaybackDirection}
+              rightInsetPx={sidebarOffsetPx}
+            />
+          )}
         </div>
 
         <div className="app__footer">
@@ -201,8 +352,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             onShareSnapshot={shareSnapshot}
             onDownloadSnapshot={downloadSnapshotAction}
             shareBusy={shareBusy}
-            places={suggestedPlaces}
-            selectedPlaceId={selectedPlaceId}
+            places={tripPlannerActive ? [] : suggestedPlaces}
+            selectedPlaceId={tripPlannerActive ? null : selectedPlaceId}
             onSelectPlace={(place) => setSelectedPlaceId(place.id)}
             darkMode={darkMode}
             onToggleDarkMode={() => setThemeMode(darkMode ? "light" : "dark")}

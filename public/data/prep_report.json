@@ -1,0 +1,394 @@
+{
+  "app_name": "OrcaCast_Public",
+  "data_version": "2026-07-01",
+  "generated_at": "2026-07-01T11:58:47Z",
+  "validation": {
+    "ok": true,
+    "checks": [
+      {
+        "path": "expected_count/H4_ACTUAL_ACTIVITY.json",
+        "exists": true,
+        "size_mb": 0.001
+      },
+      {
+        "path": "expected_count/H4_EXPECTED_ACTIVITY.json",
+        "exists": true,
+        "size_mb": 0.0012
+      },
+      {
+        "path": "expected_count/H5_ACTUAL_ACTIVITY.json",
+        "exists": true,
+        "size_mb": 0.001
+      },
+      {
+        "path": "expected_count/H5_EXPECTED_ACTIVITY.json",
+        "exists": true,
+        "size_mb": 0.0012
+      },
+      {
+        "path": "expected_count/H6_ACTUAL_ACTIVITY.json",
+        "exists": true,
+        "size_mb": 0.001
+      },
+      {
+        "path": "expected_count/H6_EXPECTED_ACTIVITY.json",
+        "exists": true,
+        "size_mb": 0.0012
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_20_H4.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_20_H5.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_20_H6.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_21_H4.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_21_H5.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_21_H6.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_22_H4.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_22_H5.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_22_H6.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_23_H4.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_23_H5.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_23_H6.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_24_H4.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_24_H5.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_24_H6.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_25_H4.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_25_H5.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_25_H6.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_26_H4.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_26_H5.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/actuals/2026_26_H6.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_20_H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_20_H5.json",
+        "exists": true,
+        "size_mb": 0.0618
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_20_H6.json",
+        "exists": true,
+        "size_mb": 0.3523
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_21_H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_21_H5.json",
+        "exists": true,
+        "size_mb": 0.062
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_21_H6.json",
+        "exists": true,
+        "size_mb": 0.353
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_22_H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_22_H5.json",
+        "exists": true,
+        "size_mb": 0.0621
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_22_H6.json",
+        "exists": true,
+        "size_mb": 0.3533
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_23_H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_23_H5.json",
+        "exists": true,
+        "size_mb": 0.0621
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_23_H6.json",
+        "exists": true,
+        "size_mb": 0.3533
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_24_H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_24_H5.json",
+        "exists": true,
+        "size_mb": 0.062
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_24_H6.json",
+        "exists": true,
+        "size_mb": 0.3531
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_25_H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_25_H5.json",
+        "exists": true,
+        "size_mb": 0.0622
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_25_H6.json",
+        "exists": true,
+        "size_mb": 0.3531
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_26_H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_26_H5.json",
+        "exists": true,
+        "size_mb": 0.0619
+      },
+      {
+        "path": "forecasts/latest/weekly/2026_26_H6.json",
+        "exists": true,
+        "size_mb": 0.3531
+      },
+      {
+        "path": "forecasts/latest/weekly/H4.json",
+        "exists": true,
+        "size_mb": 0.0124
+      },
+      {
+        "path": "forecasts/latest/weekly/H5.json",
+        "exists": true,
+        "size_mb": 0.0619
+      },
+      {
+        "path": "forecasts/latest/weekly/H6.json",
+        "exists": true,
+        "size_mb": 0.3531
+      },
+      {
+        "path": "grids/H4.geojson",
+        "exists": true,
+        "size_mb": 0.5848
+      },
+      {
+        "path": "grids/H5.geojson",
+        "exists": true,
+        "size_mb": 0.8353
+      },
+      {
+        "path": "grids/H6.geojson",
+        "exists": true,
+        "size_mb": 2.0766
+      },
+      {
+        "path": "last_week_sightings/last_week_sightings_2026-W20.geojson",
+        "exists": true,
+        "size_mb": 0.0
+      },
+      {
+        "path": "last_week_sightings/last_week_sightings_2026-W21.geojson",
+        "exists": true,
+        "size_mb": 0.0
+      },
+      {
+        "path": "last_week_sightings/last_week_sightings_2026-W22.geojson",
+        "exists": true,
+        "size_mb": 0.0
+      },
+      {
+        "path": "last_week_sightings/last_week_sightings_2026-W23.geojson",
+        "exists": true,
+        "size_mb": 0.0
+      },
+      {
+        "path": "last_week_sightings/last_week_sightings_2026-W24.geojson",
+        "exists": true,
+        "size_mb": 0.0002
+      },
+      {
+        "path": "last_week_sightings/last_week_sightings_2026-W25.geojson",
+        "exists": true,
+        "size_mb": 0.0008
+      },
+      {
+        "path": "last_week_sightings/last_week_sightings_2026-W26.geojson",
+        "exists": true,
+        "size_mb": 0.0006
+      },
+      {
+        "path": "meta.json",
+        "exists": true,
+        "size_mb": 0.0001
+      },
+      {
+        "path": "periods.json",
+        "exists": true,
+        "size_mb": 0.0006
+      },
+      {
+        "path": "places_of_interest.json",
+        "exists": true,
+        "size_mb": 0.0545
+      },
+      {
+        "path": "trip_planner/H4_HISTORICAL_DOY.json",
+        "exists": true,
+        "size_mb": 0.2693
+      },
+      {
+        "path": "trip_planner/H5_HISTORICAL_DOY.json",
+        "exists": true,
+        "size_mb": 0.6127
+      },
+      {
+        "path": "trip_planner/H6_HISTORICAL_DOY.json",
+        "exists": true,
+        "size_mb": 1.3491
+      },
+      {
+        "path": "version.json",
+        "exists": true,
+        "size_mb": 0.0001
+      }
+    ]
+  },
+  "row_counts": {
+    "sightings_rows": 228427,
+    "H4_trip_planner_rows": 2994,
+    "H4_forecast_rows": 1785,
+    "H4_actual_rows": 618630,
+    "H5_trip_planner_rows": 7130,
+    "H5_forecast_rows": 8981,
+    "H5_actual_rows": 3112558,
+    "H6_trip_planner_rows": 16013,
+    "H6_forecast_rows": 51044,
+    "H6_actual_rows": 17690392
+  },
+  "feature_counts": {
+    "H4_grid_features": 135,
+    "H5_grid_features": 661,
+    "H6_grid_features": 3628
+  },
+  "warnings": [
+    "H4 2026-W20: 120 forecast H3 IDs are not present in the grid.",
+    "H4 2026-W21: 120 forecast H3 IDs are not present in the grid.",
+    "H4 2026-W22: 120 forecast H3 IDs are not present in the grid.",
+    "H4 2026-W23: 120 forecast H3 IDs are not present in the grid.",
+    "H4 2026-W24: 120 forecast H3 IDs are not present in the grid.",
+    "H4 2026-W25: 120 forecast H3 IDs are not present in the grid.",
+    "H4 2026-W26: 120 forecast H3 IDs are not present in the grid.",
+    "H5 2026-W20: 622 forecast H3 IDs are not present in the grid.",
+    "H5 2026-W21: 622 forecast H3 IDs are not present in the grid.",
+    "H5 2026-W22: 622 forecast H3 IDs are not present in the grid.",
+    "H5 2026-W23: 622 forecast H3 IDs are not present in the grid.",
+    "H5 2026-W24: 622 forecast H3 IDs are not present in the grid.",
+    "H5 2026-W25: 622 forecast H3 IDs are not present in the grid.",
+    "H5 2026-W26: 622 forecast H3 IDs are not present in the grid.",
+    "H6 2026-W20: 3664 forecast H3 IDs are not present in the grid.",
+    "H6 2026-W21: 3664 forecast H3 IDs are not present in the grid.",
+    "H6 2026-W22: 3664 forecast H3 IDs are not present in the grid.",
+    "H6 2026-W23: 3664 forecast H3 IDs are not present in the grid.",
+    "H6 2026-W24: 3664 forecast H3 IDs are not present in the grid.",
+    "H6 2026-W25: 3664 forecast H3 IDs are not present in the grid.",
+    "H6 2026-W26: 3664 forecast H3 IDs are not present in the grid."
+  ],
+  "latest_period": {
+    "year": 2026,
+    "stat_week": 26
+  }
+}
