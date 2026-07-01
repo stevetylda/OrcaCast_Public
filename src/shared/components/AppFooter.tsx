@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { HotspotsSettingsSection } from "../../features/watch/components/HotspotsSettingsSection";
-import { AttributionHover } from "./AttributionHover";
-import { PALETTES, getPalette, type PaletteId } from "../geo/palettes";
+import { PALETTES, type PaletteId } from "../geo/palettes";
 import type { SuggestedPlace } from "../../features/locations/types";
 import type { UnitsMode } from "../state/MapStateContext";
+import { H3ResolutionPill } from "../../features/watch/components/H3ResolutionPill";
 
 type Props = {
   onShareSnapshot?: () => void;
@@ -14,18 +13,12 @@ type Props = {
   onSelectPlace: (place: SuggestedPlace) => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  resolution: "H4" | "H5" | "H6";
+  onResolutionChange: (value: "H4" | "H5" | "H6") => void;
   unitsMode: UnitsMode;
   onUnitsModeChange: (mode: UnitsMode) => void;
   surfaceMode: "grid" | "surface";
   onSurfaceModeChange: (value: "grid" | "surface") => void;
-  hotspotsEnabled: boolean;
-  onHotspotsEnabledChange: (value: boolean) => void;
-  hotspotMode: "modeled" | "custom";
-  onHotspotModeChange: (value: "modeled" | "custom") => void;
-  hotspotPercentile: number;
-  onHotspotPercentileChange: (value: number) => void;
-  hotspotTotalCells: number | null;
-  hotspotModeledCount: number | null;
   poiFilters: { Park: boolean; Marina: boolean; Ferry: boolean };
   onTogglePoiAll: () => void;
   onTogglePoiType: (type: "Park" | "Marina" | "Ferry") => void;
@@ -49,18 +42,12 @@ export function AppFooter({
   onSelectPlace,
   darkMode,
   onToggleDarkMode,
+  resolution,
+  onResolutionChange,
   unitsMode,
   onUnitsModeChange,
   surfaceMode,
   onSurfaceModeChange,
-  hotspotsEnabled,
-  onHotspotsEnabledChange,
-  hotspotMode,
-  onHotspotModeChange,
-  hotspotPercentile,
-  onHotspotPercentileChange,
-  hotspotTotalCells,
-  hotspotModeledCount,
   poiFilters,
   onTogglePoiAll,
   onTogglePoiType,
@@ -68,8 +55,8 @@ export function AppFooter({
   onPaletteChange,
 }: Props) {
   const [activePanel, setActivePanel] = useState<DockPanelId>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
-  const activePalette = getPalette(selectedPaletteId);
 
   const liveCamPlaces = useMemo(() => places.filter((place) => place.hasLiveFeed), [places]);
   const hydrophonePlaces = useMemo(() => places.filter((place) => place.hasHydrophone), [places]);
@@ -92,6 +79,12 @@ export function AppFooter({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [activePanel]);
+
+  useEffect(() => {
+    if (activePanel !== "settings") setPaletteOpen(false);
+  }, [activePanel]);
+
+  const activePalette = PALETTES[selectedPaletteId];
 
   const renderPlacesPanel = (items: SuggestedPlace[], emptyLabel: string, ctaLabel: string) => (
     <div className="footerDock__panel footerDock__panel--places" role="dialog" aria-modal="false">
@@ -153,70 +146,100 @@ export function AppFooter({
           )}
         {activePanel === "settings" && (
           <div className="footerDock__panel footerDock__panel--settings" role="dialog" aria-modal="false">
-            <div className="footerDock__panelHeader">
+            <div className="footerDock__panelHeader footerDock__panelHeader--settings">
               <div className="footerDock__titleRow" data-tour="theme-toggle">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  settings
-                </span>
                 <span className="footerDock__title">Settings</span>
+              </div>
+              <div className="footerDock__headerActions">
+                <button
+                  type="button"
+                  className="footerDock__utilityIcon footerDock__utilityIcon--header"
+                  onClick={onDownloadSnapshot}
+                  disabled={shareBusy || !onDownloadSnapshot}
+                  title="Download snapshot"
+                  aria-label="Download snapshot"
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    download
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="footerDock__utilityIcon footerDock__utilityIcon--header"
+                  onClick={onShareSnapshot}
+                  disabled={shareBusy || !onShareSnapshot}
+                  title="Share snapshot"
+                  aria-label="Share snapshot"
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    ios_share
+                  </span>
+                </button>
               </div>
             </div>
 
-            <section className="footerDock__section">
+            <section className="footerDock__section footerDock__section--settings">
               <div className="footerDock__sectionLabel">Appearance</div>
-              <div className="footerDock__settingRow">
-                <span>Night mode</span>
+              <div className="footerDock__settingRow footerDock__settingRow--button">
+                <span className="footerDock__settingLabel">Theme</span>
                 <button
                   type="button"
-                  className={`hotspotSwitch${darkMode ? " hotspotSwitch--on" : ""}`}
+                  className="footerDock__modeButton"
                   onClick={onToggleDarkMode}
                   aria-pressed={darkMode}
+                  aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
                 >
-                  <span className="hotspotSwitch__knob" />
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    {darkMode ? "light_mode" : "dark_mode"}
+                  </span>
+                  <span>{darkMode ? "Dark mode" : "Light mode"}</span>
                 </button>
               </div>
-              <div className="footerDock__settingBlock">
-                <div className="footerDock__settingCaption">Units</div>
-                <div className="footerDock__segmented" role="group" aria-label="Units">
-                  <button
-                    type="button"
-                    className={unitsMode === "imperial" ? "footerDock__segment isActive" : "footerDock__segment"}
-                    onClick={() => onUnitsModeChange("imperial")}
+              <label className="footerDock__settingRow footerDock__settingRow--select">
+                <span className="footerDock__settingLabel">Units</span>
+                <span className="footerDock__selectWrap">
+                  <select
+                    className="select select--footer"
+                    value={unitsMode}
+                    onChange={(event) => onUnitsModeChange(event.target.value as UnitsMode)}
+                    aria-label="Units"
                   >
-                    Imperial
-                  </button>
-                  <button
-                    type="button"
-                    className={unitsMode === "metric" ? "footerDock__segment isActive" : "footerDock__segment"}
-                    onClick={() => onUnitsModeChange("metric")}
-                  >
-                    Metric
-                  </button>
-                </div>
-              </div>
+                    <option value="imperial">Imperial</option>
+                    <option value="metric">Metric</option>
+                  </select>
+                  <span className="material-symbols-rounded footerDock__selectChevron" aria-hidden="true">
+                    expand_more
+                  </span>
+                </span>
+              </label>
             </section>
 
-            <section className="footerDock__section">
+            <section className="footerDock__section footerDock__section--settings">
               <div className="footerDock__sectionLabel">Map layers</div>
-              <div className="footerDock__settingBlock">
-                <div className="footerDock__settingCaption">Surface view</div>
-                <div className="footerDock__segmented">
-                  <button
-                    type="button"
-                    className={surfaceMode === "grid" ? "footerDock__segment isActive" : "footerDock__segment"}
-                    onClick={() => onSurfaceModeChange("grid")}
+              <label className="footerDock__settingRow footerDock__settingRow--select">
+                <span className="footerDock__settingLabel">Surface view</span>
+                <span className="footerDock__settingControls footerDock__settingControls--layers">
+                  <span className="footerDock__resolutionInline" data-tour="resolution">
+                    <H3ResolutionPill
+                      value={resolution === "H4" ? 4 : resolution === "H5" ? 5 : 6}
+                      onChange={(next) => onResolutionChange(next === 4 ? "H4" : next === 5 ? "H5" : "H6")}
+                      compact
+                    />
+                  </span>
+                  <select
+                    className="select select--footer"
+                    value={surfaceMode}
+                    onChange={(event) => onSurfaceModeChange(event.target.value as "grid" | "surface")}
+                    aria-label="Surface view"
                   >
-                    Hex grid
-                  </button>
-                  <button
-                    type="button"
-                    className={surfaceMode === "surface" ? "footerDock__segment isActive" : "footerDock__segment"}
-                    onClick={() => onSurfaceModeChange("surface")}
-                  >
-                    Smooth
-                  </button>
-                </div>
-              </div>
+                    <option value="grid">Hex grid</option>
+                    <option value="surface">Smooth</option>
+                  </select>
+                  <span className="material-symbols-rounded footerDock__selectChevron" aria-hidden="true">
+                    expand_more
+                  </span>
+                </span>
+              </label>
               <div className="footerDock__settingBlock" data-tour="poi">
                 <div className="footerDock__settingCaption">Points of interest</div>
                 <div className="footerDock__toggleGrid">
@@ -232,97 +255,100 @@ export function AppFooter({
                     className={poiFilters.Park ? "footerDock__chip isActive" : "footerDock__chip"}
                     onClick={() => onTogglePoiType("Park")}
                   >
-                    Parks
+                    <span className="footerDock__chipInner">
+                      <span className="footerDock__chipIcons footerDock__chipIcons--park" aria-hidden="true">
+                        <span className="material-symbols-rounded">park</span>
+                      </span>
+                      <span>Parks</span>
+                    </span>
                   </button>
                   <button
                     type="button"
                     className={poiFilters.Marina ? "footerDock__chip isActive" : "footerDock__chip"}
                     onClick={() => onTogglePoiType("Marina")}
                   >
-                    Marinas
+                    <span className="footerDock__chipInner">
+                      <span className="footerDock__chipIcons footerDock__chipIcons--marina" aria-hidden="true">
+                        <span className="material-symbols-rounded">anchor</span>
+                      </span>
+                      <span>Marinas</span>
+                    </span>
                   </button>
                   <button
                     type="button"
                     className={poiFilters.Ferry ? "footerDock__chip isActive" : "footerDock__chip"}
                     onClick={() => onTogglePoiType("Ferry")}
                   >
-                    Ferries
+                    <span className="footerDock__chipInner">
+                      <span className="footerDock__chipIcons footerDock__chipIcons--ferry" aria-hidden="true">
+                        <span className="material-symbols-rounded">directions_boat</span>
+                      </span>
+                      <span>Ferries</span>
+                    </span>
                   </button>
                 </div>
               </div>
-              <div className="footerDock__settingBlock" data-tour="hotspots">
-                <HotspotsSettingsSection
-                  enabled={hotspotsEnabled}
-                  onEnabledChange={onHotspotsEnabledChange}
-                  mode={hotspotMode}
-                  onModeChange={onHotspotModeChange}
-                  percentile={hotspotPercentile}
-                  onPercentileChange={onHotspotPercentileChange}
-                  totalCells={hotspotTotalCells}
-                  modeledCount={hotspotModeledCount}
-                />
-              </div>
             </section>
 
-            <section className="footerDock__section" data-tour="palette-picker">
+            <section className="footerDock__section footerDock__section--settings" data-tour="palette-picker">
               <div className="footerDock__sectionLabel">Color scale</div>
-              <div className="footerDock__paletteList">
-                {Object.values(PALETTES).map((palette) => {
-                  const selected = palette.id === selectedPaletteId;
-                  return (
-                    <button
-                      key={palette.id}
-                      type="button"
-                      className={`footerDock__paletteRow${selected ? " isSelected" : ""}`}
-                      onClick={() => onPaletteChange(palette.id)}
-                    >
-                      <span className="footerDock__paletteSwatches" aria-hidden="true">
-                        {palette.colors.map((color, index) => (
-                          <span
-                            key={`${palette.id}-${index}`}
-                            className="footerDock__paletteSwatch"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </span>
-                      <span className="footerDock__paletteName">{palette.name}</span>
-                      <span className="material-symbols-rounded footerDock__paletteCheck" aria-hidden="true">
-                        {selected ? "check" : ""}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="footerDock__section">
-              <div className="footerDock__sectionLabel">Utilities</div>
-              <div className="footerDock__utilityRow">
-                <AttributionHover className="footerDock__utilityPill" />
-                <div className="footerDock__snapshotGroup">
-                  <button
-                    type="button"
-                    className="footerDock__utilityIcon"
-                    onClick={onDownloadSnapshot}
-                    disabled={shareBusy || !onDownloadSnapshot}
-                    title="Download snapshot"
-                  >
-                    <span className="material-symbols-rounded" aria-hidden="true">
-                      download
+              <div className="footerDock__settingBlock">
+                <div className="footerDock__settingCaption">Palette</div>
+                <button
+                  type="button"
+                  className={`footerDock__paletteTrigger${paletteOpen ? " isOpen" : ""}`}
+                  onClick={() => setPaletteOpen((value) => !value)}
+                  aria-expanded={paletteOpen}
+                  aria-label="Color scale"
+                >
+                  <span className="footerDock__paletteTriggerMain">
+                    <span className="footerDock__paletteSwatches" aria-hidden="true">
+                      {activePalette.colors.slice(0, 5).map((color, index) => (
+                        <span
+                          key={`${activePalette.id}-active-${index}`}
+                          className="footerDock__paletteSwatch"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
                     </span>
-                  </button>
-                  <button
-                    type="button"
-                    className="footerDock__utilityIcon"
-                    onClick={onShareSnapshot}
-                    disabled={shareBusy || !onShareSnapshot}
-                    title="Share snapshot"
-                  >
-                    <span className="material-symbols-rounded" aria-hidden="true">
-                      ios_share
-                    </span>
-                  </button>
-                </div>
+                    <span className="footerDock__paletteName">{activePalette.name}</span>
+                  </span>
+                  <span className="material-symbols-rounded footerDock__paletteChevron" aria-hidden="true">
+                    expand_more
+                  </span>
+                </button>
+                {paletteOpen && (
+                  <div className="footerDock__paletteList" role="listbox" aria-label="Color scale palettes">
+                    {Object.values(PALETTES).map((palette) => {
+                      const selected = palette.id === selectedPaletteId;
+                      return (
+                        <button
+                          key={palette.id}
+                          type="button"
+                          className={`footerDock__paletteRow${selected ? " isSelected" : ""}`}
+                          onClick={() => {
+                            onPaletteChange(palette.id);
+                            setPaletteOpen(false);
+                          }}
+                        >
+                          <span className="footerDock__paletteSwatches" aria-hidden="true">
+                            {palette.colors.slice(0, 5).map((color, index) => (
+                              <span
+                                key={`${palette.id}-${index}`}
+                                className="footerDock__paletteSwatch"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </span>
+                          <span className="footerDock__paletteName">{palette.name}</span>
+                          <span className="material-symbols-rounded footerDock__paletteCheck" aria-hidden="true">
+                            {selected ? "check" : ""}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -344,7 +370,7 @@ export function AppFooter({
             },
             {
               id: "settings" as const,
-              icon: activePalette.id === selectedPaletteId ? "palette" : "settings",
+              icon: "settings",
               label: "Settings",
             },
           ].map((item) => {
@@ -353,14 +379,15 @@ export function AppFooter({
               <button
                 key={item.id}
                 type="button"
-                className={`footerDock__button${open ? " isActive" : ""}`}
+                className={`footerDock__button${item.id === "settings" ? " footerDock__button--iconOnly" : ""}${open ? " isActive" : ""}`}
                 onClick={() => setActivePanel(open ? null : item.id)}
                 data-tour={item.id === "settings" ? "tools" : undefined}
+                aria-label={item.label}
               >
                 <span className="material-symbols-rounded" aria-hidden="true">
                   {item.icon}
                 </span>
-                <span>{item.label}</span>
+                {item.id !== "settings" && <span>{item.label}</span>}
                 {typeof item.count === "number" && <span className="footerDock__buttonCount">{item.count}</span>}
               </button>
             );

@@ -307,117 +307,6 @@ body {
   height: 100%;
 }
 
-/* MapLibre controls (align above left-side gear button) */
-.maplibregl-ctrl-group {
-  position: relative;
-  background: rgba(8, 18, 44, 0.78);
-  border: 1px solid rgba(25, 240, 215, 0.45);
-  border-radius: 14px;
-  box-shadow: var(--teal-glow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  transform: rotate(0deg);
-  transform-origin: center;
-}
-
-.maplibregl-ctrl-bottom-left {
-  left: var(--map-control-left, 1.5rem) !important;
-  bottom: var(--map-zoom-bottom, 8.75rem) !important;
-  transform: none;
-}
-
-.maplibregl-ctrl-bottom-left .maplibregl-ctrl {
-  margin: 0 !important;
-}
-
-.maplibregl-ctrl-group button {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  border: 0 !important;
-  background: transparent !important;
-  color: #eaffff;
-  box-shadow: none !important;
-  margin: 0;
-  display: grid;
-  place-items: center;
-  position: relative;
-  z-index: 2;
-  transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
-  background-image: none !important;
-  outline: none;
-  appearance: none;
-}
-
-.maplibregl-ctrl-group button + button {
-  border-top: 0 !important;
-}
-
-.maplibregl-ctrl-group button:hover,
-.maplibregl-ctrl-group button:focus-visible {
-  transform: translateY(-1px);
-  box-shadow: var(--teal-glow-soft);
-  outline: none;
-  background: rgba(25, 240, 215, 0.08);
-}
-
-.maplibregl-ctrl-group button:focus {
-  outline: none;
-  box-shadow: var(--teal-glow-soft);
-}
-
-.maplibregl-ctrl-group::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 50%;
-  height: 1px;
-  background: rgba(25, 240, 215, 0.4);
-  box-shadow: 0 0 6px rgba(25, 240, 215, 0.35);
-  z-index: 1;
-}
-
-.maplibregl-ctrl-zoom-in,
-.maplibregl-ctrl-zoom-out {
-  background-image: none;
-  font-family: "Material Symbols Rounded";
-  font-weight: normal;
-  font-size: 20px;
-  line-height: 1;
-  position: relative;
-  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
-}
-
-.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon,
-.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
-  display: none !important;
-  background: none !important;
-}
-
-.maplibregl-ctrl-zoom-in::before {
-  content: "add";
-}
-
-.maplibregl-ctrl-zoom-out::before {
-  content: "remove";
-}
-
-.maplibregl-ctrl-zoom-in::before,
-.maplibregl-ctrl-zoom-out::before {
-  display: block;
-  line-height: 1;
-  color: #f6ffff;
-  text-shadow: 0 0 8px rgba(25, 240, 215, 0.55);
-  transform: none;
-}
-
-.maplibregl-ctrl-compass {
-  background-image: none;
-}
-
 /* Watch page floating suggested places panel */
 .app {
   --suggested-panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 250, 253, 0.88));
@@ -490,9 +379,8 @@ body {
   overflow: hidden;
   --map-floating-bottom: 1.25rem;
   --map-control-left: clamp(1.5rem, calc(var(--week-timeline-left, 2rem) - 4.75rem), 5rem);
-  --map-zoom-bottom: calc(var(--map-floating-bottom) + 1rem);
-  --map-legend-toggle-bottom: calc(var(--map-zoom-bottom) + 4.75rem);
-  --map-legend-bottom: calc(var(--map-legend-toggle-bottom) + 4.5rem);
+  --map-zoom-bottom: calc(var(--map-floating-bottom) + 0.75rem);
+  --map-legend-bottom: calc(var(--map-zoom-bottom) + 10rem);
 }
 
 .watchMapShell .mapStage {
@@ -509,6 +397,7 @@ body {
   width: auto;
   min-width: 720px;
   max-width: 980px;
+  transform: translateX(var(--week-timeline-shift, 0px));
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) 64px;
   align-items: center;
@@ -1151,33 +1040,33 @@ body {
 }
 
 .viewingPotentialBadge--high {
-  border-color: rgba(234, 132, 48, 0.42);
-  background: rgba(255, 144, 72, 0.18);
-  color: #8b3f00;
+  border-color: rgba(40, 197, 168, 0.34);
+  background: rgba(59, 208, 181, 0.16);
+  color: #0f7668;
 }
 
 .app--dark .viewingPotentialBadge--high {
-  border-color: rgba(255, 177, 97, 0.42);
-  background: rgba(255, 144, 72, 0.18);
-  color: rgba(255, 226, 190, 0.98);
+  border-color: rgba(111, 233, 203, 0.34);
+  background: rgba(59, 208, 181, 0.18);
+  color: rgba(214, 255, 246, 0.98);
 }
 
 .viewingPotentialBadge--medium {
-  border-color: rgba(0, 154, 178, 0.34);
-  background: rgba(0, 194, 210, 0.12);
-  color: #006c7a;
+  border-color: rgba(75, 198, 210, 0.32);
+  background: rgba(94, 220, 227, 0.14);
+  color: #0f6f81;
 }
 
 .app--dark .viewingPotentialBadge--medium {
-  border-color: rgba(25, 240, 215, 0.34);
-  background: rgba(25, 240, 215, 0.12);
-  color: rgba(206, 255, 248, 0.96);
+  border-color: rgba(115, 231, 238, 0.32);
+  background: rgba(94, 220, 227, 0.14);
+  color: rgba(218, 251, 255, 0.96);
 }
 
 .viewingPotentialBadge--low {
-  border-color: rgba(83, 116, 145, 0.22);
-  background: rgba(83, 116, 145, 0.08);
-  color: rgba(36, 60, 82, 0.82);
+  border-color: rgba(89, 121, 153, 0.24);
+  background: rgba(86, 113, 143, 0.1);
+  color: rgba(34, 58, 84, 0.82);
 }
 
 .app--dark .viewingPotentialBadge--low {
@@ -1247,6 +1136,25 @@ body {
 
 .poiMarker--suggested .material-symbols-rounded {
   font-size: 15px;
+}
+
+.poiMarker--cluster {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.poiMarker__star {
+  display: block;
+  font-size: 30px;
+  line-height: 1;
+  color: #ffd15c;
+  text-shadow:
+    0 0 12px rgba(255, 212, 92, 0.42),
+    0 4px 14px rgba(0, 0, 0, 0.28);
 }
 
 .poiMarker--high {

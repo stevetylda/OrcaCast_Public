@@ -71,7 +71,7 @@ export function H3ResolutionPill({
         aria-label="Resolution"
         title={label}
       >
-        <StackedHexIcon selected={value} size={40} />
+        <StackedHexIcon selected={value} size={46} />
       </button>
     </div>
   );

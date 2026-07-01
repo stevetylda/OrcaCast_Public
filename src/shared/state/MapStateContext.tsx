@@ -60,7 +60,7 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
     if (typeof window === "undefined") return "grid";
     return window.localStorage.getItem(SURFACE_MODE_STORAGE_KEY) === "surface" ? "surface" : "grid";
   });
-  const [resolution, setResolution] = useState<H3Resolution>("H4");
+  const [resolution, setResolution] = useState<H3Resolution>("H6");
   const [modelId, setModelId] = useState(appConfig.compositeModelId);
   const [forecastIndex, setForecastIndex] = useState(-1);
   const [forecastPlaybackPlaying, setForecastPlaybackPlaying] = useState(false);

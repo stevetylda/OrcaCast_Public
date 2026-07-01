@@ -21,10 +21,8 @@ export const OUTLOOK_BIN_LABELS = [
   "Very Low",
   "Low",
   "Moderate",
-  "Elevated",
   "High",
   "Very High",
-  "Extreme",
   "Peak",
 ] as const;
 
@@ -33,7 +31,7 @@ const LABELS: string[] = [
   ...OUTLOOK_BIN_LABELS,
 ];
 
-const Q_LEVELS = [0.6, 0.9, 0.94, 0.96, 0.975, 0.9875, 0.995];
+const Q_LEVELS = [0.6, 0.88, 0.95, 0.985, 0.997];
 
 function quantileThresholds(values: number[]): number[] {
   const sorted = [...values].sort((a, b) => a - b);
@@ -60,6 +58,29 @@ function normalizePaletteColors(palette: string[], bins: number): string[] {
   if (palette.length === 0) return Array.from({ length: bins }, () => "#ffffff");
   const last = palette[palette.length - 1];
   return [...palette, ...Array.from({ length: bins - palette.length }, () => last)];
+}
+
+function buildInterpolatedFillExpr(
+  thresholds: number[],
+  colors: string[],
+  minValue: number,
+  zeroColor: string,
+  valueExpr: unknown[] = ["get", "prob"]
+): unknown[] {
+  if (colors.length === 0) {
+    return ["case", ["<=", ["coalesce", valueExpr, 0], 0], zeroColor, zeroColor];
+  }
+
+  if (thresholds.length === 0) {
+    return ["case", ["<=", ["coalesce", valueExpr, 0], 0], zeroColor, colors[0] ?? zeroColor];
+  }
+
+  const interpolateExpr: unknown[] = ["interpolate", ["linear"], valueExpr, minValue, colors[0]];
+  thresholds.forEach((threshold, index) => {
+    interpolateExpr.push(threshold, colors[Math.min(index + 1, colors.length - 1)]);
+  });
+
+  return ["case", ["<=", ["coalesce", valueExpr, 0], 0], zeroColor, interpolateExpr];
 }
 
 export function buildAutoColorExprFromValues(
@@ -92,7 +113,7 @@ export function buildAutoColorExprFromValues(
 
   if (thresholds.length === 0) {
     return {
-      fillColorExpr: ["case", ["<=", ["coalesce", valueExpr, 0], 0], ZERO_COLOR, colors[0] ?? ZERO_COLOR],
+      fillColorExpr: buildInterpolatedFillExpr([], colors, minValue, ZERO_COLOR, valueExpr),
       scale: {
         thresholds: [],
         binColorsRgba: colors.length ? colors : [ZERO_COLOR],
@@ -103,12 +124,7 @@ export function buildAutoColorExprFromValues(
     };
   }
 
-  const stepExpr: unknown[] = ["step", valueExpr, colors[0]];
-  thresholds.forEach((t, i) => {
-    stepExpr.push(t, colors[Math.min(i + 1, colors.length - 1)]);
-  });
-
-  const expr: unknown[] = ["case", ["<=", ["coalesce", valueExpr, 0], 0], ZERO_COLOR, stepExpr];
+  const expr = buildInterpolatedFillExpr(thresholds, colors, minValue, ZERO_COLOR, valueExpr);
 
   return {
     fillColorExpr: expr,
@@ -135,11 +151,13 @@ export function buildFillExprFromScale(
       scale.binColorsRgba[0] ?? zeroColor,
     ];
   }
-  const stepExpr: unknown[] = ["step", valueExpr, scale.binColorsRgba[0]];
-  scale.thresholds.forEach((t, i) => {
-    stepExpr.push(t, scale.binColorsRgba[Math.min(i + 1, scale.binColorsRgba.length - 1)]);
-  });
-  return ["case", ["<=", ["coalesce", valueExpr, 0], 0], zeroColor, stepExpr];
+  return buildInterpolatedFillExpr(
+    scale.thresholds,
+    scale.binColorsRgba,
+    scale.binRanges[0]?.probMin ?? scale.thresholds[0] ?? 0,
+    zeroColor,
+    valueExpr
+  );
 }
 
 export function buildHotspotOnlyExpr(

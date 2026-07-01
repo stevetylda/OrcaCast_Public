@@ -58,6 +58,73 @@ function coerceExpectedActivityHotspotCellCount(value: number | null): number | 
   return value === null || !Number.isFinite(value) ? null : Math.max(0, Math.round(value));
 }
 
+const SUGGESTED_PLACE_CLUSTER_DISTANCE_KM = 18;
+const SUGGESTED_PLACE_CLUSTER_MAX_ZOOM = 10.75;
+
+function haversineKm(a: [number, number], b: [number, number]) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371.0088;
+  const dLat = toRad(b[1] - a[1]);
+  const dLon = toRad(b[0] - a[0]);
+  const lat1 = toRad(a[1]);
+  const lat2 = toRad(b[1]);
+  const h =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return 2 * earthRadiusKm * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+function clusterSuggestedPlaces<T extends { longitude: number; latitude: number; score: number }>(places: T[]) {
+  if (places.length <= 1) return places.map((place) => ({ members: [place], center: [place.longitude, place.latitude] as [number, number] }));
+
+  const visited = new Set<number>();
+  const clusters: Array<{ members: T[]; center: [number, number] }> = [];
+
+  for (let index = 0; index < places.length; index += 1) {
+    if (visited.has(index)) continue;
+    const stack = [index];
+    const memberIndexes: number[] = [];
+    visited.add(index);
+
+    while (stack.length > 0) {
+      const current = stack.pop();
+      if (current == null) continue;
+      memberIndexes.push(current);
+      const currentPlace = places[current];
+      const currentPoint: [number, number] = [currentPlace.longitude, currentPlace.latitude];
+
+      for (let next = 0; next < places.length; next += 1) {
+        if (visited.has(next)) continue;
+        const candidate = places[next];
+        const candidatePoint: [number, number] = [candidate.longitude, candidate.latitude];
+        if (haversineKm(currentPoint, candidatePoint) > SUGGESTED_PLACE_CLUSTER_DISTANCE_KM) continue;
+        visited.add(next);
+        stack.push(next);
+      }
+    }
+
+    const members = memberIndexes.map((memberIndex) => places[memberIndex]).sort((a, b) => b.score - a.score);
+    const weighted = members.reduce(
+      (acc, member) => {
+        const weight = Math.max(0.15, member.score);
+        return {
+          lon: acc.lon + member.longitude * weight,
+          lat: acc.lat + member.latitude * weight,
+          weight: acc.weight + weight,
+        };
+      },
+      { lon: 0, lat: 0, weight: 0 }
+    );
+
+    clusters.push({
+      members,
+      center: weighted.weight > 0 ? [weighted.lon / weighted.weight, weighted.lat / weighted.weight] : [members[0].longitude, members[0].latitude],
+    });
+  }
+
+  return clusters;
+}
+
 export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(function ForecastMap(
   {
     darkMode,
@@ -154,6 +221,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   const [legendSpec, setLegendSpec] = useState<HeatScale | null>(null);
   const [legendOpen, setLegendOpen] = useState(true);
   const [mapReady, setMapReady] = useState(false);
+  const [suggestedPlaceZoom, setSuggestedPlaceZoom] = useState(DEFAULT_ZOOM);
 
   const hasForecastLegend = legendSpec !== null;
 
@@ -226,7 +294,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         );
       }
 
-      addSurfaceOverlay(map, overlayRef.current, activePalette.colors, darkMode);
+      addSurfaceOverlay(map, overlayRef.current, activePalette.colors, darkMode, scale);
 
       if (hotspots) {
         if (surfaceMode === "surface") {
@@ -567,7 +635,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       cooperativeGestures: false,
     } as MapOptionsPatched);
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-left");
     map.on("error", (e: { error?: unknown }) => console.error("[MapLibre] error:", e?.error || e));
 
     const { handleSparklineClick, handleMouseEnter, handleMouseMove, handleMouseLeave } =
@@ -599,6 +666,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       lastGridLayerSignatureRef.current = null;
       mapReadyRef.current = true;
       setMapReady(true);
+      setSuggestedPlaceZoom(map.getZoom());
       safeApplyBasemapVisualTuning(map, styleUrlRef.current === DARK_STYLE);
       map.resize();
       scheduleForecastRenderRef.current(map);
@@ -613,6 +681,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       }
     };
     map.on("styledata", handleStyleData);
+    const handleZoomEnd = () => setSuggestedPlaceZoom(map.getZoom());
+    map.on("zoomend", handleZoomEnd);
 
     mapRef.current = map;
 
@@ -629,6 +699,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       map.off("mousemove", "grid-fill", handleMouseMove);
       map.off("mouseleave", "grid-fill", handleMouseLeave);
       map.off("styledata", handleStyleData);
+      map.off("zoomend", handleZoomEnd);
       sparkPopupRef.current?.remove();
       sparkPopupRef.current = null;
       suggestedPlaceMarkersRef.current.forEach((marker) => marker.remove());
@@ -720,25 +791,52 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     suggestedPlaceMarkersRef.current.forEach((marker) => marker.remove());
     suggestedPlaceMarkersRef.current = [];
 
-    suggestedPlaceMarkersRef.current = suggestedPlaces.map((place) => {
+    const useClusters = suggestedPlaceZoom < SUGGESTED_PLACE_CLUSTER_MAX_ZOOM;
+    const clusters = useClusters ? clusterSuggestedPlaces(suggestedPlaces) : suggestedPlaces.map((place) => ({
+      members: [place],
+      center: [place.longitude, place.latitude] as [number, number],
+    }));
+
+    suggestedPlaceMarkersRef.current = clusters.map((cluster) => {
+      const [primaryPlace] = cluster.members;
+      const selected = cluster.members.some((place) => place.id === selectedPlaceId);
+      const isCluster = cluster.members.length > 1;
       const el = document.createElement("button");
       el.type = "button";
-      el.className = `poiMarker poiMarker--suggested poiMarker--${place.viewingPotential}${
-        place.id === selectedPlaceId ? " poiMarker--selected" : ""
-      }`;
-      el.setAttribute("aria-label", `Select ${place.name}`);
-      el.innerHTML = `<span class="material-symbols-rounded">visibility</span>`;
+      el.className = `poiMarker poiMarker--suggested poiMarker--${primaryPlace.viewingPotential}${
+        selected ? " poiMarker--selected" : ""
+      }${isCluster ? " poiMarker--cluster" : ""}`;
+      el.setAttribute(
+        "aria-label",
+        isCluster ? `Show ${cluster.members.length} suggested places in this area` : `Select ${primaryPlace.name}`
+      );
+      el.innerHTML = isCluster
+        ? `<span class="poiMarker__star" aria-hidden="true">★</span>`
+        : `<span class="material-symbols-rounded">visibility</span>`;
+
       el.addEventListener("click", (event) => {
         event.stopPropagation();
-        onPlaceSelect?.(place);
+        if (!isCluster) {
+          onPlaceSelect?.(primaryPlace);
+          return;
+        }
+        map.flyTo({
+          center: cluster.center,
+          zoom: Math.max(map.getZoom(), SUGGESTED_PLACE_CLUSTER_MAX_ZOOM + 0.85),
+          duration: 650,
+          essential: true,
+          padding: { top: 0, right: sidebarPaddingRight, bottom: 0, left: 0 },
+        });
       });
 
       const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: true }).setHTML(
-        `<div class="poiPopup"><div class="poiPopup__title">${place.name}</div><div class="poiPopup__meta">${place.viewingPotential.toUpperCase()} viewing potential</div></div>`
+        isCluster
+          ? `<div class="poiPopup"><div class="poiPopup__title">${cluster.members.length} suggested places</div><div class="poiPopup__meta">${primaryPlace.region ?? "Clustered forecast area"}</div></div>`
+          : `<div class="poiPopup"><div class="poiPopup__title">${primaryPlace.name}</div><div class="poiPopup__meta">${primaryPlace.viewingPotential.toUpperCase()} viewing potential</div></div>`
       );
 
       return new maplibregl.Marker({ element: el, anchor: "bottom" })
-        .setLngLat([Number(place.longitude), Number(place.latitude)])
+        .setLngLat(cluster.center)
         .setPopup(popup)
         .addTo(map);
     });
@@ -747,7 +845,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       suggestedPlaceMarkersRef.current.forEach((marker) => marker.remove());
       suggestedPlaceMarkersRef.current = [];
     };
-  }, [mapReady, onPlaceSelect, selectedPlaceId, suggestedPlaces]);
+  }, [mapReady, onPlaceSelect, selectedPlaceId, sidebarPaddingRight, suggestedPlaceZoom, suggestedPlaces]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -910,6 +1008,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         legendOpen={legendOpen}
         legendSpec={legendSpec}
         onLegendToggle={() => setLegendOpen((value) => !value)}
+        onZoomIn={() => mapRef.current?.zoomIn({ duration: 180 })}
+        onZoomOut={() => mapRef.current?.zoomOut({ duration: 180 })}
       />
     </div>
   );

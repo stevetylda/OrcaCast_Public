@@ -1969,14 +1969,15 @@
   white-space: normal;
 }
 
-.map__cornerLeftBottom {
+.map__controlRail {
   position: absolute;
   left: var(--map-control-left, 1.5rem);
-  bottom: var(--map-legend-toggle-bottom, 13rem);
+  bottom: var(--map-zoom-bottom, 8rem);
   z-index: 20;
   width: 42px;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
 }
 
 .legendToggleBtn {
@@ -2003,6 +2004,43 @@
   opacity: 0.45;
   border-color: rgba(180, 190, 210, 0.35);
   background: rgba(58, 68, 86, 0.45);
+}
+
+.map__zoomStack {
+  width: 42px;
+  padding: 4px;
+  display: grid;
+  gap: 2px;
+  border-radius: 16px;
+  background: rgba(8, 18, 44, 0.78);
+  border: 1px solid rgba(25, 240, 215, 0.45);
+  box-shadow: var(--teal-glow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.map__zoomBtn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #eaffff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.map__zoomBtn:hover,
+.map__zoomBtn:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.map__zoomBtn .material-symbols-rounded {
+  font-size: 20px;
+  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 20;
 }
 
 @media (max-width: 1100px) {
@@ -2173,14 +2211,9 @@
     max-width: 186px;
   }
 
-  .map__cornerLeftBottom {
+  .map__controlRail {
     left: 10px;
-    bottom: 174px;
-  }
-
-  .maplibregl-ctrl-bottom-left {
-    left: 10px !important;
-    bottom: 72px !important;
+    bottom: 72px;
   }
 }
 

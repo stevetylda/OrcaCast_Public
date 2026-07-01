@@ -1,13 +1,6 @@
-import type { H3Resolution } from "../config/dataPaths";
-import { H3ResolutionPill } from "../../features/watch/components/H3ResolutionPill";
-
-type Resolution = H3Resolution;
-
 type Props = {
   title: string;
   subtitle: string;
-  resolution: Resolution;
-  onResolutionChange: (v: Resolution) => void;
   onOpenInfo: () => void;
   onOpenMenu: () => void;
   onBrandClick?: () => void;
@@ -16,8 +9,6 @@ type Props = {
 export function AppHeader({
   title,
   subtitle,
-  resolution,
-  onResolutionChange,
   onOpenInfo,
   onOpenMenu,
   onBrandClick,
@@ -48,14 +39,6 @@ export function AppHeader({
       </div>
 
       <div className="header__right">
-        <H3ResolutionPill
-          value={resolution === "H4" ? 4 : resolution === "H5" ? 5 : 6}
-          onChange={(next) =>
-            onResolutionChange(next === 4 ? "H4" : next === 5 ? "H5" : "H6")
-          }
-          tourId="resolution"
-        />
-
         <button
           className="iconBtn"
           onClick={onOpenInfo}

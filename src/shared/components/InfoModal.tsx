@@ -1,5 +1,6 @@
 import { useEffect, useId } from "react";
 import { Link } from "react-router-dom";
+import { attribution, basemapSources } from "../config/attribution";
 
 type Props = {
   open: boolean;
@@ -89,6 +90,41 @@ export function InfoModal({ open, onClose, onStartTour, darkMode = true }: Props
                 <strong>Compare weeks:</strong> use the forecast period control to move through time.
               </li>
             </ul>
+          </div>
+
+          <div className="modal__section">
+            <div className="modal__sectionTitle">Sources</div>
+            <details className="modal__sources">
+              <summary className="modal__sourcesSummary">
+                <span>Data and basemap attribution</span>
+                <span className="modal__sourcesPreview">{attribution.sources.length} sources</span>
+                <span className="material-symbols-rounded modal__sourcesChevron" aria-hidden="true">
+                  expand_more
+                </span>
+              </summary>
+              <div className="modal__sourcesBody">
+                <div className="modal__sourcesGrid">
+                  <div>
+                    <div className="modal__sourcesGroupTitle">Basemap</div>
+                    <ul className="modal__sourceList">
+                      {basemapSources.map((source) => (
+                        <li key={source}>{source}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="modal__sourcesGroupTitle">Forecast and sightings context</div>
+                    <ul className="modal__sourceList">
+                      {attribution.sources
+                        .filter((source) => !basemapSources.includes(source))
+                        .map((source) => (
+                          <li key={source}>{source}</li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
 
           <div className="modal__stickyWarnings">

@@ -8,6 +8,8 @@ type MapControlsProps = {
   legendOpen: boolean;
   legendSpec: HeatScale | null;
   onLegendToggle: () => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
 };
 
 export const MapControls = memo(function MapControls({
@@ -15,11 +17,13 @@ export const MapControls = memo(function MapControls({
   legendOpen,
   legendSpec,
   onLegendToggle,
+  onZoomIn,
+  onZoomOut,
 }: MapControlsProps) {
   trackRender("MapControls");
   return (
     <>
-      <div className="map__cornerLeftBottom">
+      <div className="map__controlRail">
         <button
           className={`iconBtn legendToggleBtn${!hasForecastLegend ? " legendToggleBtn--disabled" : ""}${
             legendOpen ? " legendToggleBtn--active" : ""
@@ -33,6 +37,18 @@ export const MapControls = memo(function MapControls({
             legend_toggle
           </span>
         </button>
+        <div className="map__zoomStack" aria-label="Map zoom controls">
+          <button type="button" className="map__zoomBtn" onClick={onZoomIn} aria-label="Zoom in">
+            <span className="material-symbols-rounded" aria-hidden="true">
+              add
+            </span>
+          </button>
+          <button type="button" className="map__zoomBtn" onClick={onZoomOut} aria-label="Zoom out">
+            <span className="material-symbols-rounded" aria-hidden="true">
+              remove
+            </span>
+          </button>
+        </div>
       </div>
       {hasForecastLegend && legendOpen && <ProbabilityLegend scale={legendSpec} />}
     </>

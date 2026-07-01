@@ -161,7 +161,7 @@ const ALL_STEPS: TourStepDef[] = [
   {
     id: "legend",
     title: "Probability legend",
-    description: "Explains how to read the heat scale (No probability → Peak).",
+    description: "Explains how to read the heat scale (Not scored → Peak).",
     detail: "Colors are relative within the selected week.",
     targetSelector: '[data-tour="legend"]',
     side: "left",

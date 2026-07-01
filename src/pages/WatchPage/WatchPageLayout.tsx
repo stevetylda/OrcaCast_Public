@@ -36,12 +36,9 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     hotspotsEnabled,
     setHotspotsEnabled,
     hotspotMode,
-    setHotspotMode,
     hotspotPercentile,
-    setHotspotPercentile,
     selectedPaletteId,
     setSelectedPaletteId,
-    hotspotTotalCells,
     setHotspotTotalCells,
     poiFilters,
     setPoiFilters,
@@ -72,19 +69,20 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   const commonHeaderProps = {
     title: "OrcaCast",
     subtitle: "Orca Sightings Forecast",
-    resolution,
-    onResolutionChange: setResolution,
     onOpenInfo: () => controller.setInfoOpen(true),
     onOpenMenu: () => setMenuOpen(true),
     onBrandClick: handleResetMap,
   };
 
   const watchMapShellStyle = useMemo(
-    () =>
-      ({
+    () => {
+      const sidebarOpen = sidebarOffsetPx > 0;
+      return {
         "--week-timeline-left": `${32 + Math.round(sidebarOffsetPx * 0.14)}px`,
-        "--week-timeline-right": `${Math.max(32, sidebarOffsetPx + 24)}px`,
-      }) as CSSProperties,
+        "--week-timeline-right": `${sidebarOpen ? Math.max(32, sidebarOffsetPx + 24) : 32}px`,
+        "--week-timeline-shift": sidebarOpen ? "0px" : "120px",
+      } as CSSProperties;
+    },
     [sidebarOffsetPx]
   );
 
@@ -208,18 +206,12 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             onSelectPlace={(place) => setSelectedPlaceId(place.id)}
             darkMode={darkMode}
             onToggleDarkMode={() => setThemeMode(darkMode ? "light" : "dark")}
+            resolution={resolution}
+            onResolutionChange={setResolution}
             unitsMode={unitsMode}
             onUnitsModeChange={setUnitsMode}
             surfaceMode={surfaceMode}
             onSurfaceModeChange={setSurfaceMode}
-            hotspotsEnabled={hotspotsEnabled}
-            onHotspotsEnabledChange={setHotspotsEnabled}
-            hotspotMode={hotspotMode}
-            onHotspotModeChange={setHotspotMode}
-            hotspotPercentile={hotspotPercentile}
-            onHotspotPercentileChange={setHotspotPercentile}
-            hotspotTotalCells={hotspotTotalCells}
-            hotspotModeledCount={expectedSummary.current}
             poiFilters={poiFilters}
             onTogglePoiAll={() =>
               setPoiFilters((prev) => {
