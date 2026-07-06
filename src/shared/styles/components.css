@@ -1030,7 +1030,7 @@
   background: rgba(8, 18, 44, 0.94);
   box-shadow: var(--teal-glow-soft), var(--shadow);
   color: rgba(234, 242, 255, 0.9);
-  font-family: "Plus Jakarta Sans", "Sora", sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: 12px;
 }
 
@@ -1414,7 +1414,7 @@
   border-radius: 999px;
   background: transparent;
   color: rgba(235, 243, 255, 0.74);
-  font-family: "Plus Jakarta Sans", "Sora", sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -3445,16 +3445,16 @@
 }
 
 .app:not(.app--dark) .footer {
-  --pill-bg: rgba(239, 248, 255, 0.84);
-  --pill-border: rgba(120, 157, 206, 0.52);
-  --pill-hover-bg: rgba(0, 178, 202, 0.14);
-  --pill-hover-border: rgba(0, 178, 202, 0.42);
-  --bar-border: rgba(120, 157, 206, 0.5);
+  --pill-bg: rgba(244, 248, 248, 0.88);
+  --pill-border: rgba(125, 199, 193, 0.42);
+  --pill-hover-bg: rgba(30, 119, 136, 0.12);
+  --pill-hover-border: rgba(30, 119, 136, 0.38);
+  --bar-border: rgba(125, 199, 193, 0.42);
 }
 
 .app:not(.app--dark) .footer__iconPill {
-  background: rgba(239, 248, 255, 0.9);
-  border-color: rgba(120, 157, 206, 0.54);
+  background: rgba(244, 248, 248, 0.92);
+  border-color: rgba(125, 199, 193, 0.46);
 }
 
 .app:not(.app--dark) .footer__iconPillButton {
@@ -3463,8 +3463,8 @@
 
 .app:not(.app--dark) .footer__iconPillButton:hover,
 .app:not(.app--dark) .footer__iconPillButton:focus-visible {
-  background: rgba(0, 178, 202, 0.14);
-  box-shadow: 0 0 0 1px rgba(63, 164, 198, 0.42);
+  background: rgba(30, 119, 136, 0.12);
+  box-shadow: 0 0 0 1px rgba(30, 119, 136, 0.34);
 }
 
 .app:not(.app--dark) .footer__label {
@@ -4120,4 +4120,1188 @@
 .toolbar .toolBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.homePageRoot {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at top left, rgba(85, 163, 221, 0.12), transparent 32%),
+    linear-gradient(180deg, #f6f8fc 0%, #edf3fb 100%);
+}
+
+.app--dark .homePageRoot {
+  background:
+    radial-gradient(circle at top left, rgba(0, 194, 255, 0.12), transparent 32%),
+    linear-gradient(180deg, #071120 0%, #0b182d 100%);
+}
+
+.homePage {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.homeHero {
+  position: relative;
+  min-height: calc(100svh - 64px);
+  padding: clamp(18px, 3vw, 34px);
+  background-image: var(--home-hero-url);
+  background-size: cover;
+  background-position: center 58%;
+}
+
+.homeHero__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 90%, rgba(244, 248, 252, 0.96), rgba(244, 248, 252, 0.74) 28%, rgba(244, 248, 252, 0.24) 52%, transparent 72%),
+    linear-gradient(135deg, rgba(247, 250, 254, 0.92) 0%, rgba(247, 250, 254, 0.6) 26%, rgba(247, 250, 254, 0.18) 56%, rgba(247, 250, 254, 0.02) 84%);
+  pointer-events: none;
+}
+
+.homeHero__overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(248, 251, 255, 0) 0%, rgba(248, 251, 255, 0.04) 34%, rgba(248, 251, 255, 0.22) 58%, rgba(248, 251, 255, 0.58) 78%, rgba(248, 251, 255, 0.9) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  mask-image: linear-gradient(135deg, transparent 12%, rgba(0, 0, 0, 0.2) 36%, rgba(0, 0, 0, 0.68) 66%, #000 100%);
+  -webkit-mask-image: linear-gradient(135deg, transparent 12%, rgba(0, 0, 0, 0.2) 36%, rgba(0, 0, 0, 0.68) 66%, #000 100%);
+}
+
+.app--dark .homeHero__overlay {
+  background:
+    radial-gradient(circle at 10% 90%, rgba(7, 18, 34, 0.96), rgba(7, 18, 34, 0.76) 28%, rgba(7, 18, 34, 0.26) 52%, transparent 72%),
+    linear-gradient(135deg, rgba(7, 17, 32, 0.94) 0%, rgba(7, 17, 32, 0.64) 26%, rgba(7, 17, 32, 0.2) 56%, rgba(7, 17, 32, 0.04) 84%);
+}
+
+.app--dark .homeHero__overlay::before {
+  background: linear-gradient(135deg, rgba(9, 21, 39, 0) 0%, rgba(9, 21, 39, 0.05) 34%, rgba(9, 21, 39, 0.2) 58%, rgba(9, 21, 39, 0.52) 78%, rgba(9, 21, 39, 0.84) 100%);
+}
+
+.homeHero__content {
+  position: relative;
+  z-index: 1;
+  width: min(1880px, calc(100vw - clamp(20px, 4vw, 72px)));
+  margin: 0 auto;
+  display: grid;
+  gap: 24px;
+}
+
+.homeHero__copy {
+  padding: clamp(26px, 4vw, 54px) clamp(12px, 1.2vw, 18px) 0;
+  max-width: 760px;
+}
+
+.homeHero__eyebrow {
+  margin: 0 0 10px;
+  color: rgba(15, 57, 98, 0.72);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.app--dark .homeHero__eyebrow {
+  color: rgba(186, 225, 255, 0.72);
+}
+
+.homeHero__title {
+  margin: 0;
+  max-width: none;
+  color: #102d63;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+  font-size: clamp(46px, 6.2vw, 78px);
+  font-weight: 700;
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+}
+
+.homeHero__title span {
+  display: block;
+}
+
+.app--dark .homeHero__title {
+  color: rgba(239, 246, 255, 0.96);
+}
+
+.homeHero__body {
+  margin: 18px 0 0;
+  max-width: 30ch;
+  color: rgba(19, 55, 96, 0.82);
+  font-size: clamp(21px, 2.2vw, 28px);
+  line-height: 1.28;
+}
+
+.app--dark .homeHero__body {
+  color: rgba(215, 233, 255, 0.8);
+}
+
+.homeFeatureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.homeFeatureCard {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 18px 28px 20px;
+  border-radius: 30px;
+  border: 1px solid rgba(146, 184, 220, 0.24);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 22px 64px rgba(28, 56, 98, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.app--dark .homeFeatureCard {
+  border-color: rgba(148, 212, 232, 0.18);
+  background: rgba(7, 21, 39, 0.78);
+  box-shadow:
+    0 22px 64px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.homeFeatureCard--comingSoon {
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 16px 48px rgba(28, 56, 98, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.homeFeatureCard--comingSoon .homeFeatureCard__iconWrap,
+.homeFeatureCard--comingSoon .homeFeatureCard__title,
+.homeFeatureCard--comingSoon .homeFeatureCard__body,
+.homeFeatureCard--comingSoon .homeFeatureCard__visual {
+  opacity: 0.82;
+}
+
+.homeFeatureCard--comingSoon .homeFeatureCard__visual {
+  filter: saturate(0.84);
+}
+
+.app--dark .homeFeatureCard--comingSoon {
+  background: rgba(7, 21, 39, 0.66);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.homeFeatureCard__iconWrap {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(237, 244, 255, 0.98), rgba(228, 237, 252, 0.9));
+  color: #1e63db;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.homeFeatureCard__ribbon {
+  position: absolute;
+  top: 26px;
+  right: -54px;
+  z-index: 2;
+  min-width: 220px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  transform: rotate(32deg);
+  background: linear-gradient(135deg, #ffe36b, #f4c623);
+  color: #4b3900;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow:
+    0 12px 22px rgba(138, 106, 8, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+}
+
+.app--dark .homeFeatureCard__iconWrap {
+  background: linear-gradient(180deg, rgba(18, 39, 73, 0.96), rgba(10, 27, 51, 0.92));
+}
+
+.homeFeatureCard--trip .homeFeatureCard__iconWrap {
+  color: #1f67e8;
+}
+
+.homeFeatureCard--best .homeFeatureCard__iconWrap {
+  color: #0c8c97;
+}
+
+.homeFeatureCard--outlook .homeFeatureCard__iconWrap {
+  color: #6b55d6;
+}
+
+.homeFeatureCard__iconWrap .material-symbols-rounded {
+  font-size: 40px;
+}
+
+.homeFeatureCard__title {
+  margin: 0;
+  color: #0f4fd8;
+  font-size: clamp(24px, 2.5vw, 33px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+.homeFeatureCard--best .homeFeatureCard__title {
+  color: #0d8a96;
+}
+
+.homeFeatureCard--outlook .homeFeatureCard__title {
+  color: #6850d0;
+}
+
+.app--dark .homeFeatureCard__title {
+  color: rgba(240, 246, 255, 0.96);
+}
+
+.homeFeatureCard__body {
+  margin: 0;
+  color: rgba(31, 53, 92, 0.84);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.app--dark .homeFeatureCard__body {
+  color: rgba(212, 228, 248, 0.76);
+}
+
+.homeFeatureCard__visual {
+  min-height: 188px;
+  display: grid;
+  align-items: stretch;
+}
+
+.homeMiniMapCard,
+.homeMiniChart,
+.homeMiniOutlookMap {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  border: 1px solid rgba(158, 193, 229, 0.2);
+  background: rgba(245, 249, 255, 0.76);
+}
+
+.app--dark .homeMiniMapCard,
+.app--dark .homeMiniChart,
+.app--dark .homeMiniOutlookMap {
+  border-color: rgba(151, 204, 226, 0.14);
+  background: rgba(12, 24, 42, 0.72);
+}
+
+.homeMiniMapCard {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(248, 251, 255, 0.56)),
+    radial-gradient(circle at 35% 40%, rgba(112, 202, 255, 0.16), transparent 34%),
+    linear-gradient(135deg, #dcebfb, #cfe1f8 48%, #eaf3fe);
+}
+
+.app--dark .homeMiniMapCard {
+  background:
+    linear-gradient(180deg, rgba(11, 23, 40, 0.82), rgba(8, 18, 34, 0.6)),
+    radial-gradient(circle at 35% 40%, rgba(112, 202, 255, 0.12), transparent 34%),
+    linear-gradient(135deg, #0d1f35, #132843 48%, #142c47);
+}
+
+.homeMiniMapCard__details {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #204375;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 14px 32px rgba(41, 80, 130, 0.12);
+}
+
+.app--dark .homeMiniMapCard__details {
+  background: rgba(15, 30, 54, 0.9);
+  color: rgba(230, 240, 255, 0.92);
+}
+
+.homeMiniMapCard__viewport {
+  position: absolute;
+  inset: 18px;
+  border-radius: 26px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
+    url("/images/home/san-juans-basemap-light.png");
+  background-size: cover;
+  background-position: center center;
+  border: 1px solid rgba(170, 202, 231, 0.18);
+}
+
+.app--dark .homeMiniMapCard__viewport {
+  background:
+    linear-gradient(180deg, rgba(7, 18, 34, 0.1), rgba(7, 18, 34, 0.22)),
+    url("/images/home/san-juans-basemap-light.png");
+  background-size: cover;
+  background-position: center center;
+  border-color: rgba(124, 170, 203, 0.2);
+  filter: saturate(0.78) brightness(0.76);
+}
+
+.homeMiniMapCard__star {
+  position: absolute;
+  left: 46%;
+  top: 48%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 10px 18px rgba(32, 67, 117, 0.24));
+}
+
+.homeMiniMapCard__star::before {
+  content: "star";
+  font-family: "Material Symbols Rounded";
+  font-size: 28px;
+  line-height: 1;
+  color: #f0c93f;
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 600,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.app--dark .homeMiniMapCard__star {
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.34));
+}
+
+.app--dark .homeMiniMapCard__star::before {
+  color: #ffd65c;
+}
+
+.homeMiniChart {
+  display: grid;
+  align-content: end;
+  padding: 18px 18px 22px;
+}
+
+.homeMiniChart__label {
+  justify-self: end;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(183, 231, 238, 0.74);
+  color: #2a8694;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.app--dark .homeMiniChart__label {
+  background: rgba(18, 82, 92, 0.66);
+  color: rgba(212, 245, 248, 0.94);
+}
+
+.homeMiniChart__bars {
+  height: 150px;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+}
+
+.homeMiniChart__bar {
+  height: calc(var(--bar-scale) * 100%);
+  min-height: 26px;
+  border-radius: 14px 14px 4px 4px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #dff5f6 calc((1 - var(--bar-strength)) * 100%), #4cb8c4 calc(var(--bar-strength) * 100%)) 0%,
+      color-mix(in srgb, #c7eef0 calc((1 - var(--bar-strength)) * 100%), #249ca8 calc(var(--bar-strength) * 100%)) 100%
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.homeMiniChart__bar.isActive {
+  background: linear-gradient(180deg, #66d7de, #139daa);
+  box-shadow:
+    0 12px 24px rgba(19, 157, 170, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.app--dark .homeMiniChart__bar {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #17384f calc((1 - var(--bar-strength)) * 100%), #5fd2dc calc(var(--bar-strength) * 100%)) 0%,
+      color-mix(in srgb, #0f2c42 calc((1 - var(--bar-strength)) * 100%), #1aa5b1 calc(var(--bar-strength) * 100%)) 100%
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.app--dark .homeMiniChart__bar.isActive {
+  background: linear-gradient(180deg, #72e1e8, #1aa6b2);
+  box-shadow:
+    0 14px 28px rgba(15, 179, 194, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.homeMiniOutlookMap {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+    url("/images/home/san-juans-basemap-light.png");
+  background-size: cover;
+  background-position: center center;
+}
+
+.app--dark .homeMiniOutlookMap {
+  background:
+    linear-gradient(180deg, rgba(7, 18, 34, 0.06), rgba(7, 18, 34, 0.14)),
+    url("/images/home/san-juans-basemap-light.png");
+  background-size: cover;
+  background-position: center center;
+  filter: saturate(0.86) brightness(0.72);
+}
+
+.homeMiniOutlookMap__hotspot {
+  position: absolute;
+  left: 51%;
+  top: 46%;
+  width: 184px;
+  height: 184px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle, rgba(41, 230, 209, 0.86) 0%, rgba(41, 230, 209, 0.5) 26%, rgba(41, 230, 209, 0.22) 48%, rgba(41, 230, 209, 0.08) 62%, transparent 78%);
+  filter: blur(1.4px);
+}
+
+.homeMiniOutlookMap__badge {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(31, 73, 96, 0.88);
+  color: rgba(244, 252, 255, 0.96);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  box-shadow: 0 14px 26px rgba(30, 86, 109, 0.22);
+}
+
+.homeMiniOutlookMap__badge::before {
+  content: "star";
+  font-family: "Material Symbols Rounded";
+  font-size: 22px;
+  line-height: 1;
+  color: #ffd34c;
+  font-variation-settings:
+    "FILL" 1,
+    "wght" 600,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.app--dark .homeMiniOutlookMap__badge {
+  background: rgba(15, 30, 54, 0.92);
+  color: rgba(203, 245, 244, 0.94);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.22);
+}
+
+.app--dark .homeMiniOutlookMap__badge::before {
+  color: #44d7d0;
+}
+
+.homeMiniOutlookMap__places {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.homeMiniOutlookMap__placeRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 12px 24px rgba(39, 80, 118, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.app--dark .homeMiniOutlookMap__placeRow {
+  background: rgba(14, 28, 49, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.homeMiniOutlookMap__placeIcon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(230, 246, 241, 0.96);
+  color: #35ab66;
+  font-size: 22px;
+}
+
+.homeMiniOutlookMap__placeRow:nth-child(2) .homeMiniOutlookMap__placeIcon {
+  background: rgba(232, 241, 255, 0.98);
+  color: #2e8bed;
+}
+
+.app--dark .homeMiniOutlookMap__placeIcon {
+  background: rgba(24, 46, 69, 0.96);
+  color: #7bd79a;
+}
+
+.app--dark .homeMiniOutlookMap__placeRow:nth-child(2) .homeMiniOutlookMap__placeIcon {
+  background: rgba(22, 42, 66, 0.96);
+  color: #73b4ff;
+}
+
+.homeMiniOutlookMap__placeName {
+  color: #21395f;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.homeMiniOutlookMap__placeMeta {
+  min-width: 58px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.homeMiniOutlookMap__placeMeta--high {
+  background: rgba(189, 241, 232, 0.94);
+  color: #168f8d;
+}
+
+.homeMiniOutlookMap__placeMeta--med {
+  background: rgba(255, 237, 189, 0.94);
+  color: #be8a17;
+}
+
+.app--dark .homeMiniOutlookMap__placeName {
+  color: rgba(231, 240, 251, 0.94);
+}
+
+.app--dark .homeMiniOutlookMap__placeMeta--high {
+  background: rgba(24, 88, 85, 0.92);
+  color: rgba(162, 243, 230, 0.96);
+}
+
+.app--dark .homeMiniOutlookMap__placeMeta--med {
+  background: rgba(102, 79, 28, 0.9);
+  color: rgba(255, 226, 150, 0.96);
+}
+
+.homeFeatureCard__cta {
+  min-height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: auto;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1466ef, #1d4dd8);
+  color: #f7fbff;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 18px 36px rgba(20, 102, 239, 0.26);
+}
+
+.homeFeatureCard--best .homeFeatureCard__cta {
+  background: linear-gradient(135deg, #17b2be, #0b8f9b);
+  box-shadow: 0 18px 36px rgba(11, 143, 155, 0.22);
+}
+
+.homeFeatureCard--outlook .homeFeatureCard__cta {
+  background: linear-gradient(135deg, #b3a0ef, #8f79df);
+  box-shadow: 0 18px 36px rgba(143, 121, 223, 0.22);
+}
+
+.homeFeatureCard__cta:hover,
+.homeFeatureCard__cta:focus-visible {
+  outline: none;
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.homeFeatureCard__cta--disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: saturate(0.72);
+  box-shadow: none;
+}
+
+
+
+/* Home planner card: make the homepage preview feel like the real planner page. */
+.homeFeatureCard--trip {
+  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-areas:
+    "icon title"
+    "icon body"
+    "visual visual"
+    "cta cta";
+  column-gap: 18px;
+  row-gap: 14px;
+  border-color: rgba(38, 164, 169, 0.24);
+  background:
+    radial-gradient(circle at 82% 18%, rgba(67, 218, 209, 0.13), transparent 34%),
+    rgba(255, 255, 255, 0.86);
+}
+
+.app--dark .homeFeatureCard--trip {
+  border-color: rgba(91, 231, 221, 0.18);
+  background:
+    radial-gradient(circle at 82% 18%, rgba(67, 218, 209, 0.12), transparent 34%),
+    rgba(7, 21, 39, 0.78);
+}
+
+.homeFeatureCard--trip .homeFeatureCard__iconWrap {
+  grid-area: icon;
+  width: 84px;
+  height: 84px;
+  border-radius: 26px;
+  color: #087e8a;
+  background:
+    linear-gradient(180deg, rgba(238, 253, 251, 0.98), rgba(221, 244, 241, 0.92));
+  box-shadow:
+    0 14px 28px rgba(17, 126, 138, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.app--dark .homeFeatureCard--trip .homeFeatureCard__iconWrap {
+  color: #83ede6;
+  background:
+    linear-gradient(180deg, rgba(18, 58, 70, 0.96), rgba(11, 35, 54, 0.94));
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.homeFeatureCard--trip .homeFeatureCard__title {
+  grid-area: title;
+  align-self: end;
+  color: #102d63;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+  font-size: clamp(30px, 3.15vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+.app--dark .homeFeatureCard--trip .homeFeatureCard__title {
+  color: rgba(239, 246, 255, 0.98);
+}
+
+.homeFeatureCard--trip .homeFeatureCard__body {
+  grid-area: body;
+  align-self: start;
+  max-width: 38ch;
+  color: rgba(25, 55, 91, 0.82);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.app--dark .homeFeatureCard--trip .homeFeatureCard__body {
+  color: rgba(216, 236, 247, 0.82);
+}
+
+.homeFeatureCard--trip .homeFeatureCard__visual {
+  grid-area: visual;
+  min-height: 318px;
+}
+
+.homeFeatureCard--trip .homeFeatureCard__cta {
+  grid-area: cta;
+}
+
+.homePlannerPreview {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 26px;
+  border: 1px solid rgba(151, 194, 222, 0.42);
+  background: rgba(248, 253, 255, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 16px 34px rgba(25, 73, 104, 0.1);
+}
+
+.app--dark .homePlannerPreview {
+  border-color: rgba(104, 183, 203, 0.28);
+  background: rgba(10, 24, 42, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 34px rgba(0, 0, 0, 0.24);
+}
+
+.homePlannerPreview__map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 25px;
+  background:
+    linear-gradient(180deg, rgba(8, 24, 42, 0.04), rgba(8, 24, 42, 0.18)),
+    linear-gradient(90deg, rgba(7, 24, 42, 0.78), rgba(17, 70, 84, 0.42)),
+    url("/images/home/san-juans-basemap-light.png");
+  background-size: cover;
+  background-position: center center;
+}
+
+.homePlannerPreview__map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 50% 52%, rgba(38, 236, 218, 0.22), transparent 26%),
+    radial-gradient(circle at 72% 38%, rgba(38, 236, 218, 0.16), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%, rgba(5, 20, 36, 0.14));
+  pointer-events: none;
+}
+
+.homePlannerPreview__map::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 34%, rgba(5, 22, 38, 0.08)),
+    radial-gradient(circle at 52% 56%, rgba(47, 227, 214, 0.22), transparent 32%);
+  pointer-events: none;
+}
+
+.homePlannerPreview__hexLayer {
+  position: absolute;
+  z-index: 1;
+  inset: -16px;
+  opacity: 0.16;
+  background:
+    linear-gradient(30deg, rgba(5, 18, 35, 0.44) 12%, transparent 12.5%, transparent 87%, rgba(5, 18, 35, 0.44) 87.5%, rgba(5, 18, 35, 0.44)),
+    linear-gradient(150deg, rgba(5, 18, 35, 0.44) 12%, transparent 12.5%, transparent 87%, rgba(5, 18, 35, 0.44) 87.5%, rgba(5, 18, 35, 0.44)),
+    linear-gradient(30deg, rgba(5, 18, 35, 0.44) 12%, transparent 12.5%, transparent 87%, rgba(5, 18, 35, 0.44) 87.5%, rgba(5, 18, 35, 0.44)),
+    linear-gradient(150deg, rgba(5, 18, 35, 0.44) 12%, transparent 12.5%, transparent 87%, rgba(5, 18, 35, 0.44) 87.5%, rgba(5, 18, 35, 0.44)),
+    linear-gradient(60deg, rgba(255, 255, 255, 0.08) 25%, transparent 25.5%, transparent 75%, rgba(255, 255, 255, 0.08) 75%, rgba(255, 255, 255, 0.08));
+  background-position: 0 0, 0 0, 19px 33px, 19px 33px, 0 0;
+  background-size: 38px 66px;
+  mix-blend-mode: multiply;
+}
+
+.homePlannerPreview__range {
+  position: absolute;
+  left: 61%;
+  bottom: -36px;
+  z-index: 1;
+  width: 178px;
+  height: 178px;
+  border: 2px dashed rgba(71, 224, 213, 0.66);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(54, 219, 209, 0.035);
+  box-shadow: 0 0 36px rgba(40, 214, 202, 0.12);
+}
+
+.homePlannerPreview__range span {
+  position: absolute;
+  right: 22px;
+  top: 46px;
+  color: rgba(180, 252, 246, 0.9);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 8px rgba(4, 22, 36, 0.75);
+  transform: rotate(-14deg);
+}
+
+.homePlannerPreview__waterGlow {
+  position: absolute;
+  z-index: 1;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(39, 236, 219, 0.44) 0%, rgba(39, 236, 219, 0.18) 36%, transparent 72%);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.homePlannerPreview__waterGlow--one {
+  left: 42%;
+  top: 44%;
+}
+
+.homePlannerPreview__waterGlow--two {
+  right: 17%;
+  top: 30%;
+}
+
+.homePlannerPreview__waterGlow--three {
+  left: 24%;
+  bottom: 22px;
+}
+
+.homePlannerPreview__mapLabel {
+  position: absolute;
+  z-index: 1;
+  color: rgba(236, 246, 250, 0.72);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.05;
+  text-shadow: 0 1px 9px rgba(4, 18, 31, 0.74);
+  pointer-events: none;
+}
+
+.homePlannerPreview__mapLabel--victoria {
+  left: 7%;
+  top: 44%;
+}
+
+.homePlannerPreview__mapLabel--portAngeles {
+  left: 22%;
+  bottom: 62px;
+}
+
+.homePlannerPreview__mapLabel--sequim {
+  right: 24%;
+  bottom: 20px;
+}
+
+.homePlannerPreview__mapLabel--sanJuan {
+  left: 52%;
+  top: 28%;
+  max-width: 70px;
+}
+
+.homePlannerPreview__mapLabel--friday {
+  left: 56%;
+  top: 18%;
+}
+
+.homePlannerPreview__tripCard {
+  position: absolute;
+  left: 18px;
+  top: 22px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  width: min(270px, calc(100% - 36px));
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(201, 224, 237, 0.62);
+  background: rgba(255, 255, 255, 0.92);
+  color: #12325f;
+  box-shadow:
+    0 18px 32px rgba(5, 25, 47, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.homePlannerPreview__tripCard strong,
+.homePlannerPreview__tripCard span:not(.material-symbols-rounded) {
+  display: block;
+}
+
+.homePlannerPreview__tripCard strong {
+  margin-bottom: 6px;
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.homePlannerPreview__tripCard span:not(.material-symbols-rounded) {
+  color: rgba(18, 50, 95, 0.86);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.homePlannerPreview__tripIcon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(220, 248, 245, 0.94);
+  color: #108c96;
+  font-size: 25px;
+}
+
+.homePlannerPreview__placePin {
+  position: absolute;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 2px solid #20cdc5;
+  background: rgba(250, 255, 255, 0.97);
+  color: #0e7e8a;
+  font-size: 21px;
+  box-shadow:
+    0 12px 22px rgba(6, 32, 50, 0.28),
+    0 0 20px rgba(49, 230, 216, 0.34);
+}
+
+
+.homePlannerPreview__placePin--image img {
+  width: 22px;
+  height: 22px;
+  display: block;
+  object-fit: contain;
+}
+
+.homePlannerPreview__placePin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 16px;
+  height: 16px;
+  transform: translateX(-50%) rotate(45deg);
+  border-right: 2px solid #20cdc5;
+  border-bottom: 2px solid #20cdc5;
+  border-radius: 0 0 4px 0;
+  background: rgba(250, 255, 255, 0.97);
+  z-index: -1;
+}
+
+.homePlannerPreview__placePin--one {
+  left: 45%;
+  bottom: 58px;
+}
+
+.homePlannerPreview__placePin--two {
+  right: 16%;
+  top: 46%;
+}
+
+.homePlannerPreview__placePin--three {
+  right: 24%;
+  bottom: 28px;
+}
+
+.homePlannerPreview__placePin--four {
+  left: 54%;
+  top: 30%;
+}
+
+.homePlannerPreview__placePin--five {
+  right: 18%;
+  top: 26%;
+}
+
+.homePlannerPreview__placePin--six {
+  left: 28%;
+  bottom: 34px;
+}
+
+.homePlannerPreview__activityBadge {
+  position: absolute;
+  right: 18px;
+  top: 106px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+  min-width: 158px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(200, 225, 237, 0.64);
+  background: rgba(255, 255, 255, 0.92);
+  color: #143564;
+  box-shadow:
+    0 16px 28px rgba(7, 35, 56, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.homePlannerPreview__activityBadge .material-symbols-rounded {
+  grid-row: span 2;
+  color: #138b95;
+  font-size: 28px;
+}
+
+.homePlannerPreview__activityBadge span:not(.material-symbols-rounded) {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: rgba(20, 53, 100, 0.74);
+  text-transform: none;
+}
+
+.homePlannerPreview__activityBadge strong {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.app--dark .homePlannerPreview__map {
+  background:
+    linear-gradient(180deg, rgba(5, 18, 33, 0.08), rgba(5, 18, 33, 0.34)),
+    linear-gradient(90deg, rgba(5, 18, 33, 0.88), rgba(17, 62, 76, 0.58)),
+    url("/images/home/san-juans-basemap-light.png");
+  background-size: cover;
+  background-position: center center;
+}
+
+.app--dark .homePlannerPreview__tripCard,
+.app--dark .homePlannerPreview__activityBadge {
+  border-color: rgba(109, 178, 201, 0.32);
+  background: rgba(12, 28, 48, 0.9);
+  color: rgba(236, 247, 255, 0.96);
+  box-shadow:
+    0 18px 32px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.app--dark .homePlannerPreview__tripCard span:not(.material-symbols-rounded),
+.app--dark .homePlannerPreview__activityBadge span:not(.material-symbols-rounded) {
+  color: rgba(219, 237, 249, 0.78);
+}
+
+.app--dark .homePlannerPreview__tripIcon {
+  background: rgba(24, 74, 83, 0.8);
+  color: #80ede6;
+}
+
+
+.homeFeatureCard--trip .homeFeatureCard__cta {
+  min-height: 64px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(33, 140, 148, 0.96), rgba(12, 105, 116, 0.98)),
+    radial-gradient(circle at 20% 0%, rgba(117, 245, 231, 0.2), transparent 46%);
+  box-shadow:
+    0 20px 38px rgba(12, 105, 116, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.homeFeatureCard--trip .homeFeatureCard__ctaIcon {
+  font-size: 24px;
+}
+
+.homeFeatureCard--trip .homeFeatureCard__ctaIcon--image {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+@media (max-width: 1200px) {
+  .homeFeatureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .homeHero__copy {
+    max-width: none;
+  }
+
+}
+
+@media (max-width: 760px) {
+  .homeHero {
+    padding: 12px;
+  }
+
+  .homeHero__content {
+    width: 100%;
+  }
+
+  .homeHero__copy {
+    padding: 18px 8px 0;
+  }
+
+  .homeHero__title {
+    font-size: clamp(42px, 15vw, 62px);
+  }
+
+  .homeHero__body {
+    font-size: 18px;
+  }
+
+  .homeFeatureCard {
+    padding: 16px 20px 18px;
+    border-radius: 24px;
+  }
+
+  .homeMiniForecast {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .homeFeatureCard--trip {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "icon"
+      "title"
+      "body"
+      "visual"
+      "cta";
+  }
+
+  .homeFeatureCard--trip .homeFeatureCard__title {
+    font-size: clamp(34px, 12vw, 44px);
+  }
+
+  .homeFeatureCard--trip .homeFeatureCard__visual {
+    min-height: 244px;
+  }
+
+  .homePlannerPreview {
+    min-height: 244px;
+  }
+
+  .homePlannerPreview__tripCard {
+    left: 12px;
+    top: 12px;
+    width: min(248px, calc(100% - 24px));
+    padding: 12px 14px;
+  }
+
+  .homePlannerPreview__activityBadge,
+  .homePlannerPreview__placePin--four,
+  .homePlannerPreview__placePin--five {
+    display: none;
+  }
 }

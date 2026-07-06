@@ -1,24 +1,14 @@
 import { useEffect, useState } from "react";
-import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
+import type { FeatureCollection, Geometry, Position } from "geojson";
 import type { H3Resolution } from "../../../shared/config/dataPaths";
 import { loadForecast, loadGrid } from "../../../shared/data/forecastIO";
 import { getH3CellId } from "../../../shared/data/h3";
-import type { PoiType, SuggestedPlace, ViewingPotential } from "../../locations/types";
+import type { SuggestedPlace, ViewingPotential } from "../../locations/types";
+import { loadPoiDataBundle, type PoiFilters, type PublicPoi } from "../../locations/poiData";
 
-type RawPoi = {
-  type: PoiType;
-  name: string;
-  latitude: number;
-  longitude: number;
-  region?: string;
-  hasLiveFeed?: boolean;
-  hasHydrophone?: boolean;
-};
-
-type TopForecastCell = {
+type ForecastCellScore = {
   value: number;
   center: [number, number];
-  geometry: Geometry;
 };
 
 type UseSuggestedPlacesArgs = {
@@ -26,8 +16,12 @@ type UseSuggestedPlacesArgs = {
   modelId: string;
   forecastPath?: string;
   fallbackForecastPath?: string;
+  externalValues?: Record<string, number>;
   enabled?: boolean;
-  limit?: number;
+  limit?: number | null;
+  poiFilters?: PoiFilters;
+  baseLocation?: { latitude: number; longitude: number } | null;
+  maxTravelDistanceMiles?: number | null;
 };
 
 type UseSuggestedPlacesResult = {
@@ -36,30 +30,72 @@ type UseSuggestedPlacesResult = {
   error: string | null;
 };
 
-const TOP_FORECAST_FRACTION = 0.1;
-const MAX_TOP_CELLS = 350;
-const NEARBY_RADIUS_KM = 22;
-const FALLBACK_RADIUS_KM = 120;
-const DEFAULT_LIMIT = 10;
+type PlannerPoiMetadata = {
+  reason?: string;
+  scoreBoost?: number;
+  photoSpotId?: string;
+};
 
-function normalizePoiType(value: unknown): PoiType {
-  const normalized = String(value ?? "").trim().toLowerCase();
-  if (normalized === "park") return "Park";
-  if (normalized === "marina") return "Marina";
-  if (normalized === "ferry") return "Ferry";
-  return "Other";
-}
+const TOP_LOCATION_FRACTION = 0.05;
+const POI_SCORE_RADIUS_KM = 16.0934; // 10 miles.
+const DEFAULT_RECOMMENDATION_RADIUS_MILES = 175;
+const MILES_TO_KM = 1.609344;
+
+// Optional display/ranking metadata only. These records never introduce independent coordinates.
+// Coordinates always come from data/places_of_interest.json via loadPoiData().
+const PLANNER_POI_METADATA: Record<string, PlannerPoiMetadata> = {
+  "lime-kiln-point-state-park": {
+    reason: "Classic shore-based spot with frequent sightings.",
+    scoreBoost: 0.22,
+  },
+  "lime-kiln-point": {
+    photoSpotId: "lime-kiln-point-state-park",
+  },
+  "fort-worden-state-park": {
+    reason: "Broad views with nearby active waters.",
+    scoreBoost: 0.12,
+  },
+  "alki-beach": {
+    reason: "Accessible shoreline with wide views.",
+    scoreBoost: 0.02,
+  },
+  "bush-point": {
+    reason: "Peaceful viewpoint near active waters.",
+    scoreBoost: 0.06,
+  },
+  "blind-island": {
+    reason: "Close to strong orca corridors.",
+    scoreBoost: 0.18,
+  },
+};
 
 function normalizeId(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "") || "place";
+  return (
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "place"
+  );
 }
 
-function toPlaceId(poi: RawPoi) {
+function enrichPlannerPoi(poi: PublicPoi): PublicPoi {
+  const metadata = PLANNER_POI_METADATA[normalizeId(poi.name)];
+  if (!metadata) return poi;
+  return {
+    ...poi,
+    reason: poi.reason ?? metadata.reason,
+    scoreBoost: poi.scoreBoost ?? metadata.scoreBoost,
+  };
+}
+
+function getPlannerSpotId(poi: PublicPoi) {
+  const normalizedName = normalizeId(poi.name);
+  return PLANNER_POI_METADATA[normalizedName]?.photoSpotId ?? normalizedName;
+}
+
+function toPlaceId(poi: PublicPoi) {
   return `${normalizeId(poi.name)}-${poi.latitude.toFixed(4)}-${poi.longitude.toFixed(4)}`;
 }
 
@@ -85,52 +121,20 @@ function geometryCenter(geometry: Geometry | null | undefined): [number, number]
   return [sum.lon / valid.length, sum.lat / valid.length];
 }
 
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
 function haversineKm(a: [number, number], b: [number, number]) {
-  const toRad = (value: number) => (value * Math.PI) / 180;
   const earthRadiusKm = 6371.0088;
-  const dLat = toRad(b[1] - a[1]);
-  const dLon = toRad(b[0] - a[0]);
-  const lat1 = toRad(a[1]);
-  const lat2 = toRad(b[1]);
+  const lat1 = toRadians(a[1]);
+  const lat2 = toRadians(b[1]);
+  const deltaLat = toRadians(b[1] - a[1]);
+  const deltaLon = toRadians(b[0] - a[0]);
   const h =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2;
   return 2 * earthRadiusKm * Math.asin(Math.min(1, Math.sqrt(h)));
-}
-
-function pointInRing(point: [number, number], ring: Position[]) {
-  const [x, y] = point;
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const xi = Number(ring[i]?.[0]);
-    const yi = Number(ring[i]?.[1]);
-    const xj = Number(ring[j]?.[0]);
-    const yj = Number(ring[j]?.[1]);
-    const crosses = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi;
-    if (crosses) inside = !inside;
-  }
-  return inside;
-}
-
-function pointInPolygonGeometry(point: [number, number], geometry: Geometry) {
-  if (geometry.type === "Polygon") {
-    const [outer, ...holes] = geometry.coordinates;
-    if (!outer || !pointInRing(point, outer)) return false;
-    return !holes.some((hole) => pointInRing(point, hole));
-  }
-  if (geometry.type === "MultiPolygon") {
-    return geometry.coordinates.some(([outer, ...holes]) => {
-      if (!outer || !pointInRing(point, outer)) return false;
-      return !holes.some((hole) => pointInRing(point, hole));
-    });
-  }
-  return false;
-}
-
-function formatDistanceKm(value: number) {
-  if (!Number.isFinite(value)) return "nearby";
-  if (value < 1) return "less than 1 km";
-  return `${Math.round(value)} km`;
 }
 
 function toViewingPotential(score: number): ViewingPotential {
@@ -139,168 +143,206 @@ function toViewingPotential(score: number): ViewingPotential {
   return "low";
 }
 
-async function loadPoiData(): Promise<RawPoi[]> {
-  const base = import.meta.env.BASE_URL || "/";
-  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
-  const candidates = Array.from(
-    new Set([
-      `${normalizedBase}data/places_of_interest.json`,
-      "/data/places_of_interest.json",
-      "data/places_of_interest.json",
-    ])
-  );
-
-  for (const url of candidates) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) continue;
-      const payload = (await response.json()) as
-        | { items?: Array<Record<string, unknown>> }
-        | Array<Record<string, unknown>>
-        | { features?: Array<Feature> };
-
-      const items = Array.isArray(payload)
-        ? payload
-        : "items" in payload && Array.isArray(payload.items)
-          ? payload.items
-          : "features" in payload && Array.isArray(payload.features)
-            ? payload.features.map((feature) => {
-                const props = feature.properties ?? {};
-                const coordinates = feature.geometry?.type === "Point" ? feature.geometry.coordinates : geometryCenter(feature.geometry);
-                return {
-                  type: props["type"] ?? props["category"],
-                  name: props["name"] ?? "POI",
-                  latitude: coordinates ? Number(coordinates[1]) : Number.NaN,
-                  longitude: coordinates ? Number(coordinates[0]) : Number.NaN,
-                  region: props["region"],
-                  hasLiveFeed: props["hasLiveFeed"] ?? props["liveCameraUrl"] ?? props["live_feed_url"],
-                  hasHydrophone: props["hasHydrophone"] ?? props["hydrophoneUrl"] ?? props["hydrophone_url"],
-                };
-              })
-            : [];
-
-      const rawItems = items as Array<Record<string, unknown>>;
-
-      return rawItems
-        .map((item) => ({
-          type: normalizePoiType(item["type"] ?? item["category"]),
-          name: String(item["name"] ?? "POI"),
-          latitude: Number(item["latitude"]),
-          longitude: Number(item["longitude"]),
-          region: typeof item["region"] === "string" ? item["region"] : undefined,
-          hasLiveFeed: Boolean(item["hasLiveFeed"] ?? item["liveCameraUrl"] ?? item["live_feed_url"]),
-          hasHydrophone: Boolean(item["hasHydrophone"] ?? item["hydrophoneUrl"] ?? item["hydrophone_url"]),
-        }))
-        .filter((poi) =>
-          poi.type !== "Other" &&
-          poi.name.trim().length > 0 &&
-          Number.isFinite(poi.latitude) &&
-          Number.isFinite(poi.longitude)
-        );
-    } catch {
-      // Try next candidate URL.
-    }
-  }
-
-  return [];
+function poiLocationKey(poi: PublicPoi) {
+  return `${poi.type}:${normalizeId(poi.name)}:${poi.latitude.toFixed(6)}:${poi.longitude.toFixed(6)}`;
 }
 
-function buildTopForecastCells(grid: FeatureCollection, values: Record<string, number>): TopForecastCell[] {
-  const positiveValues = Object.values(values)
-    .map(Number)
-    .filter((value) => Number.isFinite(value) && value > 0)
-    .sort((a, b) => b - a);
+function dedupePoiLocations(pois: PublicPoi[]) {
+  const seen = new Set<string>();
+  const deduped: PublicPoi[] = [];
+  for (const poi of pois) {
+    if (!Number.isFinite(poi.latitude) || !Number.isFinite(poi.longitude)) continue;
+    const key = poiLocationKey(poi);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(poi);
+  }
+  return deduped;
+}
 
-  if (positiveValues.length === 0) return [];
+function filterPoisByBaseRadius(
+  pois: PublicPoi[],
+  baseLocation?: { latitude: number; longitude: number } | null,
+  maxTravelDistanceMiles?: number | null
+) {
+  if (!baseLocation || !Number.isFinite(baseLocation.latitude) || !Number.isFinite(baseLocation.longitude)) return pois;
 
-  const topCount = Math.max(1, Math.min(MAX_TOP_CELLS, Math.ceil(positiveValues.length * TOP_FORECAST_FRACTION)));
-  const threshold = positiveValues[topCount - 1] ?? positiveValues[0];
+  const radiusMiles =
+    typeof maxTravelDistanceMiles === "number" && Number.isFinite(maxTravelDistanceMiles) && maxTravelDistanceMiles > 0
+      ? maxTravelDistanceMiles
+      : DEFAULT_RECOMMENDATION_RADIUS_MILES;
+  const radiusKm = radiusMiles * MILES_TO_KM;
+  const basePoint: [number, number] = [baseLocation.longitude, baseLocation.latitude];
 
+  return pois.filter((poi) => haversineKm(basePoint, [poi.longitude, poi.latitude]) <= radiusKm);
+}
+
+function buildForecastCellScores(grid: FeatureCollection, values: Record<string, number>): ForecastCellScore[] {
   return (grid.features ?? [])
     .map((feature) => {
       const cellId = getH3CellId(feature.properties as Record<string, unknown> | null);
       const value = Number(values[cellId] ?? 0);
-      if (!Number.isFinite(value) || value < threshold || !feature.geometry) return null;
+      if (!Number.isFinite(value) || value < 0 || !feature.geometry) return null;
       const center = geometryCenter(feature.geometry);
       if (!center) return null;
-      return { value, center, geometry: feature.geometry } satisfies TopForecastCell;
+      return { value, center } satisfies ForecastCellScore;
     })
-    .filter((cell): cell is TopForecastCell => cell !== null)
-    .sort((a, b) => b.value - a.value)
-    .slice(0, MAX_TOP_CELLS);
+    .filter((cell): cell is ForecastCellScore => cell !== null);
 }
+
+type ScoredPoi = {
+  poi: PublicPoi;
+  meanNearbyScore: number;
+  nearbyCellCount: number;
+  nearestDistanceKm: number;
+};
 
 function rankPoiAgainstForecast(
-  pois: RawPoi[],
-  topCells: TopForecastCell[],
-  limit: number,
-  maxRadiusKm = NEARBY_RADIUS_KM,
-  useFallbackReason = false
+  pois: PublicPoi[],
+  cells: ForecastCellScore[],
+  baseLocation?: { latitude: number; longitude: number } | null,
+  maxTravelDistanceMiles?: number | null,
+  limit?: number | null,
+  sourcePoisForFraction?: PublicPoi[]
 ): SuggestedPlace[] {
-  if (pois.length === 0 || topCells.length === 0) return [];
-  const maxValue = Math.max(...topCells.map((cell) => cell.value), Number.EPSILON);
+  const candidatePois = filterPoisByBaseRadius(dedupePoiLocations(pois), baseLocation, maxTravelDistanceMiles);
+  const sourceCandidatePois = filterPoisByBaseRadius(
+    dedupePoiLocations(sourcePoisForFraction ?? pois),
+    baseLocation,
+    maxTravelDistanceMiles
+  );
+  if (candidatePois.length === 0 || cells.length === 0) return [];
 
-  return pois
-    .map((poi) => {
+  const scoredPois = candidatePois
+    .map((poi): ScoredPoi => {
       const point: [number, number] = [poi.longitude, poi.latitude];
-      let bestDistanceKm = Number.POSITIVE_INFINITY;
-      let bestValue = 0;
-      let intersects = false;
+      let scoreSum = 0;
+      let nearbyCellCount = 0;
+      let nearestDistanceKm = Number.POSITIVE_INFINITY;
 
-      for (const cell of topCells) {
-        const pointInside = pointInPolygonGeometry(point, cell.geometry);
-        const distanceKm = pointInside ? 0 : haversineKm(point, cell.center);
-        const better = pointInside || distanceKm < bestDistanceKm || (distanceKm === bestDistanceKm && cell.value > bestValue);
-        if (better) {
-          bestDistanceKm = distanceKm;
-          bestValue = cell.value;
-          intersects = pointInside;
-        }
+      for (const cell of cells) {
+        const distanceKm = haversineKm(point, cell.center);
+        if (distanceKm > POI_SCORE_RADIUS_KM) continue;
+
+        // Use the literal mean the product expects: all modeled hexes within 10 miles,
+        // not a distance-weighted score and not a made-up fallback coordinate.
+        scoreSum += cell.value;
+        nearbyCellCount += 1;
+        nearestDistanceKm = Math.min(nearestDistanceKm, distanceKm);
       }
 
-      if (!intersects && bestDistanceKm > maxRadiusKm) return null;
+      const meanNearbyScore = nearbyCellCount > 0 ? scoreSum / nearbyCellCount : 0;
 
-      const distanceFactor = intersects ? 1 : Math.max(0.12, 1 - bestDistanceKm / maxRadiusKm);
-      const baseScore = Math.max(0, Math.min(1, bestValue / maxValue));
-      const liveBonus = poi.hasLiveFeed ? 0.05 : 0;
-      const hydrophoneBonus = poi.hasHydrophone ? 0.04 : 0;
-      const score = Math.max(0, Math.min(1, baseScore * distanceFactor + liveBonus + hydrophoneBonus));
-      const potential = toViewingPotential(score);
-      const reason = intersects
-        ? "Inside one of this week’s high-activity forecast areas."
-        : useFallbackReason
-          ? `No close match this week, but this is one of the strongest broader options at about ${formatDistanceKm(bestDistanceKm)} away.`
-          : `Near high-activity forecast water, about ${formatDistanceKm(bestDistanceKm)} away.`;
-
-      const place: SuggestedPlace = {
-        id: toPlaceId(poi),
-        name: poi.name,
-        region: poi.region,
-        type: poi.type,
-        latitude: poi.latitude,
-        longitude: poi.longitude,
-        viewingPotential: potential,
-        score,
-        reason,
-        distanceKm: Number.isFinite(bestDistanceKm) ? bestDistanceKm : undefined,
-        hasLiveFeed: poi.hasLiveFeed,
-        hasHydrophone: poi.hasHydrophone,
+      return {
+        poi,
+        meanNearbyScore: Number.isFinite(meanNearbyScore) ? meanNearbyScore : 0,
+        nearbyCellCount,
+        nearestDistanceKm,
       };
-      return place;
     })
-    .filter((place): place is SuggestedPlace => place !== null)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+    .sort((a, b) => b.meanNearbyScore - a.meanNearbyScore || a.poi.name.localeCompare(b.poi.name));
+
+  // A POI only qualifies as a recommendation if it actually overlaps modeled water
+  // cells and has a positive nearby mean. Otherwise zero-score POIs sort alphabetically
+  // and masquerade as “top” places, which is worse than showing nothing.
+  const eligiblePois = scoredPois.filter((item) => item.nearbyCellCount > 0 && item.meanNearbyScore > 0);
+  if (eligiblePois.length === 0) {
+    if (import.meta.env.DEV) {
+      console.info("[recommended POIs] no eligible POIs", {
+        rawPois: pois.length,
+        candidatePois: candidatePois.length,
+        scoredPois: scoredPois.length,
+        cells: cells.length,
+        scoreRadiusMiles: POI_SCORE_RADIUS_KM / MILES_TO_KM,
+        baseLatitude: baseLocation?.latitude,
+        baseLongitude: baseLocation?.longitude,
+        maxTravelDistanceMiles: maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
+      });
+    }
+    return [];
+  }
+
+  // The top-N percentage should be based on the valid POI source universe, not the smaller
+  // display-cleaned or positive-score subsets. The source file contains many generic marina
+  // inventory records; we keep those out of cards, but they still count toward "top 5%".
+  const fractionDenominator = sourceCandidatePois.length > 0 ? sourceCandidatePois.length : candidatePois.length;
+  const fractionCount = Math.max(1, Math.ceil(fractionDenominator * TOP_LOCATION_FRACTION));
+  const requestedLimit = typeof limit === "number" && Number.isFinite(limit) && limit > 0 ? Math.round(limit) : null;
+  const topCount = Math.min(eligiblePois.length, requestedLimit ?? fractionCount);
+  const maxMeanScore = Math.max(eligiblePois[0]?.meanNearbyScore ?? Number.EPSILON, Number.EPSILON);
+
+  if (import.meta.env.DEV) {
+    console.info("[recommended POIs]", {
+      rawPois: pois.length,
+      sourcePois: sourcePoisForFraction?.length ?? pois.length,
+      sourceCandidatePois: sourceCandidatePois.length,
+      candidatePois: candidatePois.length,
+      scoredPois: scoredPois.length,
+      eligiblePois: eligiblePois.length,
+      zeroScorePois: scoredPois.length - eligiblePois.length,
+      topCount,
+      fractionCount,
+      fractionDenominator,
+      scoreRadiusMiles: POI_SCORE_RADIUS_KM / MILES_TO_KM,
+      baseLatitude: baseLocation?.latitude,
+      baseLongitude: baseLocation?.longitude,
+      maxTravelDistanceMiles: maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
+      topNames: eligiblePois.slice(0, topCount).map((item) => ({
+        name: item.poi.name,
+        type: item.poi.type,
+        latitude: item.poi.latitude,
+        longitude: item.poi.longitude,
+        meanNearbyScore: item.meanNearbyScore,
+        nearbyCellCount: item.nearbyCellCount,
+        nearestDistanceKm: Number.isFinite(item.nearestDistanceKm) ? item.nearestDistanceKm : null,
+      })),
+    });
+  }
+
+  return eligiblePois.slice(0, topCount).map(({ poi, meanNearbyScore, nearbyCellCount, nearestDistanceKm }) => {
+    const normalizedScore = Math.max(0, Math.min(1, meanNearbyScore / maxMeanScore));
+    const normalizedName = normalizeId(poi.name);
+    const metadata = PLANNER_POI_METADATA[normalizedName];
+    const reason =
+      poi.reason ??
+      metadata?.reason ??
+      `${
+        requestedLimit
+          ? `One of the top ${topCount} viewing locations`
+          : "Top 5% POI"
+      } based on mean forecast score across ${nearbyCellCount} grid cells within 10 miles.`;
+
+    return {
+      id: toPlaceId(poi),
+      spotId: getPlannerSpotId(poi),
+      name: poi.name,
+      region: poi.region,
+      type: poi.type,
+      latitude: poi.latitude,
+      longitude: poi.longitude,
+      viewingPotential: toViewingPotential(normalizedScore),
+      score: meanNearbyScore,
+      reason,
+      distanceKm: Number.isFinite(nearestDistanceKm) ? nearestDistanceKm : undefined,
+      imageUrl: poi.imageUrl,
+      hasLiveFeed: poi.hasLiveFeed,
+      hasHydrophone: poi.hasHydrophone,
+    } satisfies SuggestedPlace;
+  });
 }
 
-export function useSuggestedPlaces({
-  resolution,
-  modelId,
-  forecastPath,
-  fallbackForecastPath,
-  enabled = true,
-  limit = DEFAULT_LIMIT,
-}: UseSuggestedPlacesArgs): UseSuggestedPlacesResult {
+export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPlacesResult {
+  const {
+    resolution,
+    modelId,
+    forecastPath,
+    fallbackForecastPath,
+    externalValues,
+    enabled = true,
+    baseLocation,
+    maxTravelDistanceMiles,
+    limit,
+  } = args;
   const [places, setPlaces] = useState<SuggestedPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -318,23 +360,28 @@ export function useSuggestedPlaces({
     setError(null);
 
     const load = async () => {
-      const [pois, grid] = await Promise.all([loadPoiData(), loadGrid(resolution)]);
-      const forecast = await loadForecast(resolution, {
-        kind: forecastPath ? "explicit" : "latest",
-        explicitPath: forecastPath,
-        modelId,
-      }).catch(async (primaryError) => {
-        if (!fallbackForecastPath || fallbackForecastPath === forecastPath) throw primaryError;
-        return loadForecast(resolution, {
-          kind: "explicit",
-          explicitPath: fallbackForecastPath,
-          modelId,
-        });
-      });
-      const topCells = buildTopForecastCells(grid, forecast.values);
-      const nearbyMatches = rankPoiAgainstForecast(pois, topCells, limit);
-      if (nearbyMatches.length > 0) return nearbyMatches;
-      return rankPoiAgainstForecast(pois, topCells, limit, FALLBACK_RADIUS_KM, true);
+      const [poiBundle, grid] = await Promise.all([loadPoiDataBundle(), loadGrid(resolution)]);
+      const pois = poiBundle.items.map(enrichPlannerPoi);
+      if (pois.length === 0) return [];
+
+      const values =
+        externalValues ??
+        (
+          await loadForecast(resolution, {
+            kind: forecastPath ? "explicit" : "latest",
+            explicitPath: forecastPath,
+            modelId,
+          }).catch(async (primaryError) => {
+            if (!fallbackForecastPath || fallbackForecastPath === forecastPath) throw primaryError;
+            return loadForecast(resolution, {
+              kind: "explicit",
+              explicitPath: fallbackForecastPath,
+              modelId,
+            });
+          })
+        ).values;
+      const cells = buildForecastCellScores(grid, values);
+      return rankPoiAgainstForecast(pois, cells, baseLocation, maxTravelDistanceMiles, limit, poiBundle.sourceItems);
     };
 
     load()
@@ -355,7 +402,7 @@ export function useSuggestedPlaces({
     return () => {
       cancelled = true;
     };
-  }, [enabled, fallbackForecastPath, forecastPath, limit, modelId, resolution]);
+  }, [baseLocation, enabled, externalValues, fallbackForecastPath, forecastPath, limit, maxTravelDistanceMiles, modelId, resolution]);
 
   return { places, isLoading, error };
 }

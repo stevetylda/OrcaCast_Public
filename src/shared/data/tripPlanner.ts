@@ -2,7 +2,7 @@ import type { H3Resolution } from "../config/dataPaths";
 import { fetchJson } from "./fetchClient";
 import { getDataVersionToken } from "./meta";
 
-export type TripLengthOption = "1 day" | "2 days" | "3 days" | "Weekend";
+export type TripLengthOption = "1 day" | "2 days" | "3 days" | "5 days" | "Weekend";
 
 export type TripPlannerRange = {
   startDate: string;
@@ -104,9 +104,12 @@ function formatDisplayDate(date: Date): string {
 }
 
 export function daysForTripLength(length: TripLengthOption | string): number {
+  if (length === "Weekend") return 2;
+  const parsedDays = Number(String(length).match(/^(\d+)\s*days?$/i)?.[1] ?? Number.NaN);
+  if (Number.isFinite(parsedDays) && parsedDays > 0) return Math.round(parsedDays);
+  if (length === "5 days") return 5;
   if (length === "2 days") return 2;
   if (length === "3 days") return 3;
-  if (length === "Weekend") return 2;
   return 1;
 }
 
@@ -125,6 +128,34 @@ export function buildTripPlannerRange(
     dayCount <= 1
       ? formatDisplayDate(start)
       : `${formatDisplayDate(start)} to ${formatDisplayDate(end)}`;
+  return {
+    startDate: formatIsoDate(start),
+    endDate: formatIsoDate(end),
+    startDayOfYear: startDay,
+    endDayOfYear: endDay,
+    dayCount,
+    crossesYear,
+    label,
+  };
+}
+
+export function buildTripPlannerRangeFromDates(
+  arrivalDate: string,
+  departureDate: string
+): TripPlannerRange | null {
+  const start = parseTripDate(arrivalDate);
+  const end = parseTripDate(departureDate);
+  if (!start || !end || end.getTime() < start.getTime()) return null;
+
+  const dayCount = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1);
+  const startDay = dayOfYear(start);
+  const endDay = dayOfYear(end);
+  const crossesYear = start.getUTCFullYear() !== end.getUTCFullYear() || endDay < startDay;
+  const label =
+    dayCount <= 1
+      ? formatDisplayDate(start)
+      : `${formatDisplayDate(start)} to ${formatDisplayDate(end)}`;
+
   return {
     startDate: formatIsoDate(start),
     endDate: formatIsoDate(end),

@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { SideDrawer } from "../shared/components/SideDrawer";
 import { WatchPage } from "../pages/WatchPage";
+import { HomePage } from "../pages/HomePage";
 import { MenuProvider, useMenu } from "../shared/state/MenuContext";
 import { MapStateProvider, useMapState } from "../shared/state/MapStateContext";
 import "../shared/styles/base.css";
@@ -20,7 +21,8 @@ function AppFrame() {
     <div className={darkMode ? "app app--dark" : "app"} data-theme={darkMode ? "dark" : "light"}>
       <Suspense fallback={null}>
         <Routes>
-          <Route path="/" element={<WatchPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/watch" element={<WatchPage />} />
           <Route path="/planner" element={<PlanPage />} />
           <Route path="/about" element={<AboutPage />} />
         </Routes>

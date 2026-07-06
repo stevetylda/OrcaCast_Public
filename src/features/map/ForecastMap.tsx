@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import maplibregl, { Map as MapLibreMap } from "maplibre-gl";
+import maplibregl, { Map as MapLibreMap, type MapLayerMouseEvent } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Period } from "../../shared/data/periods";
@@ -23,6 +23,8 @@ import { applyBasemapVisualTuning, createGridLayerBuildSignature, DARK_STYLE, DE
 import { useForecastData } from "./useForecastData";
 import { useHotspotAnimation } from "./useHotspotAnimation";
 import type { FillColorSpec, ForecastMapHandle, ForecastMapProps, LngLat, SparklineSeries } from "./types";
+import { filterPoisByType, hasActivePoiFilter, loadPoiData, type PoiFilters, type PublicPoi } from "../locations/poiData";
+import type { SuggestedPlace } from "../locations/types";
 
 function waitForMapRender(map: MapLibreMap, timeoutMs = 2500) {
   return new Promise<boolean>((resolve) => {
@@ -58,76 +60,549 @@ function coerceExpectedActivityHotspotCellCount(value: number | null): number | 
   return value === null || !Number.isFinite(value) ? null : Math.max(0, Math.round(value));
 }
 
-const SUGGESTED_PLACE_CLUSTER_DISTANCE_KM = 18;
-const SUGGESTED_PLACE_CLUSTER_MAX_ZOOM = 10.75;
+// Whale pulse artwork is intentionally kept here for the future aggregate-bubble pass.
+export const FUTURE_WHALE_TAIL_SVG = `<svg class="poiMarker__whaleTailIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" focusable="false"><path d="M29 53c2.1-5 2.6-9.1 2.1-12.3-.4-2.5-1.9-4.2-4.6-5.2-3.1-1.1-6.3-1.9-9.1-3.2-6-2.8-10-7.2-11.2-14.8 4.8 2.1 9 3.3 13 3.7 4.4.4 8.4.1 11.6 2.7 1 .8 1.8 1.8 2.3 3 .5-1.2 1.3-2.2 2.3-3 3.2-2.6 7.2-2.3 11.6-2.7 4-.4 8.2-1.6 13-3.7-1.2 7.6-5.2 12-11.2 14.8-2.8 1.3-6 2.1-9.1 3.2-2.7 1-4.2 2.7-4.6 5.2-.5 3.2 0 7.3 2.1 12.3H29Z" fill="currentColor"/></svg>`;
 
-function haversineKm(a: [number, number], b: [number, number]) {
-  const toRad = (value: number) => (value * Math.PI) / 180;
-  const earthRadiusKm = 6371.0088;
-  const dLat = toRad(b[1] - a[1]);
-  const dLon = toRad(b[0] - a[0]);
-  const lat1 = toRad(a[1]);
-  const lat2 = toRad(b[1]);
-  const h =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  return 2 * earthRadiusKm * Math.asin(Math.min(1, Math.sqrt(h)));
+const PLANNER_LOCATION_SOURCE_ID = "planner-location-points";
+const PLANNER_LOCATION_HALO_LAYER_ID = "planner-location-points-halo";
+const PLANNER_LOCATION_CIRCLE_LAYER_ID = "planner-location-points-circle";
+const PLANNER_LOCATION_SYMBOL_LAYER_ID = "planner-location-points-symbol";
+const PLANNER_LOCATION_ITINERARY_BADGE_LAYER_ID = "planner-location-points-itinerary-badge";
+const PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID = "planner-location-points-itinerary-text";
+const PLANNER_MAX_TRAVEL_SOURCE_ID = "planner-max-travel-radius";
+const PLANNER_MAX_TRAVEL_LAYER_ID = "planner-max-travel-radius-line";
+
+type PlannerLocationKind = "base" | "suggested" | "poi";
+type PlannerLocationType = SuggestedPlace["type"] | PublicPoi["type"] | "Base";
+
+type PlannerLocationFeatureProperties = {
+  id: string;
+  kind: PlannerLocationKind;
+  name: string;
+  markerType: string;
+  iconName: string;
+  selected: boolean;
+  selectedPulseOn?: boolean;
+  itineraryOrder?: number;
+  score?: number;
+};
+
+type PlannerRadiusFeatureProperties = {
+  dashColor: string;
+};
+
+type PlannerPinVariant = "suggested" | "poi" | "base";
+
+type PlannerPinSpec = {
+  id: string;
+  variant: PlannerPinVariant;
+  type: PlannerLocationType;
+};
+
+const PLANNER_PIN_SPECS: PlannerPinSpec[] = [
+  { id: "planner-pin-suggested-park", variant: "suggested", type: "Park" },
+  { id: "planner-pin-suggested-marina", variant: "suggested", type: "Marina" },
+  { id: "planner-pin-suggested-ferry", variant: "suggested", type: "Ferry" },
+  { id: "planner-pin-poi-park", variant: "poi", type: "Park" },
+  { id: "planner-pin-poi-marina", variant: "poi", type: "Marina" },
+  { id: "planner-pin-poi-ferry", variant: "poi", type: "Ferry" },
+  { id: "planner-pin-base", variant: "base", type: "Base" },
+];
+
+function getPointCoordinates(latitude: number, longitude: number): LngLat | null {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+  return [lon, lat];
 }
 
-function clusterSuggestedPlaces<T extends { longitude: number; latitude: number; score: number }>(places: T[]) {
-  if (places.length <= 1) return places.map((place) => ({ members: [place], center: [place.longitude, place.latitude] as [number, number] }));
+function getPoiIconKey(type?: SuggestedPlace["type"] | PublicPoi["type"]) {
+  if (type === "Park") return "park";
+  if (type === "Marina") return "marina";
+  if (type === "Ferry") return "ferry";
+  return "marina";
+}
 
-  const visited = new Set<number>();
-  const clusters: Array<{ members: T[]; center: [number, number] }> = [];
+function getPlannerLocationIconName(kind: PlannerLocationKind, type?: SuggestedPlace["type"] | PublicPoi["type"]) {
+  if (kind === "base") return "planner-pin-base";
+  return `planner-pin-${kind}-${getPoiIconKey(type)}`;
+}
 
-  for (let index = 0; index < places.length; index += 1) {
-    if (visited.has(index)) continue;
-    const stack = [index];
-    const memberIndexes: number[] = [];
-    visited.add(index);
+function getSuggestedPlacePopupHtml(place: SuggestedPlace) {
+  return `<div class="poiPopup"><div class="poiPopup__title">${place.name}</div><div class="poiPopup__meta">Recommended ${formatSuggestedPlaceType(place.type)} · mean nearby score ${Number(place.score).toFixed(3)} · ${Number(place.latitude).toFixed(4)}, ${Number(place.longitude).toFixed(4)}</div></div>`;
+}
 
-    while (stack.length > 0) {
-      const current = stack.pop();
-      if (current == null) continue;
-      memberIndexes.push(current);
-      const currentPlace = places[current];
-      const currentPoint: [number, number] = [currentPlace.longitude, currentPlace.latitude];
+function getPublicPoiPopupHtml(poi: PublicPoi) {
+  return `<div class="poiPopup"><div class="poiPopup__title">${poi.name}</div><div class="poiPopup__meta">${formatSuggestedPlaceType(poi.type)} · ${Number(poi.latitude).toFixed(4)}, ${Number(poi.longitude).toFixed(4)}</div></div>`;
+}
 
-      for (let next = 0; next < places.length; next += 1) {
-        if (visited.has(next)) continue;
-        const candidate = places[next];
-        const candidatePoint: [number, number] = [candidate.longitude, candidate.latitude];
-        if (haversineKm(currentPoint, candidatePoint) > SUGGESTED_PLACE_CLUSTER_DISTANCE_KM) continue;
-        visited.add(next);
-        stack.push(next);
-      }
-    }
+function getBaseLocationPopupHtml(baseLocation: { name: string; latitude: number; longitude: number }) {
+  return `<div class="poiPopup"><div class="poiPopup__title">${baseLocation.name}</div><div class="poiPopup__meta">Base location · ${Number(baseLocation.latitude).toFixed(4)}, ${Number(baseLocation.longitude).toFixed(4)}</div></div>`;
+}
 
-    const members = memberIndexes.map((memberIndex) => places[memberIndex]).sort((a, b) => b.score - a.score);
-    const weighted = members.reduce(
-      (acc, member) => {
-        const weight = Math.max(0.15, member.score);
-        return {
-          lon: acc.lon + member.longitude * weight,
-          lat: acc.lat + member.latitude * weight,
-          weight: acc.weight + weight,
-        };
+function buildPlannerLocationCollection(args: {
+  baseLocation: { name: string; latitude: number; longitude: number } | null;
+  suggestedPlaces: SuggestedPlace[];
+  itineraryPlaceIds: string[];
+  selectedPlaceId: string | null;
+  showSuggestedPlaces: boolean;
+  poiItems: PublicPoi[];
+  poiFilters: PoiFilters;
+}): FeatureCollection {
+  const features: FeatureCollection["features"] = [];
+  const baseCoords = args.baseLocation
+    ? getPointCoordinates(args.baseLocation.latitude, args.baseLocation.longitude)
+    : null;
+
+  if (args.baseLocation && baseCoords) {
+    features.push({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: baseCoords,
       },
-      { lon: 0, lat: 0, weight: 0 }
-    );
-
-    clusters.push({
-      members,
-      center: weighted.weight > 0 ? [weighted.lon / weighted.weight, weighted.lat / weighted.weight] : [members[0].longitude, members[0].latitude],
+      properties: {
+        id: "__planner_base_location__",
+        kind: "base",
+        name: args.baseLocation.name,
+        markerType: "Base",
+        iconName: getPlannerLocationIconName("base"),
+        selected: false,
+        selectedPulseOn: false,
+      } satisfies PlannerLocationFeatureProperties,
     });
   }
 
-  return clusters;
+  const visibleSuggestedPlaceKeys = new Set<string>();
+  const itineraryOrderById = new Map(args.itineraryPlaceIds.map((id, index) => [id, index + 1]));
+
+  if (args.showSuggestedPlaces) {
+    for (const place of args.suggestedPlaces) {
+      const coords = getPointCoordinates(place.latitude, place.longitude);
+      if (!coords) continue;
+      visibleSuggestedPlaceKeys.add(getLocationMarkerKey(place));
+      features.push({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: coords,
+        },
+        properties: {
+          id: place.id,
+          kind: "suggested",
+          name: place.name,
+          markerType: place.type,
+          iconName: getPlannerLocationIconName("suggested", place.type),
+          selected: place.id === args.selectedPlaceId,
+          selectedPulseOn: place.id === args.selectedPlaceId,
+          itineraryOrder: itineraryOrderById.get(place.id) ?? 0,
+          score: place.score,
+        } satisfies PlannerLocationFeatureProperties,
+      });
+    }
+  }
+
+  if (hasActivePoiFilter(args.poiFilters)) {
+    const seenPoiIds = new Set<string>();
+    for (const poi of filterPoisByType(args.poiItems, args.poiFilters)) {
+      const coords = getPointCoordinates(poi.latitude, poi.longitude);
+      if (!coords) continue;
+      if (visibleSuggestedPlaceKeys.has(getLocationMarkerKey(poi))) continue;
+      const id = getPublicPoiFeatureId(poi);
+      if (seenPoiIds.has(id)) continue;
+      seenPoiIds.add(id);
+      features.push({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: coords,
+        },
+        properties: {
+          id,
+          kind: "poi",
+          name: poi.name,
+          markerType: poi.type,
+          iconName: getPlannerLocationIconName("poi", poi.type),
+          selected: false,
+          selectedPulseOn: false,
+        } satisfies PlannerLocationFeatureProperties,
+      });
+    }
+  }
+
+  return {
+    type: "FeatureCollection",
+    features,
+  };
+}
+
+function getGeoJsonSource(map: MapLibreMap, sourceId: string) {
+  return map.getSource(sourceId) as { setData: (data: FeatureCollection) => void } | undefined;
+}
+
+function upsertGeoJsonSource(map: MapLibreMap, sourceId: string, data: FeatureCollection) {
+  const source = getGeoJsonSource(map, sourceId);
+  if (source) {
+    source.setData(data);
+    return;
+  }
+  map.addSource(sourceId, { type: "geojson", data });
+}
+
+function buildMaxTravelRadiusCollection(baseLocation: { latitude: number; longitude: number } | null, miles: number | null): FeatureCollection {
+  if (!baseLocation || !miles || !Number.isFinite(miles) || miles <= 0) {
+    return { type: "FeatureCollection", features: [] };
+  }
+
+  const center = getPointCoordinates(baseLocation.latitude, baseLocation.longitude);
+  if (!center) return { type: "FeatureCollection", features: [] };
+
+  const [longitude, latitude] = center;
+  const kilometers = miles * 1.60934;
+  const latRadians = (latitude * Math.PI) / 180;
+  const kmPerDegreeLat = 110.574;
+  const kmPerDegreeLon = 111.32 * Math.cos(latRadians);
+  if (!Number.isFinite(kmPerDegreeLon) || Math.abs(kmPerDegreeLon) < 0.0001) {
+    return { type: "FeatureCollection", features: [] };
+  }
+
+  const dashCount = 56;
+  const dashSweepDegrees = 4.2;
+  const gapSweepDegrees = 2.25;
+  const dashSteps = 6;
+  const dashColors = ["#24A38B", "#6EDAD0"];
+  const features: FeatureCollection["features"] = [];
+
+  for (let index = 0; index < dashCount; index += 1) {
+    const startAngle = index * (dashSweepDegrees + gapSweepDegrees);
+    const endAngle = startAngle + dashSweepDegrees;
+    const coordinates: [number, number][] = [];
+
+    for (let step = 0; step <= dashSteps; step += 1) {
+      const angleDegrees = startAngle + ((endAngle - startAngle) * step) / dashSteps;
+      const angle = (angleDegrees * Math.PI) / 180;
+      const latitudeOffset = (kilometers * Math.sin(angle)) / kmPerDegreeLat;
+      const longitudeOffset = (kilometers * Math.cos(angle)) / kmPerDegreeLon;
+      coordinates.push([longitude + longitudeOffset, latitude + latitudeOffset]);
+    }
+
+    features.push({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates,
+      },
+      properties: {
+        dashColor: dashColors[index % dashColors.length],
+      } satisfies PlannerRadiusFeatureProperties,
+    });
+  }
+
+  return {
+    type: "FeatureCollection",
+    features,
+  };
+}
+
+function withPlannerLocationPulse(data: FeatureCollection, pulseOn: boolean): FeatureCollection {
+  return {
+    ...data,
+    features: data.features.map((feature) => {
+      const properties = (feature.properties ?? {}) as PlannerLocationFeatureProperties;
+      if (!properties.selected) return feature;
+      return {
+        ...feature,
+        properties: {
+          ...properties,
+          selectedPulseOn: pulseOn,
+        },
+      };
+    }),
+  };
+}
+
+async function buildPlannerPinImage(spec: PlannerPinSpec) {
+  const pixelRatio = 2;
+  const width = 64 * pixelRatio;
+  const height = 78 * pixelRatio;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Planner pin canvas context unavailable.");
+
+  const palette =
+    spec.variant === "suggested"
+      ? {
+          fill: "#baf6ee",
+          center: "#c9fbf5",
+          stroke: "#13d8cb",
+          icon: "#07566a",
+          glow: "rgba(19,216,203,0.42)",
+        }
+      : spec.variant === "base"
+        ? {
+            fill: "#ffffff",
+            center: "#f3fbfd",
+            stroke: "#158fa2",
+            icon: "#0b718d",
+            glow: "rgba(21,143,162,0.24)",
+          }
+        : {
+            fill: "#dcedf4",
+            center: "#e8f6fb",
+            stroke: "#6f8d99",
+            icon: "#355763",
+            glow: "rgba(53,87,99,0.14)",
+          };
+  const symbol =
+    spec.type === "Park"
+      ? { text: "forest", font: "Material Symbols Rounded" }
+      : spec.type === "Ferry"
+        ? { text: "directions_boat", font: "Material Symbols Outlined" }
+        : spec.type === "Base"
+          ? { text: "home", font: "Material Symbols Outlined" }
+          : { text: "anchor", font: "Material Symbols Outlined" };
+
+  if ("fonts" in document) {
+    await document.fonts.load(`24px "${symbol.font}"`);
+    await document.fonts.ready;
+  }
+
+  ctx.scale(pixelRatio, pixelRatio);
+
+  ctx.fillStyle = palette.glow;
+  ctx.beginPath();
+  ctx.ellipse(32, 72, 10, 3.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.shadowColor = "rgba(7,31,58,0.26)";
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 6;
+  ctx.fillStyle = palette.fill;
+  ctx.strokeStyle = palette.stroke;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(32, 73);
+  ctx.bezierCurveTo(28.5, 64, 13, 48.5, 13, 32.5);
+  ctx.bezierCurveTo(13, 19, 21.3, 9, 32, 9);
+  ctx.bezierCurveTo(42.7, 9, 51, 19, 51, 32.5);
+  ctx.bezierCurveTo(51, 48.5, 35.5, 64, 32, 73);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle = palette.center;
+  ctx.beginPath();
+  ctx.arc(32, 32, 18, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(255,255,255,0.28)";
+  ctx.lineWidth = 1.25;
+  ctx.beginPath();
+  ctx.arc(32, 32, 17.4, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = palette.icon;
+  ctx.font = `24px "${symbol.font}"`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(symbol.text, 32, 33);
+
+  return ctx.getImageData(0, 0, width, height);
+}
+
+async function ensurePlannerLocationIconImages(map: MapLibreMap) {
+  await Promise.all(
+    PLANNER_PIN_SPECS.map(async (spec) => {
+      if (map.hasImage(spec.id)) return;
+      const image = await buildPlannerPinImage(spec);
+      if (!map.hasImage(spec.id)) map.addImage(spec.id, image, { pixelRatio: 2 });
+    })
+  );
+}
+
+async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollection) {
+  upsertGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID, data);
+
+  try {
+    await ensurePlannerLocationIconImages(map);
+  } catch (error) {
+    console.warn("[POI] planner pin images failed to load", error);
+  }
+
+  if (!map.getLayer(PLANNER_LOCATION_HALO_LAYER_ID)) {
+    map.addLayer({
+      id: PLANNER_LOCATION_HALO_LAYER_ID,
+      type: "circle",
+      source: PLANNER_LOCATION_SOURCE_ID,
+      filter: ["==", ["get", "selected"], true],
+      paint: {
+        "circle-radius": [
+          "case",
+          ["==", ["get", "selectedPulseOn"], true],
+          60,
+          44,
+        ],
+        "circle-color": "rgba(110, 247, 233, 1)",
+        "circle-blur": 1.15,
+        "circle-opacity": [
+          "case",
+          ["==", ["get", "selectedPulseOn"], true],
+          0.55,
+          0.24,
+        ],
+        "circle-translate": [0, -25],
+      },
+    });
+  }
+
+  if (!map.getLayer(PLANNER_LOCATION_CIRCLE_LAYER_ID)) {
+    map.addLayer({
+      id: PLANNER_LOCATION_CIRCLE_LAYER_ID,
+      type: "circle",
+      source: PLANNER_LOCATION_SOURCE_ID,
+      paint: {
+        "circle-radius": [
+          "case",
+          ["==", ["get", "kind"], "poi"],
+          18,
+          ["==", ["get", "selected"], true],
+          27,
+          23,
+        ],
+        "circle-color": "rgba(255, 255, 255, 0.01)",
+        "circle-opacity": 0.01,
+        "circle-translate": [0, -25],
+      },
+    });
+  }
+
+  if (!map.getLayer(PLANNER_LOCATION_SYMBOL_LAYER_ID)) {
+    map.addLayer({
+      id: PLANNER_LOCATION_SYMBOL_LAYER_ID,
+      type: "symbol",
+      source: PLANNER_LOCATION_SOURCE_ID,
+      layout: {
+        "icon-image": ["get", "iconName"],
+        "icon-size": [
+          "case",
+          ["==", ["get", "selected"], true],
+          0.7,
+          ["==", ["get", "kind"], "suggested"],
+          0.7,
+          ["==", ["get", "kind"], "base"],
+          0.7,
+          0.56,
+        ],
+        "icon-anchor": "bottom",
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true,
+        "symbol-sort-key": [
+          "case",
+          ["==", ["get", "kind"], "base"],
+          4,
+          ["==", ["get", "kind"], "suggested"],
+          3,
+          1,
+        ],
+      },
+      paint: {
+        "icon-opacity": [
+          "case",
+          ["==", ["get", "selected"], true],
+          1,
+          1,
+        ],
+      },
+    });
+  }
+
+  if (!map.getLayer(PLANNER_LOCATION_ITINERARY_BADGE_LAYER_ID)) {
+    map.addLayer({
+      id: PLANNER_LOCATION_ITINERARY_BADGE_LAYER_ID,
+      type: "circle",
+      source: PLANNER_LOCATION_SOURCE_ID,
+      filter: [">", ["get", "itineraryOrder"], 0],
+      paint: {
+        "circle-radius": 10,
+        "circle-color": "rgba(24, 120, 136, 0.96)",
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "rgba(255, 255, 255, 0.96)",
+        "circle-translate": [15, -47],
+      },
+    });
+  }
+
+  if (!map.getLayer(PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID)) {
+    map.addLayer({
+      id: PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID,
+      type: "symbol",
+      source: PLANNER_LOCATION_SOURCE_ID,
+      filter: [">", ["get", "itineraryOrder"], 0],
+      layout: {
+        "text-field": ["to-string", ["get", "itineraryOrder"]],
+        "text-size": 11,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-anchor": "center",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+      },
+      paint: {
+        "text-color": "#ffffff",
+        "text-halo-color": "rgba(24, 120, 136, 0.01)",
+        "text-halo-width": 0.5,
+        "text-translate": [15, -47],
+      },
+    });
+  }
+
+  bringPlannerLocationLayersToFront(map);
+}
+
+function bringPlannerLocationLayersToFront(map: MapLibreMap) {
+  if (map.getLayer(PLANNER_MAX_TRAVEL_LAYER_ID)) map.moveLayer(PLANNER_MAX_TRAVEL_LAYER_ID);
+  if (map.getLayer(PLANNER_LOCATION_HALO_LAYER_ID)) map.moveLayer(PLANNER_LOCATION_HALO_LAYER_ID);
+  if (map.getLayer(PLANNER_LOCATION_CIRCLE_LAYER_ID)) map.moveLayer(PLANNER_LOCATION_CIRCLE_LAYER_ID);
+  if (map.getLayer(PLANNER_LOCATION_SYMBOL_LAYER_ID)) map.moveLayer(PLANNER_LOCATION_SYMBOL_LAYER_ID);
+  if (map.getLayer(PLANNER_LOCATION_ITINERARY_BADGE_LAYER_ID)) map.moveLayer(PLANNER_LOCATION_ITINERARY_BADGE_LAYER_ID);
+  if (map.getLayer(PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID)) map.moveLayer(PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID);
+}
+
+
+function normalizeMarkerId(value: string) {
+  return (
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "place"
+  );
+}
+
+function getLocationMarkerKey(place: { name: string; latitude: number; longitude: number }) {
+  return `${normalizeMarkerId(place.name)}-${Number(place.latitude).toFixed(4)}-${Number(place.longitude).toFixed(4)}`;
+}
+
+function getPublicPoiFeatureId(poi: PublicPoi) {
+  return `poi-${getLocationMarkerKey(poi)}`;
+}
+
+function formatSuggestedPlaceType(type: SuggestedPlace["type"]) {
+  if (type === "Ferry") return "Ferry terminal";
+  return type;
 }
 
 export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(function ForecastMap(
   {
     darkMode,
+    showMapControls = true,
+    showLegendControl = true,
+    colorNoData = false,
     paletteId,
     surfaceMode,
     resolution,
@@ -149,12 +624,18 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     colorScaleValues,
     useExternalColorScale = false,
     externalValues,
+    forecastOverlayEnabled = true,
     pulseAllGridCells = false,
     mapModeLabel,
     onFatalDataError,
     suggestedPlaces = [],
+    itineraryPlaceIds = [],
     selectedPlaceId = null,
+    pulseSelectedPlaceMarker = false,
     onPlaceSelect,
+    showTripHotspotMarkers = false,
+    baseLocation = null,
+    maxTravelDistanceMiles = null,
     sidebarOffsetPx = 0,
   }: ForecastMapProps,
   ref
@@ -204,10 +685,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   const hotspotsOnlyRef = useRef(hotspotsEnabled);
   const lastGridLayerSignatureRef = useRef<string | null>(null);
   const hoveredCellRef = useRef<string | null>(null);
-  const poiMarkersRef = useRef<maplibregl.Marker[]>([]);
-  const suggestedPlaceMarkersRef = useRef<maplibregl.Marker[]>([]);
-  const poiLoadedRef = useRef(false);
-  const poiDataRef = useRef<Array<{ type: string; name: string; latitude: number; longitude: number }> | null>(null);
   const periodsRef = useRef<Period[]>(periods);
   const modelIdRef = useRef(modelId);
   const resolutionRef = useRef(resolution);
@@ -224,9 +701,10 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   const [legendSpec, setLegendSpec] = useState<HeatScale | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const [mapReady, setMapReady] = useState(false);
-  const [suggestedPlaceZoom, setSuggestedPlaceZoom] = useState(DEFAULT_ZOOM);
+  const [poiItems, setPoiItems] = useState<PublicPoi[]>([]);
 
   const hasForecastLegend = legendSpec !== null;
+  const poiLayerActive = hasActivePoiFilter(poiFilters);
 
   const resolveHotspotThreshold = useCallback(() => {
     const modeled = modeledHotspotThresholdRef.current ?? hotspotThresholdRef.current;
@@ -324,6 +802,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       }
 
       setGridHoverCell(map, hoveredCellRef.current);
+      bringPlannerLocationLayersToFront(map);
     },
     [
       activePalette.colors,
@@ -526,6 +1005,36 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     return captureMapSnapshot();
   }, [captureMapSnapshot]);
 
+  const fitLocations = useCallback(
+    (locations: LngLat[], options?: { padding?: number; maxZoom?: number }) => {
+      const map = mapRef.current;
+      if (!map || locations.length === 0) return;
+
+      if (locations.length === 1) {
+        map.flyTo({
+          center: locations[0],
+          zoom: options?.maxZoom ?? 11.2,
+          essential: true,
+          duration: 900,
+        });
+        return;
+      }
+
+      const bounds = locations.reduce(
+        (acc, location) => acc.extend(location),
+        new maplibregl.LngLatBounds(locations[0], locations[0])
+      );
+
+      map.fitBounds(bounds, {
+        padding: options?.padding ?? 88,
+        maxZoom: options?.maxZoom ?? 10.8,
+        duration: 900,
+        essential: true,
+      });
+    },
+    []
+  );
+
   const capturePlacePreview = useCallback(
     async ({
       center,
@@ -553,8 +1062,9 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     () => ({
       captureSnapshot: captureCurrentMapSnapshot,
       capturePlacePreview,
+      fitLocations,
     }),
-    [captureCurrentMapSnapshot, capturePlacePreview]
+    [captureCurrentMapSnapshot, capturePlacePreview, fitLocations]
   );
 
   useForecastData({
@@ -564,9 +1074,11 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     fallbackForecastPath,
     modelId,
     externalValues,
+    forecastOverlayEnabled,
     pulseAllGridCells,
     onGridCellCount,
     useExternalColorScale,
+    colorNoData,
     paletteColors: activePalette.colors,
     mapRef,
     overlayRef,
@@ -671,7 +1183,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       lastGridLayerSignatureRef.current = null;
       mapReadyRef.current = true;
       setMapReady(true);
-      setSuggestedPlaceZoom(map.getZoom());
       safeApplyBasemapVisualTuning(map, styleUrlRef.current === DARK_STYLE);
       map.resize();
       scheduleForecastRenderRef.current(map);
@@ -686,9 +1197,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       }
     };
     map.on("styledata", handleStyleData);
-    const handleZoomEnd = () => setSuggestedPlaceZoom(map.getZoom());
-    map.on("zoomend", handleZoomEnd);
-
     mapRef.current = map;
 
     const raf = window.requestAnimationFrame(() => map.resize());
@@ -704,11 +1212,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       map.off("mousemove", "grid-fill", handleMouseMove);
       map.off("mouseleave", "grid-fill", handleMouseLeave);
       map.off("styledata", handleStyleData);
-      map.off("zoomend", handleZoomEnd);
       sparkPopupRef.current?.remove();
       sparkPopupRef.current = null;
-      suggestedPlaceMarkersRef.current.forEach((marker) => marker.remove());
-      suggestedPlaceMarkersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
@@ -747,12 +1252,17 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       useExternalColorScale && colorScaleValuesRef.current && Object.keys(colorScaleValuesRef.current).length > 0
         ? colorScaleValuesRef.current
         : values;
-    const { fillColorExpr, scale } = buildAutoColorExprFromValues(scaleSourceValues, activePalette.colors);
+    const { fillColorExpr, scale } = buildAutoColorExprFromValues(
+      scaleSourceValues,
+      activePalette.colors,
+      ["get", "prob"],
+      colorNoData
+    );
     fillExprRef.current = fillColorExpr as unknown as FillColorSpec;
     legendSpecRef.current = scale;
     setLegendSpec(scale);
     requestForecastRender(map);
-  }, [activePalette, colorScaleValues, mapReady, requestForecastRender, useExternalColorScale]);
+  }, [activePalette, colorNoData, colorScaleValues, mapReady, requestForecastRender, useExternalColorScale]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -808,74 +1318,195 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   }, [hasForecastLegend, hotspotsEnabled, onHotspotsEnabledChange]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !mapReady) return;
-    suggestedPlaceMarkersRef.current.forEach((marker) => marker.remove());
-    suggestedPlaceMarkersRef.current = [];
+    if (!poiLayerActive) {
+      setPoiItems([]);
+      return;
+    }
 
-    const useClusters = suggestedPlaceZoom < SUGGESTED_PLACE_CLUSTER_MAX_ZOOM;
-    const clusters = useClusters ? clusterSuggestedPlaces(suggestedPlaces) : suggestedPlaces.map((place) => ({
-      members: [place],
-      center: [place.longitude, place.latitude] as [number, number],
-    }));
-
-    suggestedPlaceMarkersRef.current = clusters.map((cluster) => {
-      const [primaryPlace] = cluster.members;
-      const selected = cluster.members.some((place) => place.id === selectedPlaceId);
-      const isCluster = cluster.members.length > 1;
-      const el = document.createElement("button");
-      el.type = "button";
-      el.className = `poiMarker poiMarker--suggested poiMarker--${primaryPlace.viewingPotential}${
-        selected ? " poiMarker--selected" : ""
-      }${isCluster ? " poiMarker--cluster" : ""}`;
-      el.setAttribute(
-        "aria-label",
-        isCluster ? `Show ${cluster.members.length} suggested places in this area` : `Select ${primaryPlace.name}`
-      );
-      el.innerHTML = isCluster
-        ? `<svg class="poiMarker__starIcon" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M12 1.9l2.98 6.04 6.67.97-4.82 4.69 1.14 6.64L12 17.11l-5.97 3.13 1.14-6.64-4.82-4.69 6.67-.97L12 1.9z"/></svg>`
-        : `<span class="material-symbols-rounded">visibility</span>`;
-
-      el.addEventListener("click", (event) => {
-        event.stopPropagation();
-        if (!isCluster) {
-          onPlaceSelect?.(primaryPlace);
-          return;
+    let cancelled = false;
+    loadPoiData()
+      .then((items) => {
+        if (!cancelled) setPoiItems(items);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setPoiItems([]);
+          console.warn("[POI] failed to load places_of_interest.json", err);
         }
-        map.flyTo({
-          center: cluster.center,
-          zoom: Math.max(map.getZoom(), SUGGESTED_PLACE_CLUSTER_MAX_ZOOM + 0.85),
-          duration: 650,
-          essential: true,
-          padding: { top: 0, right: sidebarPaddingRight, bottom: 0, left: 0 },
-        });
       });
 
-      const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: true }).setHTML(
-        isCluster
-          ? `<div class="poiPopup"><div class="poiPopup__title">${cluster.members.length} suggested places</div><div class="poiPopup__meta">${primaryPlace.region ?? "Clustered forecast area"}</div></div>`
-          : `<div class="poiPopup"><div class="poiPopup__title">${primaryPlace.name}</div><div class="poiPopup__meta">${primaryPlace.viewingPotential.toUpperCase()} viewing potential</div></div>`
-      );
+    return () => {
+      cancelled = true;
+    };
+  }, [poiLayerActive]);
 
-      return new maplibregl.Marker({ element: el, anchor: "bottom" })
-        .setLngLat(cluster.center)
-        .setPopup(popup)
-        .addTo(map);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    let cancelled = false;
+    let removeHandlers: (() => void) | null = null;
+    let pulseIntervalId: number | null = null;
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const baseData = buildPlannerLocationCollection({
+      baseLocation,
+      suggestedPlaces,
+      itineraryPlaceIds,
+      selectedPlaceId,
+      showSuggestedPlaces: showTripHotspotMarkers,
+      poiItems,
+      poiFilters,
     });
 
-    return () => {
-      suggestedPlaceMarkersRef.current.forEach((marker) => marker.remove());
-      suggestedPlaceMarkersRef.current = [];
+    const setupPlannerLocationLayer = async () => {
+      if (!map.isStyleLoaded()) {
+        await new Promise<void>((resolve) => {
+          const waitForStyle = () => {
+            if (map.isStyleLoaded()) {
+              resolve();
+              return;
+            }
+            map.once("styledata", waitForStyle);
+          };
+          waitForStyle();
+        });
+      }
+      if (cancelled || mapRef.current !== map) return;
+
+      await ensurePlannerLocationLayers(map, baseData);
+      if (cancelled || mapRef.current !== map) return;
+
+      if (selectedPlaceId && pulseSelectedPlaceMarker) {
+        let pulseOn = true;
+        const source = getGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID);
+        source?.setData(withPlannerLocationPulse(baseData, pulseOn));
+        pulseIntervalId = window.setInterval(() => {
+          pulseOn = !pulseOn;
+          source?.setData(withPlannerLocationPulse(baseData, pulseOn));
+        }, 520);
+      }
+
+      const placesById = new Map(suggestedPlaces.map((place) => [place.id, place]));
+      const poisById = new Map(poiItems.map((poi) => [getPublicPoiFeatureId(poi), poi]));
+
+      const popupHtmlForFeature = (feature: NonNullable<MapLayerMouseEvent["features"]>[number]) => {
+        const properties = feature.properties ?? {};
+        const id = typeof properties.id === "string" ? properties.id : null;
+        const kind = typeof properties.kind === "string" ? properties.kind : null;
+        if (id && placesById.has(id)) return getSuggestedPlacePopupHtml(placesById.get(id)!);
+        if (id && kind === "poi" && poisById.has(id)) return getPublicPoiPopupHtml(poisById.get(id)!);
+        if (kind === "base" && baseLocation) return getBaseLocationPopupHtml(baseLocation);
+        return "";
+      };
+
+      const handlePlannerLocationClick = (event: MapLayerMouseEvent) => {
+        const feature = event.features?.[0];
+        if (!feature || feature.geometry?.type !== "Point") return;
+        const id = typeof feature.properties?.id === "string" ? feature.properties.id : null;
+        const place = id ? placesById.get(id) : null;
+        event.originalEvent.stopPropagation();
+        if (place) {
+          onPlaceSelect?.(place);
+          return;
+        }
+        const html = popupHtmlForFeature(feature);
+        if (!html) return;
+        popup.setLngLat(feature.geometry.coordinates as [number, number]).setHTML(html).addTo(map);
+      };
+
+      const handlePlannerLocationMouseEnter = () => {
+        map.getCanvas().style.cursor = "pointer";
+      };
+
+      const handlePlannerLocationMouseMove = (event: MapLayerMouseEvent) => {
+        const feature = event.features?.[0];
+        if (!feature || feature.geometry?.type !== "Point") return;
+        const html = popupHtmlForFeature(feature);
+        if (!html) return;
+        popup.setLngLat(feature.geometry.coordinates as [number, number]).setHTML(html).addTo(map);
+      };
+
+      const handlePlannerLocationMouseLeave = () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
+      };
+
+      map.on("click", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationClick);
+      map.on("click", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationClick);
+      map.on("mouseenter", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationMouseEnter);
+      map.on("mousemove", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationMouseMove);
+      map.on("mouseleave", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationMouseLeave);
+      map.on("mouseenter", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseEnter);
+      map.on("mousemove", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseMove);
+      map.on("mouseleave", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseLeave);
+
+      removeHandlers = () => {
+        if (pulseIntervalId !== null) {
+          window.clearInterval(pulseIntervalId);
+          pulseIntervalId = null;
+        }
+        map.off("click", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationClick);
+        map.off("click", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationClick);
+        map.off("mouseenter", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationMouseEnter);
+        map.off("mousemove", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationMouseMove);
+        map.off("mouseleave", PLANNER_LOCATION_CIRCLE_LAYER_ID, handlePlannerLocationMouseLeave);
+        map.off("mouseenter", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseEnter);
+        map.off("mousemove", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseMove);
+        map.off("mouseleave", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseLeave);
+        popup.remove();
+      };
     };
-  }, [mapReady, onPlaceSelect, selectedPlaceId, sidebarPaddingRight, suggestedPlaceZoom, suggestedPlaces]);
+
+    void setupPlannerLocationLayer();
+
+    return () => {
+      cancelled = true;
+      if (pulseIntervalId !== null) {
+        window.clearInterval(pulseIntervalId);
+      }
+      removeHandlers?.();
+      popup.remove();
+    };
+  }, [baseLocation, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedPlaceId, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const data = buildMaxTravelRadiusCollection(baseLocation, maxTravelDistanceMiles);
+    upsertGeoJsonSource(map, PLANNER_MAX_TRAVEL_SOURCE_ID, data);
+
+    if (!map.getLayer(PLANNER_MAX_TRAVEL_LAYER_ID)) {
+      map.addLayer({
+        id: PLANNER_MAX_TRAVEL_LAYER_ID,
+        type: "line",
+        source: PLANNER_MAX_TRAVEL_SOURCE_ID,
+        paint: {
+          "line-color": ["coalesce", ["get", "dashColor"], "#24A38B"],
+          "line-width": 3,
+          "line-opacity": 0.94,
+          "line-blur": 0.2,
+        },
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+      });
+    }
+
+    bringPlannerLocationLayersToFront(map);
+  }, [baseLocation, mapReady, maxTravelDistanceMiles]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady || !selectedPlaceId) return;
     const selected = suggestedPlaces.find((place) => place.id === selectedPlaceId);
     if (!selected) return;
+    const center = getPointCoordinates(selected.latitude, selected.longitude);
+    if (!center) return;
     map.flyTo({
-      center: [Number(selected.longitude), Number(selected.latitude)],
+      center,
       zoom: Math.max(map.getZoom(), 11),
       duration: 850,
       essential: true,
@@ -892,126 +1523,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       padding: { top: 0, right: sidebarPaddingRight, bottom: 0, left: 0 },
     });
   }, [mapReady, sidebarPaddingRight]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    const showPoi = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
-    if (!showPoi) {
-      poiMarkersRef.current.forEach((marker) => marker.remove());
-      poiMarkersRef.current = [];
-      return;
-    }
-
-    const loadPoi = async () => {
-      if (poiLoadedRef.current && poiDataRef.current) return poiDataRef.current;
-      const base = import.meta.env.BASE_URL || "/";
-      const normalizedBase = base.endsWith("/") ? base : `${base}/`;
-      const candidates = Array.from(
-        new Set([
-          `${normalizedBase}data/places_of_interest.json`,
-          "/data/places_of_interest.json",
-          "data/places_of_interest.json",
-        ])
-      );
-
-      for (const url of candidates) {
-        try {
-          const response = await fetch(url);
-          if (!response.ok) continue;
-          const payload = (await response.json()) as
-            | { items?: Array<{ type: string; name: string; latitude: number; longitude: number }> }
-            | Array<{ type: string; name: string; latitude: number; longitude: number }>
-            | { features?: Array<{ properties?: Record<string, unknown>; geometry?: { coordinates?: [number, number] } }> };
-
-          const items = Array.isArray(payload)
-            ? payload
-            : "items" in payload && Array.isArray(payload.items)
-              ? payload.items
-              : "features" in payload && Array.isArray(payload.features)
-                ? payload.features.map((feature) => {
-                    const props = feature.properties ?? {};
-                    const coordinates = feature.geometry?.coordinates ?? [Number.NaN, Number.NaN];
-                    return {
-                      type: String(props.type ?? props.category ?? ""),
-                      name: String(props.name ?? "POI"),
-                      latitude: Number(coordinates[1]),
-                      longitude: Number(coordinates[0]),
-                    };
-                  })
-                : [];
-
-          poiLoadedRef.current = true;
-          poiDataRef.current = items;
-          return items;
-        } catch {
-          // Try next candidate URL.
-        }
-      }
-
-      throw new Error("Failed to load POI data");
-    };
-
-    let cancelled = false;
-
-    const renderPoiMarkers = (items: Array<{ type: string; name: string; latitude: number; longitude: number }>) => {
-      if (cancelled || !mapRef.current) return;
-      poiMarkersRef.current.forEach((marker) => marker.remove());
-      poiMarkersRef.current = [];
-
-      const iconMap: Record<string, string> = { Park: "park", Marina: "sailing", Ferry: "directions_boat" };
-      const typeToFilterKey = (value: string): keyof typeof poiFilters | null => {
-        const normalized = value.trim().toLowerCase();
-        if (normalized === "park") return "Park";
-        if (normalized === "marina") return "Marina";
-        if (normalized === "ferry") return "Ferry";
-        return null;
-      };
-
-      const safeItems = items
-        .map((poi) => ({ ...poi, filterKey: typeToFilterKey(String(poi.type ?? "")) }))
-        .filter(
-          (poi) => poi.filterKey !== null && Number.isFinite(Number(poi.latitude)) && Number.isFinite(Number(poi.longitude))
-        );
-      const filteredItems = safeItems.filter((poi) => poi.filterKey && (poiFilters[poi.filterKey] ?? false));
-      const itemsToRender = filteredItems.length > 0 ? filteredItems : safeItems;
-
-      poiMarkersRef.current = itemsToRender.map((poi) => {
-        const el = document.createElement("button");
-        el.type = "button";
-        el.className = "poiMarker";
-        el.setAttribute("aria-label", poi.name);
-        el.innerHTML = `<span class="material-symbols-rounded">${poi.filterKey ? iconMap[poi.filterKey] : "directions_boat"}</span>`;
-
-        const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: true }).setHTML(
-          `<div class="poiPopup"><div class="poiPopup__title">${poi.name}</div><div class="poiPopup__meta">${Number(poi.latitude).toFixed(4)}, ${Number(poi.longitude).toFixed(4)}</div></div>`
-        );
-
-        return new maplibregl.Marker({ element: el, anchor: "bottom" })
-          .setLngLat([Number(poi.longitude), Number(poi.latitude)])
-          .setPopup(popup)
-          .addTo(map);
-      });
-    };
-
-    loadPoi()
-      .then((items) => {
-        if (cancelled || !mapRef.current) return;
-        if (!mapRef.current.isStyleLoaded()) {
-          mapRef.current.once("load", () => renderPoiMarkers(items));
-          return;
-        }
-        renderPoiMarkers(items);
-      })
-      .catch((err) => {
-        if (!cancelled) console.warn("[POI] failed to load places_of_interest.json", err);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mapReady, poiFilters, styleUrl]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1035,14 +1546,16 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
           <span>{mapModeLabel ?? "Choose dates to build a seasonal occurrence map"}</span>
         </div>
       )}
-      <MapControls
-        hasForecastLegend={hasForecastLegend}
-        legendOpen={legendOpen}
-        legendSpec={legendSpec}
-        onLegendToggle={() => setLegendOpen((value) => !value)}
-        onZoomIn={() => mapRef.current?.zoomIn({ duration: 180 })}
-        onZoomOut={() => mapRef.current?.zoomOut({ duration: 180 })}
-      />
+      {showMapControls ? (
+        <MapControls
+          hasForecastLegend={showLegendControl && hasForecastLegend}
+          legendOpen={showLegendControl && legendOpen}
+          legendSpec={legendSpec}
+          onLegendToggle={() => setLegendOpen((value) => !value)}
+          onZoomIn={() => mapRef.current?.zoomIn({ duration: 180 })}
+          onZoomOut={() => mapRef.current?.zoomOut({ duration: 180 })}
+        />
+      ) : null}
     </div>
   );
 });

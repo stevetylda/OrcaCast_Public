@@ -194,6 +194,7 @@ export function useWatchPageController() {
     forecastPath,
     fallbackForecastPath: latestForecastPath,
     enabled: periods.length > 0,
+    poiFilters,
   });
 
   useEffect(() => {

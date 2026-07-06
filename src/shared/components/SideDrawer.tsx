@@ -75,7 +75,8 @@ export function SideDrawer({ open, onClose }: Props) {
   const navigate = useNavigate();
 
   const items: NavItem[] = [
-    { label: "Map", path: "/", icon: "map_search" },
+    { label: "Home", path: "/", icon: "home" },
+    { label: "Map", path: "/watch", icon: "map_search" },
     { label: "Planner", path: "/planner", icon: "event_note" },
     { label: "About", path: "/about", icon: "info" },
   ];
@@ -106,7 +107,7 @@ export function SideDrawer({ open, onClose }: Props) {
         <nav className="sideDrawer__nav" aria-label="Primary navigation">
           {items.map((item) => {
             const isDisabled = Boolean(item.comingSoon);
-            const isActive = !isDisabled && (item.path === "/" ? pathname === "/" : pathname === item.path);
+            const isActive = !isDisabled && pathname === item.path;
 
             return (
               <button

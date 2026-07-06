@@ -6,6 +6,7 @@ import type { H3Resolution } from "../../shared/config/dataPaths";
 import { normalizeDataLoadError, type DataLoadError } from "../../shared/data/errors";
 import { attachProbabilities, loadForecast, loadGrid } from "../../shared/data/forecastIO";
 import { buildAutoColorExprFromValues } from "../../shared/geo/colorScale";
+import { removeGridOverlay } from "../../shared/geo/gridOverlay";
 import type { HeatScale } from "../../shared/geo/colorScale";
 import type { FillColorSpec } from "./types";
 
@@ -16,6 +17,8 @@ type UseForecastDataArgs = {
   fallbackForecastPath?: string;
   modelId: string;
   externalValues?: Record<string, number>;
+  forecastOverlayEnabled?: boolean;
+  colorNoData?: boolean;
   pulseAllGridCells?: boolean;
   onGridCellCount?: (count: number) => void;
   useExternalColorScale: boolean;
@@ -34,6 +37,7 @@ type UseForecastDataArgs = {
   setLegendSpec: Dispatch<SetStateAction<HeatScale | null>>;
   scheduleForecastRender: (map: MapLibreMap, isCancelled?: () => boolean) => void;
   onFatalDataError?: (error: DataLoadError) => void;
+  onOverlayLoaded?: () => void;
 };
 
 export function useForecastData({
@@ -43,6 +47,8 @@ export function useForecastData({
   fallbackForecastPath,
   modelId,
   externalValues,
+  forecastOverlayEnabled = true,
+  colorNoData = false,
   pulseAllGridCells = false,
   onGridCellCount,
   useExternalColorScale,
@@ -61,10 +67,28 @@ export function useForecastData({
   setLegendSpec,
   scheduleForecastRender,
   onFatalDataError,
+  onOverlayLoaded,
 }: UseForecastDataArgs) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
+    if (!forecastOverlayEnabled) {
+      removeGridOverlay(map);
+      overlayRef.current = null;
+      fillExprRef.current = null;
+      legendSpecRef.current = null;
+      hotspotThresholdRef.current = undefined;
+      modeledHotspotThresholdRef.current = undefined;
+      shimmerThresholdRef.current = undefined;
+      sortedValuesDescRef.current = [];
+      totalCellsRef.current = 0;
+      valuesByCellRef.current = {};
+      setLegendSpec(null);
+      onGridCellCount?.(0);
+      onOverlayLoaded?.();
+      return;
+    }
+
     const DEBUG_MAP =
       import.meta.env.DEV &&
       typeof window !== "undefined" &&
@@ -76,7 +100,7 @@ export function useForecastData({
         useExternalColorScale && colorScaleValuesRef.current && Object.keys(colorScaleValuesRef.current).length > 0
           ? colorScaleValuesRef.current
           : values;
-      const { fillColorExpr, scale } = buildAutoColorExprFromValues(scaleSourceValues, paletteColors);
+      const { fillColorExpr, scale } = buildAutoColorExprFromValues(scaleSourceValues, paletteColors, ["get", "prob"], colorNoData);
       const valueList = Object.values(values)
         .map((v) => Number(v))
         .filter((v) => Number.isFinite(v) && v > 0)
@@ -173,6 +197,7 @@ export function useForecastData({
         onGridCellCount?.(featureValues.length);
         valuesByCellRef.current = values;
         overlayRef.current = joined;
+        onOverlayLoaded?.();
         if (DEBUG_MAP) {
           console.info("[MapDebug] overlayLoaded", {
             resolution,
@@ -202,9 +227,11 @@ export function useForecastData({
     mapReady,
     forecastPath,
     fallbackForecastPath,
+    forecastOverlayEnabled,
     modelId,
     externalValues,
     pulseAllGridCells,
+    colorNoData,
     onGridCellCount,
     useExternalColorScale,
     paletteColors,

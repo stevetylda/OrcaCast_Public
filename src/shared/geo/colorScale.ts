@@ -2,6 +2,7 @@ export type HeatScale = {
   thresholds: number[];
   binColorsRgba: string[];
   labels: string[];
+  zeroColor?: string;
   binRanges: Array<{
     percentileMin: number;
     percentileMax: number;
@@ -86,7 +87,8 @@ function buildInterpolatedFillExpr(
 export function buildAutoColorExprFromValues(
   probsByH3: Record<string, number>,
   palette: string[],
-  valueExpr: unknown[] = ["get", "prob"]
+  valueExpr: unknown[] = ["get", "prob"],
+  colorNoData = false
 ): ColorScaleResult {
   const values = Object.values(probsByH3)
     .map((v) => Number(v))
@@ -102,7 +104,9 @@ export function buildAutoColorExprFromValues(
   const maxValue = Math.max(...values);
   const minValue = Math.min(...values);
   const bins = Math.max(1, thresholds.length + 1);
-  const colors = normalizePaletteColors(palette, bins);
+  const allColors = normalizePaletteColors(palette, colorNoData ? bins + 1 : bins);
+  const zeroColor = colorNoData ? allColors[0] ?? ZERO_COLOR : ZERO_COLOR;
+  const colors = colorNoData ? allColors.slice(1) : allColors;
   const quantileBounds = [0, ...Q_LEVELS, 1];
   const binRanges = Array.from({ length: bins }, (_, idx) => ({
     percentileMin: quantileBounds[idx] * 100,
@@ -113,18 +117,19 @@ export function buildAutoColorExprFromValues(
 
   if (thresholds.length === 0) {
     return {
-      fillColorExpr: buildInterpolatedFillExpr([], colors, minValue, ZERO_COLOR, valueExpr),
+      fillColorExpr: buildInterpolatedFillExpr([], colors, minValue, zeroColor, valueExpr),
       scale: {
         thresholds: [],
         binColorsRgba: colors.length ? colors : [ZERO_COLOR],
         labels: LABELS,
+        zeroColor,
         binRanges,
         hotspotThreshold: maxValue,
       },
     };
   }
 
-  const expr = buildInterpolatedFillExpr(thresholds, colors, minValue, ZERO_COLOR, valueExpr);
+  const expr = buildInterpolatedFillExpr(thresholds, colors, minValue, zeroColor, valueExpr);
 
   return {
     fillColorExpr: expr,
@@ -132,6 +137,7 @@ export function buildAutoColorExprFromValues(
       thresholds,
       binColorsRgba: colors,
       labels: LABELS,
+      zeroColor,
       binRanges,
       hotspotThreshold: thresholds[thresholds.length - 1],
     },
@@ -143,19 +149,20 @@ export function buildFillExprFromScale(
   zeroColor = ZERO_COLOR,
   valueExpr: unknown[] = ["get", "prob"]
 ): unknown[] {
+  const resolvedZeroColor = scale.zeroColor ?? zeroColor;
   if (scale.thresholds.length === 0) {
     return [
       "case",
       ["<=", ["coalesce", valueExpr, 0], 0],
-      zeroColor,
-      scale.binColorsRgba[0] ?? zeroColor,
+      resolvedZeroColor,
+      scale.binColorsRgba[0] ?? resolvedZeroColor,
     ];
   }
   return buildInterpolatedFillExpr(
     scale.thresholds,
     scale.binColorsRgba,
     scale.binRanges[0]?.probMin ?? scale.thresholds[0] ?? 0,
-    zeroColor,
+    resolvedZeroColor,
     valueExpr
   );
 }

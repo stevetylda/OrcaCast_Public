@@ -30,7 +30,7 @@ function buildBinTooltip(
 
 export function ProbabilityLegend({ scale }: Props) {
   if (!scale) return null;
-  const { binColorsRgba, labels, binRanges } = scale;
+  const { binColorsRgba, labels, binRanges, zeroColor } = scale;
   const nonZeroLabels = labels.slice(1, 1 + binColorsRgba.length);
 
   return (
@@ -44,7 +44,7 @@ export function ProbabilityLegend({ scale }: Props) {
           data-tooltip="No probability observed for this cell in the selected week (p=0)."
           tabIndex={0}
         >
-          <span className="legend__swatch" style={{ background: ZERO_COLOR }} />
+          <span className="legend__swatch" style={{ background: zeroColor ?? ZERO_COLOR }} />
           <div className="legend__label">{labels[0]}</div>
         </div>
 

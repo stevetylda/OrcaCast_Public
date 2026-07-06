@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Friday Harbor, WA",
+    "latitude": 48.534266,
+    "longitude": -123.017124
+  },
+  {
+    "name": "Sequim, WA",
+    "latitude": 48.079536,
+    "longitude": -123.101842
+  },
+  {
+    "name": "Seattle, WA",
+    "latitude": 47.606209,
+    "longitude": -122.332069
+  },
+  {
+    "name": "Everett, WA",
+    "latitude": 47.978985,
+    "longitude": -122.202079
+  },
+  {
+    "name": "Tacoma, WA",
+    "latitude": 47.252876,
+    "longitude": -122.44429
+  },
+  {
+    "name": "Victoria, BC",
+    "latitude": 48.428421,
+    "longitude": -123.365646
+  }
+]

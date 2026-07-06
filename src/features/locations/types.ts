@@ -15,6 +15,7 @@ export type PoiType = "Park" | "Marina" | "Ferry" | "Other";
 
 export type SuggestedPlace = {
   id: string;
+  spotId: string;
   name: string;
   region?: string;
   type: PoiType;
@@ -24,6 +25,7 @@ export type SuggestedPlace = {
   score: number;
   reason: string;
   distanceKm?: number;
+  imageUrl?: string;
   hasLiveFeed?: boolean;
   hasHydrophone?: boolean;
 };

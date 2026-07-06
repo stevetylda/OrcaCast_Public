@@ -651,7 +651,7 @@
 }
 
 .sideDrawer__title {
-  font-family: "Plus Jakarta Sans", "Sora", sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: 18px;
   font-weight: 700;
 }
@@ -701,7 +701,7 @@
 }
 
 .modal__title {
-  font-family: "Plus Jakarta Sans", "Sora", sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: 18px;
   font-weight: 700;
 }
@@ -1969,14 +1969,23 @@
   white-space: normal;
 }
 
-.map__controlRail {
+.map__legendControl {
+  position: absolute;
+  left: var(--map-control-left, 1.5rem);
+  bottom: var(--map-legend-bottom, 18rem);
+  z-index: 20;
+  width: 42px;
+  display: grid;
+  justify-items: center;
+}
+
+.map__zoomControl {
   position: absolute;
   left: var(--map-control-left, 1.5rem);
   bottom: var(--map-zoom-bottom, 8rem);
   z-index: 20;
   width: 42px;
   display: grid;
-  gap: 12px;
   justify-items: center;
 }
 
@@ -2211,7 +2220,12 @@
     max-width: 186px;
   }
 
-  .map__controlRail {
+  .map__legendControl {
+    left: 10px;
+    bottom: 286px;
+  }
+
+  .map__zoomControl {
     left: 10px;
     bottom: 72px;
   }
@@ -2626,7 +2640,7 @@
 }
 
 .pageHeader__title {
-  font-family: "Plus Jakarta Sans", "Sora", sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   font-weight: 700;
   font-size: 18px;
   letter-spacing: 0.2px;
@@ -2720,7 +2734,7 @@
 
 .pageSection h2 {
   margin-top: 0;
-  font-family: "Plus Jakarta Sans", "Sora", sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
 }
 
 .pageSection ul {

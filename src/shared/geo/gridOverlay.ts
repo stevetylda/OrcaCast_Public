@@ -405,7 +405,7 @@ function buildColorStops(samples: SurfaceSample[], paletteColors: string[], scal
     const minValue = scale.binRanges[0]?.probMin ?? scale.thresholds[0] ?? 0;
     const stopValues = [minValue, ...scale.thresholds];
     const stopColors = scale.binColorsRgba.map(parseCssColor);
-    return { stopValues, stopColors };
+    return { stopValues, stopColors, zeroColor: parseCssColor(scale.zeroColor ?? "rgba(0,0,0,0)") };
   }
   const colors = paletteColors.length > 0 ? paletteColors.map(parseCssColor) : [parseCssColor("#ffffff")];
   const positive = samples.map((sample) => sample.prob).filter((value) => value > 0);
@@ -413,11 +413,12 @@ function buildColorStops(samples: SurfaceSample[], paletteColors: string[], scal
   const maxValue = positive.length > 0 ? Math.max(...positive) : 1;
   const steps = Math.max(1, colors.length - 1);
   const stopValues = colors.map((_, index) => minValue + ((maxValue - minValue) * index) / steps);
-  return { stopValues, stopColors: colors };
+  return { stopValues, stopColors: colors, zeroColor: [0, 0, 0, 0] as RGBA };
 }
 
-function sampleColor(value: number, stopValues: number[], stopColors: RGBA[]): RGBA {
-  if (stopColors.length === 0 || value <= 0) return [0, 0, 0, 0];
+function sampleColor(value: number, stopValues: number[], stopColors: RGBA[], zeroColor: RGBA): RGBA {
+  if (stopColors.length === 0) return zeroColor;
+  if (value <= 0) return zeroColor;
   if (stopColors.length === 1 || stopValues.length <= 1) return [...stopColors[0]] as RGBA;
   if (value <= stopValues[0]) return [...stopColors[0]] as RGBA;
   for (let index = 0; index < stopValues.length - 1; index += 1) {
@@ -686,7 +687,7 @@ function buildSurfaceRasterSync(
   const imageData = ctx.createImageData(width, height);
   const pixels = imageData.data;
   const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-6);
-  const { stopValues, stopColors } = buildColorStops(samples, paletteColors, scale);
+  const { stopValues, stopColors, zeroColor } = buildColorStops(samples, paletteColors, scale);
 
   for (let y = 0; y < height; y += 1) {
     const lat = canvasYToLat(y, bounds, height);
@@ -699,7 +700,7 @@ function buildSurfaceRasterSync(
         pixels[pixelIndex + 3] = 0;
         continue;
       }
-      const [r, g, b, a] = sampleColor(value, stopValues, stopColors);
+      const [r, g, b, a] = sampleColor(value, stopValues, stopColors, zeroColor);
       const alpha = surfaceAlphaForValue(value, stopValues, a);
       if (alpha <= 0) {
         pixels[pixelIndex + 3] = 0;

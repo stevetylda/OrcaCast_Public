@@ -65,10 +65,10 @@ export function PageShell({
               {darkMode ? "light_mode" : "dark_mode"}
             </span>
           </button>
-          <Link className="backToMap" to="/" aria-label="Back to map" title="Back to map">
+          <Link className="backToMap" to="/" aria-label="Back home" title="Back home">
             <span className="backToMap__icon">
               <span className="material-symbols-rounded" aria-hidden="true">
-                map
+                home
               </span>
               <span className="material-symbols-rounded" aria-hidden="true">
                 subdirectory_arrow_left

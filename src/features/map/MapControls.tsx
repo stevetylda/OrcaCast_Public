@@ -23,21 +23,22 @@ export const MapControls = memo(function MapControls({
   trackRender("MapControls");
   return (
     <>
-      <div className="map__controlRail">
-        <button
-          className={`iconBtn legendToggleBtn${!hasForecastLegend ? " legendToggleBtn--disabled" : ""}${
-            legendOpen ? " legendToggleBtn--active" : ""
-          }`}
-          onClick={onLegendToggle}
-          aria-label={legendOpen ? "Hide legend" : "Show legend"}
-          data-tour="legend-toggle"
-          disabled={!hasForecastLegend}
-        >
-          <span className="material-symbols-rounded" aria-hidden="true">
-            legend_toggle
-          </span>
-        </button>
-        <div className="map__zoomStack" aria-label="Map zoom controls">
+      {hasForecastLegend ? (
+        <div className="map__legendControl">
+          <button
+            className={`iconBtn legendToggleBtn${legendOpen ? " legendToggleBtn--active" : ""}`}
+            onClick={onLegendToggle}
+            aria-label={legendOpen ? "Hide legend" : "Show legend"}
+            data-tour="legend-toggle"
+          >
+            <span className="material-symbols-rounded" aria-hidden="true">
+              legend_toggle
+            </span>
+          </button>
+        </div>
+      ) : null}
+      <div className="map__zoomControl" aria-label="Map zoom controls">
+        <div className="map__zoomStack">
           <button type="button" className="map__zoomBtn" onClick={onZoomIn} aria-label="Zoom in">
             <span className="material-symbols-rounded" aria-hidden="true">
               add

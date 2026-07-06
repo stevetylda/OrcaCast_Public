@@ -1,0 +1,105 @@
+{
+  "lime-kiln-point-state-park": {
+    "spotId": "lime-kiln-point-state-park",
+    "imageSrc": "/spot-photos/lime-kiln-point-state-park.webp",
+    "alt": "Lime Kiln Lighthouse overlooking the water at Lime Kiln Point State Park",
+    "status": "approved",
+    "title": "Lime Kiln Lighthouse 01.jpg",
+    "creator": "Joe Mabel",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lime_Kiln_Lighthouse_01.jpg",
+    "license": "cc_by_sa_4_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "focalPoint": "58% 50%"
+  },
+  "alki-beach": {
+    "spotId": "alki-beach",
+    "status": "missing",
+    "alt": "View from Alki Beach in Seattle",
+    "notes": "Need open-license photo. Prefer shoreline or Elliott Bay composition."
+  },
+  "edmonds": {
+    "spotId": "edmonds",
+    "status": "missing",
+    "alt": "Edmonds waterfront near the ferry terminal",
+    "notes": "Need open-license photo. Prefer ferry or waterfront composition."
+  },
+  "lime-kiln-point": {
+    "spotId": "lime-kiln-point",
+    "status": "missing",
+    "alt": "Waterfront view near Lime Kiln Point",
+    "notes": "May duplicate Lime Kiln Point State Park unless intentionally separate."
+  },
+  "fort-worden-state-park": {
+    "spotId": "fort-worden-state-park",
+    "status": "missing",
+    "alt": "Coastal view at Fort Worden State Park",
+    "notes": "Need open-license photo. Prefer Point Wilson, lighthouse, or water view."
+  },
+  "fort-flagler": {
+    "spotId": "fort-flagler",
+    "status": "missing",
+    "alt": "Coastal view at Fort Flagler",
+    "notes": "Need open-license photo. Prefer bluff, beach, or Admiralty Inlet view."
+  },
+  "bainbridge-island": {
+    "spotId": "bainbridge-island",
+    "status": "missing",
+    "alt": "Waterfront view from Bainbridge Island",
+    "notes": "Need open-license photo. Prefer ferry or shoreline composition."
+  },
+  "blind-island": {
+    "spotId": "blind-island",
+    "status": "missing",
+    "alt": "Shoreline view near Blind Island",
+    "notes": "Need open-license photo. Prefer shoreline and channel composition."
+  },
+  "bush-point": {
+    "spotId": "bush-point",
+    "status": "missing",
+    "alt": "View from Bush Point on Whidbey Island",
+    "notes": "Need open-license photo. Prefer bluff or channel view."
+  },
+  "coupeville": {
+    "spotId": "coupeville",
+    "status": "missing",
+    "alt": "Coupeville waterfront near the ferry terminal",
+    "notes": "Need open-license photo. Prefer waterfront or ferry composition."
+  },
+  "fort-worden": {
+    "spotId": "fort-worden",
+    "status": "missing",
+    "alt": "Coastal view near Fort Worden",
+    "notes": "Use only if this is intentionally separate from Fort Worden State Park."
+  },
+  "friday-harbor": {
+    "spotId": "friday-harbor",
+    "status": "missing",
+    "alt": "Friday Harbor waterfront near the ferry terminal",
+    "notes": "Need open-license photo. Prefer ferry terminal or marina composition."
+  },
+  "port-townsend": {
+    "spotId": "port-townsend",
+    "status": "missing",
+    "alt": "Port Townsend waterfront and ferry terminal",
+    "notes": "Need open-license photo. Prefer ferry or waterfront composition."
+  },
+  "posey-island": {
+    "spotId": "posey-island",
+    "status": "missing",
+    "alt": "Coastal waters near Posey Island",
+    "notes": "Need open-license photo. Prefer channel or shoreline composition."
+  },
+  "sidney": {
+    "spotId": "sidney",
+    "status": "missing",
+    "alt": "Sidney waterfront near the ferry terminal",
+    "notes": "Need open-license photo. Prefer ferry or harbor composition."
+  },
+  "turn-island": {
+    "spotId": "turn-island",
+    "status": "missing",
+    "alt": "View near Turn Island in the Salish Sea",
+    "notes": "Need open-license photo. Prefer shoreline or channel composition."
+  }
+}

@@ -2,6 +2,7 @@ import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
 import type { H3Resolution } from "../../shared/config/dataPaths";
 import type { DataLoadError } from "../../shared/data/errors";
 import type { Period } from "../../shared/data/periods";
+import type { PlannerBaseLocation } from "../../shared/data/plannerBaseLocations";
 import type { PaletteId } from "../../shared/geo/palettes";
 import type { SuggestedPlace } from "../locations/types";
 
@@ -19,6 +20,9 @@ export type GridCellExpandRequest = {
 
 export type ForecastMapProps = {
   darkMode: boolean;
+  showMapControls?: boolean;
+  showLegendControl?: boolean;
+  colorNoData?: boolean;
   paletteId: PaletteId;
   surfaceMode: "grid" | "surface";
   resolution: H3Resolution;
@@ -40,12 +44,18 @@ export type ForecastMapProps = {
   colorScaleValues?: Record<string, number>;
   useExternalColorScale?: boolean;
   externalValues?: Record<string, number>;
+  forecastOverlayEnabled?: boolean;
   pulseAllGridCells?: boolean;
   mapModeLabel?: string;
   onFatalDataError?: (error: DataLoadError) => void;
   suggestedPlaces?: SuggestedPlace[];
+  itineraryPlaceIds?: string[];
   selectedPlaceId?: string | null;
+  pulseSelectedPlaceMarker?: boolean;
   onPlaceSelect?: (place: SuggestedPlace) => void;
+  showTripHotspotMarkers?: boolean;
+  baseLocation?: PlannerBaseLocation | null;
+  maxTravelDistanceMiles?: number | null;
   sidebarOffsetPx?: number;
 };
 
@@ -57,4 +67,5 @@ export type ForecastMapHandle = {
     width?: number;
     height?: number;
   }) => Promise<Blob | null>;
+  fitLocations: (locations: LngLat[], options?: { padding?: number; maxZoom?: number }) => void;
 };
