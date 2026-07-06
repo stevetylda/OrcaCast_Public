@@ -1,21 +1,58 @@
-import { runExplainabilityUnitTests } from "../src/features/explainability/utils.test.ts";
-import { runDeltaMapUnitTests } from "../src/map/deltaMap.test.ts";
-import { runH3UnitTests } from "../src/data/h3.test.ts";
-import { runFetchClientUnitTests } from "../src/data/fetchClient.test.ts";
-import { runCompareSourcesUnitTests } from "../src/pages/MapPage/compareSources.test.ts";
+import { readdir } from "node:fs/promises";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 type TestCase = {
   name: string;
   run: () => void | Promise<void>;
 };
 
-const tests: TestCase[] = [
-  { name: "deltaMap", run: runDeltaMapUnitTests },
-  { name: "explainability utils", run: runExplainabilityUnitTests },
-  { name: "H3 helpers", run: runH3UnitTests },
-  { name: "fetchClient", run: runFetchClientUnitTests },
-  { name: "compare sources", run: runCompareSourcesUnitTests },
-];
+const TEST_FILE_PATTERN = /\.(test|spec)\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
+
+async function collectTestFiles(directory: string): Promise<string[]> {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const testFiles: string[] = [];
+
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      testFiles.push(...(await collectTestFiles(entryPath)));
+      continue;
+    }
+
+    if (entry.isFile() && TEST_FILE_PATTERN.test(entry.name)) {
+      testFiles.push(entryPath);
+    }
+  }
+
+  return testFiles;
+}
+
+async function loadTests(): Promise<TestCase[]> {
+  const srcDirectory = path.resolve("src");
+  const testFiles = (await collectTestFiles(srcDirectory)).sort();
+  const tests: TestCase[] = [];
+
+  for (const testFile of testFiles) {
+    const moduleUrl = pathToFileURL(testFile).href;
+    const testModule = await import(moduleUrl);
+
+    for (const [exportName, exportedValue] of Object.entries(testModule)) {
+      if (!/^run.+UnitTests$/.test(exportName) || typeof exportedValue !== "function") {
+        continue;
+      }
+
+      tests.push({
+        name: path.relative(process.cwd(), testFile),
+        run: exportedValue as () => void | Promise<void>,
+      });
+    }
+  }
+
+  return tests;
+}
+
+const tests = await loadTests();
 
 let failures = 0;
 

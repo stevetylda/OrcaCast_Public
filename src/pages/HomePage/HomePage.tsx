@@ -91,41 +91,13 @@ export function HomePage() {
                   <div className="homeFeatureCard__visual" aria-hidden="true">
                     {card.accent === "homeFeatureCard--trip" ? (
                       <div className="homePlannerPreview">
-                        <div className="homePlannerPreview__map">
-                          <div className="homePlannerPreview__waterGlow homePlannerPreview__waterGlow--one" />
-                          <div className="homePlannerPreview__waterGlow homePlannerPreview__waterGlow--two" />
-                          <div className="homePlannerPreview__waterGlow homePlannerPreview__waterGlow--three" />
-                          <div className="homePlannerPreview__hexLayer" />
-                          <div className="homePlannerPreview__range">
-                            <span>20 mi</span>
-                          </div>
-                          <span className="homePlannerPreview__mapLabel homePlannerPreview__mapLabel--victoria">Victoria</span>
-                          <span className="homePlannerPreview__mapLabel homePlannerPreview__mapLabel--portAngeles">Port Angeles</span>
-                          <span className="homePlannerPreview__mapLabel homePlannerPreview__mapLabel--sequim">Sequim</span>
-                          <span className="homePlannerPreview__mapLabel homePlannerPreview__mapLabel--sanJuan">San Juan Islands</span>
-                          <span className="homePlannerPreview__mapLabel homePlannerPreview__mapLabel--friday">Friday Harbor</span>
-                          <div className="homePlannerPreview__tripCard">
-                            <span className="homePlannerPreview__tripIcon material-symbols-rounded">calendar_month</span>
-                            <div>
-                              <strong>Trip from Sequim, WA</strong>
-                              <span>Aug 1 – Aug 31 · 31 days</span>
-                              <span>Up to 20 mi</span>
-                            </div>
-                          </div>
-                          <span className="homePlannerPreview__placePin homePlannerPreview__placePin--one material-symbols-rounded">anchor</span>
-                          <span className="homePlannerPreview__placePin homePlannerPreview__placePin--two material-symbols-rounded">park</span>
-                          <span className="homePlannerPreview__placePin homePlannerPreview__placePin--three material-symbols-rounded">home_pin</span>
-                          <span className="homePlannerPreview__placePin homePlannerPreview__placePin--four homePlannerPreview__placePin--image">
-                            <img src="/images/icons/binoculars_recreated.svg" alt="" aria-hidden="true" />
-                          </span>
-                          <span className="homePlannerPreview__placePin homePlannerPreview__placePin--five homePlannerPreview__placePin--image">
-                            <img src="/images/icons/binoculars_recreated.svg" alt="" aria-hidden="true" />
-                          </span>
-                          <span className="homePlannerPreview__placePin homePlannerPreview__placePin--six material-symbols-rounded">directions_boat</span>
-                          <div className="homePlannerPreview__activityBadge">
-                            <span className="material-symbols-rounded" aria-hidden="true">waves</span>
-                            <span>Typical activity</span>
-                            <strong>High</strong>
+                        <div className="homePlannerPreview__shell">
+                          <div className="homePlannerPreview__map">
+                            <img
+                              className="homePlannerPreview__mapImage"
+                              src="/assets/home/plan-around-dates-map-preview.svg"
+                              alt=""
+                            />
                           </div>
                         </div>
                       </div>
