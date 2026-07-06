@@ -57,6 +57,13 @@ export function AppFooter({
   const [activePanel, setActivePanel] = useState<DockPanelId>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
+  const setDockPanel = (nextPanel: DockPanelId | ((current: DockPanelId) => DockPanelId)) => {
+    setActivePanel((current) => {
+      const resolved = typeof nextPanel === "function" ? nextPanel(current) : nextPanel;
+      if (resolved !== "settings") setPaletteOpen(false);
+      return resolved;
+    });
+  };
 
   const liveCamPlaces = useMemo(() => places.filter((place) => place.hasLiveFeed), [places]);
   const hydrophonePlaces = useMemo(() => places.filter((place) => place.hasHydrophone), [places]);
@@ -66,11 +73,11 @@ export function AppFooter({
     if (!activePanel) return;
     const onPointerDown = (event: MouseEvent) => {
       if (!dockRef.current?.contains(event.target as Node)) {
-        setActivePanel(null);
+        setDockPanel(null);
       }
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActivePanel(null);
+      if (event.key === "Escape") setDockPanel(null);
     };
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -78,10 +85,6 @@ export function AppFooter({
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [activePanel]);
-
-  useEffect(() => {
-    if (activePanel !== "settings") setPaletteOpen(false);
   }, [activePanel]);
 
   const activePalette = PALETTES[selectedPaletteId];
@@ -178,7 +181,7 @@ export function AppFooter({
                 <button
                   type="button"
                   className="footerDock__closeButton"
-                  onClick={() => setActivePanel(null)}
+                  onClick={() => setDockPanel(null)}
                   title="Close settings"
                   aria-label="Close settings"
                 >
@@ -391,7 +394,7 @@ export function AppFooter({
                 key={item.id}
                 type="button"
                 className={`footerDock__button${item.id === "settings" ? " footerDock__button--iconOnly" : ""}${open ? " isActive" : ""}`}
-                onClick={() => setActivePanel(open ? null : item.id)}
+                onClick={() => setDockPanel(open ? null : item.id)}
                 data-tour={item.id === "settings" ? "tools" : undefined}
                 aria-label={item.label}
               >

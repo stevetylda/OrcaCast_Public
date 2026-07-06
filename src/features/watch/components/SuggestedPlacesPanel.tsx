@@ -51,7 +51,6 @@ export function SuggestedPlacesPanel({
   isLoading = false,
   error = null,
   mapRef,
-  unitsMode: _unitsMode,
   open,
   onClose,
   onSelectPlace,

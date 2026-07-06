@@ -806,7 +806,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     },
     [
       activePalette.colors,
-      darkMode,
       gridBorderColor,
       gridLineAccentColor,
       hotspotMode,

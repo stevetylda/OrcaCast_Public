@@ -346,20 +346,20 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
   const [places, setPlaces] = useState<SuggestedPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const effectivePlaces = enabled ? places : [];
+  const effectiveIsLoading = enabled ? isLoading : false;
+  const effectiveError = enabled ? error : null;
 
   useEffect(() => {
-    if (!enabled) {
-      setPlaces([]);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
+    if (!enabled) return;
 
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
 
     const load = async () => {
+      if (!cancelled) {
+        setIsLoading(true);
+        setError(null);
+      }
       const [poiBundle, grid] = await Promise.all([loadPoiDataBundle(), loadGrid(resolution)]);
       const pois = poiBundle.items.map(enrichPlannerPoi);
       if (pois.length === 0) return [];
@@ -404,5 +404,5 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
     };
   }, [baseLocation, enabled, externalValues, fallbackForecastPath, forecastPath, limit, maxTravelDistanceMiles, modelId, resolution]);
 
-  return { places, isLoading, error };
+  return { places: effectivePlaces, isLoading: effectiveIsLoading, error: effectiveError };
 }
