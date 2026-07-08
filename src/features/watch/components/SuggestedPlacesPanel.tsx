@@ -24,9 +24,11 @@ type SuggestedPlacesPanelProps = {
 };
 
 const potentialLabel: Record<ViewingPotential, string> = {
+  "very-high": "Very High",
   high: "High",
   medium: "Medium",
   low: "Low",
+  "very-low": "Very Low",
 };
 
 function formatPlaceType(type: SuggestedPlace["type"]) {

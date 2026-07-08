@@ -18,8 +18,12 @@ import {
   loadViewingSpotPhotoManifest,
   type ViewingSpotPhotoManifest,
 } from "../../shared/data/viewingSpotPhotos";
+import {
+  loadOrcasoundHydrophonePayload,
+  type OrcasoundHydrophone,
+} from "../../shared/data/orcasoundHydrophones";
 import { useMenu } from "../../shared/state/MenuContext";
-import { useMapState } from "../../shared/state/MapStateContext";
+import { useMapState, type UnitsMode } from "../../shared/state/MapStateContext";
 import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlaces";
 import type { SuggestedPlace, ViewingPotential } from "../../features/locations/types";
 import { isoWeekFromDate, isoWeekYearFromDate } from "../../shared/time/forecastPeriodToIsoWeek";
@@ -32,13 +36,17 @@ const DEFAULT_RECOMMENDED_SPOTS_COUNT = 25;
 const TRIP_BRUSH_DAYS = 366;
 const MAX_TRIP_LENGTH_DAYS = 366;
 const TRIP_BRUSH_APPLY_DELAY_MS = 2000;
+const PLANNER_COLLAPSE_DURATION_MS = 320;
+const HOVER_PANEL_CLOSE_DELAY_MS = 180;
 
 const LEGEND_LABELS = ["Very High", "High", "Medium", "Low", "Very Low"] as const;
 
 const potentialLabel: Record<ViewingPotential, string> = {
+  "very-high": "Very High",
   high: "High",
   medium: "Medium",
   low: "Low",
+  "very-low": "Very Low",
 };
 
 function formatPlaceType(type: SuggestedPlace["type"]) {
@@ -65,6 +73,7 @@ type TripPlannerDraft = {
   arrivalDate: string;
   departureDate: string;
   maxTravelDistance: string;
+  unitsMode?: UnitsMode;
 };
 
 const PLANNER_SELECTION_STORAGE_KEY = "orcacast.planner.selection";
@@ -137,10 +146,33 @@ function readStoredPlannerDraft(): TripPlannerDraft | null {
       arrivalDate: typeof parsed.arrivalDate === "string" ? parsed.arrivalDate : "",
       departureDate: typeof parsed.departureDate === "string" ? parsed.departureDate : "",
       maxTravelDistance: typeof parsed.maxTravelDistance === "string" ? parsed.maxTravelDistance : "",
+      unitsMode: parsed.unitsMode === "metric" || parsed.unitsMode === "imperial" ? parsed.unitsMode : undefined,
     };
   } catch {
     return null;
   }
+}
+
+const KILOMETERS_PER_MILE = 1.60934;
+
+function formatPlannerDistanceValue(miles: number | null | undefined, unitsMode: UnitsMode) {
+  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0) return "";
+  const displayValue = unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles;
+  return String(Math.round(displayValue));
+}
+
+function parsePlannerDistanceInput(value: string, unitsMode: UnitsMode) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return unitsMode === "metric" ? parsed / KILOMETERS_PER_MILE : parsed;
+}
+
+function formatPlannerDistanceLabel(miles: number | null | undefined, unitsMode: UnitsMode) {
+  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0) return null;
+  const displayValue = Math.round(unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles);
+  return `Up to ${displayValue} ${unitsMode === "metric" ? "km" : "mi"}`;
 }
 
 function isSuggestedPlace(value: unknown): value is SuggestedPlace {
@@ -154,7 +186,13 @@ function isSuggestedPlace(value: unknown): value is SuggestedPlace {
     (candidate.type === "Park" || candidate.type === "Marina" || candidate.type === "Ferry" || candidate.type === "Other") &&
     Number.isFinite(candidate.latitude) &&
     Number.isFinite(candidate.longitude) &&
-    (candidate.viewingPotential === "low" || candidate.viewingPotential === "medium" || candidate.viewingPotential === "high") &&
+    (
+      candidate.viewingPotential === "very-low" ||
+      candidate.viewingPotential === "low" ||
+      candidate.viewingPotential === "medium" ||
+      candidate.viewingPotential === "high" ||
+      candidate.viewingPotential === "very-high"
+    ) &&
     Number.isFinite(candidate.score) &&
     typeof candidate.reason === "string" &&
     (candidate.distanceKm === undefined || Number.isFinite(candidate.distanceKm))
@@ -234,6 +272,328 @@ function formatDisplayDateRange(startDate: string, endDate: string) {
   const startLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(start);
   const endLabel = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(end);
   return `${startLabel} – ${endLabel}`;
+}
+
+function formatPlannerDateFieldValue(startDate: string, endDate: string) {
+  if (!startDate && !endDate) return "Select dates";
+  if (!startDate) return "Select start date";
+  const start = parseIsoDate(startDate);
+  if (!start) return "Select dates";
+  const formatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  if (!endDate) return `${formatter.format(start)} – End date`;
+  const end = parseIsoDate(endDate);
+  if (!end) return `${formatter.format(start)} – End date`;
+  return `${formatter.format(start)} – ${formatter.format(end)}`;
+}
+
+function startOfUtcMonth(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
+
+function addUtcMonths(date: Date, months: number) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1));
+}
+
+function startOfUtcCalendarWeek(date: Date) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() - next.getUTCDay());
+  return next;
+}
+
+function compareIsoDates(dateA: string, dateB: string) {
+  if (dateA === dateB) return 0;
+  return dateA < dateB ? -1 : 1;
+}
+
+type PlannerRangeCalendarCell = {
+  iso: string;
+  label: number;
+  inMonth: boolean;
+};
+
+function buildPlannerRangeCalendarCells(month: Date): PlannerRangeCalendarCell[] {
+  const firstDay = startOfUtcMonth(month);
+  const gridStart = startOfUtcCalendarWeek(firstDay);
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = addUtcDays(gridStart, index);
+    return {
+      iso: formatIsoDate(date),
+      label: date.getUTCDate(),
+      inMonth: date.getUTCMonth() === month.getUTCMonth(),
+    };
+  });
+}
+
+function dayIsWithinSelectedRange(dayIso: string, startDate: string, endDate: string) {
+  if (!startDate || !endDate) return false;
+  return compareIsoDates(dayIso, startDate) >= 0 && compareIsoDates(dayIso, endDate) <= 0;
+}
+
+type PlannerDateRangeFieldProps = {
+  arrivalDate: string;
+  departureDate: string;
+  onChange: (nextArrivalDate: string, nextDepartureDate: string) => void;
+};
+
+type PlannerLocationFieldProps = {
+  value: string;
+  options: PlannerBaseLocation[];
+  onChange: (nextValue: string) => void;
+};
+
+function formatPlannerDateRangeSummary(startDate: string, endDate: string) {
+  if (!startDate || !endDate) return "Select an arrival and departure date";
+  const start = parseIsoDate(startDate);
+  const end = parseIsoDate(endDate);
+  if (!start || !end) return "Select an arrival and departure date";
+  const formatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  const dayCount = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
+  return `${formatter.format(start)} → ${formatter.format(end)} · ${dayCount} ${dayCount === 1 ? "day" : "days"}`;
+}
+
+function PlannerLocationField({ value, options, onChange }: PlannerLocationFieldProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (rootRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div className={`plannerResultsPage__locationField${open ? " isOpen" : ""}`} ref={rootRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="plannerResultsPage__promptInputWrap plannerResultsPage__promptInputWrap--select"
+        onClick={() => setOpen((value) => !value)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className="material-symbols-rounded" aria-hidden="true">
+          location_on
+        </span>
+        <span className={`plannerResultsPage__locationValue${value ? " hasValue" : ""}`}>{value || "Select a location"}</span>
+        <span className="material-symbols-rounded plannerResultsPage__locationChevron" aria-hidden="true">
+          expand_more
+        </span>
+      </button>
+
+      {open ? (
+        <div className="plannerResultsPage__locationPopover" role="listbox" aria-label="Base location options">
+          {options.map((location) => {
+            const selected = location.name === value;
+            return (
+              <button
+                key={location.name}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                className={`plannerResultsPage__locationOption${selected ? " isSelected" : ""}`}
+                onClick={() => {
+                  onChange(location.name);
+                  setOpen(false);
+                  triggerRef.current?.focus();
+                }}
+              >
+                <span>{location.name}</span>
+                {selected ? (
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    check
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PlannerDateRangeField({ arrivalDate, departureDate, onChange }: PlannerDateRangeFieldProps) {
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const [hoveredDate, setHoveredDate] = useState("");
+  const [visibleMonth, setVisibleMonth] = useState(() => {
+    const selected = arrivalDate ? parseIsoDate(arrivalDate) : new Date();
+    return startOfUtcMonth(selected ?? new Date());
+  });
+
+  useEffect(() => {
+    if (!open) return;
+    const selected = arrivalDate ? parseIsoDate(arrivalDate) : new Date();
+    setVisibleMonth(startOfUtcMonth(selected ?? new Date()));
+  }, [arrivalDate, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (popoverRef.current?.contains(target) || triggerRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const months = useMemo(() => [visibleMonth, addUtcMonths(visibleMonth, 1)], [visibleMonth]);
+  const previewRangeEnd = arrivalDate && !departureDate ? hoveredDate : "";
+
+  const handleDaySelect = (dayIso: string) => {
+    if (!arrivalDate || departureDate) {
+      onChange(dayIso, "");
+      return;
+    }
+    if (compareIsoDates(dayIso, arrivalDate) < 0) {
+      onChange(dayIso, arrivalDate);
+      setOpen(false);
+      return;
+    }
+    onChange(arrivalDate, dayIso);
+  };
+
+  return (
+    <div className={`plannerResultsPage__dateRangeField${open ? " isOpen" : ""}`} ref={popoverRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="plannerResultsPage__promptInputWrap plannerResultsPage__promptInputWrap--range"
+        onClick={() => setOpen((value) => !value)}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
+        <span className="material-symbols-rounded" aria-hidden="true">
+          calendar_month
+        </span>
+        <span className={`plannerResultsPage__dateRangeValue${arrivalDate ? " hasValue" : ""}`}>
+          {formatPlannerDateFieldValue(arrivalDate, departureDate)}
+        </span>
+      </button>
+
+      {open ? (
+        <div className="plannerResultsPage__dateRangePopover" role="dialog" aria-label="Choose trip dates">
+          <div className="plannerResultsPage__dateRangePopoverHead">
+            <div className="plannerResultsPage__dateRangeHeadline">
+              <strong>Select date range</strong>
+              <span>{formatPlannerDateFieldValue(arrivalDate, departureDate)}</span>
+            </div>
+            <div className="plannerResultsPage__dateRangeNav">
+              <button type="button" onClick={() => setVisibleMonth((current) => addUtcMonths(current, -1))} aria-label="Previous month">
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  chevron_left
+                </span>
+              </button>
+              <button type="button" onClick={() => setVisibleMonth((current) => addUtcMonths(current, 1))} aria-label="Next month">
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  chevron_right
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="plannerResultsPage__dateRangeCalendars">
+            {months.map((month) => {
+              const monthLabel = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(month);
+              const cells = buildPlannerRangeCalendarCells(month);
+              return (
+                <section key={month.toISOString()} className="plannerResultsPage__dateRangeCalendar">
+                  <header>{monthLabel}</header>
+                  <div className="plannerResultsPage__dateRangeWeekdays">
+                    {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+                      <span key={`${monthLabel}-${day}-${index}`}>{day}</span>
+                    ))}
+                  </div>
+                  <div className="plannerResultsPage__dateRangeDays">
+                    {cells.map((cell) => {
+                      const isStart = cell.iso === arrivalDate;
+                      const isEnd = cell.iso === departureDate;
+                      const isPreviewEnd = !departureDate && previewRangeEnd === cell.iso;
+                      const isInRange =
+                        dayIsWithinSelectedRange(cell.iso, arrivalDate, departureDate) ||
+                        (!departureDate && arrivalDate && previewRangeEnd
+                          ? dayIsWithinSelectedRange(
+                              cell.iso,
+                              compareIsoDates(arrivalDate, previewRangeEnd) <= 0 ? arrivalDate : previewRangeEnd,
+                              compareIsoDates(arrivalDate, previewRangeEnd) <= 0 ? previewRangeEnd : arrivalDate
+                            )
+                          : false);
+                      return (
+                        <button
+                          key={cell.iso}
+                          type="button"
+                          className={`plannerResultsPage__dateRangeDay${cell.inMonth ? "" : " isOutsideMonth"}${
+                            isInRange ? " isInRange" : ""
+                          }${isStart ? " isRangeStart" : ""}${isEnd ? " isRangeEnd" : ""}${isPreviewEnd ? " isPreviewEnd" : ""}`}
+                          onClick={() => handleDaySelect(cell.iso)}
+                          onMouseEnter={() => setHoveredDate(cell.iso)}
+                        >
+                          <span>{cell.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+
+          <div className="plannerResultsPage__dateRangeFooter">
+            <span className="plannerResultsPage__dateRangeFooterSummary">
+              {formatPlannerDateRangeSummary(arrivalDate, departureDate)}
+            </span>
+            <div className="plannerResultsPage__dateRangeFooterActions">
+              <button
+                type="button"
+                className="plannerResultsPage__dateRangeFooterButton isSecondary"
+                onClick={() => {
+                  onChange("", "");
+                  setHoveredDate("");
+                }}
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                className="plannerResultsPage__dateRangeFooterButton isPrimary"
+                onClick={() => setOpen(false)}
+                disabled={!arrivalDate || !departureDate}
+              >
+                Apply dates
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function escapeXml(value: string) {
@@ -803,10 +1163,17 @@ export function PlannerPage() {
   const [plannerSelection, setPlannerSelection] = useState<TripPlanSelection | null>(storedSelection);
   const [appliedPlannerSelection, setAppliedPlannerSelection] = useState<TripPlanSelection | null>(storedSelection);
   const [plannerOpen, setPlannerOpen] = useState(() => (forceNewSession ? true : readStoredPlannerOpen(!storedSelection)));
+  const [plannerCollapsing, setPlannerCollapsing] = useState(false);
   const [draftCity, setDraftCity] = useState(forceNewSession ? "" : storedDraft?.city ?? "");
   const [draftArrivalDate, setDraftArrivalDate] = useState(forceNewSession ? "" : storedDraft?.arrivalDate ?? "");
   const [draftDepartureDate, setDraftDepartureDate] = useState(forceNewSession ? "" : storedDraft?.departureDate ?? "");
-  const [draftMaxTravelDistance, setDraftMaxTravelDistance] = useState(forceNewSession ? "" : storedDraft?.maxTravelDistance ?? "");
+  const [draftMaxTravelDistance, setDraftMaxTravelDistance] = useState(() => {
+    if (forceNewSession) return "";
+    if (!storedDraft?.maxTravelDistance) return "";
+    const storedUnitsMode = storedDraft.unitsMode ?? unitsMode;
+    const miles = parsePlannerDistanceInput(storedDraft.maxTravelDistance, storedUnitsMode);
+    return formatPlannerDistanceValue(miles, unitsMode);
+  });
   const [tripOccurrence, setTripOccurrence] = useState<TripPlannerOccurrenceResult | null>(null);
   const [tripLoading, setTripLoading] = useState(false);
   const [tripError, setTripError] = useState<string | null>(null);
@@ -823,6 +1190,10 @@ export function PlannerPage() {
   const [itineraryDropTargetId, setItineraryDropTargetId] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hydrophonesVisible, setHydrophonesVisible] = useState(false);
+  const [hydrophonesPanelOpen, setHydrophonesPanelOpen] = useState(false);
+  const [hydrophoneLocations, setHydrophoneLocations] = useState<OrcasoundHydrophone[]>([]);
+  const [hydrophoneListenUrl, setHydrophoneListenUrl] = useState("https://live.orcasound.net/");
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [tripHotspotsVisible, setTripHotspotsVisible] = useState(true);
   const [colorNoData, setColorNoData] = useState<"off" | "on">("on");
@@ -839,6 +1210,35 @@ export function PlannerPage() {
   const tripBrushDragRef = useRef<TripBrushDragState | null>(null);
   const tripBrushApplyTimerRef = useRef<number | null>(null);
   const tripBrushPendingApplyRef = useRef(false);
+  const plannerCollapseTimerRef = useRef<number | null>(null);
+  const hydrophonesPanelCloseTimerRef = useRef<number | null>(null);
+  const previousUnitsModeRef = useRef<UnitsMode>(unitsMode);
+
+  const openHydrophonesPanel = () => {
+    if (hydrophonesPanelCloseTimerRef.current !== null) {
+      window.clearTimeout(hydrophonesPanelCloseTimerRef.current);
+      hydrophonesPanelCloseTimerRef.current = null;
+    }
+    setHydrophonesPanelOpen(true);
+  };
+
+  const closeHydrophonesPanelSoon = () => {
+    if (hydrophonesPanelCloseTimerRef.current !== null) {
+      window.clearTimeout(hydrophonesPanelCloseTimerRef.current);
+    }
+    hydrophonesPanelCloseTimerRef.current = window.setTimeout(() => {
+      setHydrophonesPanelOpen(false);
+      hydrophonesPanelCloseTimerRef.current = null;
+    }, HOVER_PANEL_CLOSE_DELAY_MS);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hydrophonesPanelCloseTimerRef.current !== null) {
+        window.clearTimeout(hydrophonesPanelCloseTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!forceNewSession) return;
@@ -944,6 +1344,27 @@ export function PlannerPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    loadOrcasoundHydrophonePayload()
+      .then((payload) => {
+        if (cancelled) return;
+        setHydrophoneLocations(payload.items);
+        setHydrophoneListenUrl(payload.listenUrl);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.warn("[Planner] failed to load Orcasound hydrophones", error);
+        setHydrophoneLocations([]);
+        setHydrophoneListenUrl("https://live.orcasound.net/");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (baseLocations.length === 0) return;
     const validNames = new Set(baseLocations.map((location) => location.name));
 
@@ -971,6 +1392,16 @@ export function PlannerPage() {
     window.sessionStorage.setItem(PLANNER_OPEN_STORAGE_KEY, plannerOpen ? "true" : "false");
   }, [plannerOpen]);
 
+  useEffect(
+    () => () => {
+      if (plannerCollapseTimerRef.current) {
+        window.clearTimeout(plannerCollapseTimerRef.current);
+        plannerCollapseTimerRef.current = null;
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const hasDraft =
@@ -989,9 +1420,19 @@ export function PlannerPage() {
         arrivalDate: draftArrivalDate,
         departureDate: draftDepartureDate,
         maxTravelDistance: draftMaxTravelDistance,
+        unitsMode,
       } satisfies TripPlannerDraft)
     );
-  }, [draftArrivalDate, draftCity, draftDepartureDate, draftMaxTravelDistance]);
+  }, [draftArrivalDate, draftCity, draftDepartureDate, draftMaxTravelDistance, unitsMode]);
+
+  useEffect(() => {
+    if (previousUnitsModeRef.current === unitsMode) return;
+    setDraftMaxTravelDistance((current) => {
+      const miles = parsePlannerDistanceInput(current, previousUnitsModeRef.current);
+      return formatPlannerDistanceValue(miles, unitsMode);
+    });
+    previousUnitsModeRef.current = unitsMode;
+  }, [unitsMode]);
 
   useEffect(() => {
     if (!appliedTripRange) {
@@ -1259,21 +1700,16 @@ export function PlannerPage() {
   const tripLabel = tripRange ? formatDisplayDateRange(tripRange.startDate, tripRange.endDate) : "Choose dates";
   const tripLengthLabel = tripRange ? `${tripRange.dayCount} ${tripRange.dayCount === 1 ? "day" : "days"}` : "";
   const tripCityLabel = plannerSelection?.city || "Base location";
-  const tripDistanceLabel = plannerSelection?.maxTravelDistanceMiles
-    ? `Up to ${plannerSelection.maxTravelDistanceMiles} mi`
-    : null;
+  const tripDistanceLabel = formatPlannerDistanceLabel(plannerSelection?.maxTravelDistanceMiles, unitsMode);
   const activeMaxTravelDistanceMiles = useMemo(() => {
-    if (plannerOpen) {
-      const parsed = Number(draftMaxTravelDistance);
-      return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-    }
+    if (plannerOpen) return parsePlannerDistanceInput(draftMaxTravelDistance, unitsMode);
     return plannerSelection?.maxTravelDistanceMiles ?? null;
-  }, [draftMaxTravelDistance, plannerOpen, plannerSelection?.maxTravelDistanceMiles]);
+  }, [draftMaxTravelDistance, plannerOpen, plannerSelection?.maxTravelDistanceMiles, unitsMode]);
   const selectedCount = tripOccurrence?.selectedCount ?? 0;
   const activityLabel = useMemo(() => computeActivityLabel(selectedCount, weekBars), [selectedCount, weekBars]);
   const topWatersLabel = useMemo(() => computeTopWaters(displayedRecommendedPlaces), [displayedRecommendedPlaces]);
   const liveCamCount = displayedRecommendedPlaces.filter((place) => place.hasLiveFeed).length;
-  const hydrophoneCount = displayedRecommendedPlaces.filter((place) => place.hasHydrophone).length;
+  const hydrophoneCount = hydrophoneLocations.length;
   const paletteEntries = useMemo(() => Object.values(PALETTES), []);
   const poiActive = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
   const legendColors = useMemo(
@@ -1360,7 +1796,7 @@ export function PlannerPage() {
       return;
     }
 
-    const parsedMaxTravelDistance = Number(draftMaxTravelDistance);
+    const parsedMaxTravelDistanceMiles = parsePlannerDistanceInput(draftMaxTravelDistance, unitsMode);
     if (tripBrushApplyTimerRef.current) {
       window.clearTimeout(tripBrushApplyTimerRef.current);
       tripBrushApplyTimerRef.current = null;
@@ -1371,8 +1807,8 @@ export function PlannerPage() {
       arrivalDate: range.startDate,
       departureDate: range.endDate,
       maxTravelDistanceMiles:
-        draftMaxTravelDistance.trim() && Number.isFinite(parsedMaxTravelDistance) && parsedMaxTravelDistance > 0
-          ? Math.round(parsedMaxTravelDistance)
+        typeof parsedMaxTravelDistanceMiles === "number" && Number.isFinite(parsedMaxTravelDistanceMiles) && parsedMaxTravelDistanceMiles > 0
+          ? Math.round(parsedMaxTravelDistanceMiles)
           : undefined,
     } satisfies TripPlanSelection;
     setTripError(null);
@@ -1382,7 +1818,21 @@ export function PlannerPage() {
     setSelectedPlaceId(null);
     setChartCollapsed(false);
     setLegendCollapsed(true);
-    setPlannerOpen(false);
+    if (plannerCollapseTimerRef.current) {
+      window.clearTimeout(plannerCollapseTimerRef.current);
+      plannerCollapseTimerRef.current = null;
+    }
+    if (!plannerSubmitted) {
+      setPlannerCollapsing(true);
+      plannerCollapseTimerRef.current = window.setTimeout(() => {
+        setPlannerCollapsing(false);
+        setPlannerOpen(false);
+        plannerCollapseTimerRef.current = null;
+      }, PLANNER_COLLAPSE_DURATION_MS);
+    } else {
+      setPlannerCollapsing(false);
+      setPlannerOpen(false);
+    }
 
     if (selectedBaseLocation && nextSelection.maxTravelDistanceMiles) {
       primaryMapRef.current?.fitLocations(
@@ -1397,12 +1847,15 @@ export function PlannerPage() {
   };
 
   const openPlannerEditor = () => {
+    if (plannerCollapseTimerRef.current) {
+      window.clearTimeout(plannerCollapseTimerRef.current);
+      plannerCollapseTimerRef.current = null;
+    }
+    setPlannerCollapsing(false);
     setDraftCity(plannerSelection?.city ?? "");
     setDraftArrivalDate(plannerSelection?.arrivalDate ?? "");
     setDraftDepartureDate(plannerSelection?.departureDate ?? "");
-    setDraftMaxTravelDistance(
-      plannerSelection?.maxTravelDistanceMiles ? String(plannerSelection.maxTravelDistanceMiles) : ""
-    );
+    setDraftMaxTravelDistance(formatPlannerDistanceValue(plannerSelection?.maxTravelDistanceMiles, unitsMode));
     setPlannerOpen(true);
   };
 
@@ -1475,10 +1928,12 @@ export function PlannerPage() {
   };
 
   const isEditingTrip = plannerSubmitted && plannerOpen;
+  const showPlannerChrome = true;
+  const showExpandedChart = !chartCollapsed || !plannerSubmitted || isEditingTrip;
 
   const mapProps = {
     darkMode,
-    showMapControls: !isEditingTrip,
+    showMapControls: true,
     showLegendControl: false,
     colorNoData: colorNoData === "on",
     paletteId: selectedPaletteId,
@@ -1494,22 +1949,24 @@ export function PlannerPage() {
     hotspotPercentile: 1,
     expectedActivityHotspotCellCount: null,
     onHotspotsEnabledChange: () => undefined,
-    externalValues: plannerSubmitted && !isEditingTrip ? tripOccurrence?.values ?? {} : undefined,
-    forecastOverlayEnabled: plannerSubmitted && !isEditingTrip,
-    pulseAllGridCells: plannerSubmitted && !isEditingTrip && tripLoading,
+    externalValues: plannerSubmitted ? tripOccurrence?.values ?? {} : undefined,
+    forecastOverlayEnabled: plannerSubmitted,
+    pulseAllGridCells: plannerSubmitted && tripLoading,
     mapModeLabel:
-      plannerSubmitted && !isEditingTrip ? "Loading typical activity map…" : "Choose trip details to build your outlook",
-    suggestedPlaces: plannerSubmitted && !isEditingTrip ? mapSuggestedPlaces : [],
-    itineraryPlaceIds: plannerSubmitted && !isEditingTrip ? itineraryPlaceIds : [],
-    showTripHotspotMarkers: plannerSubmitted && !isEditingTrip && tripHotspotsVisible && !tripLoading,
-    selectedPlaceId: isEditingTrip ? null : selectedPlaceId,
-    pulseSelectedPlaceMarker: plannerSubmitted && !isEditingTrip ? pulseSelectedPlaceMarker : false,
+      plannerSubmitted ? "Loading typical activity map…" : "Choose trip details to build your outlook",
+    suggestedPlaces: plannerSubmitted ? mapSuggestedPlaces : [],
+    itineraryPlaceIds: plannerSubmitted ? itineraryPlaceIds : [],
+    showTripHotspotMarkers: plannerSubmitted && tripHotspotsVisible && !tripLoading,
+    selectedPlaceId,
+    pulseSelectedPlaceMarker: plannerSubmitted ? pulseSelectedPlaceMarker : false,
     onPlaceSelect: (place: SuggestedPlace) => {
       setPulseSelectedPlaceMarker(false);
       setSelectedPlaceId(place.id);
     },
     baseLocation: activeBaseLocation,
     maxTravelDistanceMiles: activeMaxTravelDistanceMiles,
+    hydrophoneLocations,
+    showHydrophones: plannerSubmitted && hydrophonesVisible,
     sidebarOffsetPx: 0,
   } satisfies ForecastMapProps;
 
@@ -1523,7 +1980,7 @@ export function PlannerPage() {
       />
 
       <main className="app__main">
-        <div className={`plannerResultsPage${plannerSubmitted ? " hasPlan" : " isPrompting"}${plannerOpen ? " isPlannerOpen" : ""}${plannerSubmitted && plannerOpen ? " isEditing" : ""}${chartCollapsed ? " isChartCollapsed" : ""}${spotsCollapsed ? " isSpotsCollapsed" : ""}${!legendCollapsed ? " isLegendOpen" : ""}`}>
+        <div className={`plannerResultsPage${plannerSubmitted ? " hasPlan" : " isPrompting"}${plannerOpen ? " isPlannerOpen" : ""}${plannerSubmitted && plannerOpen ? " isEditing" : ""}${plannerCollapsing ? " isCollapsing" : ""}${chartCollapsed ? " isChartCollapsed" : ""}${spotsCollapsed ? " isSpotsCollapsed" : ""}${!legendCollapsed ? " isLegendOpen" : ""}`}>
           <div className="plannerResultsPage__main">
         <div className="plannerResultsPage__mapLayer">
           <ForecastMap
@@ -1534,7 +1991,7 @@ export function PlannerPage() {
 
         {(!plannerSubmitted || plannerOpen) ? (
           <section
-            className={`plannerResultsPage__promptCard${plannerSubmitted ? " isEditing" : ""}`}
+            className={`plannerResultsPage__promptCard${plannerSubmitted ? " isEditing" : ""}${plannerCollapsing ? " isCollapsing" : ""}`}
             aria-labelledby="plannerPromptTitle"
           >
             <header className="plannerResultsPage__promptHeader">
@@ -1545,7 +2002,12 @@ export function PlannerPage() {
               </div>
               <div className="plannerResultsPage__promptHeading">
                 <p className="plannerResultsPage__promptEyebrow">Trip planner</p>
-                <h1 id="plannerPromptTitle">{plannerSubmitted ? "Edit trip plan" : "Plan your trip"}</h1>
+                <h1 id="plannerPromptTitle">{plannerSubmitted ? "Edit Trip Plan" : "Plan around your dates"}</h1>
+                {!plannerSubmitted ? (
+                  <p className="plannerResultsPage__promptSupporting">
+                    Choose a base, dates, and optional travel range.
+                  </p>
+                ) : null}
               </div>
               {plannerSubmitted ? (
                 <button
@@ -1564,64 +2026,27 @@ export function PlannerPage() {
             <form className="plannerResultsPage__promptForm" onSubmit={handlePlannerSubmit} autoComplete="off">
               <label className="plannerResultsPage__promptField plannerResultsPage__promptField--base">
                 <span>Base location</span>
-                <span className="plannerResultsPage__promptInputWrap">
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    location_on
-                  </span>
-                    <select
-                      value={draftCity}
-                      onChange={(event) => setDraftCity(event.target.value)}
-                      autoComplete="off"
-                      required
-                    >
-                      <option value="" disabled>
-                        Select a location
-                      </option>
-                      {baseLocations.map((location) => (
-                        <option key={location.name} value={location.name}>
-                          {location.name}
-                        </option>
-                      ))}
-                    </select>
-                  </span>
-                </label>
+                <PlannerLocationField value={draftCity} options={baseLocations} onChange={setDraftCity} />
+              </label>
 
-              <div className="plannerResultsPage__promptFieldGrid">
-                <label className="plannerResultsPage__promptField">
-                  <span>Arrival</span>
-                  <span className="plannerResultsPage__promptInputWrap">
-                    <span className="material-symbols-rounded" aria-hidden="true">
-                      flight_land
-                    </span>
-                    <input
-                      type="date"
-                      value={draftArrivalDate}
-                      onChange={(event) => setDraftArrivalDate(event.target.value)}
-                      autoComplete="off"
-                      required
-                    />
-                  </span>
-                </label>
-
-                <label className="plannerResultsPage__promptField">
-                  <span>Departure</span>
-                  <span className="plannerResultsPage__promptInputWrap">
-                    <span className="material-symbols-rounded" aria-hidden="true">
-                      flight_takeoff
-                    </span>
-                    <input
-                      type="date"
-                      value={draftDepartureDate}
-                      onChange={(event) => setDraftDepartureDate(event.target.value)}
-                      min={draftArrivalDate || undefined}
-                      autoComplete="off"
-                      required
-                    />
-                  </span>
+              <div className="plannerResultsPage__promptRow plannerResultsPage__promptRow--middle">
+                <label className="plannerResultsPage__promptField plannerResultsPage__promptField--range">
+                  <span>Dates</span>
+                  <PlannerDateRangeField
+                    arrivalDate={draftArrivalDate}
+                    departureDate={draftDepartureDate}
+                    onChange={(nextArrivalDate, nextDepartureDate) => {
+                      setDraftArrivalDate(nextArrivalDate);
+                      setDraftDepartureDate(nextDepartureDate);
+                    }}
+                  />
                 </label>
 
                 <label className="plannerResultsPage__promptField plannerResultsPage__promptField--distance">
-                  <span>Max travel distance <em>optional</em></span>
+                  <span className="plannerResultsPage__promptLabelWithBadge">
+                    <span>Max travel distance</span>
+                    <small>Optional</small>
+                  </span>
                   <span className="plannerResultsPage__promptInputWrap plannerResultsPage__promptInputWrap--suffix">
                     <span className="material-symbols-rounded" aria-hidden="true">
                       route
@@ -1632,24 +2057,26 @@ export function PlannerPage() {
                       inputMode="numeric"
                       value={draftMaxTravelDistance}
                       onChange={(event) => setDraftMaxTravelDistance(event.target.value)}
-                      placeholder="Any"
+                      placeholder="No limit"
                       autoComplete="off"
                     />
-                    <span className="plannerResultsPage__promptSuffix">mi</span>
+                    <span className="plannerResultsPage__promptSuffix">{unitsMode === "metric" ? "km" : "mi"}</span>
                   </span>
                 </label>
               </div>
 
-              <button
-                type="submit"
-                className="plannerResultsPage__promptSubmit"
-                disabled={!draftCity || !draftArrivalDate || !draftDepartureDate}
-              >
-                <span>Go</span>
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  arrow_forward
-                </span>
-              </button>
+              <div className="plannerResultsPage__promptActions">
+                <button
+                  type="submit"
+                  className="plannerResultsPage__promptSubmit"
+                  disabled={!draftCity || !draftArrivalDate || !draftDepartureDate}
+                >
+                  <span>Find viewing spots</span>
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    arrow_forward
+                  </span>
+                </button>
+              </div>
             </form>
           </section>
         ) : null}
@@ -1880,7 +2307,7 @@ export function PlannerPage() {
           </div>
         ) : null}
 
-        {plannerSubmitted && !isEditingTrip ? (
+        {showPlannerChrome ? (
           <aside className={`plannerResultsPage__legendCard${legendCollapsed ? " isCollapsed" : ""}`}>
             <div className="plannerResultsPage__legendHead">
               <h2>{legendCollapsed ? "Legend" : "Typical Orca Activity"}</h2>
@@ -1917,7 +2344,7 @@ export function PlannerPage() {
           </aside>
         ) : null}
 
-        {plannerSubmitted && !isEditingTrip ? (
+        {showPlannerChrome ? (
           <aside
             ref={sidebarRef}
             className={`plannerResultsPage__spotsCard${spotsCollapsed ? " isCollapsed" : ""}`}
@@ -1929,7 +2356,7 @@ export function PlannerPage() {
               aria-expanded={!spotsCollapsed}
               aria-label={spotsCollapsed ? "Expand recommended viewing spots" : "Collapse recommended viewing spots"}
             >
-              {spotsCollapsed ? <span className="plannerResultsPage__spotsCollapseLabel">Recommended Places</span> : null}
+              {spotsCollapsed ? <span className="plannerResultsPage__spotsCollapseLabel">Recommended Viewing</span> : null}
               <span className="material-symbols-rounded" aria-hidden="true">
                 {spotsCollapsed ? "expand_more" : "expand_less"}
               </span>
@@ -1940,19 +2367,22 @@ export function PlannerPage() {
               </div>
               <div>
                 <div className="plannerResultsPage__spotsEyebrow">Where to watch</div>
-                <h2>Recommended Viewing Spots</h2>
+                <h2>Recommended Viewing</h2>
                 <p>Top-25 Viewing Locations for Your Trip</p>
               </div>
             </div>
 
             <div className="plannerResultsPage__spotsList">
-              {displayedRecommendedPlaces.length === 0 &&
-              plannerSubmitted &&
-              !tripLoading &&
-              !recommendedPlacesData.isLoading &&
-              !tripError &&
-              !recommendedPlacesData.error &&
-              activeMaxTravelDistanceMiles ? (
+              {!plannerSubmitted ? (
+                <div className="plannerResultsPage__spotsEmptyState">
+                  Enter your trip details to load recommended viewing spots for your route.
+                </div>
+              ) : displayedRecommendedPlaces.length === 0 &&
+                !tripLoading &&
+                !recommendedPlacesData.isLoading &&
+                !tripError &&
+                !recommendedPlacesData.error &&
+                activeMaxTravelDistanceMiles ? (
                 <div className="plannerResultsPage__spotsEmptyState">
                   No suggested locations within defined search radius. Expand your search radius and try again.
                 </div>
@@ -1979,7 +2409,7 @@ export function PlannerPage() {
           </aside>
         ) : null}
 
-        {plannerSubmitted && !isEditingTrip && chartCollapsed ? (
+        {plannerSubmitted && chartCollapsed ? (
           <button
             type="button"
             className="plannerResultsPage__chartCollapsedButton"
@@ -2000,7 +2430,7 @@ export function PlannerPage() {
           </button>
         ) : null}
 
-        {plannerSubmitted && !isEditingTrip && !chartCollapsed ? (
+        {showExpandedChart ? (
           <section className="plannerResultsPage__bottomPanel">
             <div className={`plannerResultsPage__chartCard${chartZoomedToDays ? " isDailyZoom" : ""}`}>
               <div className="plannerResultsPage__chartHeader">
@@ -2012,11 +2442,11 @@ export function PlannerPage() {
                   </div>
                   <div>
                     <h2>{chartZoomedToDays ? "Daily Sightings Around Your Trip" : "Typical Salish Sea Sightings by Week"}</h2>
-                    {chartZoomedToDays ? <p>{tripLabel}</p> : null}
+                    {chartZoomedToDays ? <p>{tripLabel}</p> : !plannerSubmitted ? <p>Enter trip details to highlight your viewing window.</p> : null}
                   </div>
                 </div>
                 <div className="plannerResultsPage__chartHeaderActions">
-                  {chartZoomMode === "daily" ? (
+                  {plannerSubmitted && chartZoomMode === "daily" ? (
                     <button
                       type="button"
                       className="plannerResultsPage__chartModeButton"
@@ -2025,24 +2455,27 @@ export function PlannerPage() {
                       <span>Back to weekly</span>
                     </button>
                   ) : null}
-                  <button
-                    type="button"
-                    className="plannerResultsPage__panelCollapseBtn"
-                    onClick={() => setChartCollapsed(true)}
-                    aria-expanded="true"
-                    aria-label="Collapse seasonal activity panel"
-                  >
-                    <span className="material-symbols-rounded" aria-hidden="true">
-                      expand_more
-                    </span>
-                  </button>
+                  {plannerSubmitted ? (
+                    <button
+                      type="button"
+                      className="plannerResultsPage__panelCollapseBtn"
+                      onClick={() => setChartCollapsed(true)}
+                      aria-expanded="true"
+                      aria-label="Collapse seasonal activity panel"
+                    >
+                      <span className="material-symbols-rounded" aria-hidden="true">
+                        expand_more
+                      </span>
+                    </button>
+                  ) : null}
                 </div>
               </div>
               <div className="plannerResultsPage__chartBody">
                 <div
                   ref={chartPlotRef}
-                  className={`plannerResultsPage__chartPlot${tripBrushMode ? " isDraggingTripWindow" : ""}${chartZoomedToDays ? " isDailyZoom" : ""}`}
+                  className={`plannerResultsPage__chartPlot${tripBrushMode ? " isDraggingTripWindow" : ""}${chartZoomedToDays ? " isDailyZoom" : ""}${!plannerSubmitted ? " isPromptState" : ""}`}
                   onClick={() => {
+                    if (!plannerSubmitted) return;
                     if (tripBrushMode) return;
                     setChartZoomMode("daily");
                   }}
@@ -2171,7 +2604,7 @@ export function PlannerPage() {
                   </span>
                   <div className="plannerResultsPage__insightBody">
                     <p>Typical activity</p>
-                    <strong>{activityLabel}</strong>
+                    <strong>{plannerSubmitted ? activityLabel : "Choose dates to calculate"}</strong>
                   </div>
                 </div>
                 <div className="plannerResultsPage__insightRow plannerResultsPage__insightRow--hotspot">
@@ -2180,44 +2613,102 @@ export function PlannerPage() {
                   </span>
                   <div className="plannerResultsPage__insightBody">
                     <p>Most active waters</p>
-                    <strong>{topWatersLabel}</strong>
+                    <strong>{plannerSubmitted ? topWatersLabel : "Trip details will populate this view"}</strong>
                   </div>
-                  <div className="plannerResultsPage__insightToggleRow">
-                    <button
-                      type="button"
-                      className={`plannerResultsPage__insightToggle${tripHotspotsVisible ? " isActive" : ""}`}
-                      onClick={() => setTripHotspotsVisible((value) => !value)}
-                      aria-pressed={tripHotspotsVisible}
-                    >
-                      <span className="material-symbols-rounded" aria-hidden="true">
-                        {tripHotspotsVisible ? "visibility_off" : "visibility"}
-                      </span>
-                      <span>{tripHotspotsVisible ? "Hide hotspot" : "Show hotspot"}</span>
-                    </button>
-                  </div>
+                  {plannerSubmitted ? (
+                    <div className="plannerResultsPage__insightToggleRow">
+                      <button
+                        type="button"
+                        className={`plannerResultsPage__insightToggle${tripHotspotsVisible ? " isActive" : ""}`}
+                        onClick={() => setTripHotspotsVisible((value) => !value)}
+                        aria-pressed={tripHotspotsVisible}
+                      >
+                        <span className="material-symbols-rounded" aria-hidden="true">
+                          {tripHotspotsVisible ? "visibility_off" : "visibility"}
+                        </span>
+                        <span>{tripHotspotsVisible ? "Hide hotspot" : "Show hotspot"}</span>
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </aside>
           </section>
         ) : null}
 
-        {!isEditingTrip ? <div className="plannerResultsPage__quickActions">
+        <div className="plannerResultsPage__quickActions">
           {plannerSubmitted ? (
             <>
               <button type="button" className="plannerResultsPage__quickAction">
                 <span className="material-symbols-rounded" aria-hidden="true">
                   videocam
                 </span>
-                <span>Live Cams</span>
+                <span>Cameras</span>
                 <em>{liveCamCount}</em>
               </button>
-              <button type="button" className="plannerResultsPage__quickAction">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  graphic_eq
-                </span>
-                <span>Hydrophones</span>
-                <em>{hydrophoneCount}</em>
-              </button>
+              <div
+                className="plannerResultsPage__quickActionDock"
+                onMouseEnter={openHydrophonesPanel}
+                onMouseLeave={closeHydrophonesPanelSoon}
+                onFocusCapture={openHydrophonesPanel}
+                onBlurCapture={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                    closeHydrophonesPanelSoon();
+                  }
+                }}
+              >
+                {hydrophonesPanelOpen ? (
+                  <section className="plannerResultsPage__hydrophonesPanel" role="dialog" aria-modal="false">
+                    <div className="plannerResultsPage__hydrophonesPanelHeader">
+                      <div className="plannerResultsPage__panelEyebrow">Hydrophones</div>
+                      <em>{hydrophoneCount}</em>
+                    </div>
+                    <div className="plannerResultsPage__hydrophonesList">
+                      {hydrophoneLocations.map((hydrophone) => (
+                        <article key={hydrophone.id} className="plannerResultsPage__hydrophoneCard">
+                          <span className="plannerResultsPage__hydrophoneIcon" aria-hidden="true">
+                            <span className="plannerResultsPage__hydrophoneMark">
+                              <span />
+                              <span />
+                              <span />
+                              <span />
+                              <span />
+                            </span>
+                            <span className="plannerResultsPage__hydrophoneCornerLive" />
+                          </span>
+                          <span className="plannerResultsPage__hydrophoneText">
+                            <strong>{hydrophone.name}</strong>
+                            <small>{hydrophone.region}</small>
+                          </span>
+                        </article>
+                      ))}
+                    </div>
+                    <a
+                      className="plannerResultsPage__hydrophonesLink"
+                      href={hydrophoneListenUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <span>Listen on Orcasound</span>
+                      <span className="material-symbols-rounded" aria-hidden="true">
+                        open_in_new
+                      </span>
+                    </a>
+                  </section>
+                ) : null}
+                <button
+                  type="button"
+                  className={`plannerResultsPage__quickAction plannerResultsPage__quickAction--hydrophones${hydrophonesVisible ? " isActive" : ""}`}
+                  aria-pressed={hydrophonesVisible}
+                  onClick={() => setHydrophonesVisible((value) => !value)}
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    graphic_eq
+                  </span>
+                  <span>Hydrophones</span>
+                  <em>{hydrophoneCount}</em>
+                </button>
+              </div>
             </>
           ) : null}
           <div ref={settingsRef} className="plannerResultsPage__settingsDock">
@@ -2485,7 +2976,7 @@ export function PlannerPage() {
               </span>
             </button>
           </div>
-        </div> : null}
+        </div>
 
         {(tripLoading || tripError || recommendedPlacesData.error) && (
           <div className="plannerResultsPage__statusBanner">

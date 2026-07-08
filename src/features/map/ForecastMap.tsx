@@ -25,6 +25,7 @@ import { useHotspotAnimation } from "./useHotspotAnimation";
 import type { FillColorSpec, ForecastMapHandle, ForecastMapProps, LngLat, SparklineSeries } from "./types";
 import { filterPoisByType, hasActivePoiFilter, loadPoiData, type PoiFilters, type PublicPoi } from "../locations/poiData";
 import type { SuggestedPlace } from "../locations/types";
+import type { OrcasoundHydrophone } from "../../shared/data/orcasoundHydrophones";
 
 function waitForMapRender(map: MapLibreMap, timeoutMs = 2500) {
   return new Promise<boolean>((resolve) => {
@@ -72,8 +73,8 @@ const PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID = "planner-location-points-itiner
 const PLANNER_MAX_TRAVEL_SOURCE_ID = "planner-max-travel-radius";
 const PLANNER_MAX_TRAVEL_LAYER_ID = "planner-max-travel-radius-line";
 
-type PlannerLocationKind = "base" | "suggested" | "poi";
-type PlannerLocationType = SuggestedPlace["type"] | PublicPoi["type"] | "Base";
+type PlannerLocationKind = "base" | "suggested" | "poi" | "hydrophone";
+type PlannerLocationType = SuggestedPlace["type"] | PublicPoi["type"] | "Base" | "Hydrophone";
 
 type PlannerLocationFeatureProperties = {
   id: string;
@@ -83,6 +84,7 @@ type PlannerLocationFeatureProperties = {
   iconName: string;
   selected: boolean;
   selectedPulseOn?: boolean;
+  pulseEnabled?: boolean;
   itineraryOrder?: number;
   score?: number;
 };
@@ -91,12 +93,13 @@ type PlannerRadiusFeatureProperties = {
   dashColor: string;
 };
 
-type PlannerPinVariant = "suggested" | "poi" | "base";
+type PlannerPinVariant = "suggested" | "poi" | "base" | "hydrophone";
 
 type PlannerPinSpec = {
   id: string;
   variant: PlannerPinVariant;
   type: PlannerLocationType;
+  liveDotHalo?: "none" | "soft" | "strong";
 };
 
 const PLANNER_PIN_SPECS: PlannerPinSpec[] = [
@@ -107,6 +110,9 @@ const PLANNER_PIN_SPECS: PlannerPinSpec[] = [
   { id: "planner-pin-poi-marina", variant: "poi", type: "Marina" },
   { id: "planner-pin-poi-ferry", variant: "poi", type: "Ferry" },
   { id: "planner-pin-base", variant: "base", type: "Base" },
+  { id: "planner-pin-hydrophone", variant: "hydrophone", type: "Hydrophone", liveDotHalo: "none" },
+  { id: "planner-pin-hydrophone-live", variant: "hydrophone", type: "Hydrophone", liveDotHalo: "soft" },
+  { id: "planner-pin-hydrophone-live-strong", variant: "hydrophone", type: "Hydrophone", liveDotHalo: "strong" },
 ];
 
 function getPointCoordinates(latitude: number, longitude: number): LngLat | null {
@@ -126,6 +132,7 @@ function getPoiIconKey(type?: SuggestedPlace["type"] | PublicPoi["type"]) {
 
 function getPlannerLocationIconName(kind: PlannerLocationKind, type?: SuggestedPlace["type"] | PublicPoi["type"]) {
   if (kind === "base") return "planner-pin-base";
+  if (kind === "hydrophone") return "planner-pin-hydrophone-live";
   return `planner-pin-${kind}-${getPoiIconKey(type)}`;
 }
 
@@ -141,12 +148,18 @@ function getBaseLocationPopupHtml(baseLocation: { name: string; latitude: number
   return `<div class="poiPopup"><div class="poiPopup__title">${baseLocation.name}</div><div class="poiPopup__meta">Base location · ${Number(baseLocation.latitude).toFixed(4)}, ${Number(baseLocation.longitude).toFixed(4)}</div></div>`;
 }
 
+function getHydrophonePopupHtml(hydrophone: OrcasoundHydrophone) {
+  return `<div class="poiPopup"><div class="poiPopup__title">${hydrophone.name}</div><div class="poiPopup__meta">Orcasound hydrophone · ${hydrophone.region} · ${Number(hydrophone.latitude).toFixed(4)}, ${Number(hydrophone.longitude).toFixed(4)}</div></div>`;
+}
+
 function buildPlannerLocationCollection(args: {
   baseLocation: { name: string; latitude: number; longitude: number } | null;
   suggestedPlaces: SuggestedPlace[];
   itineraryPlaceIds: string[];
   selectedPlaceId: string | null;
   showSuggestedPlaces: boolean;
+  hydrophoneLocations: OrcasoundHydrophone[];
+  showHydrophones: boolean;
   poiItems: PublicPoi[];
   poiFilters: PoiFilters;
 }): FeatureCollection {
@@ -198,6 +211,30 @@ function buildPlannerLocationCollection(args: {
           selectedPulseOn: place.id === args.selectedPlaceId,
           itineraryOrder: itineraryOrderById.get(place.id) ?? 0,
           score: place.score,
+        } satisfies PlannerLocationFeatureProperties,
+      });
+    }
+  }
+
+  if (args.showHydrophones) {
+    for (const hydrophone of args.hydrophoneLocations) {
+      const coords = getPointCoordinates(hydrophone.latitude, hydrophone.longitude);
+      if (!coords) continue;
+      features.push({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: coords,
+        },
+        properties: {
+          id: `hydrophone:${hydrophone.id}`,
+          kind: "hydrophone",
+          name: hydrophone.name,
+          markerType: "Hydrophone",
+          iconName: getPlannerLocationIconName("hydrophone"),
+          selected: false,
+          selectedPulseOn: true,
+          pulseEnabled: true,
         } satisfies PlannerLocationFeatureProperties,
       });
     }
@@ -310,7 +347,16 @@ function withPlannerLocationPulse(data: FeatureCollection, pulseOn: boolean): Fe
     ...data,
     features: data.features.map((feature) => {
       const properties = (feature.properties ?? {}) as PlannerLocationFeatureProperties;
-      if (!properties.selected) return feature;
+      if (!properties.selected && !properties.pulseEnabled) return feature;
+      if (properties.kind === "hydrophone") {
+        return {
+          ...feature,
+          properties: {
+            ...properties,
+            iconName: pulseOn ? "planner-pin-hydrophone-live-strong" : "planner-pin-hydrophone-live",
+          },
+        };
+      }
       return {
         ...feature,
         properties: {
@@ -342,13 +388,21 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
           glow: "rgba(19,216,203,0.42)",
         }
       : spec.variant === "base"
-        ? {
-            fill: "#ffffff",
-            center: "#f3fbfd",
-            stroke: "#158fa2",
-            icon: "#0b718d",
-            glow: "rgba(21,143,162,0.24)",
-          }
+      ? {
+          fill: "#ffffff",
+          center: "#f3fbfd",
+          stroke: "#158fa2",
+          icon: "#0b718d",
+          glow: "rgba(21,143,162,0.24)",
+        }
+        : spec.variant === "hydrophone"
+          ? {
+              fill: "#d8fbf7",
+              center: "#e7fffc",
+              stroke: "#17cfc0",
+              icon: "#0b6477",
+              glow: "rgba(23,207,192,0.36)",
+            }
         : {
             fill: "#dcedf4",
             center: "#e8f6fb",
@@ -363,6 +417,8 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
         ? { text: "directions_boat", font: "Material Symbols Outlined" }
         : spec.type === "Base"
           ? { text: "home", font: "Material Symbols Outlined" }
+          : spec.type === "Hydrophone"
+            ? { text: "graphic_eq", font: "Material Symbols Rounded" }
           : { text: "anchor", font: "Material Symbols Outlined" };
 
   if ("fonts" in document) {
@@ -411,6 +467,34 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(symbol.text, 32, 33);
+
+  if (spec.variant === "hydrophone") {
+    const halo = spec.liveDotHalo ?? "none";
+    if (halo === "soft") {
+      ctx.fillStyle = "rgba(224, 74, 87, 0.14)";
+      ctx.beginPath();
+      ctx.arc(42, 22, 6.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (halo === "strong") {
+      ctx.fillStyle = "rgba(224, 74, 87, 0.11)";
+      ctx.beginPath();
+      ctx.arc(42, 22, 8.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(224, 74, 87, 0.2)";
+      ctx.beginPath();
+      ctx.arc(42, 22, 5.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = "rgba(255, 243, 245, 0.98)";
+    ctx.beginPath();
+    ctx.arc(42, 22, 4.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e04a57";
+    ctx.beginPath();
+    ctx.arc(42, 22, 3.1, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   return ctx.getImageData(0, 0, width, height);
 }
@@ -472,6 +556,8 @@ async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollec
           18,
           ["==", ["get", "selected"], true],
           27,
+          ["==", ["get", "kind"], "hydrophone"],
+          24,
           23,
         ],
         "circle-color": "rgba(255, 255, 255, 0.01)",
@@ -496,6 +582,8 @@ async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollec
           0.7,
           ["==", ["get", "kind"], "base"],
           0.7,
+          ["==", ["get", "kind"], "hydrophone"],
+          0.68,
           0.56,
         ],
         "icon-anchor": "bottom",
@@ -507,6 +595,8 @@ async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollec
           4,
           ["==", ["get", "kind"], "suggested"],
           3,
+          ["==", ["get", "kind"], "hydrophone"],
+          2,
           1,
         ],
       },
@@ -636,6 +726,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     showTripHotspotMarkers = false,
     baseLocation = null,
     maxTravelDistanceMiles = null,
+    hydrophoneLocations = [],
+    showHydrophones = false,
     sidebarOffsetPx = 0,
   }: ForecastMapProps,
   ref
@@ -1354,6 +1446,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       itineraryPlaceIds,
       selectedPlaceId,
       showSuggestedPlaces: showTripHotspotMarkers,
+      hydrophoneLocations,
+      showHydrophones,
       poiItems,
       poiFilters,
     });
@@ -1376,18 +1470,19 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       await ensurePlannerLocationLayers(map, baseData);
       if (cancelled || mapRef.current !== map) return;
 
-      if (selectedPlaceId && pulseSelectedPlaceMarker) {
+      if ((selectedPlaceId && pulseSelectedPlaceMarker) || showHydrophones) {
         let pulseOn = true;
         const source = getGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID);
         source?.setData(withPlannerLocationPulse(baseData, pulseOn));
         pulseIntervalId = window.setInterval(() => {
           pulseOn = !pulseOn;
           source?.setData(withPlannerLocationPulse(baseData, pulseOn));
-        }, 520);
+        }, 900);
       }
 
       const placesById = new Map(suggestedPlaces.map((place) => [place.id, place]));
       const poisById = new Map(poiItems.map((poi) => [getPublicPoiFeatureId(poi), poi]));
+      const hydrophonesById = new Map(hydrophoneLocations.map((hydrophone) => [`hydrophone:${hydrophone.id}`, hydrophone]));
 
       const popupHtmlForFeature = (feature: NonNullable<MapLayerMouseEvent["features"]>[number]) => {
         const properties = feature.properties ?? {};
@@ -1395,6 +1490,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         const kind = typeof properties.kind === "string" ? properties.kind : null;
         if (id && placesById.has(id)) return getSuggestedPlacePopupHtml(placesById.get(id)!);
         if (id && kind === "poi" && poisById.has(id)) return getPublicPoiPopupHtml(poisById.get(id)!);
+        if (id && kind === "hydrophone" && hydrophonesById.has(id)) return getHydrophonePopupHtml(hydrophonesById.get(id)!);
         if (kind === "base" && baseLocation) return getBaseLocationPopupHtml(baseLocation);
         return "";
       };
@@ -1467,7 +1563,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       removeHandlers?.();
       popup.remove();
     };
-  }, [baseLocation, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedPlaceId, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
+  }, [baseLocation, hydrophoneLocations, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedPlaceId, showHydrophones, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
 
   useEffect(() => {
     const map = mapRef.current;

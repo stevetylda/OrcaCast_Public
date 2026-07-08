@@ -1,5 +1,6 @@
 import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
 import type { H3Resolution } from "../../shared/config/dataPaths";
+import type { OrcasoundHydrophone } from "../../shared/data/orcasoundHydrophones";
 import type { DataLoadError } from "../../shared/data/errors";
 import type { Period } from "../../shared/data/periods";
 import type { PlannerBaseLocation } from "../../shared/data/plannerBaseLocations";
@@ -56,6 +57,8 @@ export type ForecastMapProps = {
   showTripHotspotMarkers?: boolean;
   baseLocation?: PlannerBaseLocation | null;
   maxTravelDistanceMiles?: number | null;
+  hydrophoneLocations?: OrcasoundHydrophone[];
+  showHydrophones?: boolean;
   sidebarOffsetPx?: number;
 };
 

@@ -1,0 +1,40 @@
+{
+  "listenUrl": "https://live.orcasound.net/",
+  "items": [
+    {
+      "id": "bush-point",
+      "name": "Bush Point",
+      "region": "Whidbey Island",
+      "latitude": 48.0342,
+      "longitude": -122.6026
+    },
+    {
+      "id": "port-townsend",
+      "name": "Port Townsend",
+      "region": "Admiralty Inlet",
+      "latitude": 48.1114,
+      "longitude": -122.759
+    },
+    {
+      "id": "point-robinson",
+      "name": "Point Robinson",
+      "region": "Vashon Island",
+      "latitude": 47.3892,
+      "longitude": -122.3731
+    },
+    {
+      "id": "lime-kiln",
+      "name": "Lime Kiln",
+      "region": "San Juan Island",
+      "latitude": 48.5165,
+      "longitude": -123.1501
+    },
+    {
+      "id": "sunset-bay",
+      "name": "Sunset Bay",
+      "region": "San Juan Island",
+      "latitude": 48.5837,
+      "longitude": -123.1734
+    }
+  ]
+}

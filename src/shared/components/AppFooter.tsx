@@ -139,7 +139,7 @@ export function AppFooter({
           renderPlacesPanel(
             liveCamPlaces,
             "No currently suggested places have live cameras attached.",
-            "Live Cams"
+            "Cameras"
           )}
         {activePanel === "hydrophones" &&
           renderPlacesPanel(
@@ -373,7 +373,7 @@ export function AppFooter({
             {
               id: "live-cams" as const,
               icon: "videocam",
-              label: "Live Cams",
+              label: "Cameras",
               count: liveCamPlaces.length,
             },
             {

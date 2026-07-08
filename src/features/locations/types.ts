@@ -1,4 +1,4 @@
-export type ViewingPotential = "low" | "medium" | "high";
+export type ViewingPotential = "very-low" | "low" | "medium" | "high" | "very-high";
 
 export type ViewingLocation = {
   id: string;

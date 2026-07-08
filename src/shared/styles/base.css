@@ -1561,10 +1561,22 @@ body {
   color: var(--brand-blue-teal);
 }
 
+.viewingPotentialBadge--very-high {
+  border-color: rgba(13, 70, 91, 0.42);
+  background: rgba(13, 70, 91, 0.14);
+  color: #0d465b;
+}
+
 .app--dark .viewingPotentialBadge--high {
   border-color: rgba(var(--brand-seafoam-rgb), 0.34);
   background: rgba(var(--brand-blue-teal-rgb), 0.22);
   color: rgba(229, 247, 244, 0.98);
+}
+
+.app--dark .viewingPotentialBadge--very-high {
+  border-color: rgba(150, 233, 229, 0.36);
+  background: rgba(13, 70, 91, 0.28);
+  color: rgba(236, 249, 248, 0.99);
 }
 
 .viewingPotentialBadge--medium {
@@ -1585,10 +1597,22 @@ body {
   color: rgba(70, 89, 110, 0.9);
 }
 
+.viewingPotentialBadge--very-low {
+  border-color: rgba(128, 142, 161, 0.18);
+  background: rgba(128, 142, 161, 0.08);
+  color: rgba(104, 118, 137, 0.88);
+}
+
 .app--dark .viewingPotentialBadge--low {
   border-color: rgba(168, 185, 205, 0.24);
   background: rgba(120, 139, 161, 0.12);
   color: rgba(226, 236, 244, 0.88);
+}
+
+.app--dark .viewingPotentialBadge--very-low {
+  border-color: rgba(168, 185, 205, 0.18);
+  background: rgba(120, 139, 161, 0.08);
+  color: rgba(202, 215, 229, 0.82);
 }
 
 @media (max-width: 760px) {

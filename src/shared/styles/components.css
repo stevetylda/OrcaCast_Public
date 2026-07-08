@@ -4780,16 +4780,16 @@
     "cta cta";
   column-gap: 18px;
   row-gap: 14px;
-  border-color: rgba(38, 164, 169, 0.24);
+  border-color: rgba(181, 211, 235, 0.4);
   background:
-    radial-gradient(circle at 82% 18%, rgba(67, 218, 209, 0.13), transparent 34%),
-    rgba(255, 255, 255, 0.86);
+    radial-gradient(circle at 82% 18%, rgba(236, 247, 255, 0.92), transparent 34%),
+    rgba(255, 255, 255, 0.9);
 }
 
 .app--dark .homeFeatureCard--trip {
-  border-color: rgba(91, 231, 221, 0.18);
+  border-color: rgba(103, 153, 182, 0.24);
   background:
-    radial-gradient(circle at 82% 18%, rgba(67, 218, 209, 0.12), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(24, 51, 82, 0.72), transparent 34%),
     rgba(7, 21, 39, 0.78);
 }
 
@@ -4798,18 +4798,18 @@
   width: 84px;
   height: 84px;
   border-radius: 26px;
-  color: #087e8a;
+  color: #245be0;
   background:
-    linear-gradient(180deg, rgba(238, 253, 251, 0.98), rgba(221, 244, 241, 0.92));
+    linear-gradient(180deg, rgba(236, 246, 255, 0.98), rgba(224, 237, 255, 0.94));
   box-shadow:
-    0 14px 28px rgba(17, 126, 138, 0.1),
+    0 14px 28px rgba(31, 64, 98, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .app--dark .homeFeatureCard--trip .homeFeatureCard__iconWrap {
-  color: #83ede6;
+  color: #8eb9ff;
   background:
-    linear-gradient(180deg, rgba(18, 58, 70, 0.96), rgba(11, 35, 54, 0.94));
+    linear-gradient(180deg, rgba(24, 51, 82, 0.96), rgba(11, 25, 43, 0.92));
   box-shadow:
     0 14px 28px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -4818,12 +4818,12 @@
 .homeFeatureCard--trip .homeFeatureCard__title {
   grid-area: title;
   align-self: end;
-  color: #102d63;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+  color: #17315d;
+  font-family: inherit;
   font-size: clamp(30px, 3.15vw, 42px);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 0.98;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.96;
 }
 
 .app--dark .homeFeatureCard--trip .homeFeatureCard__title {
@@ -4834,9 +4834,10 @@
   grid-area: body;
   align-self: start;
   max-width: 38ch;
-  color: rgba(25, 55, 91, 0.82);
-  font-size: 16px;
+  color: rgba(53, 77, 116, 0.84);
+  font-size: 15px;
   line-height: 1.45;
+  font-weight: 650;
 }
 
 .app--dark .homeFeatureCard--trip .homeFeatureCard__body {
@@ -4867,20 +4868,20 @@
   height: 100%;
   overflow: hidden;
   border-radius: 34px;
-  border: 1px solid rgba(167, 205, 228, 0.58);
+  border: 1px solid rgba(181, 211, 235, 0.58);
   background:
-    radial-gradient(circle at 84% 8%, rgba(117, 230, 220, 0.16), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 251, 255, 0.96));
+    radial-gradient(circle at 18% 8%, rgba(236, 247, 255, 0.98), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 253, 255, 0.92));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.88),
-    0 22px 44px rgba(19, 66, 96, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 22px 44px rgba(31, 64, 98, 0.12);
 }
 
 .app--dark .homePlannerPreview__shell {
   border-color: rgba(104, 183, 203, 0.28);
   background:
-    radial-gradient(circle at 84% 8%, rgba(117, 230, 220, 0.12), transparent 34%),
-    rgba(10, 24, 42, 0.82);
+    radial-gradient(circle at 18% 8%, rgba(24, 51, 82, 0.96), transparent 42%),
+    rgba(11, 25, 43, 0.92);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 16px 34px rgba(0, 0, 0, 0.24);
@@ -4896,15 +4897,180 @@
   border-radius: 28px;
 }
 
-.homePlannerPreview__mapImage {
+.homePlannerPreviewScene {
   position: absolute;
   inset: 0;
   z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  transform: scale(0.9);
+  transform-origin: center center;
+  background:
+    radial-gradient(circle at 34% 36%, rgba(255, 255, 255, 0.72), transparent 26%),
+    radial-gradient(circle at 50% 44%, rgba(123, 229, 220, 0.12), transparent 26%),
+    linear-gradient(180deg, #eef9f8 0%, #ebf7f7 100%);
+}
+
+.homePlannerPreviewScene::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  bottom: 22px;
+  left: 50%;
+  width: min(420px, calc(100% - 168px));
+  transform: translateX(-50%);
+  border-radius: 26px;
+  border: 1px solid rgba(186, 224, 228, 0.72);
+  background:
+    radial-gradient(circle at 30% 34%, rgba(255, 255, 255, 0.58), transparent 30%),
+    linear-gradient(180deg, rgba(242, 251, 251, 0.94), rgba(235, 247, 247, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 14px 30px rgba(37, 91, 110, 0.08);
+}
+
+.homePlannerPreviewScene__calendar,
+.homePlannerPreviewScene__signal {
+  position: absolute;
+  z-index: 1;
+}
+
+.homePlannerPreviewScene__calendar {
+  left: 50%;
+  top: 58px;
+  width: min(266px, calc(100% - 180px));
+  padding: 16px 18px 18px;
+  transform: translateX(-50%);
+  border-radius: 20px;
+  border: 1px solid rgba(214, 232, 235, 0.98);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 24px rgba(29, 82, 104, 0.1);
+}
+
+.homePlannerPreviewScene__calendarDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 18px;
+  color: #9aa5b1;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-align: center;
+}
+
+.homePlannerPreviewScene__calendarDots {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 22px;
+  align-items: center;
+  justify-items: center;
+}
+
+.homePlannerPreviewScene__calendarDots > span,
+.homePlannerPreviewScene__calendarDots .isRange > span {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #d2d9e0;
+}
+
+.homePlannerPreviewScene__calendarDots .isRange {
+  grid-column: 3 / span 5;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  justify-items: center;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  display: block;
+  height: 34px;
+  border-radius: 999px;
+  background: #bdeee8;
+}
+
+.homePlannerPreviewScene__calendarDots .isRange > span {
+  background: #0f8998;
+}
+
+.homePlannerPreviewScene__signal {
+  left: 50%;
+  bottom: 34px;
+  width: min(256px, calc(100% - 196px));
+  height: 84px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  align-items: end;
+  gap: 7px;
+}
+
+.homePlannerPreviewScene__signal::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  bottom: -2px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(198, 227, 231, 0.9);
+}
+
+.homePlannerPreviewScene__signalBar {
+  position: relative;
+  z-index: 1;
+  height: calc(var(--signal-scale) * 100%);
+  min-height: 14px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, #d9f7f4 0%, #a0e7dd 100%);
+}
+
+.homePlannerPreviewScene__signalBar:nth-child(4),
+.homePlannerPreviewScene__signalBar:nth-child(5),
+.homePlannerPreviewScene__signalBar:nth-child(6),
+.homePlannerPreviewScene__signalBar:nth-child(10),
+.homePlannerPreviewScene__signalBar:nth-child(11) {
+  background: linear-gradient(180deg, #8fe4d8 0%, #46c9c8 100%);
+}
+
+.homePlannerPreviewScene__signalBar:nth-child(7),
+.homePlannerPreviewScene__signalBar:nth-child(8),
+.homePlannerPreviewScene__signalBar:nth-child(9) {
+  background: linear-gradient(180deg, #36b9c0 0%, #0e7f93 100%);
+}
+
+.homePlannerPreviewScene__signalBar.isPeak {
+  background: linear-gradient(180deg, #0f8695 0%, #0b6f89 100%);
+}
+
+.app--dark .homePlannerPreviewScene {
+  background:
+    radial-gradient(circle at 34% 36%, rgba(255, 255, 255, 0.08), transparent 26%),
+    radial-gradient(circle at 50% 44%, rgba(123, 229, 220, 0.12), transparent 26%),
+    linear-gradient(180deg, #102432 0%, #112937 100%);
+}
+
+.app--dark .homePlannerPreviewScene::before {
+  border-color: rgba(90, 159, 172, 0.36);
+  background:
+    radial-gradient(circle at 30% 34%, rgba(255, 255, 255, 0.06), transparent 30%),
+    linear-gradient(180deg, rgba(17, 39, 50, 0.96), rgba(14, 33, 44, 0.94));
+}
+
+.app--dark .homePlannerPreviewScene__calendar {
+  border-color: rgba(81, 139, 152, 0.4);
+  background: rgba(17, 35, 45, 0.94);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.app--dark .homePlannerPreviewScene__calendarDays {
+  color: rgba(194, 206, 217, 0.86);
+}
+
+.app--dark .homePlannerPreviewScene__calendarDots > span {
+  background: rgba(146, 163, 177, 0.42);
+}
+
+.app--dark .homePlannerPreviewScene__signal::after {
+  background: rgba(71, 104, 117, 0.9);
 }
 
 .homeFeatureCard--trip .homeFeatureCard__cta {
@@ -4995,6 +5161,32 @@
   .homePlannerPreview__shell,
   .homePlannerPreview__map {
     min-height: 224px;
+  }
+
+  .homePlannerPreviewScene__calendar {
+    left: 50%;
+    top: 40px;
+    width: min(196px, calc(100% - 112px));
+    padding: 12px 14px 14px;
+  }
+
+  .homePlannerPreviewScene::before {
+    top: 18px;
+    bottom: 18px;
+    width: min(248px, calc(100% - 92px));
+  }
+
+  .homePlannerPreviewScene__calendarDays {
+    margin-bottom: 14px;
+    font-size: 11px;
+  }
+
+  .homePlannerPreviewScene__signal {
+    left: 50%;
+    bottom: 26px;
+    width: min(188px, calc(100% - 128px));
+    height: 70px;
+    gap: 5px;
   }
 
 }

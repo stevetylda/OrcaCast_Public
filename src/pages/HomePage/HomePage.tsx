@@ -63,7 +63,7 @@ export function HomePage() {
           <div className="homeHero__content">
             <div className="homeHero__copy">
               <p className="homeHero__eyebrow">Trip planning for the Salish Sea</p>
-              <h1 className="homeHero__title">Find your best orca viewing window</h1>
+              <h1 className="homeHero__title">Experience Orcas?</h1>
               <p className="homeHero__body">
                 Plan using forecasts, seasonal insights, and real-world viewing conditions.
               </p>
@@ -93,11 +93,43 @@ export function HomePage() {
                       <div className="homePlannerPreview">
                         <div className="homePlannerPreview__shell">
                           <div className="homePlannerPreview__map">
-                            <img
-                              className="homePlannerPreview__mapImage"
-                              src="/assets/home/plan-around-dates-map-preview.svg"
-                              alt=""
-                            />
+                            <div className="homePlannerPreviewScene">
+                              <div className="homePlannerPreviewScene__calendar">
+                                <div className="homePlannerPreviewScene__calendarDays">
+                                  {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                                    <span key={day}>{day}</span>
+                                  ))}
+                                </div>
+                                <div className="homePlannerPreviewScene__calendarDots">
+                                  {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+                                    <span key={`top-${index}`} />
+                                  ))}
+                                  {[0, 1].map((index) => (
+                                    <span key={`mid-${index}`} />
+                                  ))}
+                                  <span className="isRange">
+                                    {[0, 1, 2, 3, 4].map((index) => (
+                                      <span key={`range-${index}`} />
+                                    ))}
+                                  </span>
+                                  {[0, 1, 2].map((index) => (
+                                    <span key={`bottom-${index}`} />
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="homePlannerPreviewScene__signal" aria-hidden="true">
+                                {[0.12, 0.22, 0.34, 0.48, 0.64, 0.8, 0.94, 1, 0.88, 0.66, 0.48, 0.3, 0.16].map(
+                                  (value, index) => (
+                                    <span
+                                      key={`signal-${index}`}
+                                      className={`homePlannerPreviewScene__signalBar${index === 7 ? " isPeak" : ""}`}
+                                      style={{ "--signal-scale": value } as CSSProperties}
+                                    />
+                                  )
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>

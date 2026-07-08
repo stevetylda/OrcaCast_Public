@@ -3,6 +3,7 @@ import type { FeatureCollection, Geometry, Position } from "geojson";
 import type { H3Resolution } from "../../../shared/config/dataPaths";
 import { loadForecast, loadGrid } from "../../../shared/data/forecastIO";
 import { getH3CellId } from "../../../shared/data/h3";
+import { loadTripPlannerOccurrencePayload, type TripPlannerOccurrencePayload } from "../../../shared/data/tripPlanner";
 import type { SuggestedPlace, ViewingPotential } from "../../locations/types";
 import { loadPoiDataBundle, type PoiFilters, type PublicPoi } from "../../locations/poiData";
 
@@ -36,7 +37,6 @@ type PlannerPoiMetadata = {
   photoSpotId?: string;
 };
 
-const TOP_LOCATION_FRACTION = 0.05;
 const POI_SCORE_RADIUS_KM = 16.0934; // 10 miles.
 const DEFAULT_RECOMMENDATION_RADIUS_MILES = 175;
 const MILES_TO_KM = 1.609344;
@@ -137,10 +137,12 @@ function haversineKm(a: [number, number], b: [number, number]) {
   return 2 * earthRadiusKm * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
-function toViewingPotential(score: number): ViewingPotential {
-  if (score >= 0.66) return "high";
-  if (score >= 0.34) return "medium";
-  return "low";
+function toViewingPotential(percentileFromBottom: number): ViewingPotential {
+  if (percentileFromBottom >= 90) return "very-high";
+  if (percentileFromBottom >= 75) return "high";
+  if (percentileFromBottom >= 25) return "medium";
+  if (percentileFromBottom >= 10) return "low";
+  return "very-low";
 }
 
 function poiLocationKey(poi: PublicPoi) {
@@ -190,6 +192,16 @@ function buildForecastCellScores(grid: FeatureCollection, values: Record<string,
     .filter((cell): cell is ForecastCellScore => cell !== null);
 }
 
+function buildAllTimeOccurrenceValues(payload: TripPlannerOccurrencePayload): Record<string, number> {
+  const values: Record<string, number> = {};
+  payload.rows.forEach((row) => {
+    const count = Number(row.count);
+    if (!Number.isFinite(count) || count <= 0) return;
+    values[row.h3] = (values[row.h3] ?? 0) + count;
+  });
+  return values;
+}
+
 type ScoredPoi = {
   poi: PublicPoi;
   meanNearbyScore: number;
@@ -197,23 +209,8 @@ type ScoredPoi = {
   nearestDistanceKm: number;
 };
 
-function rankPoiAgainstForecast(
-  pois: PublicPoi[],
-  cells: ForecastCellScore[],
-  baseLocation?: { latitude: number; longitude: number } | null,
-  maxTravelDistanceMiles?: number | null,
-  limit?: number | null,
-  sourcePoisForFraction?: PublicPoi[]
-): SuggestedPlace[] {
-  const candidatePois = filterPoisByBaseRadius(dedupePoiLocations(pois), baseLocation, maxTravelDistanceMiles);
-  const sourceCandidatePois = filterPoisByBaseRadius(
-    dedupePoiLocations(sourcePoisForFraction ?? pois),
-    baseLocation,
-    maxTravelDistanceMiles
-  );
-  if (candidatePois.length === 0 || cells.length === 0) return [];
-
-  const scoredPois = candidatePois
+function scorePoisAgainstCells(pois: PublicPoi[], cells: ForecastCellScore[]): ScoredPoi[] {
+  return pois
     .map((poi): ScoredPoi => {
       const point: [number, number] = [poi.longitude, poi.latitude];
       let scoreSum = 0;
@@ -224,8 +221,6 @@ function rankPoiAgainstForecast(
         const distanceKm = haversineKm(point, cell.center);
         if (distanceKm > POI_SCORE_RADIUS_KM) continue;
 
-        // Use the literal mean the product expects: all modeled hexes within 10 miles,
-        // not a distance-weighted score and not a made-up fallback coordinate.
         scoreSum += cell.value;
         nearbyCellCount += 1;
         nearestDistanceKm = Math.min(nearestDistanceKm, distanceKm);
@@ -241,6 +236,41 @@ function rankPoiAgainstForecast(
       };
     })
     .sort((a, b) => b.meanNearbyScore - a.meanNearbyScore || a.poi.name.localeCompare(b.poi.name));
+}
+
+function percentileFromBaseline(score: number, sortedScoresAscending: number[]) {
+  if (sortedScoresAscending.length <= 1) return 100;
+  let low = 0;
+  let high = sortedScoresAscending.length;
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (sortedScoresAscending[mid] <= score) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+  const index = Math.max(0, low - 1);
+  return (index / (sortedScoresAscending.length - 1)) * 100;
+}
+
+function rankPoiAgainstForecast(
+  pois: PublicPoi[],
+  cells: ForecastCellScore[],
+  baselineCells: ForecastCellScore[],
+  baseLocation?: { latitude: number; longitude: number } | null,
+  maxTravelDistanceMiles?: number | null,
+  limit?: number | null,
+  sourcePoisForFraction?: PublicPoi[]
+): SuggestedPlace[] {
+  const candidatePois = filterPoisByBaseRadius(dedupePoiLocations(pois), baseLocation, maxTravelDistanceMiles);
+  if (candidatePois.length === 0 || cells.length === 0) return [];
+
+  const scoredPois = scorePoisAgainstCells(candidatePois, cells);
+  const baselinePois = dedupePoiLocations(sourcePoisForFraction ?? pois);
+  const baselineScoresAscending = scorePoisAgainstCells(baselinePois, baselineCells)
+    .map((item) => item.meanNearbyScore)
+    .sort((a, b) => a - b);
 
   // A POI only qualifies as a recommendation if it actually overlaps modeled water
   // cells and has a positive nearby mean. Otherwise zero-score POIs sort alphabetically
@@ -262,27 +292,20 @@ function rankPoiAgainstForecast(
     return [];
   }
 
-  // The top-N percentage should be based on the valid POI source universe, not the smaller
-  // display-cleaned or positive-score subsets. The source file contains many generic marina
-  // inventory records; we keep those out of cards, but they still count toward "top 5%".
-  const fractionDenominator = sourceCandidatePois.length > 0 ? sourceCandidatePois.length : candidatePois.length;
-  const fractionCount = Math.max(1, Math.ceil(fractionDenominator * TOP_LOCATION_FRACTION));
   const requestedLimit = typeof limit === "number" && Number.isFinite(limit) && limit > 0 ? Math.round(limit) : null;
-  const topCount = Math.min(eligiblePois.length, requestedLimit ?? fractionCount);
-  const maxMeanScore = Math.max(eligiblePois[0]?.meanNearbyScore ?? Number.EPSILON, Number.EPSILON);
+  const topCount = Math.min(eligiblePois.length, requestedLimit ?? eligiblePois.length);
 
   if (import.meta.env.DEV) {
     console.info("[recommended POIs]", {
       rawPois: pois.length,
       sourcePois: sourcePoisForFraction?.length ?? pois.length,
-      sourceCandidatePois: sourceCandidatePois.length,
+      baselinePois: baselinePois.length,
       candidatePois: candidatePois.length,
       scoredPois: scoredPois.length,
       eligiblePois: eligiblePois.length,
       zeroScorePois: scoredPois.length - eligiblePois.length,
       topCount,
-      fractionCount,
-      fractionDenominator,
+      baselineScoreCount: baselineScoresAscending.length,
       scoreRadiusMiles: POI_SCORE_RADIUS_KM / MILES_TO_KM,
       baseLatitude: baseLocation?.latitude,
       baseLongitude: baseLocation?.longitude,
@@ -300,17 +323,13 @@ function rankPoiAgainstForecast(
   }
 
   return eligiblePois.slice(0, topCount).map(({ poi, meanNearbyScore, nearbyCellCount, nearestDistanceKm }) => {
-    const normalizedScore = Math.max(0, Math.min(1, meanNearbyScore / maxMeanScore));
+    const percentileFromBottom = percentileFromBaseline(meanNearbyScore, baselineScoresAscending);
     const normalizedName = normalizeId(poi.name);
     const metadata = PLANNER_POI_METADATA[normalizedName];
     const reason =
       poi.reason ??
       metadata?.reason ??
-      `${
-        requestedLimit
-          ? `One of the top ${topCount} viewing locations`
-          : "Top 5% POI"
-      } based on mean forecast score across ${nearbyCellCount} grid cells within 10 miles.`;
+      `One of the top ${topCount} viewing locations based on mean forecast score across ${nearbyCellCount} grid cells within 10 miles.`;
 
     return {
       id: toPlaceId(poi),
@@ -320,7 +339,7 @@ function rankPoiAgainstForecast(
       type: poi.type,
       latitude: poi.latitude,
       longitude: poi.longitude,
-      viewingPotential: toViewingPotential(normalizedScore),
+      viewingPotential: toViewingPotential(percentileFromBottom),
       score: meanNearbyScore,
       reason,
       distanceKm: Number.isFinite(nearestDistanceKm) ? nearestDistanceKm : undefined,
@@ -360,7 +379,8 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
         setIsLoading(true);
         setError(null);
       }
-      const [poiBundle, grid] = await Promise.all([loadPoiDataBundle(), loadGrid(resolution)]);
+      const baselinePayloadPromise = loadTripPlannerOccurrencePayload(resolution);
+      const [poiBundle, grid, baselinePayload] = await Promise.all([loadPoiDataBundle(), loadGrid(resolution), baselinePayloadPromise]);
       const pois = poiBundle.items.map(enrichPlannerPoi);
       if (pois.length === 0) return [];
 
@@ -381,7 +401,8 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
           })
         ).values;
       const cells = buildForecastCellScores(grid, values);
-      return rankPoiAgainstForecast(pois, cells, baseLocation, maxTravelDistanceMiles, limit, poiBundle.sourceItems);
+      const baselineCells = buildForecastCellScores(grid, buildAllTimeOccurrenceValues(baselinePayload));
+      return rankPoiAgainstForecast(pois, cells, baselineCells, baseLocation, maxTravelDistanceMiles, limit, poiBundle.sourceItems);
     };
 
     load()
