@@ -2,6 +2,7 @@ import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState, type CS
 import { useLocation, useNavigate } from "react-router-dom";
 import { ForecastMap, type ForecastMapHandle, type ForecastMapProps } from "../../features/map";
 import { appConfig } from "../../shared/config/appConfig";
+import { DEFAULT_RECOMMENDATION_RADIUS_MILES, KILOMETERS_PER_MILE } from "../../shared/config/planner";
 import { AppHeader } from "../../shared/components/AppHeader";
 import {
   aggregateTripPlannerOccurrence,
@@ -25,7 +26,8 @@ import {
 import { useMenu } from "../../shared/state/MenuContext";
 import { useMapState, type UnitsMode } from "../../shared/state/MapStateContext";
 import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlaces";
-import type { SuggestedPlace, ViewingPotential } from "../../features/locations/types";
+import type { SuggestedPlace, ViewingLocation, ViewingPotential } from "../../features/locations/types";
+import { loadPoiData } from "../../features/locations/poiData";
 import { isoWeekFromDate, isoWeekYearFromDate } from "../../shared/time/forecastPeriodToIsoWeek";
 import { PALETTES } from "../../shared/geo/palettes";
 import { H3ResolutionPill } from "../../features/watch/components/H3ResolutionPill";
@@ -38,6 +40,7 @@ const MAX_TRIP_LENGTH_DAYS = 366;
 const TRIP_BRUSH_APPLY_DELAY_MS = 2000;
 const PLANNER_COLLAPSE_DURATION_MS = 320;
 const HOVER_PANEL_CLOSE_DELAY_MS = 180;
+const PLACE_IMAGE_PLACEHOLDER_SRC = `${(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}spot-images/generic.webp`;
 
 const LEGEND_LABELS = ["Very High", "High", "Medium", "Low", "Very Low"] as const;
 
@@ -153,7 +156,6 @@ function readStoredPlannerDraft(): TripPlannerDraft | null {
   }
 }
 
-const KILOMETERS_PER_MILE = 1.60934;
 
 function formatPlannerDistanceValue(miles: number | null | undefined, unitsMode: UnitsMode) {
   if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0) return "";
@@ -332,12 +334,16 @@ function dayIsWithinSelectedRange(dayIso: string, startDate: string, endDate: st
 type PlannerDateRangeFieldProps = {
   arrivalDate: string;
   departureDate: string;
+  labelledBy: string;
+  valueId: string;
   onChange: (nextArrivalDate: string, nextDepartureDate: string) => void;
 };
 
 type PlannerLocationFieldProps = {
   value: string;
   options: PlannerBaseLocation[];
+  labelledBy: string;
+  valueId: string;
   onChange: (nextValue: string) => void;
 };
 
@@ -351,7 +357,7 @@ function formatPlannerDateRangeSummary(startDate: string, endDate: string) {
   return `${formatter.format(start)} → ${formatter.format(end)} · ${dayCount} ${dayCount === 1 ? "day" : "days"}`;
 }
 
-function PlannerLocationField({ value, options, onChange }: PlannerLocationFieldProps) {
+function PlannerLocationField({ value, options, labelledBy, valueId, onChange }: PlannerLocationFieldProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -387,11 +393,14 @@ function PlannerLocationField({ value, options, onChange }: PlannerLocationField
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-labelledby={`${labelledBy} ${valueId}`}
       >
         <span className="material-symbols-rounded" aria-hidden="true">
           location_on
         </span>
-        <span className={`plannerResultsPage__locationValue${value ? " hasValue" : ""}`}>{value || "Select a location"}</span>
+        <span id={valueId} className={`plannerResultsPage__locationValue${value ? " hasValue" : ""}`}>
+          {value || "Select a location"}
+        </span>
         <span className="material-symbols-rounded plannerResultsPage__locationChevron" aria-hidden="true">
           expand_more
         </span>
@@ -408,10 +417,11 @@ function PlannerLocationField({ value, options, onChange }: PlannerLocationField
                 role="option"
                 aria-selected={selected}
                 className={`plannerResultsPage__locationOption${selected ? " isSelected" : ""}`}
-                onClick={() => {
+                onClick={(event) => {
+                  event.preventDefault();
                   onChange(location.name);
                   setOpen(false);
-                  triggerRef.current?.focus();
+                  window.requestAnimationFrame(() => triggerRef.current?.focus());
                 }}
               >
                 <span>{location.name}</span>
@@ -429,21 +439,16 @@ function PlannerLocationField({ value, options, onChange }: PlannerLocationField
   );
 }
 
-function PlannerDateRangeField({ arrivalDate, departureDate, onChange }: PlannerDateRangeFieldProps) {
+function PlannerDateRangeField({ arrivalDate, departureDate, labelledBy, valueId, onChange }: PlannerDateRangeFieldProps) {
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
   const [hoveredDate, setHoveredDate] = useState("");
-  const [visibleMonth, setVisibleMonth] = useState(() => {
+  const baseVisibleMonth = useMemo(() => {
     const selected = arrivalDate ? parseIsoDate(arrivalDate) : new Date();
     return startOfUtcMonth(selected ?? new Date());
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    const selected = arrivalDate ? parseIsoDate(arrivalDate) : new Date();
-    setVisibleMonth(startOfUtcMonth(selected ?? new Date()));
-  }, [arrivalDate, open]);
+  }, [arrivalDate]);
+  const [visibleMonthOffset, setVisibleMonthOffset] = useState(0);
 
   useEffect(() => {
     if (!open) return;
@@ -464,6 +469,10 @@ function PlannerDateRangeField({ arrivalDate, departureDate, onChange }: Planner
     };
   }, [open]);
 
+  const visibleMonth = useMemo(
+    () => addUtcMonths(baseVisibleMonth, visibleMonthOffset),
+    [baseVisibleMonth, visibleMonthOffset]
+  );
   const months = useMemo(() => [visibleMonth, addUtcMonths(visibleMonth, 1)], [visibleMonth]);
   const previewRangeEnd = arrivalDate && !departureDate ? hoveredDate : "";
 
@@ -486,14 +495,21 @@ function PlannerDateRangeField({ arrivalDate, departureDate, onChange }: Planner
         ref={triggerRef}
         type="button"
         className="plannerResultsPage__promptInputWrap plannerResultsPage__promptInputWrap--range"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() =>
+          setOpen((value) => {
+            const next = !value;
+            if (next) setVisibleMonthOffset(0);
+            return next;
+          })
+        }
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-labelledby={`${labelledBy} ${valueId}`}
       >
         <span className="material-symbols-rounded" aria-hidden="true">
           calendar_month
         </span>
-        <span className={`plannerResultsPage__dateRangeValue${arrivalDate ? " hasValue" : ""}`}>
+        <span id={valueId} className={`plannerResultsPage__dateRangeValue${arrivalDate ? " hasValue" : ""}`}>
           {formatPlannerDateFieldValue(arrivalDate, departureDate)}
         </span>
       </button>
@@ -506,12 +522,12 @@ function PlannerDateRangeField({ arrivalDate, departureDate, onChange }: Planner
               <span>{formatPlannerDateFieldValue(arrivalDate, departureDate)}</span>
             </div>
             <div className="plannerResultsPage__dateRangeNav">
-              <button type="button" onClick={() => setVisibleMonth((current) => addUtcMonths(current, -1))} aria-label="Previous month">
+              <button type="button" onClick={() => setVisibleMonthOffset((current) => current - 1)} aria-label="Previous month">
                 <span className="material-symbols-rounded" aria-hidden="true">
                   chevron_left
                 </span>
               </button>
-              <button type="button" onClick={() => setVisibleMonth((current) => addUtcMonths(current, 1))} aria-label="Next month">
+              <button type="button" onClick={() => setVisibleMonthOffset((current) => current + 1)} aria-label="Next month">
                 <span className="material-symbols-rounded" aria-hidden="true">
                   chevron_right
                 </span>
@@ -583,7 +599,11 @@ function PlannerDateRangeField({ arrivalDate, departureDate, onChange }: Planner
               <button
                 type="button"
                 className="plannerResultsPage__dateRangeFooterButton isPrimary"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setHoveredDate("");
+                  window.requestAnimationFrame(() => triggerRef.current?.focus());
+                }}
                 disabled={!arrivalDate || !departureDate}
               >
                 Apply dates
@@ -645,7 +665,7 @@ function addUtcDays(date: Date, days: number) {
 }
 
 function buildRadiusFitLocations(latitude: number, longitude: number, radiusMiles: number): Array<[number, number]> {
-  const kilometers = radiusMiles * 1.60934;
+  const kilometers = radiusMiles * KILOMETERS_PER_MILE;
   const latRadians = (latitude * Math.PI) / 180;
   const kmPerDegreeLat = 110.574;
   const kmPerDegreeLon = 111.32 * Math.cos(latRadians);
@@ -672,10 +692,6 @@ function clampTripLength(start: Date, end: Date) {
   const earliestStart = addUtcDays(end, -(MAX_TRIP_LENGTH_DAYS - 1));
   if (start.getTime() < earliestStart.getTime()) return earliestStart;
   return start;
-}
-
-function buildPreviewUrlMap(places: SuggestedPlace[], cache: Map<string, string>) {
-  return Object.fromEntries(places.map((place) => [place.id, cache.get(place.id) ?? ""])) as Record<string, string>;
 }
 
 function toWeekBars(histogram: TripPlannerHistogramBin[], highlightedDays: Set<number>) {
@@ -1032,9 +1048,60 @@ function applyTripBrushDelta(
   };
 }
 
+function PlannerLoadingState({
+  title,
+  message,
+  className = "",
+}: {
+  title: string;
+  message: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`plannerResultsPage__loadingState${className ? ` ${className}` : ""}`}
+      role="status"
+      aria-live="polite"
+      aria-label={`${title}. ${message}`}
+    >
+      <div className="plannerResultsPage__loadingTrack" aria-hidden="true">
+        <svg
+          className="plannerResultsPage__loadingOrca"
+          viewBox="0 0 180 92"
+          role="presentation"
+        >
+          <path
+            className="plannerResultsPage__loadingOrcaBody"
+            d="M31 47c15-19 42-30 75-27 27 2 49 13 61 30 3 5 2 10-3 14-16 12-45 15-73 10-20-3-37-10-52-16-7-3-13-4-18-2-5 3-10 3-15 0-4-3-4-8 0-11 7-5 16-5 25 2Z"
+          />
+          <path
+            className="plannerResultsPage__loadingOrcaBody"
+            d="M29 48c-9-10-20-14-27-9 5 3 8 7 10 12-4 4-6 8-6 13 8 0 17-4 25-11Z"
+          />
+          <path
+            className="plannerResultsPage__loadingOrcaBody"
+            d="M87 23c-4-10-2-20 4-22 8 5 13 14 17 24Z"
+          />
+          <path
+            className="plannerResultsPage__loadingOrcaBody"
+            d="M101 69c0 12-5 21-13 22-5-8-5-17-1-27Z"
+          />
+          <path
+            className="plannerResultsPage__loadingOrcaPatch"
+            d="M119 39c7-5 14-5 18 0-4 6-10 8-18 5-2-1-2-3 0-5Z"
+          />
+          <path
+            className="plannerResultsPage__loadingOrcaPatch"
+            d="M62 59c19-9 41-10 61-4 11 3 21 4 31 2-9 10-29 14-51 12-17-1-31-5-41-10Z"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 function PlannerPlaceCard({
   place,
-  previewUrl,
   photoManifest,
   itineraryAdded,
   onAddToItinerary,
@@ -1043,7 +1110,6 @@ function PlannerPlaceCard({
   onShowOnMap,
 }: {
   place: SuggestedPlace;
-  previewUrl: string;
   photoManifest: ViewingSpotPhotoManifest;
   itineraryAdded: boolean;
   onAddToItinerary: () => void;
@@ -1053,8 +1119,15 @@ function PlannerPlaceCard({
 }) {
   const photo = getViewingSpotPhoto(place.spotId, photoManifest);
   const showApprovedPhoto = hasApprovedSpotPhoto(photo);
-  const imageSrc = showApprovedPhoto ? photo?.imageSrc : (place.imageUrl ?? previewUrl);
-  const imageAlt = showApprovedPhoto ? photo?.alt ?? place.name : `Preview for ${place.name}`;
+  const showPlaceImage = !showApprovedPhoto && Boolean(place.imageUrl);
+  const imageSrc = showApprovedPhoto
+    ? photo?.imageSrc ?? PLACE_IMAGE_PLACEHOLDER_SRC
+    : place.imageUrl ?? PLACE_IMAGE_PLACEHOLDER_SRC;
+  const imageAlt = showApprovedPhoto
+    ? photo?.alt ?? place.name
+    : showPlaceImage
+      ? `Photo of ${place.name}`
+      : "";
   const imagePosition = showApprovedPhoto ? photo?.focalPoint ?? "50% 50%" : undefined;
 
   return (
@@ -1078,6 +1151,14 @@ function PlannerPlaceCard({
                 alt={imageAlt}
                 loading="lazy"
                 style={imagePosition ? { objectPosition: imagePosition } : undefined}
+                onError={(event) => {
+                  const image = event.currentTarget;
+                  if (image.dataset.fallbackApplied === "true") return;
+                  image.dataset.fallbackApplied = "true";
+                  image.src = PLACE_IMAGE_PLACEHOLDER_SRC;
+                  image.alt = "";
+                  image.style.objectPosition = "50% 50%";
+                }}
               />
             ) : (
               <div className="plannerResultsPage__spotThumb plannerResultsPage__spotThumb--placeholder suggestedPlaceCard__thumb suggestedPlaceCard__thumb--placeholder">
@@ -1188,12 +1269,16 @@ export function PlannerPage() {
   const [pulseSelectedPlaceMarker, setPulseSelectedPlaceMarker] = useState(false);
   const [draggingItineraryPlaceId, setDraggingItineraryPlaceId] = useState<string | null>(null);
   const [itineraryDropTargetId, setItineraryDropTargetId] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [camerasVisible, setCamerasVisible] = useState(false);
+  const [camerasPanelOpen, setCamerasPanelOpen] = useState(false);
+  const [cameraLocations, setCameraLocations] = useState<ViewingLocation[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
   const [hydrophonesVisible, setHydrophonesVisible] = useState(false);
   const [hydrophonesPanelOpen, setHydrophonesPanelOpen] = useState(false);
   const [hydrophoneLocations, setHydrophoneLocations] = useState<OrcasoundHydrophone[]>([]);
   const [hydrophoneListenUrl, setHydrophoneListenUrl] = useState("https://live.orcasound.net/");
+  const [selectedHydrophoneId, setSelectedHydrophoneId] = useState<string | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [tripHotspotsVisible, setTripHotspotsVisible] = useState(true);
   const [colorNoData, setColorNoData] = useState<"off" | "on">("on");
@@ -1205,14 +1290,32 @@ export function PlannerPage() {
   const primaryMapRef = useRef<ForecastMapHandle | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const settingsRef = useRef<HTMLDivElement | null>(null);
-  const previewUrlCacheRef = useRef<Map<string, string>>(new Map());
   const chartPlotRef = useRef<HTMLDivElement | null>(null);
   const tripBrushDragRef = useRef<TripBrushDragState | null>(null);
   const tripBrushApplyTimerRef = useRef<number | null>(null);
   const tripBrushPendingApplyRef = useRef(false);
   const plannerCollapseTimerRef = useRef<number | null>(null);
+  const camerasPanelCloseTimerRef = useRef<number | null>(null);
   const hydrophonesPanelCloseTimerRef = useRef<number | null>(null);
   const previousUnitsModeRef = useRef<UnitsMode>(unitsMode);
+
+  const openCamerasPanel = () => {
+    if (camerasPanelCloseTimerRef.current !== null) {
+      window.clearTimeout(camerasPanelCloseTimerRef.current);
+      camerasPanelCloseTimerRef.current = null;
+    }
+    setCamerasPanelOpen(true);
+  };
+
+  const closeCamerasPanelSoon = () => {
+    if (camerasPanelCloseTimerRef.current !== null) {
+      window.clearTimeout(camerasPanelCloseTimerRef.current);
+    }
+    camerasPanelCloseTimerRef.current = window.setTimeout(() => {
+      setCamerasPanelOpen(false);
+      camerasPanelCloseTimerRef.current = null;
+    }, HOVER_PANEL_CLOSE_DELAY_MS);
+  };
 
   const openHydrophonesPanel = () => {
     if (hydrophonesPanelCloseTimerRef.current !== null) {
@@ -1234,6 +1337,9 @@ export function PlannerPage() {
 
   useEffect(() => {
     return () => {
+      if (camerasPanelCloseTimerRef.current !== null) {
+        window.clearTimeout(camerasPanelCloseTimerRef.current);
+      }
       if (hydrophonesPanelCloseTimerRef.current !== null) {
         window.clearTimeout(hydrophonesPanelCloseTimerRef.current);
       }
@@ -1336,6 +1442,36 @@ export function PlannerPage() {
       })
       .catch(() => {
         if (!cancelled) setPhotoManifest({});
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadPoiData()
+      .then((items) => {
+        if (cancelled) return;
+        setCameraLocations(
+          items
+            .filter((item) => item.hasLiveFeed && typeof item.liveCameraUrl === "string" && item.liveCameraUrl.length > 0)
+            .map((item, index) => ({
+              id: `camera-${index}-${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+              name: item.name,
+              region: item.region ?? "Viewing location",
+              latitude: item.latitude,
+              longitude: item.longitude,
+              liveCameraUrl: item.liveCameraUrl,
+            }))
+        );
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.warn("[Planner] failed to load camera locations", error);
+        setCameraLocations([]);
       });
 
     return () => {
@@ -1468,9 +1604,9 @@ export function PlannerPage() {
     [baseLocations]
   );
   const activeBaseLocation = useMemo(() => {
-    const activeName = plannerOpen ? draftCity : plannerSelection?.city ?? "";
-    return baseLocationsByName.get(activeName) ?? null;
-  }, [baseLocationsByName, draftCity, plannerOpen, plannerSelection?.city]);
+    const appliedName = appliedPlannerSelection?.city ?? "";
+    return baseLocationsByName.get(appliedName) ?? null;
+  }, [appliedPlannerSelection?.city, baseLocationsByName]);
 
   const recommendedPlacesData = useSuggestedPlaces({
     resolution,
@@ -1498,6 +1634,8 @@ export function PlannerPage() {
       : plannerSubmitted && (tripLoading || recommendedPlacesData.isLoading)
         ? cachedRecommendedPlaces
         : recommendedPlaces;
+  const recommendedPlacesLoading = appliedPlannerSubmitted && (tripLoading || recommendedPlacesData.isLoading);
+  const chartLoading = appliedPlannerSubmitted && tripLoading && !tripOccurrence;
   const selectedPlace = useMemo(
     () => displayedRecommendedPlaces.find((place) => place.id === selectedPlaceId) ?? null,
     [displayedRecommendedPlaces, selectedPlaceId]
@@ -1587,10 +1725,6 @@ export function PlannerPage() {
   }, [itineraryMapViewActive, itineraryPlaces.length]);
 
   useEffect(() => {
-    setPreviewUrls(buildPreviewUrlMap(displayedRecommendedPlaces, previewUrlCacheRef.current));
-  }, [displayedRecommendedPlaces]);
-
-  useEffect(() => {
     if (typeof window === "undefined" || !recommendedPlacesSignature || recommendedPlaces.length === 0) return;
     window.sessionStorage.setItem(
       PLANNER_RECOMMENDED_PLACES_STORAGE_KEY,
@@ -1600,39 +1734,6 @@ export function PlannerPage() {
       } satisfies StoredPlannerRecommendedPlaces)
     );
   }, [recommendedPlaces, recommendedPlacesSignature]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadPreviews = async () => {
-      const map = primaryMapRef.current;
-      if (!map || displayedRecommendedPlaces.length === 0) return;
-      for (const place of displayedRecommendedPlaces) {
-        if (cancelled || previewUrlCacheRef.current.has(place.id)) continue;
-        const blob = await map.capturePlacePreview({
-          center: [place.longitude, place.latitude],
-          zoom: 11.6,
-          width: 340,
-          height: 200,
-        });
-        if (cancelled || !blob) continue;
-        const url = URL.createObjectURL(blob);
-        previewUrlCacheRef.current.set(place.id, url);
-        setPreviewUrls(buildPreviewUrlMap(displayedRecommendedPlaces, previewUrlCacheRef.current));
-      }
-    };
-    void loadPreviews();
-    return () => {
-      cancelled = true;
-    };
-  }, [displayedRecommendedPlaces]);
-
-  useEffect(
-    () => () => {
-      previewUrlCacheRef.current.forEach((url) => URL.revokeObjectURL(url));
-      previewUrlCacheRef.current.clear();
-    },
-    []
-  );
 
   useEffect(() => {
     if (!settingsOpen) return;
@@ -1701,15 +1802,16 @@ export function PlannerPage() {
   const tripLengthLabel = tripRange ? `${tripRange.dayCount} ${tripRange.dayCount === 1 ? "day" : "days"}` : "";
   const tripCityLabel = plannerSelection?.city || "Base location";
   const tripDistanceLabel = formatPlannerDistanceLabel(plannerSelection?.maxTravelDistanceMiles, unitsMode);
-  const activeMaxTravelDistanceMiles = useMemo(() => {
-    if (plannerOpen) return parsePlannerDistanceInput(draftMaxTravelDistance, unitsMode);
-    return plannerSelection?.maxTravelDistanceMiles ?? null;
-  }, [draftMaxTravelDistance, plannerOpen, plannerSelection?.maxTravelDistanceMiles, unitsMode]);
+  const activeMaxTravelDistanceMiles = appliedPlannerSelection?.maxTravelDistanceMiles ?? null;
   const selectedCount = tripOccurrence?.selectedCount ?? 0;
   const activityLabel = useMemo(() => computeActivityLabel(selectedCount, weekBars), [selectedCount, weekBars]);
   const topWatersLabel = useMemo(() => computeTopWaters(displayedRecommendedPlaces), [displayedRecommendedPlaces]);
-  const liveCamCount = displayedRecommendedPlaces.filter((place) => place.hasLiveFeed).length;
+  const liveCamCount = cameraLocations.length;
   const hydrophoneCount = hydrophoneLocations.length;
+  const selectedCamera = useMemo(
+    () => cameraLocations.find((camera) => camera.id === selectedCameraId) ?? cameraLocations[0] ?? null,
+    [cameraLocations, selectedCameraId]
+  );
   const paletteEntries = useMemo(() => Object.values(PALETTES), []);
   const poiActive = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
   const legendColors = useMemo(
@@ -1806,9 +1908,11 @@ export function PlannerPage() {
       city: draftCity.trim(),
       arrivalDate: range.startDate,
       departureDate: range.endDate,
+      // Keep the canonical value exact. Metric input is converted to miles here,
+      // while rounding is reserved for display-only formatters.
       maxTravelDistanceMiles:
         typeof parsedMaxTravelDistanceMiles === "number" && Number.isFinite(parsedMaxTravelDistanceMiles) && parsedMaxTravelDistanceMiles > 0
-          ? Math.round(parsedMaxTravelDistanceMiles)
+          ? parsedMaxTravelDistanceMiles
           : undefined,
     } satisfies TripPlanSelection;
     setTripError(null);
@@ -1958,6 +2062,9 @@ export function PlannerPage() {
     itineraryPlaceIds: plannerSubmitted ? itineraryPlaceIds : [],
     showTripHotspotMarkers: plannerSubmitted && tripHotspotsVisible && !tripLoading,
     selectedPlaceId,
+    cameraLocations,
+    selectedCameraId,
+    selectedHydrophoneId,
     pulseSelectedPlaceMarker: plannerSubmitted ? pulseSelectedPlaceMarker : false,
     onPlaceSelect: (place: SuggestedPlace) => {
       setPulseSelectedPlaceMarker(false);
@@ -1965,6 +2072,7 @@ export function PlannerPage() {
     },
     baseLocation: activeBaseLocation,
     maxTravelDistanceMiles: activeMaxTravelDistanceMiles,
+    showCameras: plannerSubmitted && camerasVisible,
     hydrophoneLocations,
     showHydrophones: plannerSubmitted && hydrophonesVisible,
     sidebarOffsetPx: 0,
@@ -2024,23 +2132,31 @@ export function PlannerPage() {
             </header>
 
             <form className="plannerResultsPage__promptForm" onSubmit={handlePlannerSubmit} autoComplete="off">
-              <label className="plannerResultsPage__promptField plannerResultsPage__promptField--base">
-                <span>Base location</span>
-                <PlannerLocationField value={draftCity} options={baseLocations} onChange={setDraftCity} />
-              </label>
+              <div className="plannerResultsPage__promptField plannerResultsPage__promptField--base">
+                <span id="planner-base-location-label">Base location</span>
+                <PlannerLocationField
+                  value={draftCity}
+                  options={baseLocations}
+                  labelledBy="planner-base-location-label"
+                  valueId="planner-base-location-value"
+                  onChange={setDraftCity}
+                />
+              </div>
 
               <div className="plannerResultsPage__promptRow plannerResultsPage__promptRow--middle">
-                <label className="plannerResultsPage__promptField plannerResultsPage__promptField--range">
-                  <span>Dates</span>
+                <div className="plannerResultsPage__promptField plannerResultsPage__promptField--range">
+                  <span id="planner-trip-dates-label">Dates</span>
                   <PlannerDateRangeField
                     arrivalDate={draftArrivalDate}
                     departureDate={draftDepartureDate}
+                    labelledBy="planner-trip-dates-label"
+                    valueId="planner-trip-dates-value"
                     onChange={(nextArrivalDate, nextDepartureDate) => {
                       setDraftArrivalDate(nextArrivalDate);
                       setDraftDepartureDate(nextDepartureDate);
                     }}
                   />
-                </label>
+                </div>
 
                 <label className="plannerResultsPage__promptField plannerResultsPage__promptField--distance">
                   <span className="plannerResultsPage__promptLabelWithBadge">
@@ -2054,10 +2170,14 @@ export function PlannerPage() {
                     <input
                       type="number"
                       min="1"
-                      inputMode="numeric"
+                      step="any"
+                      inputMode="decimal"
                       value={draftMaxTravelDistance}
                       onChange={(event) => setDraftMaxTravelDistance(event.target.value)}
-                      placeholder="No limit"
+                      placeholder={`Default: ${formatPlannerDistanceValue(
+                        DEFAULT_RECOMMENDATION_RADIUS_MILES,
+                        unitsMode
+                      )}`}
                       autoComplete="off"
                     />
                     <span className="plannerResultsPage__promptSuffix">{unitsMode === "metric" ? "km" : "mi"}</span>
@@ -2374,9 +2494,16 @@ export function PlannerPage() {
 
             <div className="plannerResultsPage__spotsList">
               {!plannerSubmitted ? (
-                <div className="plannerResultsPage__spotsEmptyState">
-                  Enter your trip details to load recommended viewing spots for your route.
-                </div>
+                <PlannerLoadingState
+                  className="plannerResultsPage__loadingState--idle"
+                  title="Ready to scout"
+                  message="Choose a base, dates, and optional travel range. Your recommended viewing spots will appear here."
+                />
+              ) : recommendedPlacesLoading && displayedRecommendedPlaces.length === 0 ? (
+                <PlannerLoadingState
+                  title="Scouting viewing spots..."
+                  message="Our orca is searching nearby parks, marinas, and ferry viewpoints for your trip dates."
+                />
               ) : displayedRecommendedPlaces.length === 0 &&
                 !tripLoading &&
                 !recommendedPlacesData.isLoading &&
@@ -2391,7 +2518,6 @@ export function PlannerPage() {
                   <PlannerPlaceCard
                     key={place.id}
                     place={place}
-                    previewUrl={previewUrls[place.id] ?? ""}
                     photoManifest={photoManifest}
                     itineraryAdded={itineraryPlaceIds.includes(place.id)}
                     onAddToItinerary={() => handleAddPlaceToItinerary(place)}
@@ -2471,6 +2597,19 @@ export function PlannerPage() {
                 </div>
               </div>
               <div className="plannerResultsPage__chartBody">
+                {!plannerSubmitted ? (
+                  <PlannerLoadingState
+                    className="plannerResultsPage__loadingState--chart plannerResultsPage__loadingState--idle"
+                    title="Activity chart standing by"
+                    message="Choose your dates and the seasonal sightings pattern will load here."
+                  />
+                ) : chartLoading ? (
+                  <PlannerLoadingState
+                    className="plannerResultsPage__loadingState--chart"
+                    title="Loading seasonal activity..."
+                    message="Our orca is pulling the activity curve for your dates so the weekly chart can snap into place."
+                  />
+                ) : (
                 <div
                   ref={chartPlotRef}
                   className={`plannerResultsPage__chartPlot${tripBrushMode ? " isDraggingTripWindow" : ""}${chartZoomedToDays ? " isDailyZoom" : ""}${!plannerSubmitted ? " isPromptState" : ""}`}
@@ -2587,6 +2726,7 @@ export function PlannerPage() {
                     </div>
                   ) : null}
                 </div>
+                )}
               </div>
             </div>
 
@@ -2639,13 +2779,92 @@ export function PlannerPage() {
         <div className="plannerResultsPage__quickActions">
           {plannerSubmitted ? (
             <>
-              <button type="button" className="plannerResultsPage__quickAction">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  videocam
-                </span>
-                <span>Cameras</span>
-                <em>{liveCamCount}</em>
-              </button>
+              <div
+                className="plannerResultsPage__quickActionDock"
+                onMouseEnter={openCamerasPanel}
+                onMouseLeave={closeCamerasPanelSoon}
+                onFocusCapture={openCamerasPanel}
+                onBlurCapture={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                    closeCamerasPanelSoon();
+                  }
+                }}
+              >
+                {camerasPanelOpen ? (
+                  <section className="plannerResultsPage__hydrophonesPanel" role="dialog" aria-modal="false">
+                    <div className="plannerResultsPage__hydrophonesPanelHeader">
+                      <div className="plannerResultsPage__panelEyebrow">Cameras</div>
+                      <em>{liveCamCount}</em>
+                    </div>
+                    <div className="plannerResultsPage__hydrophonesList">
+                      {cameraLocations.map((camera) => (
+                        <button
+                          key={camera.id}
+                          type="button"
+                          className={`plannerResultsPage__hydrophoneCard${selectedCameraId === camera.id ? " isActive" : ""}`}
+                          onMouseEnter={() => {
+                            setCamerasVisible(true);
+                            setSelectedCameraId(camera.id);
+                          }}
+                          onMouseLeave={() => setSelectedCameraId((current) => (current === camera.id ? null : current))}
+                          onFocus={() => {
+                            setCamerasVisible(true);
+                            setSelectedCameraId(camera.id);
+                          }}
+                          onBlur={() => setSelectedCameraId((current) => (current === camera.id ? null : current))}
+                          onClick={() => {
+                            setCamerasVisible(true);
+                            setSelectedCameraId(camera.id);
+                            setHydrophonesVisible(false);
+                            setSelectedHydrophoneId(null);
+                            setPulseSelectedPlaceMarker(false);
+                            setSelectedPlaceId(null);
+                            setItineraryMapViewActive(false);
+                            primaryMapRef.current?.fitLocations([[camera.longitude, camera.latitude]], {
+                              padding: 120,
+                              maxZoom: 11,
+                            });
+                          }}
+                        >
+                          <span className="plannerResultsPage__hydrophoneIcon" aria-hidden="true">
+                            <span className="material-symbols-rounded">videocam</span>
+                            <span className="plannerResultsPage__hydrophoneCornerLive" />
+                          </span>
+                          <span className="plannerResultsPage__hydrophoneText">
+                            <strong>{camera.name}</strong>
+                            <small>{camera.region}</small>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    {selectedCamera?.liveCameraUrl ? (
+                      <a
+                        className="plannerResultsPage__hydrophonesLink"
+                        href={selectedCamera.liveCameraUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <span>Watch on YouTube</span>
+                        <span className="material-symbols-rounded" aria-hidden="true">
+                          open_in_new
+                        </span>
+                      </a>
+                    ) : null}
+                  </section>
+                ) : null}
+                <button
+                  type="button"
+                  className={`plannerResultsPage__quickAction plannerResultsPage__quickAction--hydrophones${camerasVisible ? " isActive" : ""}`}
+                  aria-pressed={camerasVisible}
+                  onClick={() => setCamerasVisible((value) => !value)}
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    videocam
+                  </span>
+                  <span>Cameras</span>
+                  <em>{liveCamCount}</em>
+                </button>
+              </div>
               <div
                 className="plannerResultsPage__quickActionDock"
                 onMouseEnter={openHydrophonesPanel}
@@ -2665,7 +2884,34 @@ export function PlannerPage() {
                     </div>
                     <div className="plannerResultsPage__hydrophonesList">
                       {hydrophoneLocations.map((hydrophone) => (
-                        <article key={hydrophone.id} className="plannerResultsPage__hydrophoneCard">
+                        <button
+                          key={hydrophone.id}
+                          type="button"
+                          className={`plannerResultsPage__hydrophoneCard${selectedHydrophoneId === hydrophone.id ? " isActive" : ""}`}
+                          onMouseEnter={() => {
+                            setHydrophonesVisible(true);
+                            setSelectedHydrophoneId(hydrophone.id);
+                          }}
+                          onMouseLeave={() => setSelectedHydrophoneId((current) => (current === hydrophone.id ? null : current))}
+                          onFocus={() => {
+                            setHydrophonesVisible(true);
+                            setSelectedHydrophoneId(hydrophone.id);
+                          }}
+                          onBlur={() => setSelectedHydrophoneId((current) => (current === hydrophone.id ? null : current))}
+                          onClick={() => {
+                            setHydrophonesVisible(true);
+                            setSelectedHydrophoneId(hydrophone.id);
+                            setCamerasVisible(false);
+                            setSelectedCameraId(null);
+                            setPulseSelectedPlaceMarker(false);
+                            setSelectedPlaceId(null);
+                            setItineraryMapViewActive(false);
+                            primaryMapRef.current?.fitLocations([[hydrophone.longitude, hydrophone.latitude]], {
+                              padding: 120,
+                              maxZoom: 11,
+                            });
+                          }}
+                        >
                           <span className="plannerResultsPage__hydrophoneIcon" aria-hidden="true">
                             <span className="plannerResultsPage__hydrophoneMark">
                               <span />
@@ -2680,7 +2926,7 @@ export function PlannerPage() {
                             <strong>{hydrophone.name}</strong>
                             <small>{hydrophone.region}</small>
                           </span>
-                        </article>
+                        </button>
                       ))}
                     </div>
                     <a

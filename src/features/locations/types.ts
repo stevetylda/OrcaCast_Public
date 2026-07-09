@@ -27,5 +27,6 @@ export type SuggestedPlace = {
   distanceKm?: number;
   imageUrl?: string;
   hasLiveFeed?: boolean;
+  liveCameraUrl?: string;
   hasHydrophone?: boolean;
 };

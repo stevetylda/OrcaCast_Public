@@ -13,6 +13,7 @@ export type PublicPoi = {
   imageUrl?: string;
   scoreBoost?: number;
   hasLiveFeed?: boolean;
+  liveCameraUrl?: string;
   hasHydrophone?: boolean;
 };
 
@@ -84,6 +85,12 @@ function normalizePoiItem(item: Record<string, unknown>): PublicPoi {
     reason: typeof item["reason"] === "string" ? item["reason"] : typeof item["description"] === "string" ? item["description"] : undefined,
     imageUrl: typeof item["imageUrl"] === "string" ? item["imageUrl"] : typeof item["image_url"] === "string" ? item["image_url"] : undefined,
     scoreBoost: Number.isFinite(Number(item["scoreBoost"])) ? Number(item["scoreBoost"]) : undefined,
+    liveCameraUrl:
+      typeof item["liveCameraUrl"] === "string"
+        ? item["liveCameraUrl"]
+        : typeof item["live_camera_url"] === "string"
+          ? item["live_camera_url"]
+          : undefined,
     hasLiveFeed: Boolean(item["hasLiveFeed"] ?? item["liveCameraUrl"] ?? item["live_feed_url"]),
     hasHydrophone: Boolean(item["hasHydrophone"] ?? item["hydrophoneUrl"] ?? item["hydrophone_url"]),
   };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FeatureCollection, Geometry, Position } from "geojson";
 import type { H3Resolution } from "../../../shared/config/dataPaths";
+import { DEFAULT_RECOMMENDATION_RADIUS_MILES, KILOMETERS_PER_MILE } from "../../../shared/config/planner";
 import { loadForecast, loadGrid } from "../../../shared/data/forecastIO";
 import { getH3CellId } from "../../../shared/data/h3";
 import { loadTripPlannerOccurrencePayload, type TripPlannerOccurrencePayload } from "../../../shared/data/tripPlanner";
@@ -38,8 +39,6 @@ type PlannerPoiMetadata = {
 };
 
 const POI_SCORE_RADIUS_KM = 16.0934; // 10 miles.
-const DEFAULT_RECOMMENDATION_RADIUS_MILES = 175;
-const MILES_TO_KM = 1.609344;
 
 // Optional display/ranking metadata only. These records never introduce independent coordinates.
 // Coordinates always come from data/places_of_interest.json via loadPoiData().
@@ -173,7 +172,7 @@ function filterPoisByBaseRadius(
     typeof maxTravelDistanceMiles === "number" && Number.isFinite(maxTravelDistanceMiles) && maxTravelDistanceMiles > 0
       ? maxTravelDistanceMiles
       : DEFAULT_RECOMMENDATION_RADIUS_MILES;
-  const radiusKm = radiusMiles * MILES_TO_KM;
+  const radiusKm = radiusMiles * KILOMETERS_PER_MILE;
   const basePoint: [number, number] = [baseLocation.longitude, baseLocation.latitude];
 
   return pois.filter((poi) => haversineKm(basePoint, [poi.longitude, poi.latitude]) <= radiusKm);
@@ -283,7 +282,7 @@ function rankPoiAgainstForecast(
         candidatePois: candidatePois.length,
         scoredPois: scoredPois.length,
         cells: cells.length,
-        scoreRadiusMiles: POI_SCORE_RADIUS_KM / MILES_TO_KM,
+        scoreRadiusMiles: POI_SCORE_RADIUS_KM / KILOMETERS_PER_MILE,
         baseLatitude: baseLocation?.latitude,
         baseLongitude: baseLocation?.longitude,
         maxTravelDistanceMiles: maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
@@ -306,7 +305,7 @@ function rankPoiAgainstForecast(
       zeroScorePois: scoredPois.length - eligiblePois.length,
       topCount,
       baselineScoreCount: baselineScoresAscending.length,
-      scoreRadiusMiles: POI_SCORE_RADIUS_KM / MILES_TO_KM,
+      scoreRadiusMiles: POI_SCORE_RADIUS_KM / KILOMETERS_PER_MILE,
       baseLatitude: baseLocation?.latitude,
       baseLongitude: baseLocation?.longitude,
       maxTravelDistanceMiles: maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
@@ -345,6 +344,7 @@ function rankPoiAgainstForecast(
       distanceKm: Number.isFinite(nearestDistanceKm) ? nearestDistanceKm : undefined,
       imageUrl: poi.imageUrl,
       hasLiveFeed: poi.hasLiveFeed,
+      liveCameraUrl: poi.liveCameraUrl,
       hasHydrophone: poi.hasHydrophone,
     } satisfies SuggestedPlace;
   });

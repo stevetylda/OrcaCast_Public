@@ -2362,6 +2362,29 @@
   box-shadow:
     0 10px 24px rgba(42, 77, 112, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.plannerResultsPage__hydrophoneCard:hover,
+.plannerResultsPage__hydrophoneCard:focus-visible,
+.plannerResultsPage__hydrophoneCard.isActive {
+  border-color: rgba(67, 201, 189, 0.78);
+  background:
+    radial-gradient(circle at top left, rgba(210, 250, 246, 0.98), transparent 46%),
+    linear-gradient(180deg, rgba(252, 255, 255, 1), rgba(236, 248, 249, 0.96));
+  box-shadow:
+    0 0 0 2px rgba(67, 201, 189, 0.14),
+    0 14px 30px rgba(42, 77, 112, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  outline: none;
+  transform: translateY(-1px);
 }
 
 .plannerResultsPage__hydrophoneIcon {
@@ -2373,6 +2396,12 @@
   border-radius: 16px;
   background: linear-gradient(180deg, rgba(213, 248, 244, 0.98), rgba(202, 244, 239, 0.94));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.plannerResultsPage__hydrophoneIcon .material-symbols-rounded {
+  color: #1f8ca9;
+  font-size: 24px;
+  font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" 24;
 }
 
 .plannerResultsPage__hydrophoneCornerLive {
@@ -5714,7 +5743,7 @@
 }
 
 .plannerResultsPage__promptRow--middle {
-  grid-template-columns: minmax(0, 1.65fr) minmax(208px, 0.72fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(250px, 0.78fr);
 }
 
 .plannerResultsPage__promptFieldGrid {
@@ -5723,9 +5752,14 @@
 }
 
 .plannerResultsPage__promptLabelWithBadge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.plannerResultsPage__promptLabelWithBadge > span:first-child {
+  white-space: nowrap;
 }
 
 .plannerResultsPage__promptLabelWithBadge small {
@@ -5874,6 +5908,10 @@
 .plannerResultsPage__promptActions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  margin-top: 2px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(184, 211, 232, 0.58);
 }
 
 .plannerResultsPage__promptCard.isCollapsing .plannerResultsPage__promptHeader {
@@ -6014,6 +6052,10 @@
   color: rgba(220, 234, 255, 0.94);
 }
 
+.app--dark .plannerResultsPage__promptActions {
+  border-top-color: rgba(103, 153, 182, 0.2);
+}
+
 @media (max-width: 1100px) {
   .plannerResultsPage__promptCard {
     width: auto;
@@ -6036,10 +6078,6 @@
 
   .plannerResultsPage__promptRow {
     grid-template-columns: 1fr;
-  }
-
-  .plannerResultsPage__promptActions {
-    justify-content: stretch;
   }
 
   .plannerResultsPage__promptSubmit {
@@ -6162,5 +6200,84 @@
     top: auto;
     bottom: auto;
     transform-origin: center;
+  }
+}
+
+
+.plannerResultsPage__loadingState {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  padding: 22px 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.plannerResultsPage__loadingState--chart {
+  min-height: 214px;
+  padding: 20px 0 24px;
+}
+
+.plannerResultsPage__loadingTrack {
+  position: relative;
+  width: min(78%, 360px);
+  height: 92px;
+  overflow: hidden;
+}
+
+.plannerResultsPage__loadingOrca {
+  position: absolute;
+  top: 50%;
+  left: 14%;
+  width: 92px;
+  height: auto;
+  color: #102f4b;
+  filter: drop-shadow(0 8px 10px rgba(42, 91, 121, 0.16));
+  transform: translate(-50%, -50%);
+  animation: plannerResultsPage__orcaSwim 3.3s ease-in-out infinite;
+  will-change: left, transform;
+}
+
+.plannerResultsPage__loadingOrcaBody {
+  fill: currentColor;
+}
+
+.plannerResultsPage__loadingOrcaPatch {
+  fill: rgba(255, 255, 255, 0.96);
+}
+
+@keyframes plannerResultsPage__orcaSwim {
+  0% {
+    left: 14%;
+    transform: translate(-50%, -50%) scaleX(1) rotate(-2deg);
+  }
+  45% {
+    left: 86%;
+    transform: translate(-50%, calc(-50% - 3px)) scaleX(1) rotate(2deg);
+  }
+  50% {
+    left: 86%;
+    transform: translate(-50%, calc(-50% - 3px)) scaleX(-1) rotate(-2deg);
+  }
+  95% {
+    left: 14%;
+    transform: translate(-50%, calc(-50% + 2px)) scaleX(-1) rotate(2deg);
+  }
+  100% {
+    left: 14%;
+    transform: translate(-50%, -50%) scaleX(1) rotate(-2deg);
+  }
+}
+
+.plannerResultsPage__loadingState--idle .plannerResultsPage__loadingOrca {
+  animation-duration: 4.6s;
+  opacity: 0.82;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plannerResultsPage__loadingOrca {
+    left: 50%;
+    animation: none;
   }
 }

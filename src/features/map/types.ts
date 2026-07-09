@@ -5,7 +5,7 @@ import type { DataLoadError } from "../../shared/data/errors";
 import type { Period } from "../../shared/data/periods";
 import type { PlannerBaseLocation } from "../../shared/data/plannerBaseLocations";
 import type { PaletteId } from "../../shared/geo/palettes";
-import type { SuggestedPlace } from "../locations/types";
+import type { SuggestedPlace, ViewingLocation } from "../locations/types";
 
 export type FillColorSpec = DataDrivenPropertyValueSpecification<string>;
 export type LngLat = [number, number];
@@ -52,11 +52,15 @@ export type ForecastMapProps = {
   suggestedPlaces?: SuggestedPlace[];
   itineraryPlaceIds?: string[];
   selectedPlaceId?: string | null;
+  cameraLocations?: ViewingLocation[];
+  selectedCameraId?: string | null;
+  selectedHydrophoneId?: string | null;
   pulseSelectedPlaceMarker?: boolean;
   onPlaceSelect?: (place: SuggestedPlace) => void;
   showTripHotspotMarkers?: boolean;
   baseLocation?: PlannerBaseLocation | null;
   maxTravelDistanceMiles?: number | null;
+  showCameras?: boolean;
   hydrophoneLocations?: OrcasoundHydrophone[];
   showHydrophones?: boolean;
   sidebarOffsetPx?: number;

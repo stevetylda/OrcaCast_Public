@@ -2026,7 +2026,9 @@
       "type": "Park",
       "name": "Lime Kiln Point",
       "latitude": 48.51654913146993,
-      "longitude": -123.15014446309584
+      "longitude": -123.15014446309584,
+      "region": "San Juan Island",
+      "liveCameraUrl": "https://www.youtube.com/watch?v=LuIj14TlEMw"
     },
     {
       "type": "Park",

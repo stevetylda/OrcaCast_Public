@@ -24,7 +24,7 @@ import { useForecastData } from "./useForecastData";
 import { useHotspotAnimation } from "./useHotspotAnimation";
 import type { FillColorSpec, ForecastMapHandle, ForecastMapProps, LngLat, SparklineSeries } from "./types";
 import { filterPoisByType, hasActivePoiFilter, loadPoiData, type PoiFilters, type PublicPoi } from "../locations/poiData";
-import type { SuggestedPlace } from "../locations/types";
+import type { SuggestedPlace, ViewingLocation } from "../locations/types";
 import type { OrcasoundHydrophone } from "../../shared/data/orcasoundHydrophones";
 
 function waitForMapRender(map: MapLibreMap, timeoutMs = 2500) {
@@ -73,8 +73,8 @@ const PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID = "planner-location-points-itiner
 const PLANNER_MAX_TRAVEL_SOURCE_ID = "planner-max-travel-radius";
 const PLANNER_MAX_TRAVEL_LAYER_ID = "planner-max-travel-radius-line";
 
-type PlannerLocationKind = "base" | "suggested" | "poi" | "hydrophone";
-type PlannerLocationType = SuggestedPlace["type"] | PublicPoi["type"] | "Base" | "Hydrophone";
+type PlannerLocationKind = "base" | "suggested" | "poi" | "hydrophone" | "camera";
+type PlannerLocationType = SuggestedPlace["type"] | PublicPoi["type"] | "Base" | "Hydrophone" | "Camera";
 
 type PlannerLocationFeatureProperties = {
   id: string;
@@ -93,7 +93,7 @@ type PlannerRadiusFeatureProperties = {
   dashColor: string;
 };
 
-type PlannerPinVariant = "suggested" | "poi" | "base" | "hydrophone";
+type PlannerPinVariant = "suggested" | "poi" | "base" | "hydrophone" | "camera";
 
 type PlannerPinSpec = {
   id: string;
@@ -110,6 +110,9 @@ const PLANNER_PIN_SPECS: PlannerPinSpec[] = [
   { id: "planner-pin-poi-marina", variant: "poi", type: "Marina" },
   { id: "planner-pin-poi-ferry", variant: "poi", type: "Ferry" },
   { id: "planner-pin-base", variant: "base", type: "Base" },
+  { id: "planner-pin-camera", variant: "camera", type: "Camera", liveDotHalo: "none" },
+  { id: "planner-pin-camera-live", variant: "camera", type: "Camera", liveDotHalo: "soft" },
+  { id: "planner-pin-camera-live-strong", variant: "camera", type: "Camera", liveDotHalo: "strong" },
   { id: "planner-pin-hydrophone", variant: "hydrophone", type: "Hydrophone", liveDotHalo: "none" },
   { id: "planner-pin-hydrophone-live", variant: "hydrophone", type: "Hydrophone", liveDotHalo: "soft" },
   { id: "planner-pin-hydrophone-live-strong", variant: "hydrophone", type: "Hydrophone", liveDotHalo: "strong" },
@@ -132,6 +135,7 @@ function getPoiIconKey(type?: SuggestedPlace["type"] | PublicPoi["type"]) {
 
 function getPlannerLocationIconName(kind: PlannerLocationKind, type?: SuggestedPlace["type"] | PublicPoi["type"]) {
   if (kind === "base") return "planner-pin-base";
+  if (kind === "camera") return "planner-pin-camera-live";
   if (kind === "hydrophone") return "planner-pin-hydrophone-live";
   return `planner-pin-${kind}-${getPoiIconKey(type)}`;
 }
@@ -152,12 +156,20 @@ function getHydrophonePopupHtml(hydrophone: OrcasoundHydrophone) {
   return `<div class="poiPopup"><div class="poiPopup__title">${hydrophone.name}</div><div class="poiPopup__meta">Orcasound hydrophone · ${hydrophone.region} · ${Number(hydrophone.latitude).toFixed(4)}, ${Number(hydrophone.longitude).toFixed(4)}</div></div>`;
 }
 
+function getCameraPopupHtml(camera: ViewingLocation) {
+  return `<div class="poiPopup"><div class="poiPopup__title">${camera.name}</div><div class="poiPopup__meta">Live camera · ${camera.region ?? "Viewing location"} · ${Number(camera.latitude).toFixed(4)}, ${Number(camera.longitude).toFixed(4)}</div></div>`;
+}
+
 function buildPlannerLocationCollection(args: {
   baseLocation: { name: string; latitude: number; longitude: number } | null;
   suggestedPlaces: SuggestedPlace[];
   itineraryPlaceIds: string[];
   selectedPlaceId: string | null;
+  cameraLocations: ViewingLocation[];
+  selectedCameraId: string | null;
+  selectedHydrophoneId: string | null;
   showSuggestedPlaces: boolean;
+  showCameras: boolean;
   hydrophoneLocations: OrcasoundHydrophone[];
   showHydrophones: boolean;
   poiItems: PublicPoi[];
@@ -216,6 +228,30 @@ function buildPlannerLocationCollection(args: {
     }
   }
 
+  if (args.showCameras) {
+    for (const camera of args.cameraLocations) {
+      const coords = getPointCoordinates(camera.latitude, camera.longitude);
+      if (!coords) continue;
+      features.push({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: coords,
+        },
+        properties: {
+          id: `camera:${camera.id}`,
+          kind: "camera",
+          name: camera.name,
+          markerType: "Camera",
+          iconName: getPlannerLocationIconName("camera"),
+          selected: camera.id === args.selectedCameraId,
+          selectedPulseOn: false,
+          pulseEnabled: true,
+        } satisfies PlannerLocationFeatureProperties,
+      });
+    }
+  }
+
   if (args.showHydrophones) {
     for (const hydrophone of args.hydrophoneLocations) {
       const coords = getPointCoordinates(hydrophone.latitude, hydrophone.longitude);
@@ -232,8 +268,8 @@ function buildPlannerLocationCollection(args: {
           name: hydrophone.name,
           markerType: "Hydrophone",
           iconName: getPlannerLocationIconName("hydrophone"),
-          selected: false,
-          selectedPulseOn: true,
+          selected: hydrophone.id === args.selectedHydrophoneId,
+          selectedPulseOn: false,
           pulseEnabled: true,
         } satisfies PlannerLocationFeatureProperties,
       });
@@ -348,6 +384,15 @@ function withPlannerLocationPulse(data: FeatureCollection, pulseOn: boolean): Fe
     features: data.features.map((feature) => {
       const properties = (feature.properties ?? {}) as PlannerLocationFeatureProperties;
       if (!properties.selected && !properties.pulseEnabled) return feature;
+      if (properties.kind === "camera") {
+        return {
+          ...feature,
+          properties: {
+            ...properties,
+            iconName: pulseOn ? "planner-pin-camera-live-strong" : "planner-pin-camera-live",
+          },
+        };
+      }
       if (properties.kind === "hydrophone") {
         return {
           ...feature,
@@ -395,6 +440,14 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
           icon: "#0b718d",
           glow: "rgba(21,143,162,0.24)",
         }
+        : spec.variant === "camera"
+          ? {
+              fill: "#d9f6ff",
+              center: "#edfaff",
+              stroke: "#49bfd5",
+              icon: "#0b6477",
+              glow: "rgba(73,191,213,0.3)",
+            }
         : spec.variant === "hydrophone"
           ? {
               fill: "#d8fbf7",
@@ -417,6 +470,8 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
         ? { text: "directions_boat", font: "Material Symbols Outlined" }
         : spec.type === "Base"
           ? { text: "home", font: "Material Symbols Outlined" }
+          : spec.type === "Camera"
+            ? { text: "videocam", font: "Material Symbols Rounded" }
           : spec.type === "Hydrophone"
             ? { text: "graphic_eq", font: "Material Symbols Rounded" }
           : { text: "anchor", font: "Material Symbols Outlined" };
@@ -468,7 +523,7 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
   ctx.textBaseline = "middle";
   ctx.fillText(symbol.text, 32, 33);
 
-  if (spec.variant === "hydrophone") {
+  if (spec.variant === "camera" || spec.variant === "hydrophone") {
     const halo = spec.liveDotHalo ?? "none";
     if (halo === "soft") {
       ctx.fillStyle = "rgba(224, 74, 87, 0.14)";
@@ -721,11 +776,15 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     suggestedPlaces = [],
     itineraryPlaceIds = [],
     selectedPlaceId = null,
+    cameraLocations = [],
+    selectedCameraId = null,
+    selectedHydrophoneId = null,
     pulseSelectedPlaceMarker = false,
     onPlaceSelect,
     showTripHotspotMarkers = false,
     baseLocation = null,
     maxTravelDistanceMiles = null,
+    showCameras = false,
     hydrophoneLocations = [],
     showHydrophones = false,
     sidebarOffsetPx = 0,
@@ -1445,7 +1504,11 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       suggestedPlaces,
       itineraryPlaceIds,
       selectedPlaceId,
+      cameraLocations,
+      selectedCameraId,
+      selectedHydrophoneId,
       showSuggestedPlaces: showTripHotspotMarkers,
+      showCameras,
       hydrophoneLocations,
       showHydrophones,
       poiItems,
@@ -1470,7 +1533,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       await ensurePlannerLocationLayers(map, baseData);
       if (cancelled || mapRef.current !== map) return;
 
-      if ((selectedPlaceId && pulseSelectedPlaceMarker) || showHydrophones) {
+      if ((selectedPlaceId && pulseSelectedPlaceMarker) || showCameras || showHydrophones) {
         let pulseOn = true;
         const source = getGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID);
         source?.setData(withPlannerLocationPulse(baseData, pulseOn));
@@ -1481,6 +1544,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       }
 
       const placesById = new Map(suggestedPlaces.map((place) => [place.id, place]));
+      const camerasById = new Map(cameraLocations.map((camera) => [`camera:${camera.id}`, camera]));
       const poisById = new Map(poiItems.map((poi) => [getPublicPoiFeatureId(poi), poi]));
       const hydrophonesById = new Map(hydrophoneLocations.map((hydrophone) => [`hydrophone:${hydrophone.id}`, hydrophone]));
 
@@ -1489,6 +1553,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         const id = typeof properties.id === "string" ? properties.id : null;
         const kind = typeof properties.kind === "string" ? properties.kind : null;
         if (id && placesById.has(id)) return getSuggestedPlacePopupHtml(placesById.get(id)!);
+        if (id && kind === "camera" && camerasById.has(id)) return getCameraPopupHtml(camerasById.get(id)!);
         if (id && kind === "poi" && poisById.has(id)) return getPublicPoiPopupHtml(poisById.get(id)!);
         if (id && kind === "hydrophone" && hydrophonesById.has(id)) return getHydrophonePopupHtml(hydrophonesById.get(id)!);
         if (kind === "base" && baseLocation) return getBaseLocationPopupHtml(baseLocation);
@@ -1563,7 +1628,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       removeHandlers?.();
       popup.remove();
     };
-  }, [baseLocation, hydrophoneLocations, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedPlaceId, showHydrophones, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
+  }, [baseLocation, cameraLocations, hydrophoneLocations, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedCameraId, selectedHydrophoneId, selectedPlaceId, showCameras, showHydrophones, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
 
   useEffect(() => {
     const map = mapRef.current;
