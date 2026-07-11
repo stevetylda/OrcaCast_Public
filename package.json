@@ -8,6 +8,7 @@
     "typecheck": "tsc -b --pretty false",
     "test": "node --import ./scripts/register-ts-loader.mjs ./scripts/run-tests.ts",
     "build": "tsc -b && vite build",
+    "build:check": "npm run build && node scripts/check_bundle_budget.mjs",
     "analyze": "npm run build",
     "lint": "eslint .",
     "preview": "vite preview",

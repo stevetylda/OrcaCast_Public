@@ -6,7 +6,7 @@ import { loadForecast, loadGrid } from "../../../shared/data/forecastIO";
 import { getH3CellId } from "../../../shared/data/h3";
 import { loadTripPlannerOccurrencePayload, type TripPlannerOccurrencePayload } from "../../../shared/data/tripPlanner";
 import type { SuggestedPlace, ViewingPotential } from "../../locations/types";
-import { loadPoiDataBundle, type PoiFilters, type PublicPoi } from "../../locations/poiData";
+import { filterPoisByType, hasActivePoiFilter, loadPoiDataBundle, type PoiFilters, type PublicPoi } from "../../locations/poiData";
 
 type ForecastCellScore = {
   value: number;
@@ -39,6 +39,8 @@ type PlannerPoiMetadata = {
 };
 
 const POI_SCORE_RADIUS_KM = 16.0934; // 10 miles.
+const EMPTY_SUGGESTED_PLACES: SuggestedPlace[] = [];
+const NO_POI_FILTERS: PoiFilters = { Park: false, Marina: false, Ferry: false };
 
 // Optional display/ranking metadata only. These records never introduce independent coordinates.
 // Coordinates always come from data/places_of_interest.json via loadPoiData().
@@ -361,11 +363,12 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
     baseLocation,
     maxTravelDistanceMiles,
     limit,
+    poiFilters = NO_POI_FILTERS,
   } = args;
   const [places, setPlaces] = useState<SuggestedPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const effectivePlaces = enabled ? places : [];
+  const effectivePlaces = enabled ? places : EMPTY_SUGGESTED_PLACES;
   const effectiveIsLoading = enabled ? isLoading : false;
   const effectiveError = enabled ? error : null;
 
@@ -381,7 +384,8 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
       }
       const baselinePayloadPromise = loadTripPlannerOccurrencePayload(resolution);
       const [poiBundle, grid, baselinePayload] = await Promise.all([loadPoiDataBundle(), loadGrid(resolution), baselinePayloadPromise]);
-      const pois = poiBundle.items.map(enrichPlannerPoi);
+      const activePoiFilters = hasActivePoiFilter(poiFilters) ? poiFilters : undefined;
+      const pois = filterPoisByType(poiBundle.items, activePoiFilters).map(enrichPlannerPoi);
       if (pois.length === 0) return [];
 
       const values =
@@ -423,7 +427,20 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
     return () => {
       cancelled = true;
     };
-  }, [baseLocation, enabled, externalValues, fallbackForecastPath, forecastPath, limit, maxTravelDistanceMiles, modelId, resolution]);
+  }, [
+    baseLocation,
+    enabled,
+    externalValues,
+    fallbackForecastPath,
+    forecastPath,
+    limit,
+    maxTravelDistanceMiles,
+    modelId,
+    poiFilters.Ferry,
+    poiFilters.Marina,
+    poiFilters.Park,
+    resolution,
+  ]);
 
   return { places: effectivePlaces, isLoading: effectiveIsLoading, error: effectiveError };
 }

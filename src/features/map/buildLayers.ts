@@ -1,9 +1,32 @@
-import { Map as MapLibreMap } from "maplibre-gl";
+import { Map as MapLibreMap, type StyleSpecification } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import { getPerfObjectId } from "../../shared/debug/perf";
 
 export const VOYAGER_STYLE = "https://tiles.stadiamaps.com/styles/alidade_smooth.json";
 export const DARK_STYLE = "https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json";
+const STADIA_ATTRIBUTION =
+  '<a href="https://stadiamaps.com/" target="_blank">&copy; Stadia Maps</a> <a href="https://openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap</a>';
+
+function buildRasterStyle(styleName: "alidade_smooth" | "alidade_smooth_dark", backgroundColor: string): StyleSpecification {
+  return {
+    version: 8,
+    sources: {
+      basemap: {
+        type: "raster",
+        tiles: [`https://tiles.stadiamaps.com/tiles/${styleName}/{z}/{x}/{y}@2x.png`],
+        tileSize: 512,
+        attribution: STADIA_ATTRIBUTION,
+      },
+    },
+    layers: [
+      { id: "basemap-background", type: "background", paint: { "background-color": backgroundColor } },
+      { id: "basemap-raster", type: "raster", source: "basemap" },
+    ],
+  };
+}
+
+export const VOYAGER_RASTER_STYLE = buildRasterStyle("alidade_smooth", "#f2f3f0");
+export const DARK_RASTER_STYLE = buildRasterStyle("alidade_smooth_dark", "#1a2634");
 export const BASEMAP_TINT_SOURCE_ID = "orcacast-basemap-tint-source";
 export const BASEMAP_TINT_LAYER_ID = "orcacast-basemap-tint-layer";
 export const DARK_LABEL_OPACITY = 0.86;

@@ -15,6 +15,7 @@ export default defineConfig(() => ({
   base: "/",
   plugins: [react()],
   build: {
+    manifest: true,
     chunkSizeWarningLimit: 1400,
     rollupOptions: {
       output: {

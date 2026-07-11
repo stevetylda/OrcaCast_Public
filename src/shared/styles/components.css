@@ -2798,6 +2798,116 @@
   --teal-glow-soft: 0 0 12px rgba(0, 194, 255, 0.08);
 }
 
+/* Editorial navigation drawer shared by every page. */
+.overlay--editorial {
+  justify-content: flex-start;
+  background: rgba(6, 29, 60, 0.32);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.app .sideDrawer--editorial,
+.app:not(.app--dark) .sideDrawer--editorial {
+  width: min(340px, calc(100vw - 28px));
+  padding: 28px 22px;
+  border: 3px solid #061d3c;
+  border-top: 0;
+  border-bottom: 0;
+  background-color: #fff8e9;
+  background-image: radial-gradient(rgba(6, 29, 60, 0.13) 1px, transparent 1px);
+  background-size: 19px 19px;
+  color: #061d3c;
+  box-shadow: 12px 0 0 #061d3c;
+}
+
+.sideDrawer--editorial .sideDrawer__header {
+  align-items: flex-start;
+  padding: 0 2px 24px;
+  border-bottom: 3px solid #061d3c;
+}
+
+.sideDrawer--editorial .sideDrawer__eyebrow {
+  margin: 0 0 7px;
+  color: #08787c;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.sideDrawer--editorial .sideDrawer__title {
+  color: #061d3c;
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -.07em;
+  line-height: .95;
+}
+
+.app .sideDrawer--editorial .iconBtn,
+.app:not(.app--dark) .sideDrawer--editorial .iconBtn {
+  width: 46px;
+  height: 46px;
+  border: 3px solid #061d3c;
+  border-radius: 50%;
+  background: #f48ab3;
+  color: #061d3c;
+  box-shadow: none;
+}
+
+.sideDrawer--editorial .sideDrawer__nav {
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.app .sideDrawer--editorial .sideDrawer__item,
+.app:not(.app--dark) .sideDrawer--editorial .sideDrawer__item {
+  min-height: 66px;
+  padding: 13px 16px;
+  border: 3px solid #061d3c;
+  border-radius: 16px;
+  background: #fffdf6;
+  color: #061d3c;
+  box-shadow: 4px 5px 0 #061d3c;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.sideDrawer--editorial .sideDrawer__item:nth-child(2) { background: #47d1ca; }
+.sideDrawer--editorial .sideDrawer__item:nth-child(3) { background: #ffda4c; }
+.sideDrawer--editorial .sideDrawer__item:nth-child(4) { background: #f48ab3; }
+.sideDrawer--editorial .sideDrawer__itemIcon { font-size: 24px; color: #061d3c; }
+.sideDrawer--editorial .sideDrawer__itemLabel { font-weight: 900; }
+
+.app .sideDrawer--editorial .sideDrawer__item:hover,
+.app .sideDrawer--editorial .sideDrawer__item:focus-visible,
+.app:not(.app--dark) .sideDrawer--editorial .sideDrawer__item:hover,
+.app:not(.app--dark) .sideDrawer--editorial .sideDrawer__item:focus-visible {
+  border-color: #061d3c;
+  background: #ff6458;
+  box-shadow: 7px 8px 0 #061d3c;
+  outline: none;
+  transform: translate(-2px, -2px);
+}
+
+.app .sideDrawer--editorial .sideDrawer__item--active,
+.app:not(.app--dark) .sideDrawer--editorial .sideDrawer__item--active {
+  border-color: #061d3c;
+  background: #2f59d7;
+  box-shadow: 4px 5px 0 #061d3c;
+  color: #fffdf6;
+}
+
+.sideDrawer--editorial .sideDrawer__item--active .sideDrawer__itemIcon,
+.sideDrawer--editorial .sideDrawer__item--active .sideDrawer__itemLabel { color: #fffdf6; }
+.sideDrawer--editorial .sideDrawer__item--active::before { display: none; }
+
+@media (max-width: 520px) {
+  .app .sideDrawer--editorial,
+  .app:not(.app--dark) .sideDrawer--editorial { width: min(320px, calc(100vw - 20px)); padding: 22px 16px; }
+}
+
 .app:not(.app--dark) .header {
   background: linear-gradient(180deg, rgba(238, 246, 255, 0.96), rgba(230, 241, 253, 0.96));
   color: var(--ink-primary);
@@ -4120,1073 +4230,4 @@
 .toolbar .toolBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.homePageRoot {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  background:
-    radial-gradient(circle at top left, rgba(85, 163, 221, 0.12), transparent 32%),
-    linear-gradient(180deg, #f6f8fc 0%, #edf3fb 100%);
-}
-
-.app--dark .homePageRoot {
-  background:
-    radial-gradient(circle at top left, rgba(0, 194, 255, 0.12), transparent 32%),
-    linear-gradient(180deg, #071120 0%, #0b182d 100%);
-}
-
-.homePage {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.homeHero {
-  position: relative;
-  min-height: calc(100svh - 64px);
-  padding: clamp(18px, 3vw, 34px);
-  background-image: var(--home-hero-url);
-  background-size: cover;
-  background-position: center 58%;
-}
-
-.homeHero__overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 10% 90%, rgba(244, 248, 252, 0.96), rgba(244, 248, 252, 0.74) 28%, rgba(244, 248, 252, 0.24) 52%, transparent 72%),
-    linear-gradient(135deg, rgba(247, 250, 254, 0.92) 0%, rgba(247, 250, 254, 0.6) 26%, rgba(247, 250, 254, 0.18) 56%, rgba(247, 250, 254, 0.02) 84%);
-  pointer-events: none;
-}
-
-.homeHero__overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(248, 251, 255, 0) 0%, rgba(248, 251, 255, 0.04) 34%, rgba(248, 251, 255, 0.22) 58%, rgba(248, 251, 255, 0.58) 78%, rgba(248, 251, 255, 0.9) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  mask-image: linear-gradient(135deg, transparent 12%, rgba(0, 0, 0, 0.2) 36%, rgba(0, 0, 0, 0.68) 66%, #000 100%);
-  -webkit-mask-image: linear-gradient(135deg, transparent 12%, rgba(0, 0, 0, 0.2) 36%, rgba(0, 0, 0, 0.68) 66%, #000 100%);
-}
-
-.app--dark .homeHero__overlay {
-  background:
-    radial-gradient(circle at 10% 90%, rgba(7, 18, 34, 0.96), rgba(7, 18, 34, 0.76) 28%, rgba(7, 18, 34, 0.26) 52%, transparent 72%),
-    linear-gradient(135deg, rgba(7, 17, 32, 0.94) 0%, rgba(7, 17, 32, 0.64) 26%, rgba(7, 17, 32, 0.2) 56%, rgba(7, 17, 32, 0.04) 84%);
-}
-
-.app--dark .homeHero__overlay::before {
-  background: linear-gradient(135deg, rgba(9, 21, 39, 0) 0%, rgba(9, 21, 39, 0.05) 34%, rgba(9, 21, 39, 0.2) 58%, rgba(9, 21, 39, 0.52) 78%, rgba(9, 21, 39, 0.84) 100%);
-}
-
-.homeHero__content {
-  position: relative;
-  z-index: 1;
-  width: min(1880px, calc(100vw - clamp(20px, 4vw, 72px)));
-  margin: 0 auto;
-  display: grid;
-  gap: 24px;
-}
-
-.homeHero__copy {
-  padding: clamp(26px, 4vw, 54px) clamp(12px, 1.2vw, 18px) 0;
-  max-width: 760px;
-}
-
-.homeHero__eyebrow {
-  margin: 0 0 10px;
-  color: rgba(15, 57, 98, 0.72);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.app--dark .homeHero__eyebrow {
-  color: rgba(186, 225, 255, 0.72);
-}
-
-.homeHero__title {
-  margin: 0;
-  max-width: none;
-  color: #102d63;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
-  font-size: clamp(46px, 6.2vw, 78px);
-  font-weight: 700;
-  line-height: 0.96;
-  letter-spacing: -0.05em;
-}
-
-.homeHero__title span {
-  display: block;
-}
-
-.app--dark .homeHero__title {
-  color: rgba(239, 246, 255, 0.96);
-}
-
-.homeHero__body {
-  margin: 18px 0 0;
-  max-width: 30ch;
-  color: rgba(19, 55, 96, 0.82);
-  font-size: clamp(21px, 2.2vw, 28px);
-  line-height: 1.28;
-}
-
-.app--dark .homeHero__body {
-  color: rgba(215, 233, 255, 0.8);
-}
-
-.homeFeatureGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  align-items: stretch;
-}
-
-.homeFeatureCard {
-  position: relative;
-  display: grid;
-  gap: 14px;
-  padding: 18px 28px 20px;
-  border-radius: 30px;
-  border: 1px solid rgba(146, 184, 220, 0.24);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow:
-    0 22px 64px rgba(28, 56, 98, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  overflow: hidden;
-}
-
-.app--dark .homeFeatureCard {
-  border-color: rgba(148, 212, 232, 0.18);
-  background: rgba(7, 21, 39, 0.78);
-  box-shadow:
-    0 22px 64px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.homeFeatureCard--comingSoon {
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow:
-    0 16px 48px rgba(28, 56, 98, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.homeFeatureCard--comingSoon .homeFeatureCard__iconWrap,
-.homeFeatureCard--comingSoon .homeFeatureCard__title,
-.homeFeatureCard--comingSoon .homeFeatureCard__body,
-.homeFeatureCard--comingSoon .homeFeatureCard__visual {
-  opacity: 0.82;
-}
-
-.homeFeatureCard--comingSoon .homeFeatureCard__visual {
-  filter: saturate(0.84);
-}
-
-.app--dark .homeFeatureCard--comingSoon {
-  background: rgba(7, 21, 39, 0.66);
-  box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.homeFeatureCard__iconWrap {
-  width: 76px;
-  height: 76px;
-  display: grid;
-  place-items: center;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(237, 244, 255, 0.98), rgba(228, 237, 252, 0.9));
-  color: #1e63db;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
-}
-
-.homeFeatureCard__ribbon {
-  position: absolute;
-  top: 26px;
-  right: -54px;
-  z-index: 2;
-  min-width: 220px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 18px;
-  transform: rotate(32deg);
-  background: linear-gradient(135deg, #ffe36b, #f4c623);
-  color: #4b3900;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  box-shadow:
-    0 12px 22px rgba(138, 106, 8, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.44);
-}
-
-.app--dark .homeFeatureCard__iconWrap {
-  background: linear-gradient(180deg, rgba(18, 39, 73, 0.96), rgba(10, 27, 51, 0.92));
-}
-
-.homeFeatureCard--trip .homeFeatureCard__iconWrap {
-  color: #1f67e8;
-}
-
-.homeFeatureCard--best .homeFeatureCard__iconWrap {
-  color: #0c8c97;
-}
-
-.homeFeatureCard--outlook .homeFeatureCard__iconWrap {
-  color: #6b55d6;
-}
-
-.homeFeatureCard__iconWrap .material-symbols-rounded {
-  font-size: 40px;
-}
-
-.homeFeatureCard__title {
-  margin: 0;
-  color: #0f4fd8;
-  font-size: clamp(24px, 2.5vw, 33px);
-  font-weight: 800;
-  line-height: 1.04;
-  letter-spacing: -0.03em;
-}
-
-.homeFeatureCard--best .homeFeatureCard__title {
-  color: #0d8a96;
-}
-
-.homeFeatureCard--outlook .homeFeatureCard__title {
-  color: #6850d0;
-}
-
-.app--dark .homeFeatureCard__title {
-  color: rgba(240, 246, 255, 0.96);
-}
-
-.homeFeatureCard__body {
-  margin: 0;
-  color: rgba(31, 53, 92, 0.84);
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.app--dark .homeFeatureCard__body {
-  color: rgba(212, 228, 248, 0.76);
-}
-
-.homeFeatureCard__visual {
-  min-height: 188px;
-  display: grid;
-  align-items: stretch;
-}
-
-.homeMiniMapCard,
-.homeMiniChart,
-.homeMiniOutlookMap {
-  width: 100%;
-  height: 100%;
-  border-radius: 24px;
-  border: 1px solid rgba(158, 193, 229, 0.2);
-  background: rgba(245, 249, 255, 0.76);
-}
-
-.app--dark .homeMiniMapCard,
-.app--dark .homeMiniChart,
-.app--dark .homeMiniOutlookMap {
-  border-color: rgba(151, 204, 226, 0.14);
-  background: rgba(12, 24, 42, 0.72);
-}
-
-.homeMiniMapCard {
-  position: relative;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(248, 251, 255, 0.56)),
-    radial-gradient(circle at 35% 40%, rgba(112, 202, 255, 0.16), transparent 34%),
-    linear-gradient(135deg, #dcebfb, #cfe1f8 48%, #eaf3fe);
-}
-
-.app--dark .homeMiniMapCard {
-  background:
-    linear-gradient(180deg, rgba(11, 23, 40, 0.82), rgba(8, 18, 34, 0.6)),
-    radial-gradient(circle at 35% 40%, rgba(112, 202, 255, 0.12), transparent 34%),
-    linear-gradient(135deg, #0d1f35, #132843 48%, #142c47);
-}
-
-.homeMiniMapCard__details {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  z-index: 1;
-  display: grid;
-  gap: 10px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #204375;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 14px 32px rgba(41, 80, 130, 0.12);
-}
-
-.app--dark .homeMiniMapCard__details {
-  background: rgba(15, 30, 54, 0.9);
-  color: rgba(230, 240, 255, 0.92);
-}
-
-.homeMiniMapCard__viewport {
-  position: absolute;
-  inset: 18px;
-  border-radius: 26px;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
-    url("/images/home/san-juans-basemap-light.png");
-  background-size: cover;
-  background-position: center center;
-  border: 1px solid rgba(170, 202, 231, 0.18);
-}
-
-.app--dark .homeMiniMapCard__viewport {
-  background:
-    linear-gradient(180deg, rgba(7, 18, 34, 0.1), rgba(7, 18, 34, 0.22)),
-    url("/images/home/san-juans-basemap-light.png");
-  background-size: cover;
-  background-position: center center;
-  border-color: rgba(124, 170, 203, 0.2);
-  filter: saturate(0.78) brightness(0.76);
-}
-
-.homeMiniMapCard__star {
-  position: absolute;
-  left: 46%;
-  top: 48%;
-  width: 28px;
-  height: 28px;
-  transform: translate(-50%, -50%);
-  filter: drop-shadow(0 10px 18px rgba(32, 67, 117, 0.24));
-}
-
-.homeMiniMapCard__star::before {
-  content: "star";
-  font-family: "Material Symbols Rounded";
-  font-size: 28px;
-  line-height: 1;
-  color: #f0c93f;
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 600,
-    "GRAD" 0,
-    "opsz" 24;
-}
-
-.app--dark .homeMiniMapCard__star {
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.34));
-}
-
-.app--dark .homeMiniMapCard__star::before {
-  color: #ffd65c;
-}
-
-.homeMiniChart {
-  display: grid;
-  align-content: end;
-  padding: 18px 18px 22px;
-}
-
-.homeMiniChart__label {
-  justify-self: end;
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  background: rgba(183, 231, 238, 0.74);
-  color: #2a8694;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.app--dark .homeMiniChart__label {
-  background: rgba(18, 82, 92, 0.66);
-  color: rgba(212, 245, 248, 0.94);
-}
-
-.homeMiniChart__bars {
-  height: 150px;
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  align-items: end;
-  gap: 10px;
-}
-
-.homeMiniChart__bar {
-  height: calc(var(--bar-scale) * 100%);
-  min-height: 26px;
-  border-radius: 14px 14px 4px 4px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, #dff5f6 calc((1 - var(--bar-strength)) * 100%), #4cb8c4 calc(var(--bar-strength) * 100%)) 0%,
-      color-mix(in srgb, #c7eef0 calc((1 - var(--bar-strength)) * 100%), #249ca8 calc(var(--bar-strength) * 100%)) 100%
-    );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
-}
-
-.homeMiniChart__bar.isActive {
-  background: linear-gradient(180deg, #66d7de, #139daa);
-  box-shadow:
-    0 12px 24px rgba(19, 157, 170, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.42);
-}
-
-.app--dark .homeMiniChart__bar {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, #17384f calc((1 - var(--bar-strength)) * 100%), #5fd2dc calc(var(--bar-strength) * 100%)) 0%,
-      color-mix(in srgb, #0f2c42 calc((1 - var(--bar-strength)) * 100%), #1aa5b1 calc(var(--bar-strength) * 100%)) 100%
-    );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.app--dark .homeMiniChart__bar.isActive {
-  background: linear-gradient(180deg, #72e1e8, #1aa6b2);
-  box-shadow:
-    0 14px 28px rgba(15, 179, 194, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-
-.homeMiniOutlookMap {
-  position: relative;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
-    url("/images/home/san-juans-basemap-light.png");
-  background-size: cover;
-  background-position: center center;
-}
-
-.app--dark .homeMiniOutlookMap {
-  background:
-    linear-gradient(180deg, rgba(7, 18, 34, 0.06), rgba(7, 18, 34, 0.14)),
-    url("/images/home/san-juans-basemap-light.png");
-  background-size: cover;
-  background-position: center center;
-  filter: saturate(0.86) brightness(0.72);
-}
-
-.homeMiniOutlookMap__hotspot {
-  position: absolute;
-  left: 51%;
-  top: 46%;
-  width: 184px;
-  height: 184px;
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  background:
-    radial-gradient(circle, rgba(41, 230, 209, 0.86) 0%, rgba(41, 230, 209, 0.5) 26%, rgba(41, 230, 209, 0.22) 48%, rgba(41, 230, 209, 0.08) 62%, transparent 78%);
-  filter: blur(1.4px);
-}
-
-.homeMiniOutlookMap__badge {
-  position: absolute;
-  left: 50%;
-  top: 45%;
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(31, 73, 96, 0.88);
-  color: rgba(244, 252, 255, 0.96);
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  box-shadow: 0 14px 26px rgba(30, 86, 109, 0.22);
-}
-
-.homeMiniOutlookMap__badge::before {
-  content: "star";
-  font-family: "Material Symbols Rounded";
-  font-size: 22px;
-  line-height: 1;
-  color: #ffd34c;
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 600,
-    "GRAD" 0,
-    "opsz" 24;
-}
-
-.app--dark .homeMiniOutlookMap__badge {
-  background: rgba(15, 30, 54, 0.92);
-  color: rgba(203, 245, 244, 0.94);
-  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.22);
-}
-
-.app--dark .homeMiniOutlookMap__badge::before {
-  color: #44d7d0;
-}
-
-.homeMiniOutlookMap__places {
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 18px;
-  display: grid;
-  gap: 10px;
-}
-
-.homeMiniOutlookMap__placeRow {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow:
-    0 12px 24px rgba(39, 80, 118, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.76);
-}
-
-.app--dark .homeMiniOutlookMap__placeRow {
-  background: rgba(14, 28, 49, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.homeMiniOutlookMap__placeIcon {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  background: rgba(230, 246, 241, 0.96);
-  color: #35ab66;
-  font-size: 22px;
-}
-
-.homeMiniOutlookMap__placeRow:nth-child(2) .homeMiniOutlookMap__placeIcon {
-  background: rgba(232, 241, 255, 0.98);
-  color: #2e8bed;
-}
-
-.app--dark .homeMiniOutlookMap__placeIcon {
-  background: rgba(24, 46, 69, 0.96);
-  color: #7bd79a;
-}
-
-.app--dark .homeMiniOutlookMap__placeRow:nth-child(2) .homeMiniOutlookMap__placeIcon {
-  background: rgba(22, 42, 66, 0.96);
-  color: #73b4ff;
-}
-
-.homeMiniOutlookMap__placeName {
-  color: #21395f;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.homeMiniOutlookMap__placeMeta {
-  min-width: 58px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
-  text-align: right;
-}
-
-.homeMiniOutlookMap__placeMeta--high {
-  background: rgba(189, 241, 232, 0.94);
-  color: #168f8d;
-}
-
-.homeMiniOutlookMap__placeMeta--med {
-  background: rgba(255, 237, 189, 0.94);
-  color: #be8a17;
-}
-
-.app--dark .homeMiniOutlookMap__placeName {
-  color: rgba(231, 240, 251, 0.94);
-}
-
-.app--dark .homeMiniOutlookMap__placeMeta--high {
-  background: rgba(24, 88, 85, 0.92);
-  color: rgba(162, 243, 230, 0.96);
-}
-
-.app--dark .homeMiniOutlookMap__placeMeta--med {
-  background: rgba(102, 79, 28, 0.9);
-  color: rgba(255, 226, 150, 0.96);
-}
-
-.homeFeatureCard__cta {
-  min-height: 56px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: auto;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #1466ef, #1d4dd8);
-  color: #f7fbff;
-  font-size: 16px;
-  font-weight: 800;
-  text-decoration: none;
-  box-shadow: 0 18px 36px rgba(20, 102, 239, 0.26);
-}
-
-.homeFeatureCard--best .homeFeatureCard__cta {
-  background: linear-gradient(135deg, #17b2be, #0b8f9b);
-  box-shadow: 0 18px 36px rgba(11, 143, 155, 0.22);
-}
-
-.homeFeatureCard--outlook .homeFeatureCard__cta {
-  background: linear-gradient(135deg, #b3a0ef, #8f79df);
-  box-shadow: 0 18px 36px rgba(143, 121, 223, 0.22);
-}
-
-.homeFeatureCard__cta:hover,
-.homeFeatureCard__cta:focus-visible {
-  outline: none;
-  filter: brightness(1.03);
-  transform: translateY(-1px);
-}
-
-.homeFeatureCard__cta--disabled {
-  opacity: 0.72;
-  cursor: not-allowed;
-  pointer-events: none;
-  filter: saturate(0.72);
-  box-shadow: none;
-}
-
-
-
-/* Home planner card: make the homepage preview feel like the real planner page. */
-.homeFeatureCard--trip {
-  grid-template-columns: 92px minmax(0, 1fr);
-  grid-template-areas:
-    "icon title"
-    "icon body"
-    "visual visual"
-    "cta cta";
-  column-gap: 18px;
-  row-gap: 14px;
-  border-color: rgba(181, 211, 235, 0.4);
-  background:
-    radial-gradient(circle at 82% 18%, rgba(236, 247, 255, 0.92), transparent 34%),
-    rgba(255, 255, 255, 0.9);
-}
-
-.app--dark .homeFeatureCard--trip {
-  border-color: rgba(103, 153, 182, 0.24);
-  background:
-    radial-gradient(circle at 82% 18%, rgba(24, 51, 82, 0.72), transparent 34%),
-    rgba(7, 21, 39, 0.78);
-}
-
-.homeFeatureCard--trip .homeFeatureCard__iconWrap {
-  grid-area: icon;
-  width: 84px;
-  height: 84px;
-  border-radius: 26px;
-  color: #245be0;
-  background:
-    linear-gradient(180deg, rgba(236, 246, 255, 0.98), rgba(224, 237, 255, 0.94));
-  box-shadow:
-    0 14px 28px rgba(31, 64, 98, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.app--dark .homeFeatureCard--trip .homeFeatureCard__iconWrap {
-  color: #8eb9ff;
-  background:
-    linear-gradient(180deg, rgba(24, 51, 82, 0.96), rgba(11, 25, 43, 0.92));
-  box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.homeFeatureCard--trip .homeFeatureCard__title {
-  grid-area: title;
-  align-self: end;
-  color: #17315d;
-  font-family: inherit;
-  font-size: clamp(30px, 3.15vw, 42px);
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  line-height: 0.96;
-}
-
-.app--dark .homeFeatureCard--trip .homeFeatureCard__title {
-  color: rgba(239, 246, 255, 0.98);
-}
-
-.homeFeatureCard--trip .homeFeatureCard__body {
-  grid-area: body;
-  align-self: start;
-  max-width: 38ch;
-  color: rgba(53, 77, 116, 0.84);
-  font-size: 15px;
-  line-height: 1.45;
-  font-weight: 650;
-}
-
-.app--dark .homeFeatureCard--trip .homeFeatureCard__body {
-  color: rgba(216, 236, 247, 0.82);
-}
-
-.homeFeatureCard--trip .homeFeatureCard__visual {
-  grid-area: visual;
-  min-height: 252px;
-}
-
-.homeFeatureCard--trip .homeFeatureCard__cta {
-  grid-area: cta;
-}
-
-.homePlannerPreview {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.homePlannerPreview__shell {
-  position: relative;
-  display: block;
-  min-height: 252px;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 34px;
-  border: 1px solid rgba(181, 211, 235, 0.58);
-  background:
-    radial-gradient(circle at 18% 8%, rgba(236, 247, 255, 0.98), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 253, 255, 0.92));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 22px 44px rgba(31, 64, 98, 0.12);
-}
-
-.app--dark .homePlannerPreview__shell {
-  border-color: rgba(104, 183, 203, 0.28);
-  background:
-    radial-gradient(circle at 18% 8%, rgba(24, 51, 82, 0.96), transparent 42%),
-    rgba(11, 25, 43, 0.92);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 16px 34px rgba(0, 0, 0, 0.24);
-}
-
-.homePlannerPreview__map {
-  position: relative;
-  width: 100%;
-  min-height: 252px;
-  height: 100%;
-  aspect-ratio: 79 / 30;
-  overflow: hidden;
-  border-radius: 28px;
-}
-
-.homePlannerPreviewScene {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  border-radius: inherit;
-  transform: scale(0.9);
-  transform-origin: center center;
-  background:
-    radial-gradient(circle at 34% 36%, rgba(255, 255, 255, 0.72), transparent 26%),
-    radial-gradient(circle at 50% 44%, rgba(123, 229, 220, 0.12), transparent 26%),
-    linear-gradient(180deg, #eef9f8 0%, #ebf7f7 100%);
-}
-
-.homePlannerPreviewScene::before {
-  content: "";
-  position: absolute;
-  top: 22px;
-  bottom: 22px;
-  left: 50%;
-  width: min(420px, calc(100% - 168px));
-  transform: translateX(-50%);
-  border-radius: 26px;
-  border: 1px solid rgba(186, 224, 228, 0.72);
-  background:
-    radial-gradient(circle at 30% 34%, rgba(255, 255, 255, 0.58), transparent 30%),
-    linear-gradient(180deg, rgba(242, 251, 251, 0.94), rgba(235, 247, 247, 0.92));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.86),
-    0 14px 30px rgba(37, 91, 110, 0.08);
-}
-
-.homePlannerPreviewScene__calendar,
-.homePlannerPreviewScene__signal {
-  position: absolute;
-  z-index: 1;
-}
-
-.homePlannerPreviewScene__calendar {
-  left: 50%;
-  top: 58px;
-  width: min(266px, calc(100% - 180px));
-  padding: 16px 18px 18px;
-  transform: translateX(-50%);
-  border-radius: 20px;
-  border: 1px solid rgba(214, 232, 235, 0.98);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 10px 24px rgba(29, 82, 104, 0.1);
-}
-
-.homePlannerPreviewScene__calendarDays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 18px;
-  color: #9aa5b1;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-align: center;
-}
-
-.homePlannerPreviewScene__calendarDots {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: 22px;
-  align-items: center;
-  justify-items: center;
-}
-
-.homePlannerPreviewScene__calendarDots > span,
-.homePlannerPreviewScene__calendarDots .isRange > span {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #d2d9e0;
-}
-
-.homePlannerPreviewScene__calendarDots .isRange {
-  grid-column: 3 / span 5;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: center;
-  justify-items: center;
-  width: 100%;
-  height: 34px;
-  border-radius: 999px;
-  background: #bdeee8;
-}
-
-.homePlannerPreviewScene__calendarDots .isRange > span {
-  background: #0f8998;
-}
-
-.homePlannerPreviewScene__signal {
-  left: 50%;
-  bottom: 34px;
-  width: min(256px, calc(100% - 196px));
-  height: 84px;
-  transform: translateX(-50%);
-  display: grid;
-  grid-template-columns: repeat(13, 1fr);
-  align-items: end;
-  gap: 7px;
-}
-
-.homePlannerPreviewScene__signal::after {
-  content: "";
-  position: absolute;
-  left: -10px;
-  right: -10px;
-  bottom: -2px;
-  height: 3px;
-  border-radius: 999px;
-  background: rgba(198, 227, 231, 0.9);
-}
-
-.homePlannerPreviewScene__signalBar {
-  position: relative;
-  z-index: 1;
-  height: calc(var(--signal-scale) * 100%);
-  min-height: 14px;
-  border-radius: 3px 3px 0 0;
-  background: linear-gradient(180deg, #d9f7f4 0%, #a0e7dd 100%);
-}
-
-.homePlannerPreviewScene__signalBar:nth-child(4),
-.homePlannerPreviewScene__signalBar:nth-child(5),
-.homePlannerPreviewScene__signalBar:nth-child(6),
-.homePlannerPreviewScene__signalBar:nth-child(10),
-.homePlannerPreviewScene__signalBar:nth-child(11) {
-  background: linear-gradient(180deg, #8fe4d8 0%, #46c9c8 100%);
-}
-
-.homePlannerPreviewScene__signalBar:nth-child(7),
-.homePlannerPreviewScene__signalBar:nth-child(8),
-.homePlannerPreviewScene__signalBar:nth-child(9) {
-  background: linear-gradient(180deg, #36b9c0 0%, #0e7f93 100%);
-}
-
-.homePlannerPreviewScene__signalBar.isPeak {
-  background: linear-gradient(180deg, #0f8695 0%, #0b6f89 100%);
-}
-
-.app--dark .homePlannerPreviewScene {
-  background:
-    radial-gradient(circle at 34% 36%, rgba(255, 255, 255, 0.08), transparent 26%),
-    radial-gradient(circle at 50% 44%, rgba(123, 229, 220, 0.12), transparent 26%),
-    linear-gradient(180deg, #102432 0%, #112937 100%);
-}
-
-.app--dark .homePlannerPreviewScene::before {
-  border-color: rgba(90, 159, 172, 0.36);
-  background:
-    radial-gradient(circle at 30% 34%, rgba(255, 255, 255, 0.06), transparent 30%),
-    linear-gradient(180deg, rgba(17, 39, 50, 0.96), rgba(14, 33, 44, 0.94));
-}
-
-.app--dark .homePlannerPreviewScene__calendar {
-  border-color: rgba(81, 139, 152, 0.4);
-  background: rgba(17, 35, 45, 0.94);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
-}
-
-.app--dark .homePlannerPreviewScene__calendarDays {
-  color: rgba(194, 206, 217, 0.86);
-}
-
-.app--dark .homePlannerPreviewScene__calendarDots > span {
-  background: rgba(146, 163, 177, 0.42);
-}
-
-.app--dark .homePlannerPreviewScene__signal::after {
-  background: rgba(71, 104, 117, 0.9);
-}
-
-.homeFeatureCard--trip .homeFeatureCard__cta {
-  min-height: 64px;
-  border-radius: 20px;
-  background:
-    linear-gradient(180deg, rgba(33, 140, 148, 0.96), rgba(12, 105, 116, 0.98)),
-    radial-gradient(circle at 20% 0%, rgba(117, 245, 231, 0.2), transparent 46%);
-  box-shadow:
-    0 20px 38px rgba(12, 105, 116, 0.26),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
-.homeFeatureCard--trip .homeFeatureCard__ctaIcon {
-  font-size: 24px;
-}
-
-.homeFeatureCard--trip .homeFeatureCard__ctaIcon--image {
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
-
-@media (max-width: 1200px) {
-  .homeFeatureGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .homeHero__copy {
-    max-width: none;
-  }
-
-}
-
-@media (max-width: 760px) {
-  .homeHero {
-    padding: 12px;
-  }
-
-  .homeHero__content {
-    width: 100%;
-  }
-
-  .homeHero__copy {
-    padding: 18px 8px 0;
-  }
-
-  .homeHero__title {
-    font-size: clamp(42px, 15vw, 62px);
-  }
-
-  .homeHero__body {
-    font-size: 18px;
-  }
-
-  .homeFeatureCard {
-    padding: 16px 20px 18px;
-    border-radius: 24px;
-  }
-
-  .homeMiniForecast {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .homeFeatureCard--trip {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "icon"
-      "title"
-      "body"
-      "visual"
-      "cta";
-  }
-
-  .homeFeatureCard--trip .homeFeatureCard__title {
-    font-size: clamp(34px, 12vw, 44px);
-  }
-
-  .homeFeatureCard--trip .homeFeatureCard__visual {
-    min-height: 300px;
-  }
-
-  .homePlannerPreview {
-    min-height: 300px;
-  }
-
-  .homePlannerPreview__shell,
-  .homePlannerPreview__map {
-    min-height: 224px;
-  }
-
-  .homePlannerPreviewScene__calendar {
-    left: 50%;
-    top: 40px;
-    width: min(196px, calc(100% - 112px));
-    padding: 12px 14px 14px;
-  }
-
-  .homePlannerPreviewScene::before {
-    top: 18px;
-    bottom: 18px;
-    width: min(248px, calc(100% - 92px));
-  }
-
-  .homePlannerPreviewScene__calendarDays {
-    margin-bottom: 14px;
-    font-size: 11px;
-  }
-
-  .homePlannerPreviewScene__signal {
-    left: 50%;
-    bottom: 26px;
-    width: min(188px, calc(100% - 128px));
-    height: 70px;
-    gap: 5px;
-  }
-
 }

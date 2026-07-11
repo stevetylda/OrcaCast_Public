@@ -20,6 +20,7 @@ type UseForecastDataArgs = {
   forecastOverlayEnabled?: boolean;
   colorNoData?: boolean;
   pulseAllGridCells?: boolean;
+  overlayLoadKey?: string;
   onGridCellCount?: (count: number) => void;
   useExternalColorScale: boolean;
   paletteColors: string[];
@@ -35,9 +36,14 @@ type UseForecastDataArgs = {
   totalCellsRef: MutableRefObject<number>;
   shimmerThresholdRef: MutableRefObject<number | undefined>;
   setLegendSpec: Dispatch<SetStateAction<HeatScale | null>>;
-  scheduleForecastRender: (map: MapLibreMap, isCancelled?: () => boolean) => void;
+  scheduleForecastRender: (
+    map: MapLibreMap,
+    isCancelled?: () => boolean,
+    onRendered?: () => void
+  ) => void;
   onFatalDataError?: (error: DataLoadError) => void;
   onOverlayLoaded?: () => void;
+  onOverlayRendered?: () => void;
 };
 
 export function useForecastData({
@@ -50,6 +56,7 @@ export function useForecastData({
   forecastOverlayEnabled = true,
   colorNoData = false,
   pulseAllGridCells = false,
+  overlayLoadKey,
   onGridCellCount,
   useExternalColorScale,
   paletteColors,
@@ -68,6 +75,7 @@ export function useForecastData({
   scheduleForecastRender,
   onFatalDataError,
   onOverlayLoaded,
+  onOverlayRendered,
 }: UseForecastDataArgs) {
   useEffect(() => {
     const map = mapRef.current;
@@ -209,7 +217,7 @@ export function useForecastData({
             fallbackForecastPath,
           });
         }
-        scheduleForecastRender(map, () => cancelled);
+        scheduleForecastRender(map, () => cancelled, onOverlayRendered);
       } catch (err) {
         console.warn("[Forecast] failed to load grid", err);
         onFatalDataError?.(normalizeDataLoadError(err, GRID_PATH[resolution]));
@@ -231,6 +239,7 @@ export function useForecastData({
     modelId,
     externalValues,
     pulseAllGridCells,
+    overlayLoadKey,
     colorNoData,
     onGridCellCount,
     useExternalColorScale,

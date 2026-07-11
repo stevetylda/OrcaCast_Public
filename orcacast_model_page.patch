@@ -1,0 +1,1960 @@
+diff --git a/src/app/App.tsx b/src/app/App.tsx
+index 50fa1ea..8de7a8b 100644
+--- a/src/app/App.tsx
++++ b/src/app/App.tsx
+@@ -10,6 +10,7 @@ import "../shared/styles/map.css";
+ import "../shared/styles/components.css";
+ 
+ const AboutPage = lazy(() => import("../pages/AboutPage").then((m) => ({ default: m.AboutPage })));
++const ModelPage = lazy(() => import("../pages/ModelPage").then((m) => ({ default: m.ModelPage })));
+ const PlanPage = lazy(() => import("../pages/PlanPage").then((m) => ({ default: m.PlanPage })));
+ const HomePage = lazy(() => import("../pages/HomePage").then((m) => ({ default: m.HomePage })));
+ const WatchPage = lazy(() => import("../pages/WatchPage").then((m) => ({ default: m.WatchPage })));
+@@ -30,6 +31,7 @@ function AppFrame() {
+           <Route path="/watch" element={withPageBoundary("Watch", <WatchPage />)} />
+           <Route path="/planner" element={withPageBoundary("Planner", <PlanPage />)} />
+           <Route path="/about" element={withPageBoundary("About", <AboutPage />)} />
++          <Route path="/about/model" element={withPageBoundary("Model", <ModelPage />)} />
+         </Routes>
+       </Suspense>
+ 
+diff --git a/src/pages/AboutPage/AboutPage.css b/src/pages/AboutPage/AboutPage.css
+index e7b652d..ad6ba21 100644
+--- a/src/pages/AboutPage/AboutPage.css
++++ b/src/pages/AboutPage/AboutPage.css
+@@ -1385,3 +1385,76 @@
+     transition: none;
+   }
+ }
++
++.aboutGuideMethodology__learn {
++  display: grid;
++  grid-template-columns: auto minmax(0, 1fr) auto;
++  gap: 18px;
++  align-items: center;
++  max-width: 1040px;
++  margin: 26px auto 0;
++  padding: 18px;
++  border: 2px solid var(--about-navy);
++  border-radius: 22px;
++  background: var(--about-cream);
++  box-shadow: 5px 6px 0 rgba(6, 29, 60, 0.76);
++}
++
++.aboutGuideMethodology__learnIcon {
++  display: grid;
++  place-items: center;
++  width: 58px;
++  height: 58px;
++  border: 2px solid var(--about-navy);
++  border-radius: 18px;
++  background: var(--about-yellow);
++  color: var(--about-navy);
++  font-size: 31px;
++  font-variation-settings: "FILL" 1;
++}
++
++.aboutGuideMethodology__learn small,
++.aboutGuideMethodology__learn strong {
++  display: block;
++}
++
++.aboutGuideMethodology__learn small {
++  color: var(--about-teal-deep);
++  font-size: 0.65rem;
++  font-weight: 950;
++  letter-spacing: 0.09em;
++  text-transform: uppercase;
++}
++
++.aboutGuideMethodology__learn strong {
++  margin-top: 4px;
++  color: var(--about-navy);
++  font-size: 1rem;
++  font-weight: 900;
++  line-height: 1.35;
++}
++
++.app--dark .aboutGuideMethodology__learn strong {
++  color: #eef8f7;
++}
++
++@media (max-width: 820px) {
++  .aboutGuideMethodology__learn {
++    grid-template-columns: auto 1fr;
++  }
++
++  .aboutGuideMethodology__learn .aboutGuideButton {
++    grid-column: 1 / -1;
++    justify-self: start;
++  }
++}
++
++@media (max-width: 560px) {
++  .aboutGuideMethodology__learn {
++    grid-template-columns: 1fr;
++  }
++
++  .aboutGuideMethodology__learn .aboutGuideButton {
++    width: 100%;
++  }
++}
+diff --git a/src/pages/AboutPage/AboutPage.tsx b/src/pages/AboutPage/AboutPage.tsx
+index 683d0fb..baa05e6 100644
+--- a/src/pages/AboutPage/AboutPage.tsx
++++ b/src/pages/AboutPage/AboutPage.tsx
+@@ -388,6 +388,16 @@ export function AboutPage() {
+               </article>
+             ))}
+           </div>
++          <div className="aboutGuideMethodology__learn">
++            <span className="aboutGuideMethodology__learnIcon material-symbols-rounded" aria-hidden="true">route</span>
++            <div>
++              <small>Go beneath the outlook</small>
++              <strong>Follow each signal from seasonal history to your field plan.</strong>
++            </div>
++            <Link className="aboutGuideButton aboutGuideButton--teal" to="/about/model">
++              Learn how the model works <span className="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
++            </Link>
++          </div>
+           <details className="aboutGuideTechnical">
+             <summary>
+               Technical metadata <span className="material-symbols-rounded" aria-hidden="true">expand_more</span>
+@@ -466,6 +476,7 @@ export function AboutPage() {
+           <a href="#about-top">About</a>
+           <a href="#responsible-viewing">Responsible viewing</a>
+           <a href="#methodology">Methodology</a>
++          <Link to="/about/model">Learn how the model works</Link>
+           <Link to="/planner">Plan a trip</Link>
+         </nav>
+         <span>Plan thoughtfully. Watch respectfully.</span>
+diff --git a/src/pages/ModelPage/ModelPage.css b/src/pages/ModelPage/ModelPage.css
+new file mode 100644
+index 0000000..123ffd6
+--- /dev/null
++++ b/src/pages/ModelPage/ModelPage.css
+@@ -0,0 +1,1184 @@
++.modelStoryPage {
++  --model-rope: #d5a24b;
++  --model-rope-light: #ffe5a3;
++  --model-current: #08787c;
++  --model-integrating: #2f59d7;
++  --model-planner: #d64c43;
++}
++
++.modelStoryMain {
++  width: min(1540px, 100%);
++  margin: 0 auto;
++  padding: clamp(28px, 4vw, 64px) clamp(16px, 3vw, 60px) clamp(70px, 8vw, 120px);
++  overflow: hidden;
++}
++
++.modelStoryHero {
++  position: relative;
++  display: grid;
++  grid-template-columns: 0.92fr 1.08fr;
++  min-height: 610px;
++  overflow: hidden;
++  border: 3px solid var(--about-navy);
++  border-radius: 38px;
++  background: var(--about-cream);
++  box-shadow: 14px 16px 0 var(--about-navy);
++}
++
++.modelStoryHero__copy {
++  position: relative;
++  z-index: 2;
++  display: flex;
++  flex-direction: column;
++  justify-content: center;
++  padding: clamp(44px, 6vw, 88px);
++}
++
++.modelStoryHero__copy::before {
++  position: absolute;
++  top: -125px;
++  left: -115px;
++  width: 360px;
++  height: 340px;
++  border-radius: 50%;
++  background: var(--about-yellow);
++  content: "";
++}
++
++.modelStoryHero__copy > * {
++  position: relative;
++}
++
++.modelStoryHero h1 {
++  max-width: 720px;
++  margin: 25px 0 22px;
++  color: var(--about-navy);
++  font-size: clamp(3.45rem, 6vw, 6.9rem);
++  font-weight: 950;
++  letter-spacing: -0.09em;
++  line-height: 0.86;
++}
++
++.modelStoryHero h1 em {
++  display: block;
++  color: var(--about-coral);
++  font-family: Georgia, serif;
++  font-weight: 400;
++  letter-spacing: -0.08em;
++}
++
++.modelStoryHero__lead {
++  max-width: 640px;
++  margin: 0;
++  color: var(--about-slate);
++  font-size: clamp(1rem, 1.25vw, 1.24rem);
++  font-weight: 650;
++  line-height: 1.6;
++}
++
++.modelStoryHero__actions,
++.modelStoryResult__actions {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 12px;
++  margin-top: 30px;
++}
++
++.modelStoryHero__visual {
++  position: relative;
++  min-height: 610px;
++  overflow: hidden;
++  border-left: 3px solid var(--about-navy);
++  background:
++    radial-gradient(
++      circle at 70% 18%,
++      rgba(255, 255, 255, 0.54),
++      transparent 24%
++    ),
++    radial-gradient(rgba(6, 29, 60, 0.13) 1px, transparent 1px),
++    linear-gradient(145deg, #a7dad4, #66b8bd);
++  background-size:
++    auto,
++    18px 18px,
++    auto;
++}
++
++.modelStoryHero__visual::before,
++.modelStoryHero__visual::after {
++  position: absolute;
++  border: 3px solid var(--about-navy);
++  border-radius: 50%;
++  content: "";
++}
++
++.modelStoryHero__visual::before {
++  top: -95px;
++  right: -90px;
++  width: 280px;
++  height: 280px;
++  background: var(--about-pink);
++}
++
++.modelStoryHero__visual::after {
++  right: 10%;
++  bottom: -135px;
++  width: 310px;
++  height: 310px;
++  background: var(--about-yellow);
++}
++
++.modelStoryHero__rope {
++  position: absolute;
++  top: -9%;
++  left: 48%;
++  z-index: 1;
++  width: 22px;
++  height: 94%;
++  border: 3px solid var(--about-navy);
++  border-radius: 999px;
++  background: repeating-linear-gradient(
++    20deg,
++    var(--model-rope) 0 9px,
++    var(--model-rope-light) 9px 13px,
++    var(--model-rope) 13px 23px
++  );
++  box-shadow: 7px 8px 0 rgba(6, 29, 60, 0.82);
++  transform: rotate(14deg);
++}
++
++.modelStoryHero__layer,
++.modelStoryHero__output {
++  position: absolute;
++  z-index: 3;
++  border: 3px solid var(--about-navy);
++  box-shadow: 7px 8px 0 rgba(6, 29, 60, 0.84);
++}
++
++.modelStoryHero__layer {
++  display: grid;
++  grid-template-columns: auto 1fr;
++  column-gap: 12px;
++  align-items: center;
++  min-width: 205px;
++  padding: 18px 20px;
++  border-radius: 22px;
++  background: var(--about-cream);
++}
++
++.modelStoryHero__layer .material-symbols-rounded {
++  grid-row: 1 / 3;
++  font-size: 34px;
++  font-variation-settings: "FILL" 1;
++}
++
++.modelStoryHero__layer strong,
++.modelStoryHero__output strong {
++  color: var(--about-navy);
++  font-size: 0.91rem;
++  font-weight: 950;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++}
++
++.modelStoryHero__layer small,
++.modelStoryHero__output small {
++  color: var(--about-slate);
++  font-size: 0.67rem;
++  font-weight: 800;
++  letter-spacing: 0.05em;
++  text-transform: uppercase;
++}
++
++.modelStoryHero__layer--history {
++  top: 14%;
++  left: 8%;
++  background: #fff0ae;
++  transform: rotate(-5deg);
++}
++
++.modelStoryHero__layer--effort {
++  top: 37%;
++  right: 7%;
++  background: #ffd4e3;
++  transform: rotate(5deg);
++}
++
++.modelStoryHero__layer--environment {
++  bottom: 22%;
++  left: 10%;
++  background: #dce6ff;
++  transform: rotate(3deg);
++}
++
++.modelStoryHero__output {
++  right: 8%;
++  bottom: 7%;
++  display: grid;
++  grid-template-columns: auto 1fr;
++  gap: 13px;
++  align-items: center;
++  width: min(360px, 66%);
++  padding: 22px;
++  border-radius: 22px;
++  background: var(--about-coral);
++  transform: rotate(-3deg);
++}
++
++.modelStoryHero__output .material-symbols-rounded {
++  font-size: 42px;
++  font-variation-settings: "FILL" 1;
++}
++
++.modelStoryHero__output small,
++.modelStoryHero__output strong {
++  display: block;
++  color: var(--about-navy);
++}
++
++.modelStoryHero__output strong {
++  margin-top: 5px;
++  font-size: 1rem;
++}
++
++.modelStoryHero__stamp {
++  position: absolute;
++  top: 16px;
++  right: 22px;
++  z-index: 4;
++  padding: 9px 13px;
++  border: 2px solid var(--about-navy);
++  border-radius: 999px;
++  background: var(--about-teal);
++  color: var(--about-navy);
++  font-size: 0.64rem;
++  font-weight: 950;
++  letter-spacing: 0.1em;
++  text-transform: uppercase;
++  transform: rotate(4deg);
++}
++
++.modelStorySplit,
++.modelStoryJourney,
++.modelStoryResult,
++.modelStoryTechnical {
++  margin-top: clamp(54px, 7vw, 96px);
++}
++
++.modelStorySplit {
++  display: grid;
++  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
++  gap: clamp(28px, 4vw, 70px);
++  align-items: center;
++  padding: clamp(34px, 5vw, 66px);
++  border: 3px solid var(--about-teal-deep);
++  border-radius: 30px;
++  background: linear-gradient(115deg, #d9f1ef, #eefaf7);
++}
++
++.modelStorySplit h2,
++.modelStoryJourney__heading h2,
++.modelStoryResult h2,
++.modelStoryTechnical h2 {
++  margin: 16px 0 0;
++  color: var(--about-navy);
++  font-size: clamp(2.2rem, 4.2vw, 4.5rem);
++  font-weight: 950;
++  letter-spacing: -0.075em;
++  line-height: 0.92;
++}
++
++.modelStorySplit__cards {
++  display: grid;
++  grid-template-columns: 1fr auto 1fr;
++  gap: 16px;
++  align-items: stretch;
++}
++
++.modelStorySplit__cards article {
++  display: grid;
++  grid-template-columns: auto 1fr;
++  gap: 18px;
++  align-content: center;
++  padding: 25px;
++  border: 2px solid var(--about-navy);
++  border-radius: 22px;
++  background: var(--about-cream);
++  box-shadow: 5px 6px 0 rgba(6, 29, 60, 0.76);
++}
++
++.modelStorySplit__icon {
++  display: grid;
++  place-items: center;
++  width: 56px;
++  height: 56px;
++  border: 2px solid var(--about-navy);
++  border-radius: 18px;
++  color: var(--about-navy);
++  font-size: 30px;
++  font-variation-settings: "FILL" 1;
++}
++
++.modelStorySplit__icon--teal {
++  background: var(--about-teal);
++}
++.modelStorySplit__icon--yellow {
++  background: var(--about-yellow);
++}
++
++.modelStorySplit__cards small {
++  color: var(--about-teal-deep);
++  font-size: 0.66rem;
++  font-weight: 950;
++  letter-spacing: 0.1em;
++  text-transform: uppercase;
++}
++
++.modelStorySplit__cards h3 {
++  margin: 5px 0 7px;
++  color: var(--about-navy);
++  font-size: 1.08rem;
++  font-weight: 950;
++  letter-spacing: -0.03em;
++}
++
++.modelStorySplit__cards p {
++  margin: 0;
++  color: var(--about-slate);
++  font-size: 0.88rem;
++  font-weight: 650;
++  line-height: 1.5;
++}
++
++.modelStorySplit__plus {
++  display: grid;
++  place-items: center;
++  align-self: center;
++  width: 46px;
++  height: 46px;
++  border: 2px solid var(--about-navy);
++  border-radius: 50%;
++  background: var(--about-pink);
++  color: var(--about-navy);
++  font-size: 1.7rem;
++  font-weight: 950;
++}
++
++.modelStoryJourney {
++  padding: clamp(38px, 5vw, 72px) clamp(16px, 3vw, 46px) clamp(44px, 6vw, 80px);
++  border: 3px solid var(--about-navy);
++  border-radius: 34px;
++  background:
++    linear-gradient(rgba(246, 251, 248, 0.9), rgba(246, 251, 248, 0.9)),
++    radial-gradient(rgba(6, 29, 60, 0.16) 1px, transparent 1px);
++  background-size:
++    auto,
++    18px 18px;
++  box-shadow: 10px 12px 0 var(--about-navy);
++}
++
++.modelStoryJourney__heading {
++  max-width: 820px;
++  margin: 0 auto 22px;
++  text-align: center;
++}
++
++.modelStoryJourney__heading .aboutGuideKicker {
++  justify-content: center;
++}
++
++.modelStoryJourney__heading > p:last-of-type {
++  max-width: 680px;
++  margin: 18px auto 0;
++  color: var(--about-slate);
++  font-weight: 650;
++  line-height: 1.55;
++}
++
++.modelStoryLegend {
++  display: flex;
++  flex-wrap: wrap;
++  justify-content: center;
++  gap: 10px;
++  margin-top: 24px;
++}
++
++.modelStoryLegend span {
++  display: inline-flex;
++  align-items: center;
++  gap: 8px;
++  min-height: 36px;
++  padding: 0 13px;
++  border: 2px solid rgba(6, 29, 60, 0.18);
++  border-radius: 999px;
++  background: var(--about-cream);
++  color: var(--about-navy);
++  font-size: 0.64rem;
++  font-weight: 900;
++  letter-spacing: 0.06em;
++  text-transform: uppercase;
++}
++
++.modelStoryLegend__dot {
++  width: 10px;
++  height: 10px;
++  border: 1px solid var(--about-navy);
++  border-radius: 50%;
++}
++
++.modelStoryLegend__dot--current {
++  background: var(--model-current);
++}
++.modelStoryLegend__dot--integrating {
++  background: var(--model-integrating);
++}
++.modelStoryLegend__dot--planner {
++  background: var(--model-planner);
++}
++
++.modelStoryJourney__body {
++  position: relative;
++  width: min(1260px, 100%);
++  min-height: var(--rope-height);
++  margin: 38px auto 0;
++}
++
++.modelStoryRope {
++  position: absolute;
++  top: 0;
++  left: 50%;
++  z-index: 0;
++  width: 300px;
++  height: var(--rope-height);
++  overflow: visible;
++  transform: translateX(-50%);
++}
++
++.modelStoryRope path {
++  fill: none;
++  vector-effect: non-scaling-stroke;
++}
++
++.modelStoryRope__outline {
++  stroke: var(--about-navy);
++  stroke-linecap: round;
++  stroke-linejoin: round;
++  stroke-width: 20;
++}
++
++.modelStoryRope__body {
++  stroke: var(--model-rope);
++  stroke-linecap: round;
++  stroke-linejoin: round;
++  stroke-width: 13;
++}
++
++.modelStoryRope__twist {
++  stroke: var(--model-rope-light);
++  stroke-dasharray: 2 18;
++  stroke-linecap: round;
++  stroke-width: 4;
++}
++
++.modelStoryStage {
++  position: relative;
++  z-index: 1;
++  display: grid;
++  grid-template-columns: minmax(0, 1fr) 300px minmax(0, 1fr);
++  align-items: center;
++  min-height: 280px;
++}
++
++.modelStoryStage__card {
++  position: relative;
++  width: min(500px, 100%);
++  padding: 24px 26px 23px;
++  border: 3px solid var(--about-navy);
++  border-radius: 24px;
++  background: var(--about-cream);
++  box-shadow: 7px 8px 0 rgba(6, 29, 60, 0.86);
++}
++
++.modelStoryStage--left .modelStoryStage__card {
++  grid-column: 1;
++  justify-self: end;
++  transform: rotate(-1deg);
++}
++
++.modelStoryStage--right .modelStoryStage__card {
++  grid-column: 3;
++  justify-self: start;
++  transform: rotate(1deg);
++}
++
++.modelStoryStage--center .modelStoryStage__card {
++  grid-column: 1 / 4;
++  justify-self: center;
++  width: min(720px, calc(100% - 340px));
++  background: linear-gradient(120deg, #fff8e9, #ffd4cc);
++  transform: rotate(-0.5deg);
++}
++
++.modelStoryStage__card::before {
++  position: absolute;
++  inset: 8px;
++  z-index: -1;
++  border: 1px dashed rgba(6, 29, 60, 0.17);
++  border-radius: 17px;
++  content: "";
++}
++
++.modelStoryStage__topline {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 12px;
++}
++
++.modelStoryStatus,
++.modelStoryStage__number {
++  font-size: 0.61rem;
++  font-weight: 950;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++}
++
++.modelStoryStatus {
++  display: inline-flex;
++  align-items: center;
++  min-height: 28px;
++  padding: 0 10px;
++  border: 1.5px solid var(--about-navy);
++  border-radius: 999px;
++  color: white;
++}
++
++.modelStoryStatus--current {
++  background: var(--model-current);
++}
++.modelStoryStatus--integrating {
++  background: var(--model-integrating);
++}
++.modelStoryStatus--planner {
++  background: var(--model-planner);
++}
++
++.modelStoryStage__number {
++  color: var(--about-slate);
++}
++
++.modelStoryStage__titleRow {
++  display: grid;
++  grid-template-columns: auto 1fr;
++  gap: 16px;
++  align-items: center;
++  margin-top: 17px;
++}
++
++.modelStoryStage__icon {
++  display: grid;
++  place-items: center;
++  width: 62px;
++  height: 62px;
++  border: 2px solid var(--about-navy);
++  border-radius: 19px;
++  color: var(--about-navy);
++  font-size: 33px;
++  font-variation-settings: "FILL" 1;
++}
++
++.modelStoryStage--yellow .modelStoryStage__icon {
++  background: var(--about-yellow);
++}
++.modelStoryStage--coral .modelStoryStage__icon {
++  background: var(--about-coral);
++}
++.modelStoryStage--pink .modelStoryStage__icon {
++  background: var(--about-pink);
++}
++.modelStoryStage--teal .modelStoryStage__icon {
++  background: var(--about-teal);
++}
++.modelStoryStage--cobalt .modelStoryStage__icon {
++  background: #b9c9ff;
++}
++
++.modelStoryStage h3 {
++  margin: 0;
++  color: var(--about-navy);
++  font-size: clamp(1.25rem, 2vw, 1.72rem);
++  font-weight: 950;
++  letter-spacing: -0.045em;
++}
++
++.modelStoryStage__prompt {
++  margin: 4px 0 0;
++  color: var(--about-teal-deep);
++  font-family: Georgia, serif;
++  font-size: 0.99rem;
++  font-style: italic;
++  font-weight: 700;
++  line-height: 1.3;
++}
++
++.modelStoryStage__copy {
++  margin: 17px 0 0;
++  color: var(--about-slate);
++  font-size: 0.93rem;
++  font-weight: 650;
++  line-height: 1.52;
++}
++
++.modelStoryStage ul {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 7px;
++  margin: 17px 0 0;
++  padding: 0;
++  list-style: none;
++}
++
++.modelStoryStage li {
++  padding: 6px 9px;
++  border: 1.5px solid rgba(6, 29, 60, 0.22);
++  border-radius: 999px;
++  background: rgba(71, 209, 202, 0.11);
++  color: var(--about-navy);
++  font-size: 0.64rem;
++  font-weight: 850;
++  letter-spacing: 0.025em;
++}
++
++.modelStoryStage__knot {
++  grid-column: 2;
++  grid-row: 1;
++  z-index: 3;
++  display: grid;
++  place-items: center;
++  justify-self: center;
++  width: 62px;
++  height: 62px;
++  border: 4px solid var(--about-navy);
++  border-radius: 48% 52% 46% 54%;
++  background: var(--model-rope);
++  box-shadow: 5px 6px 0 rgba(6, 29, 60, 0.8);
++  transform: translateX(var(--marker-shift)) rotate(8deg);
++}
++
++.modelStoryStage:nth-of-type(even) .modelStoryStage__knot {
++  transform: translateX(var(--marker-shift)) rotate(-8deg);
++}
++
++.modelStoryStage__knot::before,
++.modelStoryStage__knot::after {
++  position: absolute;
++  width: 48px;
++  height: 18px;
++  border: 4px solid var(--about-navy);
++  border-radius: 999px;
++  background: var(--model-rope-light);
++  content: "";
++}
++
++.modelStoryStage__knot::before {
++  transform: rotate(45deg);
++}
++.modelStoryStage__knot::after {
++  transform: rotate(-45deg);
++}
++
++.modelStoryStage__knot span {
++  position: relative;
++  z-index: 2;
++  display: grid;
++  place-items: center;
++  width: 33px;
++  height: 33px;
++  border: 2px solid var(--about-navy);
++  border-radius: 50%;
++  background: var(--about-cream);
++  color: var(--about-navy);
++  font-size: 0.66rem;
++  font-weight: 950;
++}
++
++.modelStoryResult {
++  display: grid;
++  grid-template-columns: 1fr minmax(330px, 0.72fr);
++  gap: clamp(30px, 5vw, 78px);
++  align-items: center;
++  padding: clamp(38px, 5vw, 70px);
++  overflow: hidden;
++  border: 3px solid #d9a600;
++  border-radius: 30px;
++  background: linear-gradient(115deg, #fff8e9, #fff0b6);
++}
++
++.modelStoryResult__copy > p:last-of-type {
++  max-width: 720px;
++  margin: 20px 0 0;
++  color: var(--about-slate);
++  font-weight: 650;
++  line-height: 1.58;
++}
++
++.modelStoryResult__ticket {
++  position: relative;
++  padding: 26px;
++  border: 3px solid var(--about-navy);
++  border-radius: 14px;
++  background: var(--about-cream);
++  box-shadow: 9px 10px 0 var(--about-navy);
++  transform: rotate(2deg);
++}
++
++.modelStoryResult__ticket::before,
++.modelStoryResult__ticket::after {
++  position: absolute;
++  left: -13px;
++  width: 22px;
++  height: 22px;
++  border: 3px solid var(--about-navy);
++  border-radius: 50%;
++  background: #fff0b6;
++  content: "";
++}
++
++.modelStoryResult__ticket::before {
++  top: 29%;
++}
++.modelStoryResult__ticket::after {
++  bottom: 24%;
++}
++
++.modelStoryResult__ticketHeader {
++  display: flex;
++  align-items: flex-end;
++  justify-content: space-between;
++  gap: 20px;
++  padding-bottom: 18px;
++  border-bottom: 2px dashed rgba(6, 29, 60, 0.34);
++}
++
++.modelStoryResult__ticketHeader span,
++.modelStoryResult__ticket dt,
++.modelStoryResult__ticket > p {
++  color: var(--about-slate);
++  font-size: 0.65rem;
++  font-weight: 900;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++}
++
++.modelStoryResult__ticketHeader strong {
++  color: var(--about-coral);
++  font-family: Georgia, serif;
++  font-size: 2.1rem;
++  font-style: italic;
++}
++
++.modelStoryResult__ticket dl {
++  display: grid;
++  gap: 12px;
++  margin: 19px 0;
++}
++
++.modelStoryResult__ticket dl > div {
++  display: flex;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.modelStoryResult__ticket dt,
++.modelStoryResult__ticket dd {
++  margin: 0;
++}
++
++.modelStoryResult__ticket dd {
++  color: var(--about-navy);
++  font-size: 0.82rem;
++  font-weight: 950;
++  text-align: right;
++}
++
++.modelStoryResult__ticket > p {
++  margin: 0;
++  padding-top: 16px;
++  border-top: 2px dashed rgba(6, 29, 60, 0.34);
++  line-height: 1.45;
++}
++
++.modelStoryResult__ticketStamp {
++  position: absolute;
++  right: 18px;
++  bottom: -17px;
++  padding: 8px 13px;
++  border: 2px solid var(--about-navy);
++  border-radius: 999px;
++  background: var(--about-teal);
++  color: var(--about-navy);
++  font-size: 0.66rem;
++  font-weight: 950;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++  transform: rotate(-6deg);
++}
++
++.modelStoryTechnical {
++  display: grid;
++  grid-template-columns: minmax(250px, 0.58fr) minmax(0, 1.42fr);
++  gap: 38px;
++  align-items: center;
++  padding: clamp(32px, 4vw, 54px);
++  border: 3px solid var(--about-navy);
++  border-radius: 28px;
++  background: var(--about-cream);
++}
++
++.modelStoryTechnical h2 {
++  font-size: clamp(2rem, 3.6vw, 3.8rem);
++}
++
++.modelStoryTechnical__grid {
++  display: grid;
++  grid-template-columns: repeat(3, 1fr);
++  gap: 14px;
++}
++
++.modelStoryTechnical__grid article {
++  display: grid;
++  gap: 6px;
++  min-height: 130px;
++  align-content: center;
++  padding: 20px;
++  border: 2px solid rgba(6, 29, 60, 0.17);
++  border-radius: 18px;
++  background: rgba(71, 209, 202, 0.1);
++}
++
++.modelStoryTechnical__grid span,
++.modelStoryTechnical__grid small {
++  color: var(--about-slate);
++  font-size: 0.64rem;
++  font-weight: 900;
++  letter-spacing: 0.07em;
++  text-transform: uppercase;
++}
++
++.modelStoryTechnical__grid strong {
++  color: var(--about-navy);
++  overflow-wrap: anywhere;
++}
++
++.app--dark .modelStoryHero h1,
++.app--dark .modelStorySplit h2,
++.app--dark .modelStoryJourney__heading h2,
++.app--dark .modelStoryResult h2,
++.app--dark .modelStoryTechnical h2,
++.app--dark .modelStorySplit__cards h3,
++.app--dark .modelStoryStage h3,
++.app--dark .modelStoryStage li,
++.app--dark .modelStoryTechnical__grid strong,
++.app--dark .modelStoryResult__ticket dd {
++  color: #eef8f7;
++}
++
++.app--dark .modelStoryHero__visual {
++  background:
++    radial-gradient(
++      circle at 70% 18%,
++      rgba(255, 255, 255, 0.1),
++      transparent 24%
++    ),
++    radial-gradient(rgba(181, 231, 225, 0.13) 1px, transparent 1px),
++    linear-gradient(145deg, #1a5157, #123d49);
++  background-size:
++    auto,
++    18px 18px,
++    auto;
++}
++
++.app--dark .modelStorySplit {
++  background: linear-gradient(115deg, #0d3340, #10283a);
++}
++
++.app--dark .modelStoryJourney {
++  background:
++    linear-gradient(rgba(7, 24, 39, 0.94), rgba(7, 24, 39, 0.94)),
++    radial-gradient(rgba(181, 231, 225, 0.13) 1px, transparent 1px);
++  background-size:
++    auto,
++    18px 18px;
++}
++
++.app--dark .modelStoryResult {
++  background: linear-gradient(115deg, #4b421a, #2c2a1b);
++}
++
++.app--dark .modelStoryStage--center .modelStoryStage__card {
++  background: linear-gradient(120deg, #10283a, #3d2730);
++}
++
++.app--dark .modelStoryHero__layer strong,
++.app--dark .modelStoryHero__output strong,
++.app--dark .modelStoryHero__output small {
++  color: var(--about-navy);
++}
++
++@media (max-width: 1160px) {
++  .modelStoryHero {
++    grid-template-columns: 1fr;
++  }
++
++  .modelStoryHero__visual {
++    min-height: 540px;
++    border-top: 3px solid var(--about-navy);
++    border-left: 0;
++  }
++
++  .modelStorySplit {
++    grid-template-columns: 1fr;
++  }
++
++  .modelStorySplit__heading {
++    max-width: 760px;
++  }
++
++  .modelStoryStage {
++    grid-template-columns: minmax(0, 1fr) 260px minmax(0, 1fr);
++  }
++
++  .modelStoryStage--center .modelStoryStage__card {
++    width: min(700px, calc(100% - 290px));
++  }
++
++  .modelStoryResult {
++    grid-template-columns: 1fr 0.85fr;
++  }
++
++  .modelStoryTechnical {
++    grid-template-columns: 1fr;
++  }
++}
++
++@media (max-width: 880px) {
++  .modelStoryMain {
++    padding-right: 14px;
++    padding-left: 14px;
++  }
++
++  .modelStoryHero {
++    border-radius: 28px;
++    box-shadow: 8px 10px 0 var(--about-navy);
++  }
++
++  .modelStoryHero__copy {
++    min-height: 520px;
++    padding: 44px 28px;
++  }
++
++  .modelStoryHero__visual {
++    min-height: 470px;
++  }
++
++  .modelStorySplit__cards {
++    grid-template-columns: 1fr;
++  }
++
++  .modelStorySplit__plus {
++    justify-self: center;
++  }
++
++  .modelStoryJourney {
++    padding-right: 18px;
++    padding-left: 18px;
++    box-shadow: 7px 8px 0 var(--about-navy);
++  }
++
++  .modelStoryRope {
++    display: none;
++  }
++
++  .modelStoryJourney__body {
++    min-height: 0 !important;
++    padding-left: 54px;
++  }
++
++  .modelStoryJourney__body::before {
++    position: absolute;
++    top: 0;
++    bottom: 0;
++    left: 20px;
++    width: 15px;
++    border: 3px solid var(--about-navy);
++    border-radius: 999px;
++    background: repeating-linear-gradient(
++      20deg,
++      var(--model-rope) 0 8px,
++      var(--model-rope-light) 8px 12px,
++      var(--model-rope) 12px 21px
++    );
++    content: "";
++  }
++
++  .modelStoryStage,
++  .modelStoryStage--left,
++  .modelStoryStage--right,
++  .modelStoryStage--center {
++    display: block;
++    min-height: 0;
++    padding: 14px 0 30px;
++  }
++
++  .modelStoryStage__card,
++  .modelStoryStage--left .modelStoryStage__card,
++  .modelStoryStage--right .modelStoryStage__card,
++  .modelStoryStage--center .modelStoryStage__card {
++    width: 100%;
++    transform: none;
++  }
++
++  .modelStoryStage__knot {
++    position: absolute;
++    top: 38px;
++    left: -62px;
++    width: 48px;
++    height: 48px;
++    transform: rotate(8deg) !important;
++  }
++
++  .modelStoryStage__knot::before,
++  .modelStoryStage__knot::after {
++    width: 37px;
++    height: 13px;
++    border-width: 3px;
++  }
++
++  .modelStoryStage__knot span {
++    width: 27px;
++    height: 27px;
++    font-size: 0.58rem;
++  }
++
++  .modelStoryResult {
++    grid-template-columns: 1fr;
++  }
++
++  .modelStoryResult__ticket {
++    width: min(520px, 100%);
++  }
++
++  .modelStoryTechnical__grid {
++    grid-template-columns: 1fr 1fr;
++  }
++}
++
++@media (max-width: 560px) {
++  .modelStoryHero__copy {
++    min-height: 500px;
++    padding: 38px 24px;
++  }
++
++  .modelStoryHero h1 {
++    font-size: clamp(3.1rem, 14.5vw, 4.65rem);
++  }
++
++  .modelStoryHero__visual {
++    min-height: 420px;
++  }
++
++  .modelStoryHero__layer {
++    min-width: 170px;
++    padding: 14px 15px;
++  }
++
++  .modelStoryHero__layer--history {
++    top: 13%;
++    left: 5%;
++  }
++  .modelStoryHero__layer--effort {
++    top: 40%;
++    right: 4%;
++  }
++  .modelStoryHero__layer--environment {
++    bottom: 23%;
++    left: 5%;
++  }
++  .modelStoryHero__output {
++    right: 5%;
++    width: 76%;
++    padding: 17px;
++  }
++  .modelStoryHero__stamp {
++    right: 12px;
++  }
++
++  .modelStorySplit,
++  .modelStoryResult,
++  .modelStoryTechnical {
++    padding: 28px 22px;
++    border-radius: 24px;
++  }
++
++  .modelStoryJourney {
++    padding: 32px 12px 40px;
++    border-radius: 25px;
++  }
++
++  .modelStoryJourney__body {
++    padding-left: 42px;
++  }
++
++  .modelStoryJourney__body::before {
++    left: 13px;
++    width: 13px;
++  }
++
++  .modelStoryStage__knot {
++    left: -50px;
++    width: 43px;
++    height: 43px;
++  }
++
++  .modelStoryStage__card {
++    padding: 20px;
++    border-radius: 20px;
++    box-shadow: 5px 6px 0 rgba(6, 29, 60, 0.84);
++  }
++
++  .modelStoryStage__topline {
++    align-items: flex-start;
++    flex-direction: column;
++    gap: 8px;
++  }
++
++  .modelStoryStage__titleRow {
++    grid-template-columns: 1fr;
++  }
++
++  .modelStoryStage__icon {
++    width: 54px;
++    height: 54px;
++  }
++
++  .modelStoryTechnical__grid {
++    grid-template-columns: 1fr;
++  }
++
++  .modelStoryHero__actions .aboutGuideButton,
++  .modelStoryResult__actions .aboutGuideButton {
++    width: 100%;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .modelStoryHero__rope,
++  .modelStoryHero__layer,
++  .modelStoryHero__output,
++  .modelStoryHero__stamp,
++  .modelStoryStage__card,
++  .modelStoryStage__knot,
++  .modelStoryResult__ticket,
++  .modelStoryResult__ticketStamp {
++    transform: none;
++  }
++}
+diff --git a/src/pages/ModelPage/ModelPage.tsx b/src/pages/ModelPage/ModelPage.tsx
+new file mode 100644
+index 0000000..3f33b03
+--- /dev/null
++++ b/src/pages/ModelPage/ModelPage.tsx
+@@ -0,0 +1,612 @@
++import {
++  lazy,
++  Suspense,
++  useEffect,
++  useMemo,
++  useState,
++  type CSSProperties,
++} from "react";
++import { Link } from "react-router-dom";
++import { AppHeader } from "../../shared/components/AppHeader";
++import { appConfig } from "../../shared/config/appConfig";
++import {
++  getCachedDataMeta,
++  loadDataMeta,
++  type DataMeta,
++} from "../../shared/data/meta";
++import { useMapState } from "../../shared/state/MapStateContext";
++import { useMenu } from "../../shared/state/MenuContext";
++import "../AboutPage/AboutPage.css";
++import "./ModelPage.css";
++
++const InfoModal = lazy(() =>
++  import("../../shared/components/InfoModal").then((module) => ({
++    default: module.InfoModal,
++  })),
++);
++
++type StageStatus = "current" | "integrating" | "planner";
++type StageSide = "left" | "right" | "center";
++type StageTone = "yellow" | "coral" | "pink" | "teal" | "cobalt";
++
++type ModelStage = {
++  number: string;
++  title: string;
++  prompt: string;
++  copy: string;
++  icon: string;
++  tone: StageTone;
++  side: StageSide;
++  status: StageStatus;
++  details: readonly string[];
++};
++
++const statusLabels: Record<StageStatus, string> = {
++  current: "In the current forecast",
++  integrating: "Being integrated",
++  planner: "Personalization layer",
++};
++
++const modelStages: readonly ModelStage[] = [
++  {
++    number: "01",
++    title: "Seasonal history",
++    prompt: "What usually happens here at this time of year?",
++    copy: "OrcaCast begins with long-term spatial and seasonal patterns instead of treating every week and every part of the Salish Sea as identical.",
++    icon: "calendar_month",
++    tone: "yellow",
++    side: "left",
++    status: "current",
++    details: [
++      "Week-of-year patterns",
++      "Historical hotspots",
++      "Ecotype-specific context",
++    ],
++  },
++  {
++    number: "02",
++    title: "Recent activity",
++    prompt: "What has been happening nearby lately?",
++    copy: "Recent reports and neighboring activity help the forecast respond to short-term persistence and movement rather than relying only on the long-run average.",
++    icon: "timeline",
++    tone: "coral",
++    side: "right",
++    status: "current",
++    details: [
++      "Recent sightings",
++      "Nearby-grid activity",
++      "Short-term persistence",
++    ],
++  },
++  {
++    number: "03",
++    title: "Observer effort",
++    prompt: "Where are people able and likely to notice?",
++    copy: "A sighting map is partly a map of people. Effort layers help distinguish biological signal from ferries, daylight, access, population, and reporting habits.",
++    icon: "visibility",
++    tone: "pink",
++    side: "left",
++    status: "integrating",
++    details: [
++      "Daylight",
++      "Shore and ferry access",
++      "Population and reporting bias",
++    ],
++  },
++  {
++    number: "04",
++    title: "Geography and spatial context",
++    prompt: "How does this place relate to the water around it?",
++    copy: "Channels, islands, neighboring cells, and recurring corridors create spatial structure. OrcaCast learns from that structure instead of reading each grid cell in isolation.",
++    icon: "map",
++    tone: "teal",
++    side: "right",
++    status: "current",
++    details: [
++      "H3 neighborhoods",
++      "Passages and corridors",
++      "Local spatial history",
++    ],
++  },
++  {
++    number: "05",
++    title: "Prey proxies",
++    prompt: "When might food conditions support activity?",
++    copy: "Direct prey observations are limited, so OrcaCast can use carefully labeled ecological proxies such as salmon timing, river signals, and seasonal availability.",
++    icon: "set_meal",
++    tone: "yellow",
++    side: "left",
++    status: "integrating",
++    details: ["Salmon timing", "River and runoff signals", "Proxy uncertainty"],
++  },
++  {
++    number: "06",
++    title: "Environmental proxies",
++    prompt: "What are the ocean and atmosphere doing?",
++    copy: "Wind, visibility, cloud, precipitation, and future sea-state signals can affect animal activity, detection, and whether a forecast is useful to a person in the field.",
++    icon: "partly_cloudy_day",
++    tone: "cobalt",
++    side: "right",
++    status: "integrating",
++    details: [
++      "Wind and visibility",
++      "Cloud and precipitation",
++      "Daily viewing conditions",
++    ],
++  },
++  {
++    number: "07",
++    title: "Agreement and uncertainty",
++    prompt: "How strongly do the signals agree?",
++    copy: "OrcaCast should not hide uncertainty behind a sharp-looking score. Sparse data, conflicting signals, and model disagreement become part of the outlook.",
++    icon: "query_stats",
++    tone: "pink",
++    side: "left",
++    status: "integrating",
++    details: ["Confidence language", "Sparse-data warnings", "Model agreement"],
++  },
++  {
++    number: "08",
++    title: "Activity outlook",
++    prompt: "Where and when does activity look relatively more likely?",
++    copy: "The forecast combines the available signals into a relative activity surface. It ranks possibilities across dates and places, but it never promises an encounter.",
++    icon: "analytics",
++    tone: "teal",
++    side: "right",
++    status: "current",
++    details: ["Relative activity", "Likely time windows", "Ecotype outlooks"],
++  },
++  {
++    number: "09",
++    title: "Viewing opportunity",
++    prompt: "Could a person realistically experience it from here?",
++    copy: "Forecast activity is combined with visibility, distance, terrain, weather, and access so a biologically promising cell can become a practical viewing-place recommendation.",
++    icon: "landscape",
++    tone: "cobalt",
++    side: "left",
++    status: "integrating",
++    details: [
++      "Viewshed and distance",
++      "Weather and daylight",
++      "Shore, ferry, camera, or audio",
++    ],
++  },
++  {
++    number: "10",
++    title: "You",
++    prompt: "What kind of Salish Sea day are you trying to plan?",
++    copy: "Your dates, starting point, travel tolerance, accessibility needs, and preferred experience personalize the recommendation. They do not predict the whales.",
++    icon: "person_pin_circle",
++    tone: "coral",
++    side: "center",
++    status: "planner",
++    details: ["Your dates", "Your starting point", "Your preferred experience"],
++  },
++] as const;
++
++const stageSpacing = 280;
++const ropeWidth = 300;
++const ropeCenter = ropeWidth / 2;
++const ropeX = [150, 74, 226, 74, 226, 74, 226, 74, 226, 150] as const;
++
++function buildRopePath(
++  points: readonly (readonly [number, number])[],
++  height: number,
++) {
++  let previousX = ropeCenter;
++  let previousY = 0;
++  let path = `M ${ropeCenter} 0`;
++
++  points.forEach(([x, y]) => {
++    const midpointY = (previousY + y) / 2;
++    path += ` C ${previousX} ${midpointY}, ${x} ${midpointY}, ${x} ${y}`;
++    previousX = x;
++    previousY = y;
++  });
++
++  const finalMidpoint = (previousY + height) / 2;
++  path += ` C ${previousX} ${finalMidpoint}, ${ropeCenter} ${finalMidpoint}, ${ropeCenter} ${height}`;
++  return path;
++}
++
++export function ModelPage() {
++  const { setMenuOpen } = useMenu();
++  const { darkMode } = useMapState();
++  const [infoOpen, setInfoOpen] = useState(false);
++  const [dataMeta, setDataMeta] = useState<DataMeta | null>(() =>
++    getCachedDataMeta(),
++  );
++
++  useEffect(() => {
++    let active = true;
++    loadDataMeta()
++      .then((meta) => {
++        if (active) setDataMeta(meta);
++      })
++      .catch(() => {
++        if (active) setDataMeta(null);
++      });
++
++    return () => {
++      active = false;
++    };
++  }, []);
++
++  const ropeHeight = modelStages.length * stageSpacing;
++  const ropePath = useMemo(
++    () =>
++      buildRopePath(
++        modelStages.map(
++          (_, index) =>
++            [ropeX[index], index * stageSpacing + stageSpacing / 2] as const,
++        ),
++        ropeHeight,
++      ),
++    [ropeHeight],
++  );
++
++  return (
++    <div className="aboutGuidePage modelStoryPage" id="model-top">
++      <AppHeader
++        title="OrcaCast"
++        subtitle="Forecast Lab"
++        variant="home"
++        onOpenInfo={() => setInfoOpen(true)}
++        onOpenMenu={() => setMenuOpen(true)}
++        rightSlot={
++          <nav className="aboutGuideNav" aria-label="Model page navigation">
++            <Link to="/about">About</Link>
++            <a href="#model-journey">Model layers</a>
++            <Link to="/planner">Plan a trip</Link>
++          </nav>
++        }
++      />
++
++      <main className="modelStoryMain">
++        <section className="modelStoryHero" aria-labelledby="model-story-title">
++          <div className="modelStoryHero__copy">
++            <p className="aboutGuideKicker">Inside the forecast</p>
++            <h1 id="model-story-title">
++              From ocean signals to <em>your Salish Sea day.</em>
++            </h1>
++            <p className="modelStoryHero__lead">
++              OrcaCast builds an outlook in layers. Follow the rope to see what
++              shapes the forecast, what corrects for human observation, and how
++              the final result becomes useful to you.
++            </p>
++            <div className="modelStoryHero__actions">
++              <a
++                className="aboutGuideButton aboutGuideButton--teal"
++                href="#model-journey"
++              >
++                Follow the model{" "}
++                <span className="material-symbols-rounded" aria-hidden="true">
++                  south
++                </span>
++              </a>
++              <Link
++                className="aboutGuideButton aboutGuideButton--cream"
++                to="/about"
++              >
++                Back to about{" "}
++                <span className="material-symbols-rounded" aria-hidden="true">
++                  arrow_back
++                </span>
++              </Link>
++            </div>
++          </div>
++
++          <div
++            className="modelStoryHero__visual"
++            aria-label="Illustration of data layers becoming a forecast and trip plan"
++          >
++            <div className="modelStoryHero__rope" aria-hidden="true" />
++            <div className="modelStoryHero__layer modelStoryHero__layer--history">
++              <span className="material-symbols-rounded" aria-hidden="true">
++                calendar_month
++              </span>
++              <strong>History</strong>
++              <small>Season and place</small>
++            </div>
++            <div className="modelStoryHero__layer modelStoryHero__layer--effort">
++              <span className="material-symbols-rounded" aria-hidden="true">
++                visibility
++              </span>
++              <strong>Effort</strong>
++              <small>Who could observe?</small>
++            </div>
++            <div className="modelStoryHero__layer modelStoryHero__layer--environment">
++              <span className="material-symbols-rounded" aria-hidden="true">
++                partly_cloudy_day
++              </span>
++              <strong>Conditions</strong>
++              <small>Ocean and weather</small>
++            </div>
++            <div className="modelStoryHero__output">
++              <span className="material-symbols-rounded" aria-hidden="true">
++                route
++              </span>
++              <div>
++                <small>Forecast + your context</small>
++                <strong>A practical field plan</strong>
++              </div>
++            </div>
++            <span className="modelStoryHero__stamp" aria-hidden="true">
++              Built in layers
++            </span>
++          </div>
++        </section>
++
++        <section
++          className="modelStorySplit"
++          aria-labelledby="model-split-title"
++        >
++          <div className="modelStorySplit__heading">
++            <p className="aboutGuideKicker">One important distinction</p>
++            <h2 id="model-split-title">
++              The whales are forecast. Your day is recommended.
++            </h2>
++          </div>
++          <div className="modelStorySplit__cards">
++            <article>
++              <span
++                className="modelStorySplit__icon modelStorySplit__icon--teal material-symbols-rounded"
++                aria-hidden="true"
++              >
++                analytics
++              </span>
++              <div>
++                <small>Forecast model</small>
++                <h3>Estimates relative activity</h3>
++                <p>
++                  Ecological, spatial, historical, and observation signals shape
++                  the orca activity outlook.
++                </p>
++              </div>
++            </article>
++            <span className="modelStorySplit__plus" aria-hidden="true">
++              +
++            </span>
++            <article>
++              <span
++                className="modelStorySplit__icon modelStorySplit__icon--yellow material-symbols-rounded"
++                aria-hidden="true"
++              >
++                person_pin_circle
++              </span>
++              <div>
++                <small>Recommendation layer</small>
++                <h3>Fits the outlook to you</h3>
++                <p>
++                  Your dates and constraints help rank practical places and
++                  experiences. They never predict animal behavior.
++                </p>
++              </div>
++            </article>
++          </div>
++        </section>
++
++        <section
++          className="modelStoryJourney"
++          id="model-journey"
++          aria-labelledby="model-journey-title"
++        >
++          <div className="modelStoryJourney__heading">
++            <p className="aboutGuideKicker">The layers behind the outlook</p>
++            <h2 id="model-journey-title">Follow the rope.</h2>
++            <p>
++              OrcaCast is evolving. The status tag on each stop separates what
++              is already active from signals being integrated into the forecast
++              and planner.
++            </p>
++            <div
++              className="modelStoryLegend"
++              aria-label="Model layer status legend"
++            >
++              <span>
++                <i className="modelStoryLegend__dot modelStoryLegend__dot--current" />
++                In the current forecast
++              </span>
++              <span>
++                <i className="modelStoryLegend__dot modelStoryLegend__dot--integrating" />
++                Being integrated
++              </span>
++              <span>
++                <i className="modelStoryLegend__dot modelStoryLegend__dot--planner" />
++                Personalization layer
++              </span>
++            </div>
++          </div>
++
++          <div
++            className="modelStoryJourney__body"
++            style={{ "--rope-height": `${ropeHeight}px` } as CSSProperties}
++          >
++            <svg
++              className="modelStoryRope"
++              viewBox={`0 0 ${ropeWidth} ${ropeHeight}`}
++              preserveAspectRatio="none"
++              aria-hidden="true"
++            >
++              <path className="modelStoryRope__outline" d={ropePath} />
++              <path className="modelStoryRope__body" d={ropePath} />
++              <path className="modelStoryRope__twist" d={ropePath} />
++            </svg>
++
++            {modelStages.map((stage, index) => {
++              const markerShift = (ropeX[index] ?? ropeCenter) - ropeCenter;
++              return (
++                <article
++                  key={stage.number}
++                  id={`model-layer-${stage.number}`}
++                  className={`modelStoryStage modelStoryStage--${stage.side} modelStoryStage--${stage.tone}`}
++                  style={
++                    { "--marker-shift": `${markerShift}px` } as CSSProperties
++                  }
++                >
++                  <div className="modelStoryStage__card">
++                    <div className="modelStoryStage__topline">
++                      <span
++                        className={`modelStoryStatus modelStoryStatus--${stage.status}`}
++                      >
++                        {statusLabels[stage.status]}
++                      </span>
++                      <span className="modelStoryStage__number">
++                        Layer {stage.number}
++                      </span>
++                    </div>
++                    <div className="modelStoryStage__titleRow">
++                      <span
++                        className="modelStoryStage__icon material-symbols-rounded"
++                        aria-hidden="true"
++                      >
++                        {stage.icon}
++                      </span>
++                      <div>
++                        <h3>{stage.title}</h3>
++                        <p className="modelStoryStage__prompt">
++                          {stage.prompt}
++                        </p>
++                      </div>
++                    </div>
++                    <p className="modelStoryStage__copy">{stage.copy}</p>
++                    <ul>
++                      {stage.details.map((detail) => (
++                        <li key={detail}>{detail}</li>
++                      ))}
++                    </ul>
++                  </div>
++                  <div className="modelStoryStage__knot" aria-hidden="true">
++                    <span>{stage.number}</span>
++                  </div>
++                </article>
++              );
++            })}
++          </div>
++        </section>
++
++        <section
++          className="modelStoryResult"
++          aria-labelledby="model-result-title"
++        >
++          <div className="modelStoryResult__copy">
++            <p className="aboutGuideKicker">What comes out the other end</p>
++            <h2 id="model-result-title">
++              A useful outlook, not an orca appointment.
++            </h2>
++            <p>
++              The goal is not a magical certainty score. It is a transparent
++              recommendation that helps you compare dates, understand
++              confidence, choose a practical place, and keep a good backup plan.
++            </p>
++            <div className="modelStoryResult__actions">
++              <Link
++                className="aboutGuideButton aboutGuideButton--teal"
++                to="/planner"
++              >
++                Use the trip planner{" "}
++                <span className="material-symbols-rounded" aria-hidden="true">
++                  arrow_forward
++                </span>
++              </Link>
++              <Link
++                className="aboutGuideButton aboutGuideButton--cream"
++                to="/watch"
++              >
++                Explore this week{" "}
++                <span className="material-symbols-rounded" aria-hidden="true">
++                  map_search
++                </span>
++              </Link>
++            </div>
++          </div>
++
++          <div
++            className="modelStoryResult__ticket"
++            aria-label="Example personalized OrcaCast output"
++          >
++            <div className="modelStoryResult__ticketHeader">
++              <span>OrcaCast field plan</span>
++              <strong>Saturday</strong>
++            </div>
++            <dl>
++              <div>
++                <dt>Activity outlook</dt>
++                <dd>High</dd>
++              </div>
++              <div>
++                <dt>Confidence</dt>
++                <dd>Moderate</dd>
++              </div>
++              <div>
++                <dt>Best fit</dt>
++                <dd>West-facing shore</dd>
++              </div>
++              <div>
++                <dt>Backup</dt>
++                <dd>Hydrophone session</dd>
++              </div>
++            </dl>
++            <p>Conditions are promising, wildlife remains unpredictable.</p>
++            <span className="modelStoryResult__ticketStamp" aria-hidden="true">
++              For you
++            </span>
++          </div>
++        </section>
++
++        <section
++          className="modelStoryTechnical"
++          aria-labelledby="model-technical-title"
++        >
++          <div>
++            <p className="aboutGuideKicker">Technical footprint</p>
++            <h2 id="model-technical-title">Versioned and inspectable.</h2>
++          </div>
++          <div className="modelStoryTechnical__grid">
++            <article>
++              <span>Model</span>
++              <strong>{appConfig.compositeModelLabel}</strong>
++              <small>{appConfig.compositeModelId}</small>
++            </article>
++            <article>
++              <span>Version</span>
++              <strong>{appConfig.modelVersion}</strong>
++              <small>Forecast Lab</small>
++            </article>
++            <article>
++              <span>Data</span>
++              <strong>{dataMeta?.data_version ?? "Loading metadata"}</strong>
++              <small>
++                {dataMeta?.generated_at
++                  ? `Generated ${dataMeta.generated_at}`
++                  : "Versioned forecast inputs"}
++              </small>
++            </article>
++          </div>
++        </section>
++      </main>
++
++      <footer className="aboutGuideFooter">
++        <strong>OrcaCast</strong>
++        <nav aria-label="Model page footer navigation">
++          <Link to="/about">About</Link>
++          <a href="#model-journey">Model layers</a>
++          <Link to="/planner">Plan a trip</Link>
++          <Link to="/watch">This week</Link>
++        </nav>
++        <span>Signals in. Context out.</span>
++      </footer>
++
++      <Suspense fallback={null}>
++        {infoOpen ? (
++          <InfoModal
++            open={infoOpen}
++            onClose={() => setInfoOpen(false)}
++            onStartTour={() => setInfoOpen(false)}
++            darkMode={darkMode}
++          />
++        ) : null}
++      </Suspense>
++    </div>
++  );
++}
+diff --git a/src/pages/ModelPage/index.ts b/src/pages/ModelPage/index.ts
+new file mode 100644
+index 0000000..85af7b5
+--- /dev/null
++++ b/src/pages/ModelPage/index.ts
+@@ -0,0 +1 @@
++export { ModelPage } from "./ModelPage";
+diff --git a/src/shared/components/SideDrawer.tsx b/src/shared/components/SideDrawer.tsx
+index 7b31290..2669c3a 100644
+--- a/src/shared/components/SideDrawer.tsx
++++ b/src/shared/components/SideDrawer.tsx
+@@ -110,7 +110,9 @@ export function SideDrawer({ open, onClose }: Props) {
+         <nav className="sideDrawer__nav" aria-label="Primary navigation">
+           {items.map((item) => {
+             const isDisabled = Boolean(item.comingSoon);
+-            const isActive = !isDisabled && pathname === item.path;
++            const isActive =
++              !isDisabled &&
++              (item.path === "/about" ? pathname.startsWith("/about") : pathname === item.path);
+ 
+             return (
+               <button

@@ -12,6 +12,7 @@ import {
   setGridVisibility,
   setHotspotVisibility,
   setSurfaceVisibility,
+  type GridVisualStyle,
 } from "../../shared/geo/gridOverlay";
 import { buildAutoColorExprFromValues, buildFillExprFromScale, buildHotspotOnlyExpr } from "../../shared/geo/colorScale";
 import type { HeatScale } from "../../shared/geo/colorScale";
@@ -19,10 +20,19 @@ import { getPaletteOrDefault } from "../../shared/geo/palettes";
 import { trackLayerRebuild, trackRender } from "../../shared/debug/perf";
 import { MapControls } from "./MapControls";
 import { createGridInteractionHandlers } from "./MapInteractions";
-import { applyBasemapVisualTuning, createGridLayerBuildSignature, DARK_STYLE, DEFAULT_CENTER, DEFAULT_ZOOM, VOYAGER_STYLE } from "./buildLayers";
+import {
+  applyBasemapVisualTuning,
+  createGridLayerBuildSignature,
+  DARK_RASTER_STYLE,
+  DARK_STYLE,
+  DEFAULT_CENTER,
+  DEFAULT_ZOOM,
+  VOYAGER_RASTER_STYLE,
+  VOYAGER_STYLE,
+} from "./buildLayers";
 import { useForecastData } from "./useForecastData";
 import { useHotspotAnimation } from "./useHotspotAnimation";
-import type { FillColorSpec, ForecastMapHandle, ForecastMapProps, LngLat, SparklineSeries } from "./types";
+import type { FillColorSpec, ForecastMapHandle, ForecastMapProps, LngLat, MapViewportPadding, SparklineSeries } from "./types";
 import { filterPoisByType, hasActivePoiFilter, loadPoiData, type PoiFilters, type PublicPoi } from "../locations/poiData";
 import type { SuggestedPlace, ViewingLocation } from "../locations/types";
 import type { OrcasoundHydrophone } from "../../shared/data/orcasoundHydrophones";
@@ -140,24 +150,72 @@ function getPlannerLocationIconName(kind: PlannerLocationKind, type?: SuggestedP
   return `planner-pin-${kind}-${getPoiIconKey(type)}`;
 }
 
+function getPlannerMarkerSymbol(kind: PlannerLocationKind, type?: SuggestedPlace["type"] | PublicPoi["type"]) {
+  if (kind === "base") return "home";
+  if (kind === "camera") return "videocam";
+  if (kind === "hydrophone") return "graphic_eq";
+  if (type === "Park") return "forest";
+  if (type === "Ferry") return "directions_boat";
+  return "anchor";
+}
+
+function createPlannerDomMarker(properties: PlannerLocationFeatureProperties) {
+  const element = document.createElement("button");
+  element.type = "button";
+  element.className = `plannerMapMarker plannerMapMarker--${properties.kind}${properties.selected ? " is-selected" : ""}`;
+  element.setAttribute("aria-label", `${properties.name}, ${properties.markerType}`);
+  element.title = properties.name;
+
+  const icon = document.createElement("span");
+  icon.className = "material-symbols-rounded";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = getPlannerMarkerSymbol(properties.kind, properties.markerType as SuggestedPlace["type"]);
+  element.append(icon);
+
+  const label = document.createElement("span");
+  label.className = "plannerMapMarker__label";
+  label.textContent = properties.name;
+  label.setAttribute("aria-hidden", "true");
+  element.append(label);
+
+  if (typeof properties.itineraryOrder === "number" && properties.itineraryOrder > 0) {
+    const badge = document.createElement("span");
+    badge.className = "plannerMapMarker__itineraryBadge";
+    badge.textContent = String(properties.itineraryOrder);
+    badge.setAttribute("aria-hidden", "true");
+    element.append(badge);
+  }
+
+  return element;
+}
+
+function escapePopupHtml(value: unknown) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function getSuggestedPlacePopupHtml(place: SuggestedPlace) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${place.name}</div><div class="poiPopup__meta">Recommended ${formatSuggestedPlaceType(place.type)} · mean nearby score ${Number(place.score).toFixed(3)} · ${Number(place.latitude).toFixed(4)}, ${Number(place.longitude).toFixed(4)}</div></div>`;
+  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(place.name)}</div><div class="poiPopup__meta">Recommended ${escapePopupHtml(formatSuggestedPlaceType(place.type))} · mean nearby score ${Number(place.score).toFixed(3)} · ${Number(place.latitude).toFixed(4)}, ${Number(place.longitude).toFixed(4)}</div></div>`;
 }
 
 function getPublicPoiPopupHtml(poi: PublicPoi) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${poi.name}</div><div class="poiPopup__meta">${formatSuggestedPlaceType(poi.type)} · ${Number(poi.latitude).toFixed(4)}, ${Number(poi.longitude).toFixed(4)}</div></div>`;
+  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(poi.name)}</div><div class="poiPopup__meta">${escapePopupHtml(formatSuggestedPlaceType(poi.type))} · ${Number(poi.latitude).toFixed(4)}, ${Number(poi.longitude).toFixed(4)}</div></div>`;
 }
 
 function getBaseLocationPopupHtml(baseLocation: { name: string; latitude: number; longitude: number }) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${baseLocation.name}</div><div class="poiPopup__meta">Base location · ${Number(baseLocation.latitude).toFixed(4)}, ${Number(baseLocation.longitude).toFixed(4)}</div></div>`;
+  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(baseLocation.name)}</div><div class="poiPopup__meta">Base location · ${Number(baseLocation.latitude).toFixed(4)}, ${Number(baseLocation.longitude).toFixed(4)}</div></div>`;
 }
 
 function getHydrophonePopupHtml(hydrophone: OrcasoundHydrophone) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${hydrophone.name}</div><div class="poiPopup__meta">Orcasound hydrophone · ${hydrophone.region} · ${Number(hydrophone.latitude).toFixed(4)}, ${Number(hydrophone.longitude).toFixed(4)}</div></div>`;
+  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(hydrophone.name)}</div><div class="poiPopup__meta">Orcasound hydrophone · ${escapePopupHtml(hydrophone.region)} · ${Number(hydrophone.latitude).toFixed(4)}, ${Number(hydrophone.longitude).toFixed(4)}</div></div>`;
 }
 
 function getCameraPopupHtml(camera: ViewingLocation) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${camera.name}</div><div class="poiPopup__meta">Live camera · ${camera.region ?? "Viewing location"} · ${Number(camera.latitude).toFixed(4)}, ${Number(camera.longitude).toFixed(4)}</div></div>`;
+  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(camera.name)}</div><div class="poiPopup__meta">Live camera · ${escapePopupHtml(camera.region ?? "Viewing location")} · ${Number(camera.latitude).toFixed(4)}, ${Number(camera.longitude).toFixed(4)}</div></div>`;
 }
 
 function buildPlannerLocationCollection(args: {
@@ -315,12 +373,15 @@ function getGeoJsonSource(map: MapLibreMap, sourceId: string) {
 }
 
 function upsertGeoJsonSource(map: MapLibreMap, sourceId: string, data: FeatureCollection) {
+  if (!map.isStyleLoaded()) return false;
+
   const source = getGeoJsonSource(map, sourceId);
   if (source) {
     source.setData(data);
-    return;
+    return true;
   }
   map.addSource(sourceId, { type: "geojson", data });
+  return true;
 }
 
 function buildMaxTravelRadiusCollection(baseLocation: { latitude: number; longitude: number } | null, miles: number | null): FeatureCollection {
@@ -426,11 +487,11 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
   const palette =
     spec.variant === "suggested"
       ? {
-          fill: "#baf6ee",
-          center: "#c9fbf5",
-          stroke: "#13d8cb",
-          icon: "#07566a",
-          glow: "rgba(19,216,203,0.42)",
+          fill: "#dbe7ff",
+          center: "#f2f6ff",
+          stroke: "#315ad9",
+          icon: "#183caa",
+          glow: "rgba(49,90,217,0.34)",
         }
       : spec.variant === "base"
       ? {
@@ -442,25 +503,25 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
         }
         : spec.variant === "camera"
           ? {
-              fill: "#d9f6ff",
-              center: "#edfaff",
-              stroke: "#49bfd5",
-              icon: "#0b6477",
-              glow: "rgba(73,191,213,0.3)",
+              fill: "#ffffff",
+              center: "#fffdf6",
+              stroke: "#6f8d99",
+              icon: "#061d3c",
+              glow: "rgba(53,87,99,0.18)",
             }
         : spec.variant === "hydrophone"
           ? {
-              fill: "#d8fbf7",
-              center: "#e7fffc",
-              stroke: "#17cfc0",
-              icon: "#0b6477",
-              glow: "rgba(23,207,192,0.36)",
+              fill: "#ffffff",
+              center: "#fffdf6",
+              stroke: "#6f8d99",
+              icon: "#061d3c",
+              glow: "rgba(53,87,99,0.18)",
             }
         : {
-            fill: "#dcedf4",
-            center: "#e8f6fb",
+            fill: "#ffffff",
+            center: "#fffdf6",
             stroke: "#6f8d99",
-            icon: "#355763",
+            icon: "#061d3c",
             glow: "rgba(53,87,99,0.14)",
           };
   const symbol =
@@ -565,13 +626,17 @@ async function ensurePlannerLocationIconImages(map: MapLibreMap) {
 }
 
 async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollection) {
-  upsertGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID, data);
+  if (!upsertGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID, data)) return;
 
   try {
     await ensurePlannerLocationIconImages(map);
   } catch (error) {
     console.warn("[POI] planner pin images failed to load", error);
   }
+
+  // Image generation is asynchronous. The style may have changed while it was
+  // running, so confirm the source still belongs to the active, loaded style.
+  if (!map.isStyleLoaded() || !map.getSource(PLANNER_LOCATION_SOURCE_ID)) return;
 
   if (!map.getLayer(PLANNER_LOCATION_HALO_LAYER_ID)) {
     map.addLayer({
@@ -583,16 +648,16 @@ async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollec
         "circle-radius": [
           "case",
           ["==", ["get", "selectedPulseOn"], true],
-          60,
-          44,
+          72,
+          52,
         ],
-        "circle-color": "rgba(110, 247, 233, 1)",
-        "circle-blur": 1.15,
+        "circle-color": "rgba(255, 213, 79, 1)",
+        "circle-blur": 0.95,
         "circle-opacity": [
           "case",
           ["==", ["get", "selectedPulseOn"], true],
-          0.55,
-          0.24,
+          0.76,
+          0.36,
         ],
         "circle-translate": [0, -25],
       },
@@ -607,16 +672,46 @@ async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollec
       paint: {
         "circle-radius": [
           "case",
-          ["==", ["get", "kind"], "poi"],
-          18,
           ["==", ["get", "selected"], true],
-          27,
+          17,
+          ["==", ["get", "kind"], "base"],
+          13,
+          ["==", ["get", "kind"], "suggested"],
+          11,
           ["==", ["get", "kind"], "hydrophone"],
-          24,
-          23,
+          11,
+          ["==", ["get", "kind"], "camera"],
+          11,
+          10,
         ],
-        "circle-color": "rgba(255, 255, 255, 0.01)",
-        "circle-opacity": 0.01,
+        "circle-color": [
+          "match",
+          ["get", "kind"],
+          "base",
+          "#ffffff",
+          "suggested",
+          "#dbe7ff",
+          "camera",
+          "#ffffff",
+          "hydrophone",
+          "#ffffff",
+          "#ffffff",
+        ],
+        "circle-opacity": 0.96,
+        "circle-stroke-width": 2,
+        "circle-stroke-color": [
+          "match",
+          ["get", "kind"],
+          "base",
+          "#158fa2",
+          "suggested",
+          "#315ad9",
+          "camera",
+          "#6f8d99",
+          "hydrophone",
+          "#6f8d99",
+          "#6f8d99",
+        ],
         "circle-translate": [0, -25],
       },
     });
@@ -632,7 +727,7 @@ async function ensurePlannerLocationLayers(map: MapLibreMap, data: FeatureCollec
         "icon-size": [
           "case",
           ["==", ["get", "selected"], true],
-          0.7,
+          0.78,
           ["==", ["get", "kind"], "suggested"],
           0.7,
           ["==", ["get", "kind"], "base"],
@@ -745,6 +840,7 @@ function formatSuggestedPlaceType(type: SuggestedPlace["type"]) {
 export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(function ForecastMap(
   {
     darkMode,
+    basemapMode = "vector",
     showMapControls = true,
     showLegendControl = true,
     colorNoData = false,
@@ -772,6 +868,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     forecastOverlayEnabled = true,
     pulseAllGridCells = false,
     mapModeLabel,
+    forecastOverlayLoadKey = "",
+    onForecastOverlayReady,
     onFatalDataError,
     suggestedPlaces = [],
     itineraryPlaceIds = [],
@@ -788,6 +886,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     hydrophoneLocations = [],
     showHydrophones = false,
     sidebarOffsetPx = 0,
+    gridPresentation = "default",
   }: ForecastMapProps,
   ref
 ) {
@@ -795,7 +894,17 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
-  const styleUrl = useMemo(() => (darkMode ? DARK_STYLE : VOYAGER_STYLE), [darkMode]);
+  const styleUrl = useMemo(
+    () =>
+      basemapMode === "raster"
+        ? darkMode
+          ? DARK_RASTER_STYLE
+          : VOYAGER_RASTER_STYLE
+        : darkMode
+          ? DARK_STYLE
+          : VOYAGER_STYLE,
+    [basemapMode, darkMode]
+  );
   const sidebarPaddingRight = useMemo(
     () => (sidebarOffsetPx > 0 ? Math.max(0, Math.round(sidebarOffsetPx * 0.72)) : 0),
     [sidebarOffsetPx]
@@ -815,6 +924,13 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   const gridLineAccentColor = useMemo(
     () => (activePalette.id === "red_atlas" ? "rgba(176,72,66,0.38)" : "rgba(96,186,200,0.34)"),
     [activePalette.id]
+  );
+  const gridVisualStyle = useMemo<GridVisualStyle>(
+    () =>
+      gridPresentation === "quiet"
+        ? { fillOpacity: 0.66, haloOpacity: 0.12, lineOpacity: 0.28, lineWidth: 0.34 }
+        : { fillOpacity: 0.8, haloOpacity: 0.45, lineOpacity: 0.85, lineWidth: 0.4 },
+    [gridPresentation]
   );
 
   const overlayRef = useRef<FeatureCollection | null>(null);
@@ -922,7 +1038,11 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
           hotspotOverlayVisible,
           shimmerThresholdRef.current,
           gridBorderColor,
-          gridLineAccentColor
+          gridLineAccentColor,
+          undefined,
+          undefined,
+          undefined,
+          gridVisualStyle
         );
       }
 
@@ -930,24 +1050,24 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
 
       if (hotspots) {
         if (surfaceMode === "surface") {
-          setGridBaseVisibility(map, false);
+          setGridBaseVisibility(map, false, undefined, undefined, gridVisualStyle);
           setSurfaceVisibility(map, true);
           setHotspotVisibility(map, hotspotOverlayVisible);
         } else if (hotspotOverlayVisible) {
-          setGridBaseVisibility(map, false);
+          setGridBaseVisibility(map, false, undefined, undefined, gridVisualStyle);
           setSurfaceVisibility(map, false);
           setHotspotVisibility(map, true);
         } else {
-          setGridVisibility(map, true);
+          setGridVisibility(map, true, undefined, undefined, gridVisualStyle);
           setSurfaceVisibility(map, false);
           setHotspotVisibility(map, false);
         }
       } else if (surfaceMode === "surface") {
-        setGridBaseVisibility(map, false);
+        setGridBaseVisibility(map, false, undefined, undefined, gridVisualStyle);
         setSurfaceVisibility(map, true);
         setHotspotVisibility(map, false);
       } else {
-        setGridVisibility(map, true);
+        setGridVisibility(map, true, undefined, undefined, gridVisualStyle);
         setSurfaceVisibility(map, false);
         setHotspotVisibility(map, false);
       }
@@ -959,6 +1079,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       activePalette.colors,
       gridBorderColor,
       gridLineAccentColor,
+      gridVisualStyle,
       hotspotMode,
       resolution,
       resolveHotspotThreshold,
@@ -967,7 +1088,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   );
 
   const scheduleForecastRender = useCallback(
-    (map: MapLibreMap, isCancelled?: () => boolean) => {
+    (map: MapLibreMap, isCancelled?: () => boolean, onRendered?: () => void) => {
       let attempts = 0;
       let timeoutId: number | null = null;
       let done = false;
@@ -991,6 +1112,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         if (!overlayRef.current || !mapRef.current || !map.isStyleLoaded()) return;
         try {
           renderForecastLayer(map);
+          onRendered?.();
           done = true;
           cleanup();
         } catch {
@@ -1119,13 +1241,17 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
             hotspotsOnlyRef.current,
             shimmerThresholdRef.current,
             gridBorderColor,
-            gridLineAccentColor
+            gridLineAccentColor,
+            undefined,
+            undefined,
+            undefined,
+            gridVisualStyle
           );
           if (hotspotsOnlyRef.current) {
-            setGridBaseVisibility(tempMap, false);
+            setGridBaseVisibility(tempMap, false, undefined, undefined, gridVisualStyle);
             setHotspotVisibility(tempMap, true);
           } else {
-            setGridVisibility(tempMap, true);
+            setGridVisibility(tempMap, true, undefined, undefined, gridVisualStyle);
             setHotspotVisibility(tempMap, false);
           }
         }
@@ -1148,7 +1274,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         container.remove();
       }
     },
-    [gridBorderColor, gridLineAccentColor, resolveHotspotThreshold]
+    [gridBorderColor, gridLineAccentColor, gridVisualStyle, resolveHotspotThreshold]
   );
 
   const captureCurrentMapSnapshot = useCallback(async () => {
@@ -1156,7 +1282,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   }, [captureMapSnapshot]);
 
   const fitLocations = useCallback(
-    (locations: LngLat[], options?: { padding?: number; maxZoom?: number }) => {
+    (locations: LngLat[], options?: { padding?: MapViewportPadding; maxZoom?: number }) => {
       const map = mapRef.current;
       if (!map || locations.length === 0) return;
 
@@ -1166,6 +1292,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
           zoom: options?.maxZoom ?? 11.2,
           essential: true,
           duration: 900,
+          padding: options?.padding,
         });
         return;
       }
@@ -1226,6 +1353,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     externalValues,
     forecastOverlayEnabled,
     pulseAllGridCells,
+    overlayLoadKey: forecastOverlayLoadKey,
     onGridCellCount,
     useExternalColorScale,
     colorNoData,
@@ -1244,6 +1372,10 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     setLegendSpec,
     scheduleForecastRender,
     onFatalDataError,
+    onOverlayRendered:
+      forecastOverlayEnabled && forecastOverlayLoadKey
+        ? () => onForecastOverlayReady?.(forecastOverlayLoadKey)
+        : undefined,
   });
 
   useEffect(() => {
@@ -1340,11 +1472,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
 
     const handleStyleData = () => {
       safeApplyBasemapVisualTuning(map, styleUrlRef.current === DARK_STYLE);
-      if (!mapReadyRef.current && map.isStyleLoaded()) {
-        mapReadyRef.current = true;
-        setMapReady(true);
-        map.resize();
-      }
     };
     map.on("styledata", handleStyleData);
     mapRef.current = map;
@@ -1446,21 +1573,21 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
 
     if (!hasForecastLegend) {
       setGridCoreLayerVisibility(map, true);
-      setGridVisibility(map, true);
+      setGridVisibility(map, true, undefined, undefined, gridVisualStyle);
       setHotspotVisibility(map, false);
       return;
     }
 
     setGridCoreLayerVisibility(map, true);
     if (hotspotsEnabled) {
-      setGridBaseVisibility(map, false);
+      setGridBaseVisibility(map, false, undefined, undefined, gridVisualStyle);
       setHotspotVisibility(map, !zeroModeledHotspots);
       if (zeroModeledHotspots) setGridVisibility(map, false);
     } else {
-      setGridVisibility(map, true);
+      setGridVisibility(map, true, undefined, undefined, gridVisualStyle);
       setHotspotVisibility(map, false);
     }
-  }, [expectedActivityHotspotCellCount, hasForecastLegend, hotspotMode, hotspotsEnabled, mapReady]);
+  }, [expectedActivityHotspotCellCount, gridVisualStyle, hasForecastLegend, hotspotMode, hotspotsEnabled, mapReady]);
 
   useEffect(() => {
     if (hasForecastLegend) return;
@@ -1497,6 +1624,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     let cancelled = false;
     let removeHandlers: (() => void) | null = null;
     let pulseIntervalId: number | null = null;
+    const domMarkers: maplibregl.Marker[] = [];
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
     const baseData = buildPlannerLocationCollection({
@@ -1533,6 +1661,19 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       await ensurePlannerLocationLayers(map, baseData);
       if (cancelled || mapRef.current !== map) return;
 
+      // DOM markers are the single visual marker renderer. The GeoJSON layers
+      // remain available as the data source, but hiding their visuals prevents
+      // a second pin from being drawn at the same coordinates.
+      [
+        PLANNER_LOCATION_HALO_LAYER_ID,
+        PLANNER_LOCATION_CIRCLE_LAYER_ID,
+        PLANNER_LOCATION_SYMBOL_LAYER_ID,
+        PLANNER_LOCATION_ITINERARY_BADGE_LAYER_ID,
+        PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID,
+      ].forEach((layerId) => {
+        if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", "none");
+      });
+
       if ((selectedPlaceId && pulseSelectedPlaceMarker) || showCameras || showHydrophones) {
         let pulseOn = true;
         const source = getGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID);
@@ -1559,6 +1700,35 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         if (kind === "base" && baseLocation) return getBaseLocationPopupHtml(baseLocation);
         return "";
       };
+
+      for (const feature of baseData.features) {
+        if (feature.geometry?.type !== "Point" || !feature.properties) continue;
+        const properties = feature.properties as PlannerLocationFeatureProperties;
+        const coordinates = feature.geometry.coordinates as [number, number];
+        const element = createPlannerDomMarker(properties);
+        element.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const place = placesById.get(properties.id);
+          if (place) {
+            onPlaceSelect?.(place);
+            return;
+          }
+          if (properties.kind === "camera") {
+            const camera = camerasById.get(properties.id);
+            if (camera) popup.setLngLat(coordinates).setHTML(getCameraPopupHtml(camera)).addTo(map);
+          } else if (properties.kind === "hydrophone") {
+            const hydrophone = hydrophonesById.get(properties.id);
+            if (hydrophone) popup.setLngLat(coordinates).setHTML(getHydrophonePopupHtml(hydrophone)).addTo(map);
+          } else if (properties.kind === "poi") {
+            const poi = poisById.get(properties.id);
+            if (poi) popup.setLngLat(coordinates).setHTML(getPublicPoiPopupHtml(poi)).addTo(map);
+          } else if (properties.kind === "base" && baseLocation) {
+            popup.setLngLat(coordinates).setHTML(getBaseLocationPopupHtml(baseLocation)).addTo(map);
+          }
+        });
+        domMarkers.push(new maplibregl.Marker({ element, anchor: "bottom" }).setLngLat(coordinates).addTo(map));
+      }
 
       const handlePlannerLocationClick = (event: MapLayerMouseEvent) => {
         const feature = event.features?.[0];
@@ -1614,6 +1784,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         map.off("mouseenter", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseEnter);
         map.off("mousemove", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseMove);
         map.off("mouseleave", PLANNER_LOCATION_SYMBOL_LAYER_ID, handlePlannerLocationMouseLeave);
+        domMarkers.forEach((marker) => marker.remove());
         popup.remove();
       };
     };
@@ -1626,6 +1797,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         window.clearInterval(pulseIntervalId);
       }
       removeHandlers?.();
+      domMarkers.forEach((marker) => marker.remove());
       popup.remove();
     };
   }, [baseLocation, cameraLocations, hydrophoneLocations, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedCameraId, selectedHydrophoneId, selectedPlaceId, showCameras, showHydrophones, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
@@ -1635,7 +1807,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     if (!map || !mapReady) return;
 
     const data = buildMaxTravelRadiusCollection(baseLocation, maxTravelDistanceMiles);
-    upsertGeoJsonSource(map, PLANNER_MAX_TRAVEL_SOURCE_ID, data);
+    if (!upsertGeoJsonSource(map, PLANNER_MAX_TRAVEL_SOURCE_ID, data)) return;
 
     if (!map.getLayer(PLANNER_MAX_TRAVEL_LAYER_ID)) {
       map.addLayer({
@@ -1694,7 +1866,10 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   }, []);
 
   return (
-    <div className={`mapStage${pulseAllGridCells ? " mapStage--tripLoading" : ""}`}>
+    <div
+      className={`mapStage${pulseAllGridCells ? " mapStage--tripLoading" : ""}`}
+      data-map-ready={mapReady ? "true" : "false"}
+    >
       <div ref={containerRef} className="map" data-tour="map-canvas" />
       {pulseAllGridCells && (
         <div className="mapStage__tripLoading" aria-live="polite">

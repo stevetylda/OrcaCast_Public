@@ -76,7 +76,7 @@ export function SideDrawer({ open, onClose }: Props) {
 
   const items: NavItem[] = [
     { label: "Home", path: "/", icon: "home" },
-    { label: "Map", path: "/watch", icon: "map_search" },
+    { label: "This Week", path: "/watch", icon: "map_search" },
     { label: "Planner", path: "/planner", icon: "event_note" },
     { label: "About", path: "/about", icon: "info" },
   ];
@@ -84,14 +84,17 @@ export function SideDrawer({ open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div className="overlay" onClick={onClose} role="presentation">
+    <div className="overlay overlay--editorial" onClick={onClose} role="presentation">
       <aside
-        className="sideDrawer"
+        className="sideDrawer sideDrawer--editorial"
         onClick={(e) => e.stopPropagation()}
         aria-label="Main menu"
       >
         <div className="sideDrawer__header">
-          <div className="sideDrawer__title">Menu</div>
+          <div>
+            <p className="sideDrawer__eyebrow">OrcaCast</p>
+            <div className="sideDrawer__title">Explore the water</div>
+          </div>
           <button
             className="iconBtn iconBtn--ghost"
             onClick={onClose}
@@ -107,7 +110,9 @@ export function SideDrawer({ open, onClose }: Props) {
         <nav className="sideDrawer__nav" aria-label="Primary navigation">
           {items.map((item) => {
             const isDisabled = Boolean(item.comingSoon);
-            const isActive = !isDisabled && pathname === item.path;
+            const isActive =
+              !isDisabled &&
+              (item.path === "/about" ? pathname.startsWith("/about") : pathname === item.path);
 
             return (
               <button

@@ -7,7 +7,11 @@ export type PaletteId =
   | "forest_greens"
   | "mediterranean_atlas"
   | "red_atlas"
-  | "northern_lights";
+  | "northern_lights"
+  | "forecast_lab"
+  | "forecast_lab_glow"
+  | "orca_cobalt"
+  | "salish_postcard";
 
 export type ViewabilityOnlyPaletteId = "relief_atlas";
 
@@ -158,6 +162,58 @@ export const PALETTES: Record<PaletteId, PaletteDef> = {
     ],
     dominant: "#1FBF9A",
   },
+  forecast_lab: {
+    id: "forecast_lab",
+    name: "Forecast Lab",
+    colors: [
+      "#E8F4F1",
+      "#B9E4DF",
+      "#76CFCA",
+      "#38A9AA",
+      "#176F7D",
+      "#0C1C3A",
+    ],
+    dominant: "#38A9AA",
+  },
+  forecast_lab_glow: {
+    id: "forecast_lab_glow",
+    name: "Forecast Lab Glow",
+    colors: [
+      "#FFF4C8",
+      "#F8D769",
+      "#B9DCB6",
+      "#76CFCA",
+      "#288E99",
+      "#0C1C3A",
+    ],
+    dominant: "#76CFCA",
+  },
+  orca_cobalt: {
+    id: "orca_cobalt",
+    name: "Orca Cobalt",
+    colors: [
+      "#EEF1FF",
+      "#CDD7FF",
+      "#93A8F2",
+      "#5F78DC",
+      "#455FC6",
+      "#182E72",
+    ],
+    dominant: "#5F78DC",
+  },
+  salish_postcard: {
+    id: "salish_postcard",
+    name: "Salish Postcard",
+    colors: [
+      "#FEF8EB",
+      "#F8D769",
+      "#F2AE76",
+      "#EE7465",
+      "#4A9DA1",
+      "#0C1C3A",
+    ],
+    dominant: "#EE7465",
+  },
 };
 
 export const VIEWABILITY_ONLY_PALETTES: Record<ViewabilityOnlyPaletteId, PaletteDef<ViewabilityOnlyPaletteId>> = {
@@ -203,8 +259,8 @@ export function getViewabilityPaletteOrDefault(paletteId: string | null | undefi
 
 if (import.meta.env.DEV) {
   [...Object.values(PALETTES), ...Object.values(VIEWABILITY_ONLY_PALETTES)].forEach((palette) => {
-    if (palette.colors.length !== 8) {
-      const message = `[palettes] Palette "${palette.id}" must define exactly 8 colors, got ${palette.colors.length}.`;
+    if (palette.colors.length < 2) {
+      const message = `[palettes] Palette "${palette.id}" must define at least 2 colors, got ${palette.colors.length}.`;
        
       console.warn(message);
       throw new Error(message);

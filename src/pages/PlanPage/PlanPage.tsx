@@ -1,95 +1,107 @@
-import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent as ReactDragEvent, type FormEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Fragment, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent as ReactDragEvent, type FormEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ForecastMap, type ForecastMapHandle, type ForecastMapProps } from "../../features/map";
 import { appConfig } from "../../shared/config/appConfig";
-import { DEFAULT_RECOMMENDATION_RADIUS_MILES, KILOMETERS_PER_MILE } from "../../shared/config/planner";
+import { DEFAULT_RECOMMENDATION_RADIUS_MILES } from "../../shared/config/planner";
 import { AppHeader } from "../../shared/components/AppHeader";
+import { SwimmingOrcaLoader } from "../../shared/components/SwimmingOrcaLoader";
 import {
-  aggregateTripPlannerOccurrence,
   buildTripPlannerRangeFromDates,
-  dayIsInTripRange,
-  loadTripPlannerOccurrencePayload,
-  type TripPlannerHistogramBin,
-  type TripPlannerOccurrenceResult,
 } from "../../shared/data/tripPlanner";
-import { loadPlannerBaseLocations, type PlannerBaseLocation } from "../../shared/data/plannerBaseLocations";
-import {
-  getViewingSpotPhoto,
-  hasApprovedSpotPhoto,
-  loadViewingSpotPhotoManifest,
-  type ViewingSpotPhotoManifest,
-} from "../../shared/data/viewingSpotPhotos";
-import {
-  loadOrcasoundHydrophonePayload,
-  type OrcasoundHydrophone,
-} from "../../shared/data/orcasoundHydrophones";
 import { useMenu } from "../../shared/state/MenuContext";
 import { useMapState, type UnitsMode } from "../../shared/state/MapStateContext";
 import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlaces";
-import type { SuggestedPlace, ViewingLocation, ViewingPotential } from "../../features/locations/types";
-import { loadPoiData } from "../../features/locations/poiData";
+import type { SuggestedPlace } from "../../features/locations/types";
 import { isoWeekFromDate, isoWeekYearFromDate } from "../../shared/time/forecastPeriodToIsoWeek";
 import { PALETTES } from "../../shared/geo/palettes";
 import { H3ResolutionPill } from "../../features/watch/components/H3ResolutionPill";
+import type { TripPlanSelection } from "../../features/planner/model/plannerTypes";
+import {
+  clearStoredPlannerState,
+  PLANNER_RECOMMENDED_PLACES_STORAGE_KEY,
+  readStoredPlannerDraft,
+  readStoredPlannerOpen,
+  readStoredPlannerSelection,
+} from "../../features/planner/model/plannerStorage";
+import {
+  formatPlannerDistanceLabel,
+  formatPlannerDistanceValue,
+  parsePlannerDistanceInput,
+} from "../../features/planner/model/plannerDistance";
+import { buildHighlightedDays } from "../../features/seasonal-activity/seasonalActivity";
+import {
+  PlannerDateRangeField,
+  PlannerLocationField,
+} from "../../features/planner/components/PlannerFields";
+import { PlannerFerryLoader } from "../../features/planner/components/PlannerFerryLoader";
+import {
+  PlannerLoadingState,
+  PlannerPlaceCard,
+  PlannerPlaceDetailView,
+} from "../../features/planner/components/PlannerPlaces";
+import { usePlannerPersistence } from "../../features/planner/hooks/usePlannerPersistence";
+import { usePlannerReferenceData } from "../../features/planner/hooks/usePlannerReferenceData";
+import { useTripOccurrence } from "../../features/planner/hooks/useTripOccurrence";
+import {
+  applyTripBrushDelta,
+  buildChartWindowStyle,
+  buildDailyBars,
+  buildDailyMonthBands,
+  buildDailyTicks,
+  buildInteractiveTripWindowSegments,
+  buildMonthTicks,
+  buildRadiusFitLocations,
+  computeActivityLabel,
+  computeTopWaters,
+  toWeekBars,
+  type AxisTick,
+  type ChartBar,
+  type ChartZoomMode,
+  type MonthBand,
+  type TripBrushDragState,
+  type TripBrushMode,
+} from "../../features/planner/model/plannerChart";
+import {
+  buildItineraryCardSvg,
+  rasterizeSvgToPngBlob,
+} from "../../features/planner/exports/itineraryExport";
+import "./PlanPage.css";
 
 const InfoModal = lazy(() => import("../../shared/components/InfoModal").then((m) => ({ default: m.InfoModal })));
 
 const DEFAULT_RECOMMENDED_SPOTS_COUNT = 25;
 const TRIP_BRUSH_DAYS = 366;
-const MAX_TRIP_LENGTH_DAYS = 366;
 const TRIP_BRUSH_APPLY_DELAY_MS = 2000;
 const PLANNER_COLLAPSE_DURATION_MS = 320;
-const HOVER_PANEL_CLOSE_DELAY_MS = 180;
-const PLACE_IMAGE_PLACEHOLDER_SRC = `${(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}spot-images/generic.webp`;
+const PLANNER_REVEAL_MIN_DURATION_MS = 10_000;
+const PLANNER_REVEAL_EXIT_DURATION_MS = 420;
+const PLACE_DETAIL_MATCH_RADIUS_KM = 1.25;
+const PLANNER_ITINERARY_STORAGE_KEY = "orcacast.planner.itinerary.v1";
 
-const LEGEND_LABELS = ["Very High", "High", "Medium", "Low", "Very Low"] as const;
+type FieldPickFilter = "top" | "shore" | "Ferry" | "Marina" | "Park";
+type PlannerSidebarMode = "overview" | "location-details" | "itinerary";
 
-const potentialLabel: Record<ViewingPotential, string> = {
-  "very-high": "Very High",
-  high: "High",
-  medium: "Medium",
-  low: "Low",
-  "very-low": "Very Low",
-};
-
-function formatPlaceType(type: SuggestedPlace["type"]) {
-  if (type === "Ferry") return "Ferry terminal";
-  return type;
+function formatViewingPotentialLabel(value: SuggestedPlace["viewingPotential"]) {
+  if (value === "very-high") return "Very high";
+  if (value === "very-low") return "Very low";
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function getPlaceTypeIcon(type: SuggestedPlace["type"]) {
-  if (type === "Park") return "park";
-  if (type === "Marina") return "anchor";
-  if (type === "Ferry") return "directions_boat";
-  return "place";
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
 }
 
-type TripPlanSelection = {
-  city: string;
-  arrivalDate: string;
-  departureDate: string;
-  maxTravelDistanceMiles?: number;
-};
-
-type TripPlannerDraft = {
-  city: string;
-  arrivalDate: string;
-  departureDate: string;
-  maxTravelDistance: string;
-  unitsMode?: UnitsMode;
-};
-
-const PLANNER_SELECTION_STORAGE_KEY = "orcacast.planner.selection";
-const PLANNER_OPEN_STORAGE_KEY = "orcacast.planner.open";
-const PLANNER_DRAFT_STORAGE_KEY = "orcacast.planner.draft";
-const PLANNER_RECOMMENDED_PLACES_STORAGE_KEY = "orcacast.planner.recommended-places";
-
-function clearStoredPlannerState() {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.removeItem(PLANNER_SELECTION_STORAGE_KEY);
-  window.sessionStorage.removeItem(PLANNER_OPEN_STORAGE_KEY);
-  window.sessionStorage.removeItem(PLANNER_DRAFT_STORAGE_KEY);
-  window.sessionStorage.removeItem(PLANNER_RECOMMENDED_PLACES_STORAGE_KEY);
+function haversineKm(a: [number, number], b: [number, number]) {
+  const [lonA, latA] = a;
+  const [lonB, latB] = b;
+  const dLat = toRadians(latB - latA);
+  const dLon = toRadians(lonB - lonA);
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const aa =
+    sinLat * sinLat +
+    Math.cos(toRadians(latA)) * Math.cos(toRadians(latB)) * sinLon * sinLon;
+  return 6371 * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
 }
 
 type StoredPlannerRecommendedPlaces = {
@@ -105,76 +117,6 @@ function pickLegendColors(colors: string[], colorNoData = false) {
     return colors[index];
   });
   return colorNoData ? sampled.slice(0, 5) : sampled;
-}
-
-function readStoredPlannerSelection(): TripPlanSelection | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.sessionStorage.getItem(PLANNER_SELECTION_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<TripPlanSelection> | null;
-    if (!parsed || typeof parsed !== "object") return null;
-    if (typeof parsed.arrivalDate !== "string" || typeof parsed.departureDate !== "string") return null;
-    return {
-      city: typeof parsed.city === "string" ? parsed.city : "",
-      arrivalDate: parsed.arrivalDate,
-      departureDate: parsed.departureDate,
-      maxTravelDistanceMiles:
-        typeof parsed.maxTravelDistanceMiles === "number" && Number.isFinite(parsed.maxTravelDistanceMiles)
-          ? parsed.maxTravelDistanceMiles
-          : undefined,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function readStoredPlannerOpen(defaultValue: boolean) {
-  if (typeof window === "undefined") return defaultValue;
-  const stored = window.sessionStorage.getItem(PLANNER_OPEN_STORAGE_KEY);
-  if (stored === "true") return true;
-  if (stored === "false") return false;
-  return defaultValue;
-}
-
-function readStoredPlannerDraft(): TripPlannerDraft | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.sessionStorage.getItem(PLANNER_DRAFT_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<TripPlannerDraft> | null;
-    if (!parsed || typeof parsed !== "object") return null;
-    return {
-      city: typeof parsed.city === "string" ? parsed.city : "",
-      arrivalDate: typeof parsed.arrivalDate === "string" ? parsed.arrivalDate : "",
-      departureDate: typeof parsed.departureDate === "string" ? parsed.departureDate : "",
-      maxTravelDistance: typeof parsed.maxTravelDistance === "string" ? parsed.maxTravelDistance : "",
-      unitsMode: parsed.unitsMode === "metric" || parsed.unitsMode === "imperial" ? parsed.unitsMode : undefined,
-    };
-  } catch {
-    return null;
-  }
-}
-
-
-function formatPlannerDistanceValue(miles: number | null | undefined, unitsMode: UnitsMode) {
-  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0) return "";
-  const displayValue = unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles;
-  return String(Math.round(displayValue));
-}
-
-function parsePlannerDistanceInput(value: string, unitsMode: UnitsMode) {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const parsed = Number(trimmed);
-  if (!Number.isFinite(parsed) || parsed <= 0) return null;
-  return unitsMode === "metric" ? parsed / KILOMETERS_PER_MILE : parsed;
-}
-
-function formatPlannerDistanceLabel(miles: number | null | undefined, unitsMode: UnitsMode) {
-  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0) return null;
-  const displayValue = Math.round(unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles);
-  return `Up to ${displayValue} ${unitsMode === "metric" ? "km" : "mi"}`;
 }
 
 function isSuggestedPlace(value: unknown): value is SuggestedPlace {
@@ -226,47 +168,6 @@ function readStoredRecommendedPlaces(signature: string): SuggestedPlace[] {
   }
 }
 
-type WeekBar = {
-  index: number;
-  label: string;
-  count: number;
-  highlighted: boolean;
-};
-
-type ChartBar = WeekBar & {
-  dayOfYear: number;
-};
-
-type AxisTick = {
-  index: number;
-  label: string;
-  sublabel?: string;
-};
-
-type MonthBand = {
-  label: string;
-  startIndex: number;
-  span: number;
-};
-
-type TripBrushMode = "move" | "start" | "end";
-
-type TripWindowSegment = {
-  key: string;
-  style: CSSProperties;
-  showLabel: boolean;
-  handleStart: boolean;
-  handleEnd: boolean;
-};
-
-type TripBrushDragState = {
-  mode: TripBrushMode;
-  pointerId: number;
-  startX: number;
-  initialSelection: TripPlanSelection;
-};
-
-type ChartZoomMode = "weekly" | "daily";
 
 function formatDisplayDateRange(startDate: string, endDate: string) {
   const start = new Date(`${startDate}T12:00:00Z`);
@@ -276,957 +177,12 @@ function formatDisplayDateRange(startDate: string, endDate: string) {
   return `${startLabel} – ${endLabel}`;
 }
 
-function formatPlannerDateFieldValue(startDate: string, endDate: string) {
-  if (!startDate && !endDate) return "Select dates";
-  if (!startDate) return "Select start date";
-  const start = parseIsoDate(startDate);
-  if (!start) return "Select dates";
-  const formatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-  if (!endDate) return `${formatter.format(start)} – End date`;
-  const end = parseIsoDate(endDate);
-  if (!end) return `${formatter.format(start)} – End date`;
-  return `${formatter.format(start)} – ${formatter.format(end)}`;
-}
-
-function startOfUtcMonth(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-}
-
-function addUtcMonths(date: Date, months: number) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1));
-}
-
-function startOfUtcCalendarWeek(date: Date) {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() - next.getUTCDay());
-  return next;
-}
-
-function compareIsoDates(dateA: string, dateB: string) {
-  if (dateA === dateB) return 0;
-  return dateA < dateB ? -1 : 1;
-}
-
-type PlannerRangeCalendarCell = {
-  iso: string;
-  label: number;
-  inMonth: boolean;
-};
-
-function buildPlannerRangeCalendarCells(month: Date): PlannerRangeCalendarCell[] {
-  const firstDay = startOfUtcMonth(month);
-  const gridStart = startOfUtcCalendarWeek(firstDay);
-  return Array.from({ length: 42 }, (_, index) => {
-    const date = addUtcDays(gridStart, index);
-    return {
-      iso: formatIsoDate(date),
-      label: date.getUTCDate(),
-      inMonth: date.getUTCMonth() === month.getUTCMonth(),
-    };
-  });
-}
-
-function dayIsWithinSelectedRange(dayIso: string, startDate: string, endDate: string) {
-  if (!startDate || !endDate) return false;
-  return compareIsoDates(dayIso, startDate) >= 0 && compareIsoDates(dayIso, endDate) <= 0;
-}
-
-type PlannerDateRangeFieldProps = {
-  arrivalDate: string;
-  departureDate: string;
-  labelledBy: string;
-  valueId: string;
-  onChange: (nextArrivalDate: string, nextDepartureDate: string) => void;
-};
-
-type PlannerLocationFieldProps = {
-  value: string;
-  options: PlannerBaseLocation[];
-  labelledBy: string;
-  valueId: string;
-  onChange: (nextValue: string) => void;
-};
-
-function formatPlannerDateRangeSummary(startDate: string, endDate: string) {
-  if (!startDate || !endDate) return "Select an arrival and departure date";
-  const start = parseIsoDate(startDate);
-  const end = parseIsoDate(endDate);
-  if (!start || !end) return "Select an arrival and departure date";
-  const formatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-  const dayCount = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
-  return `${formatter.format(start)} → ${formatter.format(end)} · ${dayCount} ${dayCount === 1 ? "day" : "days"}`;
-}
-
-function PlannerLocationField({ value, options, labelledBy, valueId, onChange }: PlannerLocationFieldProps) {
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: MouseEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (rootRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  return (
-    <div className={`plannerResultsPage__locationField${open ? " isOpen" : ""}`} ref={rootRef}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="plannerResultsPage__promptInputWrap plannerResultsPage__promptInputWrap--select"
-        onClick={() => setOpen((value) => !value)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-labelledby={`${labelledBy} ${valueId}`}
-      >
-        <span className="material-symbols-rounded" aria-hidden="true">
-          location_on
-        </span>
-        <span id={valueId} className={`plannerResultsPage__locationValue${value ? " hasValue" : ""}`}>
-          {value || "Select a location"}
-        </span>
-        <span className="material-symbols-rounded plannerResultsPage__locationChevron" aria-hidden="true">
-          expand_more
-        </span>
-      </button>
-
-      {open ? (
-        <div className="plannerResultsPage__locationPopover" role="listbox" aria-label="Base location options">
-          {options.map((location) => {
-            const selected = location.name === value;
-            return (
-              <button
-                key={location.name}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                className={`plannerResultsPage__locationOption${selected ? " isSelected" : ""}`}
-                onClick={(event) => {
-                  event.preventDefault();
-                  onChange(location.name);
-                  setOpen(false);
-                  window.requestAnimationFrame(() => triggerRef.current?.focus());
-                }}
-              >
-                <span>{location.name}</span>
-                {selected ? (
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    check
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function PlannerDateRangeField({ arrivalDate, departureDate, labelledBy, valueId, onChange }: PlannerDateRangeFieldProps) {
-  const popoverRef = useRef<HTMLDivElement | null>(null);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const [hoveredDate, setHoveredDate] = useState("");
-  const baseVisibleMonth = useMemo(() => {
-    const selected = arrivalDate ? parseIsoDate(arrivalDate) : new Date();
-    return startOfUtcMonth(selected ?? new Date());
-  }, [arrivalDate]);
-  const [visibleMonthOffset, setVisibleMonthOffset] = useState(0);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: MouseEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (popoverRef.current?.contains(target) || triggerRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  const visibleMonth = useMemo(
-    () => addUtcMonths(baseVisibleMonth, visibleMonthOffset),
-    [baseVisibleMonth, visibleMonthOffset]
-  );
-  const months = useMemo(() => [visibleMonth, addUtcMonths(visibleMonth, 1)], [visibleMonth]);
-  const previewRangeEnd = arrivalDate && !departureDate ? hoveredDate : "";
-
-  const handleDaySelect = (dayIso: string) => {
-    if (!arrivalDate || departureDate) {
-      onChange(dayIso, "");
-      return;
-    }
-    if (compareIsoDates(dayIso, arrivalDate) < 0) {
-      onChange(dayIso, arrivalDate);
-      setOpen(false);
-      return;
-    }
-    onChange(arrivalDate, dayIso);
-  };
-
-  return (
-    <div className={`plannerResultsPage__dateRangeField${open ? " isOpen" : ""}`} ref={popoverRef}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="plannerResultsPage__promptInputWrap plannerResultsPage__promptInputWrap--range"
-        onClick={() =>
-          setOpen((value) => {
-            const next = !value;
-            if (next) setVisibleMonthOffset(0);
-            return next;
-          })
-        }
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-labelledby={`${labelledBy} ${valueId}`}
-      >
-        <span className="material-symbols-rounded" aria-hidden="true">
-          calendar_month
-        </span>
-        <span id={valueId} className={`plannerResultsPage__dateRangeValue${arrivalDate ? " hasValue" : ""}`}>
-          {formatPlannerDateFieldValue(arrivalDate, departureDate)}
-        </span>
-      </button>
-
-      {open ? (
-        <div className="plannerResultsPage__dateRangePopover" role="dialog" aria-label="Choose trip dates">
-          <div className="plannerResultsPage__dateRangePopoverHead">
-            <div className="plannerResultsPage__dateRangeHeadline">
-              <strong>Select date range</strong>
-              <span>{formatPlannerDateFieldValue(arrivalDate, departureDate)}</span>
-            </div>
-            <div className="plannerResultsPage__dateRangeNav">
-              <button type="button" onClick={() => setVisibleMonthOffset((current) => current - 1)} aria-label="Previous month">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  chevron_left
-                </span>
-              </button>
-              <button type="button" onClick={() => setVisibleMonthOffset((current) => current + 1)} aria-label="Next month">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  chevron_right
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <div className="plannerResultsPage__dateRangeCalendars">
-            {months.map((month) => {
-              const monthLabel = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(month);
-              const cells = buildPlannerRangeCalendarCells(month);
-              return (
-                <section key={month.toISOString()} className="plannerResultsPage__dateRangeCalendar">
-                  <header>{monthLabel}</header>
-                  <div className="plannerResultsPage__dateRangeWeekdays">
-                    {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
-                      <span key={`${monthLabel}-${day}-${index}`}>{day}</span>
-                    ))}
-                  </div>
-                  <div className="plannerResultsPage__dateRangeDays">
-                    {cells.map((cell) => {
-                      const isStart = cell.iso === arrivalDate;
-                      const isEnd = cell.iso === departureDate;
-                      const isPreviewEnd = !departureDate && previewRangeEnd === cell.iso;
-                      const isInRange =
-                        dayIsWithinSelectedRange(cell.iso, arrivalDate, departureDate) ||
-                        (!departureDate && arrivalDate && previewRangeEnd
-                          ? dayIsWithinSelectedRange(
-                              cell.iso,
-                              compareIsoDates(arrivalDate, previewRangeEnd) <= 0 ? arrivalDate : previewRangeEnd,
-                              compareIsoDates(arrivalDate, previewRangeEnd) <= 0 ? previewRangeEnd : arrivalDate
-                            )
-                          : false);
-                      return (
-                        <button
-                          key={cell.iso}
-                          type="button"
-                          className={`plannerResultsPage__dateRangeDay${cell.inMonth ? "" : " isOutsideMonth"}${
-                            isInRange ? " isInRange" : ""
-                          }${isStart ? " isRangeStart" : ""}${isEnd ? " isRangeEnd" : ""}${isPreviewEnd ? " isPreviewEnd" : ""}`}
-                          onClick={() => handleDaySelect(cell.iso)}
-                          onMouseEnter={() => setHoveredDate(cell.iso)}
-                        >
-                          <span>{cell.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-
-          <div className="plannerResultsPage__dateRangeFooter">
-            <span className="plannerResultsPage__dateRangeFooterSummary">
-              {formatPlannerDateRangeSummary(arrivalDate, departureDate)}
-            </span>
-            <div className="plannerResultsPage__dateRangeFooterActions">
-              <button
-                type="button"
-                className="plannerResultsPage__dateRangeFooterButton isSecondary"
-                onClick={() => {
-                  onChange("", "");
-                  setHoveredDate("");
-                }}
-              >
-                Clear
-              </button>
-              <button
-                type="button"
-                className="plannerResultsPage__dateRangeFooterButton isPrimary"
-                onClick={() => {
-                  setOpen(false);
-                  setHoveredDate("");
-                  window.requestAnimationFrame(() => triggerRef.current?.focus());
-                }}
-                disabled={!arrivalDate || !departureDate}
-              >
-                Apply dates
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function escapeXml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&apos;");
-}
-
-async function rasterizeSvgToPngBlob(svgMarkup: string, width: number, height: number) {
-  const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-  try {
-    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const next = new Image();
-      next.onload = () => resolve(next);
-      next.onerror = () => reject(new Error("Card image could not be rendered."));
-      next.src = url;
-    });
-
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("Canvas context not available.");
-    context.drawImage(image, 0, 0, width, height);
-
-    const blob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob((result) => resolve(result), "image/png");
-    });
-    if (!blob) throw new Error("Card image could not be generated.");
-    return blob;
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-function parseIsoDate(value: string) {
-  const parsed = new Date(`${value}T12:00:00Z`);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function addUtcDays(date: Date, days: number) {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function buildRadiusFitLocations(latitude: number, longitude: number, radiusMiles: number): Array<[number, number]> {
-  const kilometers = radiusMiles * KILOMETERS_PER_MILE;
-  const latRadians = (latitude * Math.PI) / 180;
-  const kmPerDegreeLat = 110.574;
-  const kmPerDegreeLon = 111.32 * Math.cos(latRadians);
-  if (!Number.isFinite(kmPerDegreeLon) || Math.abs(kmPerDegreeLon) < 0.0001) {
-    return [[longitude, latitude]];
-  }
-
-  const latOffset = kilometers / kmPerDegreeLat;
-  const lonOffset = kilometers / kmPerDegreeLon;
-
-  return [
-    [longitude, latitude + latOffset],
-    [longitude + lonOffset, latitude],
-    [longitude, latitude - latOffset],
-    [longitude - lonOffset, latitude],
-  ];
-}
-
-function formatIsoDate(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
-function clampTripLength(start: Date, end: Date) {
-  const earliestStart = addUtcDays(end, -(MAX_TRIP_LENGTH_DAYS - 1));
-  if (start.getTime() < earliestStart.getTime()) return earliestStart;
-  return start;
-}
-
-function toWeekBars(histogram: TripPlannerHistogramBin[], highlightedDays: Set<number>) {
-  const counts = Array.from({ length: 53 }, (_, index) => ({
-    index,
-    count: 0,
-    highlighted: false,
-  }));
-  histogram.forEach((row) => {
-    const day = Math.max(1, Math.min(366, Number(row.day_of_year)));
-    const weekIndex = Math.min(52, Math.floor((day - 1) / 7));
-    counts[weekIndex].count += Number(row.count) || 0;
-    if (highlightedDays.has(day)) counts[weekIndex].highlighted = true;
-  });
-
-  return counts.map((entry) => ({
-    ...entry,
-    label:
-      entry.index === 0
-        ? "Jan"
-        : entry.index === 4
-          ? "Feb"
-          : entry.index === 8
-            ? "Mar"
-            : entry.index === 13
-              ? "Apr"
-              : entry.index === 17
-                ? "May"
-                : entry.index === 21
-                  ? "Jun"
-                  : entry.index === 26
-                    ? "Jul"
-                    : entry.index === 30
-                      ? "Aug"
-                      : entry.index === 35
-                        ? "Sep"
-                        : entry.index === 39
-                          ? "Oct"
-                          : entry.index === 44
-                            ? "Nov"
-                            : entry.index === 48
-                              ? "Dec"
-                              : "",
-  }));
-}
-
-function buildHighlightedDays(startDay: number, endDay: number, crossesYear: boolean) {
-  const days = new Set<number>();
-  for (let day = 1; day <= 366; day += 1) {
-    if (crossesYear ? day >= startDay || day <= endDay : day >= startDay && day <= endDay) {
-      days.add(day);
-    }
-  }
-  return days;
-}
-
-function computeActivityLabel(selectedCount: number, bars: WeekBar[]) {
-  const maxValue = Math.max(1, ...bars.map((bar) => bar.count));
-  const ratio = selectedCount / maxValue;
-  if (ratio >= 0.72) return "High";
-  if (ratio >= 0.48) return "Medium–High";
-  if (ratio >= 0.26) return "Medium";
-  return "Low";
-}
-
-function computeTopWaters(places: SuggestedPlace[]) {
-  const unique = Array.from(new Set(places.map((place) => place.region).filter(Boolean) as string[]));
-  return unique.slice(0, 2).join(", ") || "San Juan Channel, Haro Strait";
-}
-
-function buildMonthTicks(bars: WeekBar[]): AxisTick[] {
-  return bars.filter((bar) => bar.label).map((bar) => ({ index: bar.index, label: bar.label }));
-}
-
-function modDayOfYear(day: number) {
-  return ((day - 1) % TRIP_BRUSH_DAYS + TRIP_BRUSH_DAYS) % TRIP_BRUSH_DAYS + 1;
-}
-
-function buildDailyBars(
-  histogram: TripPlannerHistogramBin[],
-  range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>,
-  paddingDays = 10
-): ChartBar[] {
-  const byDay = new Map<number, number>();
-  histogram.forEach((row) => {
-    const day = Math.max(1, Math.min(TRIP_BRUSH_DAYS, Number(row.day_of_year)));
-    byDay.set(day, (byDay.get(day) ?? 0) + (Number(row.count) || 0));
-  });
-
-  const firstDay = range.startDayOfYear - paddingDays;
-  const totalDays = range.dayCount + paddingDays * 2;
-
-  return Array.from({ length: totalDays }, (_, index) => {
-    const dayOfYear = modDayOfYear(firstDay + index);
-    return {
-      index,
-      label: "",
-      count: byDay.get(dayOfYear) ?? 0,
-      highlighted: dayIsInTripRange(dayOfYear, range),
-      dayOfYear,
-    };
-  });
-}
-
-function buildDailyTicks(
-  bars: ChartBar[],
-  range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>
-): AxisTick[] {
-  const tripStartIndex = bars.findIndex((bar) => bar.highlighted);
-  if (tripStartIndex < 0) return [];
-
-  const tripStartDate = parseIsoDate(range.startDate);
-  if (!tripStartDate) return [];
-
-  const firstDate = addUtcDays(tripStartDate, -tripStartIndex);
-  const tickStep = bars.length > 28 ? 3 : 2;
-
-  return bars.flatMap((bar) => {
-    const isEdgeTick = bar.index === 0 || bar.index === bars.length - 1;
-    if (!isEdgeTick && bar.index % tickStep !== 0) return [];
-
-    const date = addUtcDays(firstDate, bar.index);
-    return [
-      {
-        index: bar.index,
-        label: new Intl.DateTimeFormat("en-US", { day: "numeric", timeZone: "UTC" }).format(date),
-      },
-    ];
-  });
-}
-
-function buildDailyMonthBands(
-  bars: ChartBar[],
-  range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>
-): MonthBand[] {
-  const tripStartIndex = bars.findIndex((bar) => bar.highlighted);
-  if (tripStartIndex < 0) return [];
-
-  const tripStartDate = parseIsoDate(range.startDate);
-  if (!tripStartDate) return [];
-
-  const firstDate = addUtcDays(tripStartDate, -tripStartIndex);
-  const bands: MonthBand[] = [];
-
-  bars.forEach((bar) => {
-    const date = addUtcDays(firstDate, bar.index);
-    const label = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" }).format(date);
-    const current = bands[bands.length - 1];
-    if (current && current.label === label) {
-      current.span += 1;
-      return;
-    }
-    bands.push({ label, startIndex: bar.index, span: 1 });
-  });
-
-  return bands;
-}
-
-function buildChartWindowStyle(bars: Array<{ index: number; highlighted: boolean }>): CSSProperties | null {
-  const highlightedIndexes = bars.filter((bar) => bar.highlighted).map((bar) => bar.index);
-  if (highlightedIndexes.length === 0) return null;
-  const first = Math.min(...highlightedIndexes);
-  const last = Math.max(...highlightedIndexes);
-  const total = Math.max(1, bars.length);
-  const outlineDelayMs = last * 20 + 980;
-  return {
-    left: `${(first / total) * 100}%`,
-    width: `${((last - first + 1) / total) * 100}%`,
-    "--trip-outline-delay": `${outlineDelayMs}ms`,
-  } as CSSProperties;
-}
-
-function buildItineraryCardSvg({
-  tripCityLabel,
-  tripLabel,
-  tripLengthLabel,
-  itineraryPlaces,
-  weekBars,
-}: {
-  tripCityLabel: string;
-  tripLabel: string;
-  tripLengthLabel: string;
-  itineraryPlaces: SuggestedPlace[];
-  weekBars: WeekBar[];
-}) {
-  const width = 960;
-  const outerPad = 22;
-  const innerPad = 54;
-  const lineHeight = 34;
-  const itineraryStartY = 234;
-  const chartHeight = 164;
-  const chartWidth = width - innerPad * 2;
-  const chartTop = itineraryStartY + Math.max(itineraryPlaces.length, 1) * lineHeight + 70;
-  const height = Math.max(700, chartTop + chartHeight + 94);
-  const barMax = Math.max(1, ...weekBars.map((bar) => bar.count));
-  const barWidth = chartWidth / Math.max(weekBars.length, 1);
-  const monthTicks = buildMonthTicks(weekBars);
-
-  const itineraryMarkup = itineraryPlaces
-    .map((place, index) => {
-      const y = itineraryStartY + index * lineHeight;
-      return `
-        <circle cx="${innerPad + 12}" cy="${y - 5}" r="11" fill="#D8F0EA" />
-        <text x="${innerPad + 12}" y="${y}" fill="#136B73" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">${index + 1}</text>
-        <text x="${innerPad + 38}" y="${y - 4}" fill="#173657" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="700">${escapeXml(place.name)}</text>
-        <text x="${innerPad + 38}" y="${y + 15}" fill="#5D7894" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="600">${escapeXml(place.region ?? "Salish Sea")}</text>
-      `;
-    })
-    .join("");
-
-  const barMarkup = weekBars
-    .map((bar) => {
-      const heightScale = Math.max(8, (bar.count / barMax) * (chartHeight - 28));
-      const x = innerPad + bar.index * barWidth + 1.5;
-      const y = chartTop + chartHeight - heightScale - 22;
-      const fill = bar.highlighted ? "url(#tripBarGradient)" : "rgba(179, 210, 235, 0.7)";
-      return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(4, barWidth - 3).toFixed(2)}" height="${heightScale.toFixed(2)}" rx="8" fill="${fill}" />`;
-    })
-    .join("");
-
-  const tickMarkup = monthTicks
-    .map((tick) => {
-      const x = innerPad + tick.index * barWidth + barWidth / 2;
-      return `<text x="${x.toFixed(2)}" y="${chartTop + chartHeight}" fill="#637B93" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" text-anchor="middle">${escapeXml(tick.label)}</text>`;
-    })
-    .join("");
-
-  const svg = `<?xml version="1.0" encoding="UTF-8"?>
-  <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
-    <defs>
-      <pattern id="airmailStripe" width="56" height="56" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-        <rect width="56" height="56" fill="#F7F7F1"/>
-        <rect width="16" height="56" fill="#24A38B"/>
-        <rect x="16" width="12" height="56" fill="#F7F7F1"/>
-        <rect x="28" width="16" height="56" fill="#6EDAD0"/>
-        <rect x="44" width="12" height="56" fill="#F7F7F1"/>
-      </pattern>
-      <linearGradient id="paperWash" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#FFFDF5"/>
-        <stop offset="100%" stop-color="#FBF7EC"/>
-      </linearGradient>
-      <linearGradient id="tripBarGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#7BE2D2"/>
-        <stop offset="100%" stop-color="#136B73"/>
-      </linearGradient>
-      <filter id="paperNoise" x="-10%" y="-10%" width="120%" height="120%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
-        <feColorMatrix type="saturate" values="0"/>
-        <feComponentTransfer>
-          <feFuncA type="table" tableValues="0 0.07"/>
-        </feComponentTransfer>
-      </filter>
-    </defs>
-    <rect width="${width}" height="${height}" rx="34" fill="url(#airmailStripe)"/>
-    <rect x="${outerPad}" y="${outerPad}" width="${width - outerPad * 2}" height="${height - outerPad * 2}" rx="24" fill="url(#paperWash)"/>
-    <rect x="${outerPad}" y="${outerPad}" width="${width - outerPad * 2}" height="${height - outerPad * 2}" rx="24" filter="url(#paperNoise)" opacity="0.65"/>
-
-    <text x="${innerPad}" y="98" fill="#173657" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700">Orca Itinerary</text>
-    <text x="${innerPad}" y="136" fill="#2C7F7C" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700">From ${escapeXml(tripCityLabel)}</text>
-    <text x="${innerPad}" y="166" fill="#173657" font-family="Helvetica, Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(tripLabel)}</text>
-    <text x="${innerPad}" y="194" fill="#5D7894" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700">${escapeXml(tripLengthLabel)}</text>
-
-    <line x1="${innerPad}" y1="214" x2="${width - innerPad}" y2="214" stroke="#173657" stroke-opacity="0.22" stroke-width="2"/>
-
-    ${itineraryMarkup}
-
-    <line x1="${innerPad}" y1="${chartTop - 18}" x2="${width - innerPad}" y2="${chartTop - 18}" stroke="#173657" stroke-opacity="0.14" stroke-width="1.5"/>
-    ${barMarkup}
-    ${tickMarkup}
-  </svg>`;
-
-  return { svg, width, height };
-}
-
-function buildInteractiveTripWindowSegments(
-  range: ReturnType<typeof buildTripPlannerRangeFromDates>,
-  bars: WeekBar[]
-): TripWindowSegment[] {
-  if (!range || bars.length === 0) return [];
-
-  const highlightedIndexes = bars.filter((bar) => bar.highlighted).map((bar) => bar.index);
-  if (highlightedIndexes.length === 0) return [];
-
-  const segments: Array<{ startIndex: number; endIndex: number }> = [];
-  highlightedIndexes.forEach((index) => {
-    const current = segments[segments.length - 1];
-    if (current && index === current.endIndex + 1) {
-      current.endIndex = index;
-      return;
-    }
-    segments.push({ startIndex: index, endIndex: index });
-  });
-
-  const total = Math.max(1, bars.length);
-  const startWeekIndex = Math.min(52, Math.floor((range.startDayOfYear - 1) / 7));
-  const endWeekIndex = Math.min(52, Math.floor((range.endDayOfYear - 1) / 7));
-
-  return segments.map((segment, segmentIndex) => {
-    const span = segment.endIndex - segment.startIndex + 1;
-    const containsStart = startWeekIndex >= segment.startIndex && startWeekIndex <= segment.endIndex;
-    const containsEnd = endWeekIndex >= segment.startIndex && endWeekIndex <= segment.endIndex;
-    const outlineDelayMs = Math.floor((segment.startIndex / total) * 1060) + 980;
-
-    return {
-      key: `segment-${segmentIndex}`,
-      style: {
-        left: `${(segment.startIndex / total) * 100}%`,
-        width: `${(span / total) * 100}%`,
-        "--trip-outline-delay": `${outlineDelayMs}ms`,
-      } as CSSProperties,
-      showLabel: containsStart,
-      handleStart: containsStart,
-      handleEnd: containsEnd,
-    };
-  });
-}
-
-function applyTripBrushDelta(
-  selection: TripPlanSelection,
-  mode: TripBrushMode,
-  deltaDays: number
-): TripPlanSelection | null {
-  const start = parseIsoDate(selection.arrivalDate);
-  const end = parseIsoDate(selection.departureDate);
-  if (!start || !end) return null;
-
-  let nextStart = start;
-  let nextEnd = end;
-
-  if (mode === "move") {
-    nextStart = addUtcDays(start, deltaDays);
-    nextEnd = addUtcDays(end, deltaDays);
-  } else if (mode === "start") {
-    nextStart = addUtcDays(start, deltaDays);
-    if (nextStart.getTime() > end.getTime()) nextStart = end;
-    nextStart = clampTripLength(nextStart, end);
-  } else {
-    nextEnd = addUtcDays(end, deltaDays);
-    if (nextEnd.getTime() < start.getTime()) nextEnd = start;
-    const latestEnd = addUtcDays(start, MAX_TRIP_LENGTH_DAYS - 1);
-    if (nextEnd.getTime() > latestEnd.getTime()) nextEnd = latestEnd;
-  }
-
-  const arrivalDate = formatIsoDate(nextStart);
-  const departureDate = formatIsoDate(nextEnd);
-  if (arrivalDate === selection.arrivalDate && departureDate === selection.departureDate) {
-    return selection;
-  }
-
-  return {
-    ...selection,
-    arrivalDate,
-    departureDate,
-  };
-}
-
-function PlannerLoadingState({
-  title,
-  message,
-  className = "",
-}: {
-  title: string;
-  message: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`plannerResultsPage__loadingState${className ? ` ${className}` : ""}`}
-      role="status"
-      aria-live="polite"
-      aria-label={`${title}. ${message}`}
-    >
-      <div className="plannerResultsPage__loadingTrack" aria-hidden="true">
-        <svg
-          className="plannerResultsPage__loadingOrca"
-          viewBox="0 0 180 92"
-          role="presentation"
-        >
-          <path
-            className="plannerResultsPage__loadingOrcaBody"
-            d="M31 47c15-19 42-30 75-27 27 2 49 13 61 30 3 5 2 10-3 14-16 12-45 15-73 10-20-3-37-10-52-16-7-3-13-4-18-2-5 3-10 3-15 0-4-3-4-8 0-11 7-5 16-5 25 2Z"
-          />
-          <path
-            className="plannerResultsPage__loadingOrcaBody"
-            d="M29 48c-9-10-20-14-27-9 5 3 8 7 10 12-4 4-6 8-6 13 8 0 17-4 25-11Z"
-          />
-          <path
-            className="plannerResultsPage__loadingOrcaBody"
-            d="M87 23c-4-10-2-20 4-22 8 5 13 14 17 24Z"
-          />
-          <path
-            className="plannerResultsPage__loadingOrcaBody"
-            d="M101 69c0 12-5 21-13 22-5-8-5-17-1-27Z"
-          />
-          <path
-            className="plannerResultsPage__loadingOrcaPatch"
-            d="M119 39c7-5 14-5 18 0-4 6-10 8-18 5-2-1-2-3 0-5Z"
-          />
-          <path
-            className="plannerResultsPage__loadingOrcaPatch"
-            d="M62 59c19-9 41-10 61-4 11 3 21 4 31 2-9 10-29 14-51 12-17-1-31-5-41-10Z"
-          />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function PlannerPlaceCard({
-  place,
-  photoManifest,
-  itineraryAdded,
-  onAddToItinerary,
-  onRemoveFromItinerary,
-  selected,
-  onShowOnMap,
-}: {
-  place: SuggestedPlace;
-  photoManifest: ViewingSpotPhotoManifest;
-  itineraryAdded: boolean;
-  onAddToItinerary: () => void;
-  onRemoveFromItinerary: () => void;
-  selected: boolean;
-  onShowOnMap: () => void;
-}) {
-  const photo = getViewingSpotPhoto(place.spotId, photoManifest);
-  const showApprovedPhoto = hasApprovedSpotPhoto(photo);
-  const showPlaceImage = !showApprovedPhoto && Boolean(place.imageUrl);
-  const imageSrc = showApprovedPhoto
-    ? photo?.imageSrc ?? PLACE_IMAGE_PLACEHOLDER_SRC
-    : place.imageUrl ?? PLACE_IMAGE_PLACEHOLDER_SRC;
-  const imageAlt = showApprovedPhoto
-    ? photo?.alt ?? place.name
-    : showPlaceImage
-      ? `Photo of ${place.name}`
-      : "";
-  const imagePosition = showApprovedPhoto ? photo?.focalPoint ?? "50% 50%" : undefined;
-
-  return (
-    <article
-      className={`plannerResultsPage__spotCard suggestedPlaceCard suggestedPlaceCard--${place.viewingPotential}${
-        selected ? " isSelected suggestedPlaceCard--selected" : ""
-      }${itineraryAdded ? " isInItinerary" : ""}`}
-    >
-      <div className="plannerResultsPage__spotCardInner">
-        <button
-          type="button"
-          className="plannerResultsPage__spotCardFace plannerResultsPage__spotCardFace--front"
-          onClick={onShowOnMap}
-          aria-pressed={selected}
-        >
-          <div className="plannerResultsPage__spotThumbWrap suggestedPlaceCard__media">
-            {imageSrc ? (
-              <img
-                className="plannerResultsPage__spotThumb suggestedPlaceCard__thumb"
-                src={imageSrc}
-                alt={imageAlt}
-                loading="lazy"
-                style={imagePosition ? { objectPosition: imagePosition } : undefined}
-                onError={(event) => {
-                  const image = event.currentTarget;
-                  if (image.dataset.fallbackApplied === "true") return;
-                  image.dataset.fallbackApplied = "true";
-                  image.src = PLACE_IMAGE_PLACEHOLDER_SRC;
-                  image.alt = "";
-                  image.style.objectPosition = "50% 50%";
-                }}
-              />
-            ) : (
-              <div className="plannerResultsPage__spotThumb plannerResultsPage__spotThumb--placeholder suggestedPlaceCard__thumb suggestedPlaceCard__thumb--placeholder">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  travel_explore
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="plannerResultsPage__spotBody suggestedPlaceCard__body">
-            <div className="plannerResultsPage__spotTopline suggestedPlaceCard__topline">
-              <h3 className="suggestedPlaceCard__name">{place.name}</h3>
-              <span className={`viewingPotentialBadge viewingPotentialBadge--${place.viewingPotential}`}>
-                {potentialLabel[place.viewingPotential]}
-              </span>
-            </div>
-            <p className="plannerResultsPage__spotRegion suggestedPlaceCard__meta">
-              <span className={`suggestedPlaceType suggestedPlaceType--${place.type.toLowerCase()}`}>
-                <span className="material-symbols-rounded suggestedPlaceType__icon" aria-hidden="true">
-                  {getPlaceTypeIcon(place.type)}
-                </span>
-                <span>{formatPlaceType(place.type)}</span>
-              </span>
-              <span>{place.region ?? "Salish Sea"}</span>
-            </p>
-            <p className="plannerResultsPage__spotReason suggestedPlaceCard__reason">{place.reason}</p>
-          </div>
-        </button>
-
-        <div className="plannerResultsPage__spotCardFace plannerResultsPage__spotCardFace--back">
-          <div className="plannerResultsPage__spotCardActionWrap">
-            <span className="plannerResultsPage__spotCardActionLabel">{place.name}</span>
-            <div className="plannerResultsPage__spotCardActions">
-              <button type="button" className="plannerResultsPage__spotCardActionBtn" onClick={onShowOnMap}>
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  travel_explore
-                </span>
-                <span>View details</span>
-              </button>
-              <button
-                type="button"
-                className={`plannerResultsPage__spotCardActionBtn ${
-                  itineraryAdded
-                    ? "plannerResultsPage__spotCardActionBtn--danger"
-                    : "plannerResultsPage__spotCardActionBtn--primary"
-                }${itineraryAdded ? " isAdded" : ""}`}
-                onClick={itineraryAdded ? onRemoveFromItinerary : onAddToItinerary}
-                aria-pressed={itineraryAdded}
-              >
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  {itineraryAdded ? "remove_circle" : "playlist_add"}
-                </span>
-                <span>{itineraryAdded ? "Remove from inventory" : "Add to itinerary"}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-}
 
 export function PlannerPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { setMenuOpen } = useMenu();
   const {
-    darkMode,
     unitsMode,
     setUnitsMode,
     surfaceMode,
@@ -1235,53 +191,68 @@ export function PlannerPage() {
     setResolution,
     selectedPaletteId,
     setSelectedPaletteId,
-    setThemeMode,
   } = useMapState();
-  const forceNewSession = useMemo(() => new URLSearchParams(location.search).get("new") === "1", [location.search]);
+  const resumeStoredPlan = useMemo(() => new URLSearchParams(location.search).get("resume") === "1", [location.search]);
   const [infoOpen, setInfoOpen] = useState(false);
-  const storedSelection = useMemo(() => (forceNewSession ? null : readStoredPlannerSelection()), [forceNewSession]);
-  const storedDraft = useMemo(() => (forceNewSession ? null : readStoredPlannerDraft()), [forceNewSession]);
+  const storedSelection = useMemo(() => (resumeStoredPlan ? readStoredPlannerSelection() : null), [resumeStoredPlan]);
+  const storedDraft = useMemo(() => (resumeStoredPlan ? readStoredPlannerDraft() : null), [resumeStoredPlan]);
   const [plannerSelection, setPlannerSelection] = useState<TripPlanSelection | null>(storedSelection);
   const [appliedPlannerSelection, setAppliedPlannerSelection] = useState<TripPlanSelection | null>(storedSelection);
-  const [plannerOpen, setPlannerOpen] = useState(() => (forceNewSession ? true : readStoredPlannerOpen(!storedSelection)));
+  const [plannerOpen, setPlannerOpen] = useState(() => (resumeStoredPlan ? readStoredPlannerOpen(!storedSelection) : true));
   const [plannerCollapsing, setPlannerCollapsing] = useState(false);
-  const [draftCity, setDraftCity] = useState(forceNewSession ? "" : storedDraft?.city ?? "");
-  const [draftArrivalDate, setDraftArrivalDate] = useState(forceNewSession ? "" : storedDraft?.arrivalDate ?? "");
-  const [draftDepartureDate, setDraftDepartureDate] = useState(forceNewSession ? "" : storedDraft?.departureDate ?? "");
+  const [plannerEditingTransition, setPlannerEditingTransition] = useState(false);
+  const [tripRevealPending, setTripRevealPending] = useState(false);
+  const [revealMinimumElapsed, setRevealMinimumElapsed] = useState(false);
+  const [renderedTripLoadKey, setRenderedTripLoadKey] = useState("");
+  const [plannerMapLoadFailed, setPlannerMapLoadFailed] = useState(false);
+  const [draftCity, setDraftCity] = useState(resumeStoredPlan ? storedDraft?.city ?? "" : "");
+  const [draftArrivalDate, setDraftArrivalDate] = useState(resumeStoredPlan ? storedDraft?.arrivalDate ?? "" : "");
+  const [draftDepartureDate, setDraftDepartureDate] = useState(resumeStoredPlan ? storedDraft?.departureDate ?? "" : "");
   const [draftMaxTravelDistance, setDraftMaxTravelDistance] = useState(() => {
-    if (forceNewSession) return "";
+    if (!resumeStoredPlan) return "";
     if (!storedDraft?.maxTravelDistance) return "";
     const storedUnitsMode = storedDraft.unitsMode ?? unitsMode;
     const miles = parsePlannerDistanceInput(storedDraft.maxTravelDistance, storedUnitsMode);
     return formatPlannerDistanceValue(miles, unitsMode);
   });
-  const [tripOccurrence, setTripOccurrence] = useState<TripPlannerOccurrenceResult | null>(null);
-  const [tripLoading, setTripLoading] = useState(false);
-  const [tripError, setTripError] = useState<string | null>(null);
-  const [photoManifest, setPhotoManifest] = useState<ViewingSpotPhotoManifest>({});
-  const [baseLocations, setBaseLocations] = useState<PlannerBaseLocation[]>([]);
+  const [formError, setFormError] = useState<string | null>(null);
+  const {
+    baseLocations,
+    photoManifest,
+    cameraLocations,
+    hydrophoneLocations,
+    hydrophoneListenUrl,
+  } = usePlannerReferenceData();
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [legendCollapsed, setLegendCollapsed] = useState(true);
+  const [detailPlaceId, setDetailPlaceId] = useState<string | null>(null);
+  const [fieldPickFilter, setFieldPickFilter] = useState<FieldPickFilter>("top");
   const [chartCollapsed, setChartCollapsed] = useState(true);
-  const [spotsCollapsed, setSpotsCollapsed] = useState(false);
-  const [itineraryPlaceIds, setItineraryPlaceIds] = useState<string[]>([]);
+  const [spotsCollapsed, setSpotsCollapsed] = useState(true);
+  const [sidebarMode, setSidebarMode] = useState<PlannerSidebarMode>("overview");
+  const [itineraryPlaceIds, setItineraryPlaceIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const parsed = JSON.parse(window.sessionStorage.getItem(PLANNER_ITINERARY_STORAGE_KEY) ?? "[]");
+      return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
+    } catch {
+      return [];
+    }
+  });
+  const [itineraryExpanded, setItineraryExpanded] = useState(false);
+  const [itineraryExportOpen, setItineraryExportOpen] = useState(false);
   const [itineraryMapViewActive, setItineraryMapViewActive] = useState(false);
   const [pulseSelectedPlaceMarker, setPulseSelectedPlaceMarker] = useState(false);
   const [draggingItineraryPlaceId, setDraggingItineraryPlaceId] = useState<string | null>(null);
   const [itineraryDropTargetId, setItineraryDropTargetId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [placesMenuOpen, setPlacesMenuOpen] = useState(false);
+  const [topPlacesVisible, setTopPlacesVisible] = useState(true);
   const [camerasVisible, setCamerasVisible] = useState(false);
-  const [camerasPanelOpen, setCamerasPanelOpen] = useState(false);
-  const [cameraLocations, setCameraLocations] = useState<ViewingLocation[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
   const [hydrophonesVisible, setHydrophonesVisible] = useState(false);
-  const [hydrophonesPanelOpen, setHydrophonesPanelOpen] = useState(false);
-  const [hydrophoneLocations, setHydrophoneLocations] = useState<OrcasoundHydrophone[]>([]);
-  const [hydrophoneListenUrl, setHydrophoneListenUrl] = useState("https://live.orcasound.net/");
   const [selectedHydrophoneId, setSelectedHydrophoneId] = useState<string | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [tripHotspotsVisible, setTripHotspotsVisible] = useState(true);
-  const [colorNoData, setColorNoData] = useState<"off" | "on">("on");
+  const tripHotspotsVisible = true;
   const [poiFilters, setPoiFilters] = useState({ Park: false, Marina: false, Ferry: false });
   const [shareBusy, setShareBusy] = useState(false);
   const [itineraryShareMenuOpen, setItineraryShareMenuOpen] = useState(false);
@@ -1290,67 +261,47 @@ export function PlannerPage() {
   const primaryMapRef = useRef<ForecastMapHandle | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const settingsRef = useRef<HTMLDivElement | null>(null);
+  const legendPaletteRef = useRef<HTMLElement | null>(null);
   const chartPlotRef = useRef<HTMLDivElement | null>(null);
   const tripBrushDragRef = useRef<TripBrushDragState | null>(null);
   const tripBrushApplyTimerRef = useRef<number | null>(null);
   const tripBrushPendingApplyRef = useRef(false);
   const plannerCollapseTimerRef = useRef<number | null>(null);
-  const camerasPanelCloseTimerRef = useRef<number | null>(null);
-  const hydrophonesPanelCloseTimerRef = useRef<number | null>(null);
+  const plannerEditTimerRef = useRef<number | null>(null);
   const previousUnitsModeRef = useRef<UnitsMode>(unitsMode);
+  const handlePlannerMapFatalError = useCallback(() => setPlannerMapLoadFailed(true), []);
 
-  const openCamerasPanel = () => {
-    if (camerasPanelCloseTimerRef.current !== null) {
-      window.clearTimeout(camerasPanelCloseTimerRef.current);
-      camerasPanelCloseTimerRef.current = null;
-    }
-    setCamerasPanelOpen(true);
-  };
-
-  const closeCamerasPanelSoon = () => {
-    if (camerasPanelCloseTimerRef.current !== null) {
-      window.clearTimeout(camerasPanelCloseTimerRef.current);
-    }
-    camerasPanelCloseTimerRef.current = window.setTimeout(() => {
-      setCamerasPanelOpen(false);
-      camerasPanelCloseTimerRef.current = null;
-    }, HOVER_PANEL_CLOSE_DELAY_MS);
-  };
-
-  const openHydrophonesPanel = () => {
-    if (hydrophonesPanelCloseTimerRef.current !== null) {
-      window.clearTimeout(hydrophonesPanelCloseTimerRef.current);
-      hydrophonesPanelCloseTimerRef.current = null;
-    }
-    setHydrophonesPanelOpen(true);
-  };
-
-  const closeHydrophonesPanelSoon = () => {
-    if (hydrophonesPanelCloseTimerRef.current !== null) {
-      window.clearTimeout(hydrophonesPanelCloseTimerRef.current);
-    }
-    hydrophonesPanelCloseTimerRef.current = window.setTimeout(() => {
-      setHydrophonesPanelOpen(false);
-      hydrophonesPanelCloseTimerRef.current = null;
-    }, HOVER_PANEL_CLOSE_DELAY_MS);
-  };
+  usePlannerPersistence({
+    selection: plannerSelection,
+    plannerOpen,
+    draftCity,
+    draftArrivalDate,
+    draftDepartureDate,
+    draftMaxTravelDistance,
+    unitsMode,
+  });
 
   useEffect(() => {
     return () => {
-      if (camerasPanelCloseTimerRef.current !== null) {
-        window.clearTimeout(camerasPanelCloseTimerRef.current);
-      }
-      if (hydrophonesPanelCloseTimerRef.current !== null) {
-        window.clearTimeout(hydrophonesPanelCloseTimerRef.current);
+      if (plannerEditTimerRef.current !== null) {
+        window.clearTimeout(plannerEditTimerRef.current);
       }
     };
   }, []);
 
   useEffect(() => {
-    if (!forceNewSession) return;
+    if (!tripRevealPending) return;
+    const timerId = window.setTimeout(() => {
+      setRevealMinimumElapsed(true);
+    }, PLANNER_REVEAL_MIN_DURATION_MS);
+    return () => window.clearTimeout(timerId);
+  }, [tripRevealPending]);
+
+  useEffect(() => {
+    if (resumeStoredPlan) return;
     clearStoredPlannerState();
-    navigate("/planner", { replace: true });
-  }, [forceNewSession, navigate]);
+    if (location.search) navigate("/planner", { replace: true });
+  }, [location.search, navigate, resumeStoredPlan]);
 
   const downloadSnapshot = (blob: Blob, fileName: string) => {
     const url = URL.createObjectURL(blob);
@@ -1381,6 +332,12 @@ export function PlannerPage() {
     [appliedPlannerSelection]
   );
   const appliedPlannerSubmitted = !!appliedPlannerSelection && !!appliedTripRange;
+  const {
+    occurrence: tripOccurrence,
+    loading: tripLoading,
+    error: occurrenceError,
+  } = useTripOccurrence(appliedTripRange, resolution);
+  const tripError = formError ?? occurrenceError;
 
   useEffect(() => {
     if (tripBrushApplyTimerRef.current) {
@@ -1413,92 +370,6 @@ export function PlannerPage() {
     };
   }, [plannerSelection]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    loadPlannerBaseLocations()
-      .then((items) => {
-        if (cancelled) return;
-        setBaseLocations(items);
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          console.warn("[Planner] failed to load base locations", error);
-          setBaseLocations([]);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    loadViewingSpotPhotoManifest()
-      .then((manifest) => {
-        if (!cancelled) setPhotoManifest(manifest);
-      })
-      .catch(() => {
-        if (!cancelled) setPhotoManifest({});
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    loadPoiData()
-      .then((items) => {
-        if (cancelled) return;
-        setCameraLocations(
-          items
-            .filter((item) => item.hasLiveFeed && typeof item.liveCameraUrl === "string" && item.liveCameraUrl.length > 0)
-            .map((item, index) => ({
-              id: `camera-${index}-${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-              name: item.name,
-              region: item.region ?? "Viewing location",
-              latitude: item.latitude,
-              longitude: item.longitude,
-              liveCameraUrl: item.liveCameraUrl,
-            }))
-        );
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        console.warn("[Planner] failed to load camera locations", error);
-        setCameraLocations([]);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    loadOrcasoundHydrophonePayload()
-      .then((payload) => {
-        if (cancelled) return;
-        setHydrophoneLocations(payload.items);
-        setHydrophoneListenUrl(payload.listenUrl);
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        console.warn("[Planner] failed to load Orcasound hydrophones", error);
-        setHydrophoneLocations([]);
-        setHydrophoneListenUrl("https://live.orcasound.net/");
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (baseLocations.length === 0) return;
@@ -1514,20 +385,6 @@ export function PlannerPage() {
     });
   }, [baseLocations, draftCity]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (plannerSelection) {
-      window.sessionStorage.setItem(PLANNER_SELECTION_STORAGE_KEY, JSON.stringify(plannerSelection));
-    } else {
-      window.sessionStorage.removeItem(PLANNER_SELECTION_STORAGE_KEY);
-    }
-  }, [plannerSelection]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.sessionStorage.setItem(PLANNER_OPEN_STORAGE_KEY, plannerOpen ? "true" : "false");
-  }, [plannerOpen]);
-
   useEffect(
     () => () => {
       if (plannerCollapseTimerRef.current) {
@@ -1539,29 +396,6 @@ export function PlannerPage() {
   );
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const hasDraft =
-      draftCity.trim().length > 0 ||
-      draftArrivalDate.length > 0 ||
-      draftDepartureDate.length > 0 ||
-      draftMaxTravelDistance.trim().length > 0;
-    if (!hasDraft) {
-      window.sessionStorage.removeItem(PLANNER_DRAFT_STORAGE_KEY);
-      return;
-    }
-    window.sessionStorage.setItem(
-      PLANNER_DRAFT_STORAGE_KEY,
-      JSON.stringify({
-        city: draftCity,
-        arrivalDate: draftArrivalDate,
-        departureDate: draftDepartureDate,
-        maxTravelDistance: draftMaxTravelDistance,
-        unitsMode,
-      } satisfies TripPlannerDraft)
-    );
-  }, [draftArrivalDate, draftCity, draftDepartureDate, draftMaxTravelDistance, unitsMode]);
-
-  useEffect(() => {
     if (previousUnitsModeRef.current === unitsMode) return;
     setDraftMaxTravelDistance((current) => {
       const miles = parsePlannerDistanceInput(current, previousUnitsModeRef.current);
@@ -1569,35 +403,6 @@ export function PlannerPage() {
     });
     previousUnitsModeRef.current = unitsMode;
   }, [unitsMode]);
-
-  useEffect(() => {
-    if (!appliedTripRange) {
-      setTripOccurrence(null);
-      setTripLoading(false);
-      setTripError(null);
-      return;
-    }
-
-    let cancelled = false;
-    setTripLoading(true);
-    setTripError(null);
-    loadTripPlannerOccurrencePayload(resolution)
-      .then((payload) => {
-        if (cancelled) return;
-        setTripOccurrence(aggregateTripPlannerOccurrence(payload, appliedTripRange));
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        setTripOccurrence(null);
-        setTripError(error instanceof Error ? error.message : "Trip planner data could not be loaded.");
-      })
-      .finally(() => {
-        if (!cancelled) setTripLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [appliedTripRange, resolution]);
 
   const baseLocationsByName = useMemo(
     () => new Map(baseLocations.map((location) => [location.name, location])),
@@ -1614,7 +419,6 @@ export function PlannerPage() {
     externalValues: tripOccurrence?.values,
     enabled: appliedPlannerSubmitted && !tripLoading && !!tripOccurrence,
     limit: DEFAULT_RECOMMENDED_SPOTS_COUNT,
-    poiFilters,
     baseLocation: activeBaseLocation,
     maxTravelDistanceMiles: appliedPlannerSelection?.maxTravelDistanceMiles,
   });
@@ -1625,8 +429,8 @@ export function PlannerPage() {
   );
   const recommendedPlaces = recommendedPlacesData.places;
   const cachedRecommendedPlaces = useMemo(
-    () => (forceNewSession ? [] : readStoredRecommendedPlaces(recommendedPlacesSignature)),
-    [forceNewSession, recommendedPlacesSignature]
+    () => (resumeStoredPlan ? readStoredRecommendedPlaces(recommendedPlacesSignature) : []),
+    [recommendedPlacesSignature, resumeStoredPlan]
   );
   const displayedRecommendedPlaces =
     recommendedPlaces.length > 0
@@ -1635,29 +439,137 @@ export function PlannerPage() {
         ? cachedRecommendedPlaces
         : recommendedPlaces;
   const recommendedPlacesLoading = appliedPlannerSubmitted && (tripLoading || recommendedPlacesData.isLoading);
+  const plannerResourcesReady =
+    Boolean(tripError) ||
+    (
+      appliedPlannerSubmitted &&
+      !tripLoading &&
+      !!tripOccurrence &&
+      !recommendedPlacesData.isLoading &&
+      (renderedTripLoadKey === recommendedPlacesSignature || plannerMapLoadFailed)
+    );
+  const plannerRevealComplete = tripRevealPending && revealMinimumElapsed && plannerResourcesReady;
+
+  useEffect(() => {
+    if (!plannerRevealComplete) return;
+    const timerId = window.setTimeout(() => {
+      setTripRevealPending(false);
+      setRevealMinimumElapsed(false);
+    }, PLANNER_REVEAL_EXIT_DURATION_MS);
+    return () => window.clearTimeout(timerId);
+  }, [plannerRevealComplete]);
+
+  const fieldPickPlaces = useMemo(() => {
+    if (fieldPickFilter === "top") return displayedRecommendedPlaces;
+    if (fieldPickFilter === "shore") return displayedRecommendedPlaces.filter((place) => place.type === "Other");
+    return displayedRecommendedPlaces.filter((place) => place.type === fieldPickFilter);
+  }, [displayedRecommendedPlaces, fieldPickFilter]);
   const chartLoading = appliedPlannerSubmitted && tripLoading && !tripOccurrence;
   const selectedPlace = useMemo(
     () => displayedRecommendedPlaces.find((place) => place.id === selectedPlaceId) ?? null,
     [displayedRecommendedPlaces, selectedPlaceId]
   );
+  const detailPlace = useMemo(
+    () => displayedRecommendedPlaces.find((place) => place.id === detailPlaceId) ?? null,
+    [detailPlaceId, displayedRecommendedPlaces]
+  );
+  const detailPlaceCameras = useMemo(() => {
+    if (!detailPlace) return [];
+    return cameraLocations.filter(
+      (camera) =>
+        haversineKm(
+          [detailPlace.longitude, detailPlace.latitude],
+          [camera.longitude, camera.latitude]
+        ) <= PLACE_DETAIL_MATCH_RADIUS_KM
+    );
+  }, [cameraLocations, detailPlace]);
+  const detailPlaceHydrophones = useMemo(() => {
+    if (!detailPlace) return [];
+    return hydrophoneLocations.filter(
+      (hydrophone) =>
+        haversineKm(
+          [detailPlace.longitude, detailPlace.latitude],
+          [hydrophone.longitude, hydrophone.latitude]
+        ) <= PLACE_DETAIL_MATCH_RADIUS_KM
+    );
+  }, [detailPlace, hydrophoneLocations]);
   const itineraryPlaces = useMemo(
     () => itineraryPlaceIds.map((id) => displayedRecommendedPlaces.find((place) => place.id === id)).filter(Boolean) as SuggestedPlace[],
     [displayedRecommendedPlaces, itineraryPlaceIds]
   );
   const mapSuggestedPlaces = useMemo(
-    () => (itineraryMapViewActive ? itineraryPlaces : displayedRecommendedPlaces),
-    [displayedRecommendedPlaces, itineraryMapViewActive, itineraryPlaces]
+    () => (itineraryMapViewActive ? itineraryPlaces : topPlacesVisible ? displayedRecommendedPlaces : []),
+    [displayedRecommendedPlaces, itineraryMapViewActive, itineraryPlaces, topPlacesVisible]
   );
+  const visiblePlannerMapLocations = useMemo(
+    () => [
+      ...mapSuggestedPlaces.map((place) => [place.longitude, place.latitude] as [number, number]),
+      ...(camerasVisible ? cameraLocations.map((camera) => [camera.longitude, camera.latitude] as [number, number]) : []),
+      ...(hydrophonesVisible
+        ? hydrophoneLocations.map((hydrophone) => [hydrophone.longitude, hydrophone.latitude] as [number, number])
+        : []),
+    ],
+    [cameraLocations, camerasVisible, hydrophoneLocations, hydrophonesVisible, mapSuggestedPlaces]
+  );
+  const visiblePlannerMapLocationsSignature = useMemo(
+    () => visiblePlannerMapLocations.map(([longitude, latitude]) => `${longitude.toFixed(4)},${latitude.toFixed(4)}`).join("|"),
+    [visiblePlannerMapLocations]
+  );
+  const lastPlannerMarkerViewportRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!plannerSubmitted || tripLoading || visiblePlannerMapLocations.length === 0) return;
+    if (lastPlannerMarkerViewportRef.current === visiblePlannerMapLocationsSignature) return;
+
+    lastPlannerMarkerViewportRef.current = visiblePlannerMapLocationsSignature;
+    primaryMapRef.current?.fitLocations(visiblePlannerMapLocations, {
+      // The planner is a map-first composition with panels around the edges.
+      // Reserve their space so the active location markers land in the visible map window.
+      padding: { top: 112, right: 120, bottom: 300, left: 470 },
+      maxZoom: 10,
+    });
+  }, [plannerSubmitted, tripLoading, visiblePlannerMapLocations, visiblePlannerMapLocationsSignature]);
 
   const handleAddPlaceToItinerary = (place: SuggestedPlace) => {
     setItineraryPlaceIds((current) => (current.includes(place.id) ? current : [...current, place.id]));
   };
 
   const handleRemovePlaceFromItinerary = (placeId: string) => {
-    setItineraryPlaceIds((current) => current.filter((id) => id !== placeId));
+    setItineraryPlaceIds((current) => {
+      const next = current.filter((id) => id !== placeId);
+      if (next.length === 0) setItineraryExpanded(false);
+      return next;
+    });
   };
 
-  const handleItineraryDragStart = (placeId: string, event: ReactDragEvent<HTMLDivElement>) => {
+  const handleOpenPlaceDetails = (place: SuggestedPlace) => {
+    setSpotsCollapsed(false);
+    setSidebarMode("location-details");
+    setDetailPlaceId(place.id);
+    setItineraryMapViewActive(false);
+    setPulseSelectedPlaceMarker(true);
+    setSelectedPlaceId(place.id);
+    setCamerasVisible(false);
+    setSelectedCameraId(null);
+    setHydrophonesVisible(false);
+    setSelectedHydrophoneId(null);
+    primaryMapRef.current?.fitLocations([[place.longitude, place.latitude]], {
+      padding: 120,
+      maxZoom: 11.5,
+    });
+  };
+
+  const handleSelectItineraryPlace = (place: SuggestedPlace) => {
+    setPulseSelectedPlaceMarker(false);
+    setSelectedPlaceId(place.id);
+    setItineraryMapViewActive(true);
+    primaryMapRef.current?.fitLocations([[place.longitude, place.latitude]], {
+      padding: { top: 112, right: 120, bottom: 260, left: 430 },
+      maxZoom: 11.2,
+    });
+  };
+
+  const handleItineraryDragStart = (placeId: string, event: ReactDragEvent<HTMLElement>) => {
     setDraggingItineraryPlaceId(placeId);
     setItineraryDropTargetId(placeId);
     event.dataTransfer.effectAllowed = "move";
@@ -1705,9 +617,12 @@ export function PlannerPage() {
   useEffect(() => {
     if (!plannerSubmitted) {
       setSelectedPlaceId(null);
+      setDetailPlaceId(null);
       setItineraryPlaceIds([]);
+      setSidebarMode("overview");
       setItineraryMapViewActive(false);
       setPulseSelectedPlaceMarker(false);
+      if (typeof window !== "undefined") window.sessionStorage.removeItem(PLANNER_ITINERARY_STORAGE_KEY);
       return;
     }
 
@@ -1715,8 +630,39 @@ export function PlannerPage() {
       setSelectedPlaceId(null);
       setPulseSelectedPlaceMarker(false);
     }
+    if (detailPlaceId && !displayedRecommendedPlaces.some((place) => place.id === detailPlaceId)) {
+      setDetailPlaceId(null);
+    }
     setItineraryPlaceIds((current) => current.filter((id) => displayedRecommendedPlaces.some((place) => place.id === id)));
-  }, [displayedRecommendedPlaces, plannerSubmitted, selectedPlaceId]);
+  }, [detailPlaceId, displayedRecommendedPlaces, plannerSubmitted, selectedPlaceId]);
+
+  useEffect(() => {
+    if (!plannerSubmitted || typeof window === "undefined") return;
+    window.sessionStorage.setItem(PLANNER_ITINERARY_STORAGE_KEY, JSON.stringify(itineraryPlaceIds));
+  }, [itineraryPlaceIds, plannerSubmitted]);
+
+  useEffect(() => {
+    if (sidebarMode === "location-details" && !detailPlace) {
+      setSidebarMode("overview");
+    }
+  }, [detailPlace, sidebarMode]);
+
+  useEffect(() => {
+    if (!itineraryExportOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setItineraryExportOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [itineraryExportOpen]);
+
+  useEffect(() => {
+    if (!selectedPlaceId || typeof document === "undefined") return;
+    const selectedRow = sidebarRef.current?.querySelector<HTMLElement>(`#field-pick-${CSS.escape(selectedPlaceId)}`);
+    if (!selectedRow) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    selectedRow.scrollIntoView({ block: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+  }, [fieldPickPlaces, selectedPlaceId]);
 
   useEffect(() => {
     if (itineraryPlaces.length === 0 && itineraryMapViewActive) {
@@ -1752,6 +698,25 @@ export function PlannerPage() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [settingsOpen]);
+
+  useEffect(() => {
+    if (!paletteOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (legendPaletteRef.current?.contains(target)) return;
+      setPaletteOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPaletteOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [paletteOpen]);
 
   useEffect(() => {
     if (!settingsOpen) setPaletteOpen(false);
@@ -1806,17 +771,12 @@ export function PlannerPage() {
   const selectedCount = tripOccurrence?.selectedCount ?? 0;
   const activityLabel = useMemo(() => computeActivityLabel(selectedCount, weekBars), [selectedCount, weekBars]);
   const topWatersLabel = useMemo(() => computeTopWaters(displayedRecommendedPlaces), [displayedRecommendedPlaces]);
-  const liveCamCount = cameraLocations.length;
-  const hydrophoneCount = hydrophoneLocations.length;
-  const selectedCamera = useMemo(
-    () => cameraLocations.find((camera) => camera.id === selectedCameraId) ?? cameraLocations[0] ?? null,
-    [cameraLocations, selectedCameraId]
-  );
   const paletteEntries = useMemo(() => Object.values(PALETTES), []);
-  const poiActive = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
+  const allPoiLayersVisible =
+    poiFilters.Park && poiFilters.Marina && poiFilters.Ferry && camerasVisible && hydrophonesVisible;
   const legendColors = useMemo(
-    () => pickLegendColors(PALETTES[selectedPaletteId].colors, colorNoData === "on"),
-    [colorNoData, selectedPaletteId]
+    () => pickLegendColors(PALETTES[selectedPaletteId].colors, true),
+    [selectedPaletteId]
   );
 
   useEffect(() => {
@@ -1887,14 +847,14 @@ export function PlannerPage() {
     if (!draftCity || !draftArrivalDate || !draftDepartureDate) return;
 
     if (!baseLocationsByName.has(draftCity)) {
-      setTripError("Choose a base location from the available list.");
+      setFormError("Choose a base location from the available list.");
       return;
     }
     const selectedBaseLocation = baseLocationsByName.get(draftCity) ?? null;
 
     const range = buildTripPlannerRangeFromDates(draftArrivalDate, draftDepartureDate);
     if (!range) {
-      setTripError("Departure must be on or after arrival.");
+      setFormError("Departure must be on or after arrival.");
       return;
     }
 
@@ -1915,28 +875,26 @@ export function PlannerPage() {
           ? parsedMaxTravelDistanceMiles
           : undefined,
     } satisfies TripPlanSelection;
-    setTripError(null);
+    setFormError(null);
+    setTripRevealPending(true);
+    setRevealMinimumElapsed(false);
+    setRenderedTripLoadKey("");
+    setPlannerMapLoadFailed(false);
     setPlannerSelection(nextSelection);
     setAppliedPlannerSelection(nextSelection);
     setChartZoomMode("weekly");
     setSelectedPlaceId(null);
     setChartCollapsed(false);
-    setLegendCollapsed(true);
+    setSpotsCollapsed(false);
+    setSidebarMode("overview");
+    setDetailPlaceId(null);
     if (plannerCollapseTimerRef.current) {
       window.clearTimeout(plannerCollapseTimerRef.current);
       plannerCollapseTimerRef.current = null;
     }
-    if (!plannerSubmitted) {
-      setPlannerCollapsing(true);
-      plannerCollapseTimerRef.current = window.setTimeout(() => {
-        setPlannerCollapsing(false);
-        setPlannerOpen(false);
-        plannerCollapseTimerRef.current = null;
-      }, PLANNER_COLLAPSE_DURATION_MS);
-    } else {
-      setPlannerCollapsing(false);
-      setPlannerOpen(false);
-    }
+    setPlannerCollapsing(false);
+    setPlannerOpen(false);
+    setPlannerEditingTransition(false);
 
     if (selectedBaseLocation && nextSelection.maxTravelDistanceMiles) {
       primaryMapRef.current?.fitLocations(
@@ -1956,58 +914,19 @@ export function PlannerPage() {
       plannerCollapseTimerRef.current = null;
     }
     setPlannerCollapsing(false);
+    if (plannerEditTimerRef.current !== null) {
+      window.clearTimeout(plannerEditTimerRef.current);
+    }
     setDraftCity(plannerSelection?.city ?? "");
     setDraftArrivalDate(plannerSelection?.arrivalDate ?? "");
     setDraftDepartureDate(plannerSelection?.departureDate ?? "");
     setDraftMaxTravelDistance(formatPlannerDistanceValue(plannerSelection?.maxTravelDistanceMiles, unitsMode));
+    setPlannerEditingTransition(true);
     setPlannerOpen(true);
-  };
-
-  const shareSnapshot = async () => {
-    if (shareBusy) return;
-    setShareBusy(true);
-    try {
-      const blob = await primaryMapRef.current?.captureSnapshot();
-      if (!blob) throw new Error("Snapshot not available");
-
-      const fileName = `orcacast_trip_${selectedWeekYear}-W${String(selectedWeek).padStart(2, "0")}_${resolution}_${toFileSafeToken(appConfig.compositeModelId)}.png`;
-      const snapshotFile = new File([blob], fileName, { type: "image/png" });
-      const nav = navigator as Navigator & { canShare?: (data?: ShareData) => boolean };
-      const canNativeShareFiles =
-        typeof nav.share === "function" &&
-        (typeof nav.canShare !== "function" || nav.canShare({ files: [snapshotFile] }));
-
-      if (canNativeShareFiles) {
-        await nav.share({
-          title: "OrcaCast trip planner snapshot",
-          text: `${tripCityLabel} · ${tripLabel} · ${tripLengthLabel}`,
-          files: [snapshotFile],
-        });
-      } else {
-        downloadSnapshot(blob, fileName);
-      }
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) {
-        console.error("[Share] Planner snapshot failed", error);
-      }
-    } finally {
-      setShareBusy(false);
-    }
-  };
-
-  const downloadSnapshotAction = async () => {
-    if (shareBusy) return;
-    setShareBusy(true);
-    try {
-      const blob = await primaryMapRef.current?.captureSnapshot();
-      if (!blob) throw new Error("Snapshot not available");
-      const fileName = `orcacast_trip_${selectedWeekYear}-W${String(selectedWeek).padStart(2, "0")}_${resolution}_${toFileSafeToken(appConfig.compositeModelId)}.png`;
-      downloadSnapshot(blob, fileName);
-    } catch (error) {
-      console.error("[Download] Planner snapshot failed", error);
-    } finally {
-      setShareBusy(false);
-    }
+    plannerEditTimerRef.current = window.setTimeout(() => {
+      setPlannerEditingTransition(false);
+      plannerEditTimerRef.current = null;
+    }, PLANNER_COLLAPSE_DURATION_MS);
   };
 
   const handleItineraryDownloadAction = async () => {
@@ -2032,14 +951,19 @@ export function PlannerPage() {
   };
 
   const isEditingTrip = plannerSubmitted && plannerOpen;
-  const showPlannerChrome = true;
-  const showExpandedChart = !chartCollapsed || !plannerSubmitted || isEditingTrip;
+  const showPlannerChrome =
+    plannerSubmitted &&
+    !tripRevealPending &&
+    (!plannerOpen || plannerEditingTransition) &&
+    !plannerCollapsing;
+  const showExpandedChart = showPlannerChrome && !chartCollapsed;
 
   const mapProps = {
-    darkMode,
-    showMapControls: true,
+    darkMode: false,
+    basemapMode: "raster" as const,
+    showMapControls: false,
     showLegendControl: false,
-    colorNoData: colorNoData === "on",
+    colorNoData: true,
     paletteId: selectedPaletteId,
     surfaceMode,
     resolution,
@@ -2053,8 +977,11 @@ export function PlannerPage() {
     hotspotPercentile: 1,
     expectedActivityHotspotCellCount: null,
     onHotspotsEnabledChange: () => undefined,
-    externalValues: plannerSubmitted ? tripOccurrence?.values ?? {} : undefined,
-    forecastOverlayEnabled: plannerSubmitted,
+    externalValues: plannerSubmitted && tripOccurrence ? tripOccurrence.values : undefined,
+    forecastOverlayEnabled: plannerSubmitted && !!tripOccurrence,
+    forecastOverlayLoadKey: recommendedPlacesSignature,
+    onForecastOverlayReady: setRenderedTripLoadKey,
+    onFatalDataError: handlePlannerMapFatalError,
     pulseAllGridCells: plannerSubmitted && tripLoading,
     mapModeLabel:
       plannerSubmitted ? "Loading typical activity map…" : "Choose trip details to build your outlook",
@@ -2067,8 +994,7 @@ export function PlannerPage() {
     selectedHydrophoneId,
     pulseSelectedPlaceMarker: plannerSubmitted ? pulseSelectedPlaceMarker : false,
     onPlaceSelect: (place: SuggestedPlace) => {
-      setPulseSelectedPlaceMarker(false);
-      setSelectedPlaceId(place.id);
+      handleOpenPlaceDetails(place);
     },
     baseLocation: activeBaseLocation,
     maxTravelDistanceMiles: activeMaxTravelDistanceMiles,
@@ -2076,19 +1002,31 @@ export function PlannerPage() {
     hydrophoneLocations,
     showHydrophones: plannerSubmitted && hydrophonesVisible,
     sidebarOffsetPx: 0,
+    gridPresentation: "quiet" as const,
   } satisfies ForecastMapProps;
 
   return (
     <div className="mapPageRoot">
       <AppHeader
         title="OrcaCast"
-        subtitle="Orca Sightings Forecast"
+        subtitle="Forecast Lab"
+        variant="home"
         onOpenInfo={() => setInfoOpen(true)}
         onOpenMenu={() => setMenuOpen(true)}
+        rightSlot={
+          <nav className="homeNav" aria-label="Planner navigation">
+            <Link to="/watch">This week</Link>
+            <Link to="/planner">Plan a trip</Link>
+            <Link to="/#explore">Explore</Link>
+          </nav>
+        }
       />
 
       <main className="app__main">
-        <div className={`plannerResultsPage${plannerSubmitted ? " hasPlan" : " isPrompting"}${plannerOpen ? " isPlannerOpen" : ""}${plannerSubmitted && plannerOpen ? " isEditing" : ""}${plannerCollapsing ? " isCollapsing" : ""}${chartCollapsed ? " isChartCollapsed" : ""}${spotsCollapsed ? " isSpotsCollapsed" : ""}${!legendCollapsed ? " isLegendOpen" : ""}`}>
+        <div
+          className={`plannerResultsPage${plannerSubmitted ? " hasPlan" : " isPrompting"}${plannerOpen ? " isPlannerOpen" : ""}${plannerSubmitted && plannerOpen ? " isEditing" : ""}${plannerEditingTransition ? " isPoppingPanels" : ""}${plannerCollapsing ? " isCollapsing" : ""}${chartCollapsed ? " isChartCollapsed" : ""}${spotsCollapsed ? " isSpotsCollapsed" : ""}${tripLoading ? " isLoading" : ""}${tripRevealPending ? " isRevealing" : ""}${settingsOpen ? " isSettingsOpen" : ""}`}
+          aria-busy={tripRevealPending || tripLoading}
+        >
           <div className="plannerResultsPage__main">
         <div className="plannerResultsPage__mapLayer">
           <ForecastMap
@@ -2096,6 +1034,26 @@ export function PlannerPage() {
             ref={primaryMapRef}
           />
         </div>
+
+        {tripRevealPending ? (
+          <div
+            className={`plannerResultsPage__revealGate${plannerRevealComplete ? " isComplete" : ""}`}
+            role="status"
+            aria-live="polite"
+            aria-label="Preparing the trip planner map, activity layers, and recommended viewing spots."
+          >
+            <PlannerFerryLoader complete={plannerRevealComplete} />
+          </div>
+        ) : tripLoading ? (
+          <div
+            className="plannerResultsPage__screenLoading"
+            role="status"
+            aria-live="polite"
+            aria-label="Loading historical sightings, the activity map, and trip recommendations."
+          >
+            <SwimmingOrcaLoader />
+          </div>
+        ) : null}
 
         {(!plannerSubmitted || plannerOpen) ? (
           <section
@@ -2121,7 +1079,10 @@ export function PlannerPage() {
                 <button
                   type="button"
                   className="plannerResultsPage__promptClose"
-                  onClick={() => setPlannerOpen(false)}
+                  onClick={() => {
+                    setPlannerEditingTransition(false);
+                    setPlannerOpen(false);
+                  }}
                   aria-label="Close trip editor"
                 >
                   <span className="material-symbols-rounded" aria-hidden="true">
@@ -2201,7 +1162,7 @@ export function PlannerPage() {
           </section>
         ) : null}
 
-        {plannerSubmitted && !isEditingTrip ? (
+        {plannerSubmitted && (!isEditingTrip || plannerEditingTransition) ? (
           <section className="plannerResultsPage__summaryCard">
             <div className="plannerResultsPage__summaryIcon">
               <span className="material-symbols-rounded" aria-hidden="true">
@@ -2209,7 +1170,8 @@ export function PlannerPage() {
               </span>
             </div>
             <div className="plannerResultsPage__summaryBody">
-              <h1>{`Trip from ${tripCityLabel}`}</h1>
+              <div className="plannerResultsPage__summaryEyebrow">Your Salish Sea trip</div>
+              <h1>{tripCityLabel}</h1>
               <div className="plannerResultsPage__summaryMeta">
                 <span>
                   {tripLabel} · {tripLengthLabel}
@@ -2428,130 +1390,446 @@ export function PlannerPage() {
         ) : null}
 
         {showPlannerChrome ? (
-          <aside className={`plannerResultsPage__legendCard${legendCollapsed ? " isCollapsed" : ""}`}>
-            <div className="plannerResultsPage__legendHead">
-              <h2>{legendCollapsed ? "Legend" : "Typical Orca Activity"}</h2>
-              <button
-                type="button"
-                className="plannerResultsPage__legendToggle"
-                onClick={() => setLegendCollapsed((value) => !value)}
-                aria-expanded={!legendCollapsed}
-                aria-label={legendCollapsed ? "Expand activity legend" : "Collapse activity legend"}
-              >
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  {legendCollapsed ? "expand_less" : "expand_more"}
-                </span>
+          <aside className="plannerResultsPage__leftTripStack" aria-label="Trip and itinerary">
+            <div className="plannerResultsPage__sidebarTripCard">
+              <div className="plannerResultsPage__sidebarTripIcon" aria-hidden="true">
+                <span className="material-symbols-rounded">calendar_month</span>
+              </div>
+              <div className="plannerResultsPage__sidebarTripCopy">
+                <div className="plannerResultsPage__spotsEyebrow">Your Salish Sea trip</div>
+                <h2>{tripCityLabel}</h2>
+                <p>{tripLabel}{tripDistanceLabel ? ` · ${tripDistanceLabel}` : ""}</p>
+              </div>
+              <button type="button" className="plannerResultsPage__sidebarEditTrip" onClick={openPlannerEditor}>
+                Edit trip
               </button>
+              {itineraryPlaces.length > 0 ? (
+                <button
+                  type="button"
+                  className="plannerResultsPage__sidebarViewItinerary"
+                  onClick={() => setItineraryExpanded((expanded) => !expanded)}
+                  aria-expanded={itineraryExpanded}
+                  aria-controls="planner-trip-itinerary"
+                >
+                  <span>{itineraryExpanded ? "Hide itinerary" : "View itinerary"}</span>
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    {itineraryExpanded ? "expand_less" : "expand_more"}
+                  </span>
+                </button>
+              ) : null}
             </div>
-            {legendCollapsed ? (
+            {itineraryPlaces.length > 0 && itineraryExpanded ? (
+            <div id="planner-trip-itinerary" className="plannerResultsPage__leftItineraryCard">
+              <div className="plannerResultsPage__itineraryPreviewHeader">
+                <span>Your itinerary</span>
+                <span className="plannerResultsPage__itineraryHeaderActions">
+                  <strong>{itineraryPlaces.length}</strong>
+                  {itineraryPlaces.length > 0 ? (
+                    <button type="button" className="plannerResultsPage__itineraryExportButton" onClick={() => setItineraryExportOpen(true)}>
+                      <span className="material-symbols-rounded" aria-hidden="true">ios_share</span>
+                      Export
+                    </button>
+                  ) : null}
+                </span>
+              </div>
+                <div className="plannerResultsPage__leftItineraryList" aria-label="Sortable itinerary">
+                  {itineraryPlaces.map((place, index) => (
+                    <div
+                      key={place.id}
+                      className={`plannerResultsPage__leftItineraryItem${draggingItineraryPlaceId === place.id ? " isDragging" : ""}${
+                        itineraryDropTargetId === place.id && draggingItineraryPlaceId !== place.id ? " isDropTarget" : ""
+                      }`}
+                      onDragOver={(event) => handleItineraryDragOver(place.id, event)}
+                      onDrop={(event) => handleItineraryDrop(place.id, event)}
+                    >
+                      <button
+                        type="button"
+                        className="plannerResultsPage__itineraryDragHandle"
+                        draggable
+                        onDragStart={(event) => handleItineraryDragStart(place.id, event)}
+                        onDragEnd={handleItineraryDragEnd}
+                        aria-label={`Drag ${place.name}`}
+                      >
+                        <span aria-hidden="true">⠿</span>
+                      </button>
+                      <button type="button" className="plannerResultsPage__leftItineraryMain" onClick={() => handleSelectItineraryPlace(place)}>
+                        <span className="plannerResultsPage__sidebarItineraryOrder">{index + 1}</span>
+                        <span><strong>{place.name}</strong><small>{place.region ?? "Salish Sea"}</small></span>
+                      </button>
+                      <button type="button" className="plannerResultsPage__sidebarItineraryRemove" onClick={() => handleRemovePlaceFromItinerary(place.id)} aria-label={`Remove ${place.name}`}>
+                        <span className="material-symbols-rounded" aria-hidden="true">close</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+            </div>
+            ) : null}
+          </aside>
+        ) : null}
+
+        {showPlannerChrome ? (
+          <aside
+            ref={legendPaletteRef}
+            className={`plannerResultsPage__legendCard${paletteOpen ? " isPaletteOpen" : ""}`}
+            aria-label="Typical orca activity legend, low to high"
+          >
+            <button
+              type="button"
+              className="plannerResultsPage__legendPaletteTrigger"
+              aria-label="Typical activity color scale"
+              aria-haspopup="listbox"
+              aria-expanded={paletteOpen}
+              onClick={() => setPaletteOpen((value) => !value)}
+            />
+            <strong className="plannerResultsPage__legendTitle">Typical activity</strong>
+            <div className="plannerResultsPage__legendScale">
+              <span>Low</span>
               <div className="plannerResultsPage__legendRamp" aria-hidden="true">
                 {[...legendColors].reverse().map((color, index) => (
                   <span key={`${color}-${index}`} style={{ background: color }} />
                 ))}
               </div>
-            ) : (
-              <>
-                <div className="plannerResultsPage__legendList">
-                  {LEGEND_LABELS.map((label, index) => (
-                    <div key={label} className="plannerResultsPage__legendRow">
-                      <span className="plannerResultsPage__legendSwatch" style={{ background: legendColors[index] }} />
-                      <span>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+              <span>High</span>
+            </div>
+            {paletteOpen ? (
+              <div
+                className="plannerResultsPage__legendPaletteList"
+                role="listbox"
+                aria-label="Color scale palettes"
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                {paletteEntries.map((palette) => {
+                  const selected = palette.id === selectedPaletteId;
+                  return (
+                    <button
+                      key={palette.id}
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      className={`plannerResultsPage__legendPaletteRow${selected ? " isSelected" : ""}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setPlannerOpen(false);
+                        setPlannerCollapsing(false);
+                        setPlannerEditingTransition(false);
+                        setTripRevealPending(false);
+                        setRevealMinimumElapsed(false);
+                        setSelectedPaletteId(palette.id);
+                        setPaletteOpen(false);
+                      }}
+                    >
+                      <span className="plannerResultsPage__legendPaletteSwatches" aria-hidden="true">
+                        {palette.colors.slice(0, 6).map((color, index) => (
+                          <span key={`${palette.id}-${index}`} style={{ backgroundColor: color }} />
+                        ))}
+                      </span>
+                      <span>{palette.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </aside>
         ) : null}
 
         {showPlannerChrome ? (
           <aside
             ref={sidebarRef}
-            className={`plannerResultsPage__spotsCard${spotsCollapsed ? " isCollapsed" : ""}`}
+            className={`plannerResultsPage__spotsCard plannerResultsPage__tripSidebar isMode-${sidebarMode}${
+              spotsCollapsed ? " isCollapsed" : ""
+            }${detailPlace ? " isDetailOpen" : ""}`}
           >
-            <button
-              type="button"
-              className={`plannerResultsPage__spotsCollapseBtn${spotsCollapsed ? " isCollapsed" : ""}`}
-              onClick={() => setSpotsCollapsed((value) => !value)}
-              aria-expanded={!spotsCollapsed}
-              aria-label={spotsCollapsed ? "Expand recommended viewing spots" : "Collapse recommended viewing spots"}
-            >
-              {spotsCollapsed ? <span className="plannerResultsPage__spotsCollapseLabel">Recommended Viewing</span> : null}
-              <span className="material-symbols-rounded" aria-hidden="true">
-                {spotsCollapsed ? "expand_more" : "expand_less"}
-              </span>
-            </button>
-            <div className="plannerResultsPage__spotsHeader">
-              <div className="plannerResultsPage__spotsIcon">
-                <img src="/images/icons/binoculars_recreated.svg" alt="" aria-hidden="true" />
-              </div>
-              <div>
-                <div className="plannerResultsPage__spotsEyebrow">Where to watch</div>
-                <h2>Recommended Viewing</h2>
-                <p>Top-25 Viewing Locations for Your Trip</p>
-              </div>
-            </div>
-
-            <div className="plannerResultsPage__spotsList">
-              {!plannerSubmitted ? (
-                <PlannerLoadingState
-                  className="plannerResultsPage__loadingState--idle"
-                  title="Ready to scout"
-                  message="Choose a base, dates, and optional travel range. Your recommended viewing spots will appear here."
-                />
-              ) : recommendedPlacesLoading && displayedRecommendedPlaces.length === 0 ? (
-                <PlannerLoadingState
-                  title="Scouting viewing spots..."
-                  message="Our orca is searching nearby parks, marinas, and ferry viewpoints for your trip dates."
-                />
-              ) : displayedRecommendedPlaces.length === 0 &&
-                !tripLoading &&
-                !recommendedPlacesData.isLoading &&
-                !tripError &&
-                !recommendedPlacesData.error &&
-                activeMaxTravelDistanceMiles ? (
-                <div className="plannerResultsPage__spotsEmptyState">
-                  No suggested locations within defined search radius. Expand your search radius and try again.
+            {spotsCollapsed ? (
+              <button
+                type="button"
+                className="plannerResultsPage__spotsNotebook"
+                onClick={() => setSpotsCollapsed(false)}
+                aria-expanded="false"
+                aria-label="Expand recommended viewing spots"
+              >
+                <span className="plannerResultsPage__spotsNotebookGraphic" aria-hidden="true">
+                  <span className="plannerResultsPage__spotsNotebookPage" />
+                  <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--one" />
+                  <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--two" />
+                  <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--three" />
+                  <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--four" />
+                </span>
+                <span className="plannerResultsPage__spotsNotebookLabel">Field picks</span>
+                <span className="plannerResultsPage__spotsNotebookCount">{displayedRecommendedPlaces.length}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="plannerResultsPage__spotsCollapseBtn"
+                onClick={() => {
+                  setDetailPlaceId(null);
+                  setSpotsCollapsed(true);
+                }}
+                aria-expanded="true"
+                aria-label="Collapse recommended viewing spots"
+              >
+                <span className="material-symbols-rounded" aria-hidden="true">expand_more</span>
+              </button>
+            )}
+            <div className="plannerResultsPage__spotsPanel">
+              <div className="plannerResultsPage__spotsPanelFace plannerResultsPage__spotsPanelFace--front">
+                <div className="plannerResultsPage__sidebarTripCard">
+                  <div className="plannerResultsPage__sidebarTripIcon" aria-hidden="true">
+                    <span className="material-symbols-rounded">calendar_month</span>
+                  </div>
+                  <div className="plannerResultsPage__sidebarTripCopy">
+                    <div className="plannerResultsPage__spotsEyebrow">Your Salish Sea trip</div>
+                    <h2>{tripCityLabel}</h2>
+                    <p>{tripLabel}{tripDistanceLabel ? ` · ${tripDistanceLabel}` : ""}</p>
+                  </div>
+                  <button type="button" className="plannerResultsPage__sidebarEditTrip" onClick={openPlannerEditor}>
+                    Edit trip
+                  </button>
                 </div>
-              ) : (
-                displayedRecommendedPlaces.map((place) => (
-                  <PlannerPlaceCard
-                    key={place.id}
-                    place={place}
-                    photoManifest={photoManifest}
-                    itineraryAdded={itineraryPlaceIds.includes(place.id)}
-                    onAddToItinerary={() => handleAddPlaceToItinerary(place)}
-                    onRemoveFromItinerary={() => handleRemovePlaceFromItinerary(place.id)}
-                    selected={selectedPlace?.id === place.id}
-                    onShowOnMap={() => {
-                      setItineraryMapViewActive(false);
-                      setPulseSelectedPlaceMarker(true);
-                      setSelectedPlaceId(place.id);
-                    }}
-                  />
-                ))
-              )}
+
+                {sidebarMode === "itinerary" ? (
+                  <div className="plannerResultsPage__itineraryPanel">
+                    <div className="plannerResultsPage__sidebarSectionHeader">
+                      <button type="button" className="plannerResultsPage__sidebarBackBtn" onClick={() => setSidebarMode("overview")}>
+                        <span className="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+                        Back to trip
+                      </button>
+                      <strong>Your itinerary <span>{itineraryPlaces.length}</span></strong>
+                    </div>
+                    {itineraryPlaces.length === 0 ? (
+                      <div className="plannerResultsPage__itineraryEmptyState">
+                        <span className="material-symbols-rounded" aria-hidden="true">explore</span>
+                        <h3>Your day is still an open chart.</h3>
+                        <p>Add places from the map to begin building your Salish Sea route.</p>
+                      </div>
+                    ) : (
+                      <div className="plannerResultsPage__sidebarItineraryList" aria-label="Sortable itinerary">
+                        {itineraryPlaces.map((place, index) => (
+                          <div
+                            key={place.id}
+                            className={`plannerResultsPage__sidebarItineraryItem${
+                              draggingItineraryPlaceId === place.id ? " isDragging" : ""
+                            }${itineraryDropTargetId === place.id && draggingItineraryPlaceId !== place.id ? " isDropTarget" : ""}${
+                              selectedPlaceId === place.id ? " isSelected" : ""
+                            }`}
+                            onDragOver={(event) => handleItineraryDragOver(place.id, event)}
+                            onDrop={(event) => handleItineraryDrop(place.id, event)}
+                          >
+                            <button
+                              type="button"
+                              className="plannerResultsPage__itineraryDragHandle"
+                              draggable
+                              onDragStart={(event) => handleItineraryDragStart(place.id, event)}
+                              onDragEnd={handleItineraryDragEnd}
+                              aria-label={`Drag ${place.name}`}
+                            >
+                              <span aria-hidden="true">⠿</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="plannerResultsPage__sidebarItineraryMain"
+                              onClick={() => handleSelectItineraryPlace(place)}
+                            >
+                              <span className="plannerResultsPage__sidebarItineraryOrder">{index + 1}</span>
+                              <span>
+                                <strong>{place.name}</strong>
+                                <small>{place.region ?? "Salish Sea"} · {place.distanceKm !== undefined ? `${Math.round(place.distanceKm * 0.621371)} mi` : "Selected stop"}</small>
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              className="plannerResultsPage__sidebarItineraryAction"
+                              onClick={() => handleOpenPlaceDetails(place)}
+                            >
+                              Details
+                            </button>
+                            <button
+                              type="button"
+                              className="plannerResultsPage__sidebarItineraryRemove"
+                              onClick={() => handleRemovePlaceFromItinerary(place.id)}
+                              aria-label={`Remove ${place.name} from itinerary`}
+                            >
+                              <span className="material-symbols-rounded" aria-hidden="true">close</span>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="plannerResultsPage__itineraryPreviewCard">
+                      <div className="plannerResultsPage__itineraryPreviewHeader">
+                        <span>Your itinerary</span>
+                        <strong>{itineraryPlaces.length}</strong>
+                      </div>
+                      {itineraryPlaces.length === 0 ? (
+                        <div className="plannerResultsPage__itineraryEmptyState plannerResultsPage__itineraryEmptyState--compact">
+                          <span className="material-symbols-rounded" aria-hidden="true">travel_explore</span>
+                          <h3>Your day is still an open chart.</h3>
+                          <p>Add places from the map to begin building your Salish Sea route.</p>
+                        </div>
+                      ) : (
+                        <div className="plannerResultsPage__itineraryPreviewList">
+                          {itineraryPlaces.slice(0, 3).map((place, index) => (
+                            <button
+                              key={place.id}
+                              type="button"
+                              className="plannerResultsPage__itineraryPreviewItem"
+                              onClick={() => handleSelectItineraryPlace(place)}
+                            >
+                              <span aria-hidden="true">⠿</span>
+                              <strong>{index + 1}</strong>
+                              <span>
+                                <b>{place.name}</b>
+                                <small>{place.viewingPotential === "very-high" ? "Strong outlook" : `${formatViewingPotentialLabel(place.viewingPotential)} outlook`}</small>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <button type="button" className="plannerResultsPage__viewItineraryBtn" onClick={() => setSidebarMode("itinerary")}>
+                        View full itinerary
+                      </button>
+                    </div>
+
+                    <div className="plannerResultsPage__spotsHeader plannerResultsPage__sidebarRecommendationsHeader">
+                      <div className="plannerResultsPage__spotsIcon">
+                        <img src="/images/icons/binoculars_recreated.svg" alt="" aria-hidden="true" />
+                      </div>
+                      <div>
+                        <div className="plannerResultsPage__spotsEyebrow">Recommended places</div>
+                        <h2>Field Picks <span>{displayedRecommendedPlaces.length}</span></h2>
+                      </div>
+                    </div>
+
+                    <div className="plannerResultsPage__fieldPickFilters" role="group" aria-label="Filter field picks">
+                      {([
+                        ["top", "Top picks"],
+                        ["shore", "Shore"],
+                        ["Ferry", "Ferry"],
+                        ["Marina", "Marina"],
+                        ["Park", "Park"],
+                      ] as const).map(([filter, label]) => (
+                        <button
+                          key={filter}
+                          type="button"
+                          className={fieldPickFilter === filter ? "isActive" : ""}
+                          aria-pressed={fieldPickFilter === filter}
+                          onClick={() => setFieldPickFilter(filter)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div
+                      className="plannerResultsPage__spotsList"
+                      role="region"
+                      aria-label="Recommended places"
+                      tabIndex={0}
+                    >
+                      {!plannerSubmitted ? (
+                        <PlannerLoadingState
+                          className="plannerResultsPage__loadingState--idle"
+                          title="Ready to scout"
+                          message="Choose a base, dates, and optional travel range. Your recommended viewing spots will appear here."
+                        />
+                      ) : recommendedPlacesLoading && displayedRecommendedPlaces.length === 0 ? (
+                        <PlannerLoadingState
+                          title="Scouting viewing spots..."
+                          message="Our orca is searching nearby parks, marinas, and ferry viewpoints for your trip dates."
+                        />
+                      ) : displayedRecommendedPlaces.length === 0 &&
+                        !tripLoading &&
+                        !recommendedPlacesData.isLoading &&
+                        !tripError &&
+                        !recommendedPlacesData.error &&
+                        activeMaxTravelDistanceMiles ? (
+                        <div className="plannerResultsPage__spotsEmptyState">
+                          No suggested locations within defined search radius. Expand your search radius and try again.
+                        </div>
+                      ) : (
+                        fieldPickPlaces.map((place, index) => (
+                          <div id={`field-pick-${place.id}`} key={place.id} className="plannerResultsPage__spotRow">
+                            <PlannerPlaceCard
+                              place={place}
+                              rank={index + 1}
+                              photoManifest={photoManifest}
+                              itineraryAdded={itineraryPlaceIds.includes(place.id)}
+                              onAddToItinerary={() => handleAddPlaceToItinerary(place)}
+                              onRemoveFromItinerary={() => handleRemovePlaceFromItinerary(place.id)}
+                              selected={selectedPlace?.id === place.id}
+                              onShowOnMap={() => {
+                                setDetailPlaceId(null);
+                                setSidebarMode("overview");
+                                setItineraryMapViewActive(false);
+                                setPulseSelectedPlaceMarker(true);
+                                setSelectedPlaceId(place.id);
+                              }}
+                              onViewDetails={() => handleOpenPlaceDetails(place)}
+                            />
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="plannerResultsPage__spotsPanelFace plannerResultsPage__spotsPanelFace--back">
+                {detailPlace ? (
+                  <div className="plannerResultsPage__detailModeWrap">
+                    <PlannerPlaceDetailView
+                      place={detailPlace}
+                      photoManifest={photoManifest}
+                      matchedCameras={detailPlaceCameras}
+                      matchedHydrophones={detailPlaceHydrophones}
+                      hydrophoneListenUrl={hydrophoneListenUrl}
+                      itineraryAdded={itineraryPlaceIds.includes(detailPlace.id)}
+                      onAddToItinerary={() => handleAddPlaceToItinerary(detailPlace)}
+                      onRemoveFromItinerary={() => handleRemovePlaceFromItinerary(detailPlace.id)}
+                      onViewItinerary={() => {
+                        setDetailPlaceId(null);
+                        setSidebarMode("itinerary");
+                      }}
+                      onBack={() => {
+                        setDetailPlaceId(null);
+                        setSidebarMode("overview");
+                      }}
+                    />
+                  </div>
+                ) : null}
+              </div>
             </div>
           </aside>
         ) : null}
 
-        {plannerSubmitted && chartCollapsed ? (
+        {showPlannerChrome && chartCollapsed ? (
           <button
             type="button"
             className="plannerResultsPage__chartCollapsedButton"
             onClick={() => setChartCollapsed(false)}
             aria-expanded="false"
+            aria-label="Expand Your Trip Window"
           >
             <span className="plannerResultsPage__chartIcon">
               <span className="material-symbols-rounded" aria-hidden="true">
                 bar_chart
               </span>
             </span>
-            <span>
-              <strong>Seasonal Activity</strong>
+            <span className="plannerResultsPage__chartCollapsedCopy">
+              <strong>Your Trip Window</strong>
+              <small>
+                {plannerSubmitted
+                  ? `${tripLabel} · ${activityLabel} · ${topWatersLabel}`
+                  : "Seasonal activity for your selected dates"}
+              </small>
             </span>
-            <span className="material-symbols-rounded" aria-hidden="true">
-              expand_less
+            <span className="plannerResultsPage__chartCollapsedToggle" aria-hidden="true">
+              <span className="material-symbols-rounded">expand_less</span>
             </span>
           </button>
         ) : null}
@@ -2567,8 +1845,14 @@ export function PlannerPage() {
                     </span>
                   </div>
                   <div>
-                    <h2>{chartZoomedToDays ? "Daily Sightings Around Your Trip" : "Typical Salish Sea Sightings by Week"}</h2>
-                    {chartZoomedToDays ? <p>{tripLabel}</p> : !plannerSubmitted ? <p>Enter trip details to highlight your viewing window.</p> : null}
+                    <h2>{chartZoomedToDays ? "Daily Sightings Around Your Trip" : "Your Trip Window"}</h2>
+                    {chartZoomedToDays ? (
+                      <p>{tripLabel}</p>
+                    ) : plannerSubmitted ? (
+                      <p>{tripLabel} · {activityLabel} · {topWatersLabel}</p>
+                    ) : (
+                      <p>Enter trip details to highlight your viewing window.</p>
+                    )}
                   </div>
                 </div>
                 <div className="plannerResultsPage__chartHeaderActions">
@@ -2581,7 +1865,7 @@ export function PlannerPage() {
                       <span>Back to weekly</span>
                     </button>
                   ) : null}
-                  {plannerSubmitted ? (
+                  {!isEditingTrip ? (
                     <button
                       type="button"
                       className="plannerResultsPage__panelCollapseBtn"
@@ -2730,232 +2014,84 @@ export function PlannerPage() {
               </div>
             </div>
 
-            <aside className="plannerResultsPage__insightsCard">
-              <div className="plannerResultsPage__insightsHeader">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  insights
-                </span>
-                <h2>Trip insights</h2>
-              </div>
-              <div className="plannerResultsPage__insightsList">
-                <div className="plannerResultsPage__insightRow">
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    waves
-                  </span>
-                  <div className="plannerResultsPage__insightBody">
-                    <p>Typical activity</p>
-                    <strong>{plannerSubmitted ? activityLabel : "Choose dates to calculate"}</strong>
-                  </div>
-                </div>
-                <div className="plannerResultsPage__insightRow plannerResultsPage__insightRow--hotspot">
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    location_on
-                  </span>
-                  <div className="plannerResultsPage__insightBody">
-                    <p>Most active waters</p>
-                    <strong>{plannerSubmitted ? topWatersLabel : "Trip details will populate this view"}</strong>
-                  </div>
-                  {plannerSubmitted ? (
-                    <div className="plannerResultsPage__insightToggleRow">
-                      <button
-                        type="button"
-                        className={`plannerResultsPage__insightToggle${tripHotspotsVisible ? " isActive" : ""}`}
-                        onClick={() => setTripHotspotsVisible((value) => !value)}
-                        aria-pressed={tripHotspotsVisible}
-                      >
-                        <span className="material-symbols-rounded" aria-hidden="true">
-                          {tripHotspotsVisible ? "visibility_off" : "visibility"}
-                        </span>
-                        <span>{tripHotspotsVisible ? "Hide hotspot" : "Show hotspot"}</span>
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </aside>
           </section>
         ) : null}
 
+        {showPlannerChrome ? (
         <div className="plannerResultsPage__quickActions">
           {plannerSubmitted ? (
-            <>
-              <div
-                className="plannerResultsPage__quickActionDock"
-                onMouseEnter={openCamerasPanel}
-                onMouseLeave={closeCamerasPanelSoon}
-                onFocusCapture={openCamerasPanel}
-                onBlurCapture={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                    closeCamerasPanelSoon();
-                  }
-                }}
-              >
-                {camerasPanelOpen ? (
-                  <section className="plannerResultsPage__hydrophonesPanel" role="dialog" aria-modal="false">
-                    <div className="plannerResultsPage__hydrophonesPanelHeader">
-                      <div className="plannerResultsPage__panelEyebrow">Cameras</div>
-                      <em>{liveCamCount}</em>
-                    </div>
-                    <div className="plannerResultsPage__hydrophonesList">
-                      {cameraLocations.map((camera) => (
-                        <button
-                          key={camera.id}
-                          type="button"
-                          className={`plannerResultsPage__hydrophoneCard${selectedCameraId === camera.id ? " isActive" : ""}`}
-                          onMouseEnter={() => {
-                            setCamerasVisible(true);
-                            setSelectedCameraId(camera.id);
-                          }}
-                          onMouseLeave={() => setSelectedCameraId((current) => (current === camera.id ? null : current))}
-                          onFocus={() => {
-                            setCamerasVisible(true);
-                            setSelectedCameraId(camera.id);
-                          }}
-                          onBlur={() => setSelectedCameraId((current) => (current === camera.id ? null : current))}
-                          onClick={() => {
-                            setCamerasVisible(true);
-                            setSelectedCameraId(camera.id);
-                            setHydrophonesVisible(false);
-                            setSelectedHydrophoneId(null);
-                            setPulseSelectedPlaceMarker(false);
-                            setSelectedPlaceId(null);
-                            setItineraryMapViewActive(false);
-                            primaryMapRef.current?.fitLocations([[camera.longitude, camera.latitude]], {
-                              padding: 120,
-                              maxZoom: 11,
-                            });
-                          }}
-                        >
-                          <span className="plannerResultsPage__hydrophoneIcon" aria-hidden="true">
-                            <span className="material-symbols-rounded">videocam</span>
-                            <span className="plannerResultsPage__hydrophoneCornerLive" />
-                          </span>
-                          <span className="plannerResultsPage__hydrophoneText">
-                            <strong>{camera.name}</strong>
-                            <small>{camera.region}</small>
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                    {selectedCamera?.liveCameraUrl ? (
-                      <a
-                        className="plannerResultsPage__hydrophonesLink"
-                        href={selectedCamera.liveCameraUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <span>Watch on YouTube</span>
-                        <span className="material-symbols-rounded" aria-hidden="true">
-                          open_in_new
-                        </span>
-                      </a>
-                    ) : null}
-                  </section>
-                ) : null}
-                <button
-                  type="button"
-                  className={`plannerResultsPage__quickAction plannerResultsPage__quickAction--hydrophones${camerasVisible ? " isActive" : ""}`}
-                  aria-pressed={camerasVisible}
-                  onClick={() => setCamerasVisible((value) => !value)}
-                >
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    videocam
-                  </span>
-                  <span>Cameras</span>
-                  <em>{liveCamCount}</em>
-                </button>
-              </div>
-              <div
-                className="plannerResultsPage__quickActionDock"
-                onMouseEnter={openHydrophonesPanel}
-                onMouseLeave={closeHydrophonesPanelSoon}
-                onFocusCapture={openHydrophonesPanel}
-                onBlurCapture={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                    closeHydrophonesPanelSoon();
-                  }
-                }}
-              >
-                {hydrophonesPanelOpen ? (
-                  <section className="plannerResultsPage__hydrophonesPanel" role="dialog" aria-modal="false">
-                    <div className="plannerResultsPage__hydrophonesPanelHeader">
-                      <div className="plannerResultsPage__panelEyebrow">Hydrophones</div>
-                      <em>{hydrophoneCount}</em>
-                    </div>
-                    <div className="plannerResultsPage__hydrophonesList">
-                      {hydrophoneLocations.map((hydrophone) => (
-                        <button
-                          key={hydrophone.id}
-                          type="button"
-                          className={`plannerResultsPage__hydrophoneCard${selectedHydrophoneId === hydrophone.id ? " isActive" : ""}`}
-                          onMouseEnter={() => {
-                            setHydrophonesVisible(true);
-                            setSelectedHydrophoneId(hydrophone.id);
-                          }}
-                          onMouseLeave={() => setSelectedHydrophoneId((current) => (current === hydrophone.id ? null : current))}
-                          onFocus={() => {
-                            setHydrophonesVisible(true);
-                            setSelectedHydrophoneId(hydrophone.id);
-                          }}
-                          onBlur={() => setSelectedHydrophoneId((current) => (current === hydrophone.id ? null : current))}
-                          onClick={() => {
-                            setHydrophonesVisible(true);
-                            setSelectedHydrophoneId(hydrophone.id);
-                            setCamerasVisible(false);
-                            setSelectedCameraId(null);
-                            setPulseSelectedPlaceMarker(false);
-                            setSelectedPlaceId(null);
-                            setItineraryMapViewActive(false);
-                            primaryMapRef.current?.fitLocations([[hydrophone.longitude, hydrophone.latitude]], {
-                              padding: 120,
-                              maxZoom: 11,
-                            });
-                          }}
-                        >
-                          <span className="plannerResultsPage__hydrophoneIcon" aria-hidden="true">
-                            <span className="plannerResultsPage__hydrophoneMark">
-                              <span />
-                              <span />
-                              <span />
-                              <span />
-                              <span />
-                            </span>
-                            <span className="plannerResultsPage__hydrophoneCornerLive" />
-                          </span>
-                          <span className="plannerResultsPage__hydrophoneText">
-                            <strong>{hydrophone.name}</strong>
-                            <small>{hydrophone.region}</small>
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                    <a
-                      className="plannerResultsPage__hydrophonesLink"
-                      href={hydrophoneListenUrl}
-                      target="_blank"
-                      rel="noreferrer"
+            <div className={`plannerResultsPage__placesFab${placesMenuOpen ? " isOpen" : ""}`}>
+              <div id="planner-places-filters" className="plannerResultsPage__placesFabMenu" role="group" aria-label="Choose visible points of interest">
+                {([
+                  ["top", "Top Places", "star"],
+                  ["all", "All POIs", "location_on"],
+                  ["Park", "Parks", "park"],
+                  ["Marina", "Marinas", "anchor"],
+                  ["Ferry", "Ferries", "directions_boat"],
+                  ["camera", "Cameras", "videocam"],
+                  ["hydrophone", "Hydrophones", "graphic_eq"],
+                ] as const).map(([filter, label, icon]) => {
+                  const active =
+                    filter === "top"
+                      ? topPlacesVisible
+                      : filter === "all"
+                        ? allPoiLayersVisible
+                        : filter === "camera"
+                          ? camerasVisible
+                          : filter === "hydrophone"
+                            ? hydrophonesVisible
+                            : poiFilters[filter];
+                  return (
+                    <button
+                      key={filter}
+                      type="button"
+                      className={active ? "isActive" : ""}
+                      aria-pressed={active}
+                      onClick={() => {
+                        if (filter === "top") {
+                          setTopPlacesVisible(true);
+                          setPoiFilters({ Park: false, Marina: false, Ferry: false });
+                          setCamerasVisible(false);
+                          setHydrophonesVisible(false);
+                        } else if (filter === "all") {
+                          setTopPlacesVisible(false);
+                          setPoiFilters({ Park: true, Marina: true, Ferry: true });
+                          setCamerasVisible(true);
+                          setHydrophonesVisible(true);
+                        } else if (filter === "camera") {
+                          setTopPlacesVisible(false);
+                          setCamerasVisible((visible) => !visible);
+                        } else if (filter === "hydrophone") {
+                          setTopPlacesVisible(false);
+                          setHydrophonesVisible((visible) => !visible);
+                        } else {
+                          setTopPlacesVisible(false);
+                          setPoiFilters((current) => ({ ...current, [filter]: !current[filter] }));
+                        }
+                      }}
                     >
-                      <span>Listen on Orcasound</span>
-                      <span className="material-symbols-rounded" aria-hidden="true">
-                        open_in_new
-                      </span>
-                    </a>
-                  </section>
-                ) : null}
-                <button
-                  type="button"
-                  className={`plannerResultsPage__quickAction plannerResultsPage__quickAction--hydrophones${hydrophonesVisible ? " isActive" : ""}`}
-                  aria-pressed={hydrophonesVisible}
-                  onClick={() => setHydrophonesVisible((value) => !value)}
-                >
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    graphic_eq
-                  </span>
-                  <span>Hydrophones</span>
-                  <em>{hydrophoneCount}</em>
-                </button>
+                      <span className="material-symbols-rounded" aria-hidden="true">{icon}</span>
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
               </div>
-            </>
+              <button
+                type="button"
+                className={`plannerResultsPage__quickAction plannerResultsPage__quickAction--places${placesMenuOpen ? " isExpanded" : ""}`}
+                aria-expanded={placesMenuOpen}
+                aria-controls="planner-places-filters"
+                onClick={() => {
+                  setPlacesMenuOpen((open) => !open);
+                  setSelectedCameraId(null);
+                  setSelectedHydrophoneId(null);
+                }}
+              >
+                <span className="material-symbols-rounded plannerResultsPage__placesFabIcon" aria-hidden="true">add</span>
+                <span>Places</span>
+                <em>{displayedRecommendedPlaces.length}</em>
+              </button>
+            </div>
           ) : null}
           <div ref={settingsRef} className="plannerResultsPage__settingsDock">
             {settingsOpen && (
@@ -2974,30 +2110,6 @@ export function PlannerPage() {
                   <div className="footerDock__headerActions">
                     <button
                       type="button"
-                      className="footerDock__utilityIcon footerDock__utilityIcon--header"
-                      onClick={downloadSnapshotAction}
-                      disabled={shareBusy}
-                      title="Download snapshot"
-                      aria-label="Download snapshot"
-                    >
-                      <span className="material-symbols-rounded" aria-hidden="true">
-                        download
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      className="footerDock__utilityIcon footerDock__utilityIcon--header"
-                      onClick={shareSnapshot}
-                      disabled={shareBusy}
-                      title="Share snapshot"
-                      aria-label="Share snapshot"
-                    >
-                      <span className="material-symbols-rounded" aria-hidden="true">
-                        ios_share
-                      </span>
-                    </button>
-                    <button
-                      type="button"
                       className="footerDock__closeButton"
                       onClick={() => setSettingsOpen(false)}
                       aria-label="Close settings"
@@ -3010,22 +2122,7 @@ export function PlannerPage() {
                 </div>
 
                 <section className="footerDock__section footerDock__section--settings">
-                  <div className="footerDock__sectionLabel">Appearance</div>
-                  <div className="footerDock__settingRow footerDock__settingRow--button">
-                    <span className="footerDock__settingLabel">Theme</span>
-                    <button
-                      type="button"
-                      className="footerDock__modeButton"
-                      onClick={() => setThemeMode(darkMode ? "light" : "dark")}
-                      aria-pressed={darkMode}
-                      aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-                    >
-                      <span className="material-symbols-rounded" aria-hidden="true">
-                        {darkMode ? "light_mode" : "dark_mode"}
-                      </span>
-                      <span>{darkMode ? "Dark mode" : "Light mode"}</span>
-                    </button>
-                  </div>
+                  <div className="footerDock__sectionLabel">Display</div>
                   <label className="footerDock__settingRow footerDock__settingRow--select">
                     <span className="footerDock__settingLabel">Units</span>
                     <span className="footerDock__selectWrap">
@@ -3073,140 +2170,8 @@ export function PlannerPage() {
                       </span>
                     </span>
                   </label>
-                  <div className="footerDock__settingBlock">
-                    <div className="footerDock__settingCaption">Points of interest</div>
-                    <div className="footerDock__toggleGrid">
-                      <button
-                        type="button"
-                        className={poiActive ? "footerDock__chip isActive" : "footerDock__chip"}
-                        onClick={() =>
-                          setPoiFilters(() =>
-                            poiActive
-                              ? { Park: false, Marina: false, Ferry: false }
-                              : { Park: true, Marina: true, Ferry: true }
-                          )
-                        }
-                      >
-                        All
-                      </button>
-                      <button
-                        type="button"
-                        className={poiFilters.Park ? "footerDock__chip isActive" : "footerDock__chip"}
-                        onClick={() => setPoiFilters((current) => ({ ...current, Park: !current.Park }))}
-                      >
-                        <span className="footerDock__chipInner">
-                          <span className="footerDock__chipIcons footerDock__chipIcons--park" aria-hidden="true">
-                            <span className="material-symbols-rounded">park</span>
-                          </span>
-                          <span>Parks</span>
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className={poiFilters.Marina ? "footerDock__chip isActive" : "footerDock__chip"}
-                        onClick={() => setPoiFilters((current) => ({ ...current, Marina: !current.Marina }))}
-                      >
-                        <span className="footerDock__chipInner">
-                          <span className="footerDock__chipIcons footerDock__chipIcons--marina" aria-hidden="true">
-                            <span className="material-symbols-rounded">anchor</span>
-                          </span>
-                          <span>Marinas</span>
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className={poiFilters.Ferry ? "footerDock__chip isActive" : "footerDock__chip"}
-                        onClick={() => setPoiFilters((current) => ({ ...current, Ferry: !current.Ferry }))}
-                      >
-                        <span className="footerDock__chipInner">
-                          <span className="footerDock__chipIcons footerDock__chipIcons--ferry" aria-hidden="true">
-                            <span className="material-symbols-rounded">directions_boat</span>
-                          </span>
-                          <span>Ferries</span>
-                        </span>
-                      </button>
-                    </div>
-                  </div>
                 </section>
 
-                <section className="footerDock__section footerDock__section--settings">
-                  <div className="footerDock__sectionLabel">Color scale</div>
-                  <div className="footerDock__settingBlock">
-                    <div className="footerDock__settingCaption">Palette</div>
-                    <button
-                      type="button"
-                      className={`footerDock__paletteTrigger${paletteOpen ? " isOpen" : ""}`}
-                      onClick={() => setPaletteOpen((value) => !value)}
-                      aria-expanded={paletteOpen}
-                      aria-label="Color scale"
-                    >
-                      <span className="footerDock__paletteTriggerMain">
-                        <span className="footerDock__paletteSwatches" aria-hidden="true">
-                          {PALETTES[selectedPaletteId].colors.slice(0, 5).map((color, index) => (
-                            <span
-                              key={`${selectedPaletteId}-active-${index}`}
-                              className="footerDock__paletteSwatch"
-                              style={{ backgroundColor: color }}
-                            />
-                          ))}
-                        </span>
-                        <span className="footerDock__paletteName">{PALETTES[selectedPaletteId].name}</span>
-                      </span>
-                      <span className="material-symbols-rounded footerDock__paletteChevron" aria-hidden="true">
-                        expand_more
-                      </span>
-                    </button>
-                    {paletteOpen && (
-                      <div className="footerDock__paletteList" role="listbox" aria-label="Color scale palettes">
-                        {paletteEntries.map((palette) => {
-                          const selected = palette.id === selectedPaletteId;
-                          return (
-                            <button
-                              key={palette.id}
-                              type="button"
-                              className={`footerDock__paletteRow${selected ? " isSelected" : ""}`}
-                              onClick={() => {
-                                setSelectedPaletteId(palette.id);
-                                setPaletteOpen(false);
-                              }}
-                            >
-                              <span className="footerDock__paletteSwatches" aria-hidden="true">
-                                {palette.colors.slice(0, 5).map((color, index) => (
-                                  <span
-                                    key={`${palette.id}-${index}`}
-                                    className="footerDock__paletteSwatch"
-                                    style={{ backgroundColor: color }}
-                                  />
-                                ))}
-                              </span>
-                              <span className="footerDock__paletteName">{palette.name}</span>
-                              <span className="material-symbols-rounded footerDock__paletteCheck" aria-hidden="true">
-                                {selected ? "check" : ""}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  <label className="footerDock__settingRow footerDock__settingRow--select">
-                    <span className="footerDock__settingLabel">Color no data</span>
-                    <span className="footerDock__selectWrap">
-                      <select
-                        className="select select--footer"
-                        value={colorNoData}
-                        onChange={(event) => setColorNoData(event.target.value as "off" | "on")}
-                        aria-label="Color no data"
-                      >
-                        <option value="off">No</option>
-                        <option value="on">Yes</option>
-                      </select>
-                      <span className="material-symbols-rounded footerDock__selectChevron" aria-hidden="true">
-                        expand_more
-                      </span>
-                    </span>
-                  </label>
-                </section>
               </section>
             )}
 
@@ -3223,6 +2188,7 @@ export function PlannerPage() {
             </button>
           </div>
         </div>
+        ) : null}
 
         {(tripLoading || tripError || recommendedPlacesData.error) && (
           <div className="plannerResultsPage__statusBanner">
@@ -3232,13 +2198,48 @@ export function PlannerPage() {
           </div>
         )}
 
+        {itineraryExportOpen ? (
+          <div className="plannerResultsPage__itineraryExportOverlay" role="presentation" onMouseDown={() => setItineraryExportOpen(false)}>
+            <section
+              className="plannerResultsPage__itineraryExportDialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="planner-itinerary-export-title"
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <div className="plannerResultsPage__itineraryExportHeader">
+                <div>
+                  <div className="plannerResultsPage__spotsEyebrow">Salish Sea trip</div>
+                  <h2 id="planner-itinerary-export-title">Your itinerary</h2>
+                  <p>{tripLabel}</p>
+                </div>
+                <button type="button" className="plannerResultsPage__itineraryExportClose" onClick={() => setItineraryExportOpen(false)} aria-label="Close itinerary export">
+                  <span className="material-symbols-rounded" aria-hidden="true">close</span>
+                </button>
+              </div>
+              <div className="plannerResultsPage__itineraryExportList">
+                {itineraryPlaces.map((place, index) => (
+                  <div className="plannerResultsPage__itineraryExportStop" key={place.id}>
+                    <span className="plannerResultsPage__itineraryExportNumber">{index + 1}</span>
+                    <div>
+                      <strong>{place.name}</strong>
+                      <span>{place.region ?? "Salish Sea"}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="plannerResultsPage__itineraryExportFooter">{itineraryPlaces.length} {itineraryPlaces.length === 1 ? "stop" : "stops"} planned</div>
+            </section>
+          </div>
+        ) : null}
+
         <Suspense fallback={null}>
           {infoOpen && (
             <InfoModal
               open={infoOpen}
               onClose={() => setInfoOpen(false)}
               onStartTour={() => setInfoOpen(false)}
-              darkMode={darkMode}
+              darkMode={false}
             />
           )}
         </Suspense>

@@ -7,6 +7,7 @@ type Props = {
   onOpenMenu: () => void;
   onBrandClick?: () => void;
   rightSlot?: ReactNode;
+  variant?: "default" | "home";
 };
 
 export function AppHeader({
@@ -16,9 +17,10 @@ export function AppHeader({
   onOpenMenu,
   onBrandClick,
   rightSlot,
+  variant = "default",
 }: Props) {
   return (
-    <header className="header" data-tour="top-bar">
+    <header className={`header${variant === "home" ? " header--home" : ""}`} data-tour="top-bar">
       <div className="header__left">
         <button
           className="iconBtn iconBtn--menu"

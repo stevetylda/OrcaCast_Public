@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app/App";
 import "driver.js/dist/driver.css";
-import { WatchPageFailureState } from "./pages/WatchPage";
+import { WatchPageFailureState } from "./pages/WatchPage/WatchPageFailureState";
 import { normalizeDataLoadError } from "./shared/data/errors";
 import { primeDataMeta } from "./shared/data/meta";
 

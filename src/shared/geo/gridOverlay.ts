@@ -54,6 +54,13 @@ const HOTSPOT_GLOW_COLOR = "rgba(255,45,170,0.52)";
  */
 type FillColorSpec = DataDrivenPropertyValueSpecification<string>;
 
+export type GridVisualStyle = {
+  fillOpacity?: number;
+  haloOpacity?: number;
+  lineOpacity?: number;
+  lineWidth?: number;
+};
+
 function extractGeometryCoordinates(geometry: Feature["geometry"]): number[][] {
   if (!geometry) return [];
   if (geometry.type === "Polygon") return geometry.coordinates.flat();
@@ -763,8 +770,13 @@ export function addGridOverlay(
   lineAccentColor = "rgba(96,186,200,0.34)",
   sourceId = DEFAULT_SOURCE_ID,
   fillId = DEFAULT_FILL_ID,
-  lineId = DEFAULT_LINE_ID
+  lineId = DEFAULT_LINE_ID,
+  visualStyle: GridVisualStyle = {}
 ) {
+  const fillOpacity = visualStyle.fillOpacity ?? 0.8;
+  const haloOpacity = visualStyle.haloOpacity ?? 0.45;
+  const lineOpacity = visualStyle.lineOpacity ?? 0.85;
+  const lineWidth = visualStyle.lineWidth ?? 0.4;
   const DEBUG_MAP =
     import.meta.env.DEV &&
     typeof window !== "undefined" &&
@@ -825,7 +837,7 @@ export function addGridOverlay(
 
   if (map.getLayer(fillId)) {
     map.setPaintProperty(fillId, "fill-color", fillColor);
-    map.setPaintProperty(fillId, "fill-opacity", 0.8);
+    map.setPaintProperty(fillId, "fill-opacity", fillOpacity);
     map.setPaintProperty(fillId, "fill-outline-color", borderColor);
     map.setPaintProperty(fillId, "fill-opacity-transition", { duration: 200, delay: 0 });
   } else {
@@ -835,7 +847,7 @@ export function addGridOverlay(
       source: sourceId,
       paint: {
         "fill-color": fillColor,
-        "fill-opacity": 0.8,
+        "fill-opacity": fillOpacity,
         "fill-outline-color": borderColor,
         "fill-opacity-transition": { duration: 200, delay: 0 },
       },
@@ -855,7 +867,7 @@ export function addGridOverlay(
       12,
       2.4,
     ] as ExpressionSpecification);
-    map.setPaintProperty(HALO_ID, "line-opacity", 0.45);
+    map.setPaintProperty(HALO_ID, "line-opacity", haloOpacity);
     map.setPaintProperty(HALO_ID, "line-blur", 1.8);
   } else {
     const layer = {
@@ -865,7 +877,7 @@ export function addGridOverlay(
       paint: {
         "line-color": "rgba(5,10,22,0.6)",
         "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.2, 9, 1.8, 12, 2.4] as ExpressionSpecification,
-        "line-opacity": 0.45,
+        "line-opacity": haloOpacity,
         "line-blur": 1.8,
       },
     };
@@ -878,8 +890,8 @@ export function addGridOverlay(
 
   if (map.getLayer(lineId)) {
     map.setPaintProperty(lineId, "line-color", borderColor);
-    map.setPaintProperty(lineId, "line-width", 0.4);
-    map.setPaintProperty(lineId, "line-opacity", 0.85);
+    map.setPaintProperty(lineId, "line-width", lineWidth);
+    map.setPaintProperty(lineId, "line-opacity", lineOpacity);
   } else {
     map.addLayer({
       id: lineId,
@@ -887,8 +899,8 @@ export function addGridOverlay(
       source: sourceId,
       paint: {
         "line-color": borderColor,
-        "line-width": 0.4,
-        "line-opacity": 0.85,
+        "line-width": lineWidth,
+        "line-opacity": lineOpacity,
       },
     });
   }
@@ -1264,11 +1276,15 @@ export function setGridBaseVisibility(
   map: MapLibreMap,
   visible: boolean,
   fillId = DEFAULT_FILL_ID,
-  lineId = DEFAULT_LINE_ID
+  lineId = DEFAULT_LINE_ID,
+  visualStyle: GridVisualStyle = {}
 ) {
+  const fillOpacity = visualStyle.fillOpacity ?? 0.8;
+  const haloOpacity = visualStyle.haloOpacity ?? 0.45;
+  const lineOpacity = visualStyle.lineOpacity ?? 0.35;
   setGridCoreLayerVisibility(map, visible, fillId, lineId);
   if (map.getLayer(fillId)) {
-    map.setPaintProperty(fillId, "fill-opacity", visible ? 0.8 : 0);
+    map.setPaintProperty(fillId, "fill-opacity", visible ? fillOpacity : 0);
   }
   if (map.getLayer(SHIMMER_ID)) {
     map.setPaintProperty(SHIMMER_ID, "fill-opacity", visible ? 0.2 : 0);
@@ -1295,10 +1311,10 @@ export function setGridBaseVisibility(
     map.setPaintProperty(HOVER_CORE_ID, "line-opacity", visible ? 0.9 : 0);
   }
   if (map.getLayer(HALO_ID)) {
-    map.setPaintProperty(HALO_ID, "line-opacity", visible ? 0.45 : 0);
+    map.setPaintProperty(HALO_ID, "line-opacity", visible ? haloOpacity : 0);
   }
   if (map.getLayer(lineId)) {
-    map.setPaintProperty(lineId, "line-opacity", visible ? 0.35 : 0);
+    map.setPaintProperty(lineId, "line-opacity", visible ? lineOpacity : 0);
   }
 }
 
@@ -1306,9 +1322,10 @@ export function setGridVisibility(
   map: MapLibreMap,
   visible: boolean,
   fillId = DEFAULT_FILL_ID,
-  lineId = DEFAULT_LINE_ID
+  lineId = DEFAULT_LINE_ID,
+  visualStyle: GridVisualStyle = {}
 ) {
-  setGridBaseVisibility(map, visible, fillId, lineId);
+  setGridBaseVisibility(map, visible, fillId, lineId, visualStyle);
   if (!visible) {
     setHotspotVisibility(map, false);
   }

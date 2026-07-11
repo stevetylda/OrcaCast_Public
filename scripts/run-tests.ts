@@ -54,6 +54,11 @@ async function loadTests(): Promise<TestCase[]> {
 
 const tests = await loadTests();
 
+if (tests.length === 0) {
+  console.error("No test suites were discovered. Add at least one exported run*UnitTests function.");
+  process.exitCode = 1;
+}
+
 let failures = 0;
 
 for (const testCase of tests) {
