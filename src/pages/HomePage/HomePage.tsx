@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
 import { ReturnToTopButton } from "../../shared/components/ReturnToTopButton";
+import { SiteFooter } from "../../shared/components/SiteFooter";
 import { useMenu } from "../../shared/state/MenuContext";
 import { useMapState } from "../../shared/state/MapStateContext";
 import {
@@ -225,14 +226,14 @@ export function HomePage() {
         <section className="homeExplore" id="explore" aria-labelledby="explore-title">
           <div className="homeSectionHeading homeSectionHeading--center"><p className="homeKicker">Shore mode / couch mode</p><h2 id="explore-title">Choose your own adventure.</h2></div>
           <div className="homeExplore__cards">
-            <Link className="homeExploreCard homeExploreCard--pink" to="/watch"><i>01</i><span className="material-symbols-rounded" aria-hidden="true">map</span><div><h3>Explore the map</h3><p>See forecast waters and places to watch.</p></div><b aria-hidden="true">→</b></Link>
-            <Link className="homeExploreCard homeExploreCard--yellow" to="/watch"><i>02</i><span className="material-symbols-rounded" aria-hidden="true">photo_camera</span><div><h3>Watch the coast</h3><p>Find cameras around the Salish Sea.</p></div><b aria-hidden="true">→</b></Link>
-            <Link className="homeExploreCard homeExploreCard--aqua" to="/watch"><i>03</i><span className="material-symbols-rounded" aria-hidden="true">graphic_eq</span><div><h3>Listen below</h3><p>Tune into Salish Sea hydrophones.</p></div><b aria-hidden="true">→</b></Link>
+            <Link className="homeExploreCard homeExploreCard--pink" to="/watch"><i>01</i><span className="material-symbols-rounded" aria-hidden="true">map</span><div><h3>Explore</h3><p>See forecast waters and places to watch.</p></div><b aria-hidden="true">→</b></Link>
+            <Link className="homeExploreCard homeExploreCard--yellow" to="/watch"><i>02</i><span className="material-symbols-rounded" aria-hidden="true">photo_camera</span><div><h3>Watch</h3><p>Find cameras around the Salish Sea.</p></div><b aria-hidden="true">→</b></Link>
+            <Link className="homeExploreCard homeExploreCard--aqua" to="/watch"><i>03</i><span className="material-symbols-rounded" aria-hidden="true">graphic_eq</span><div><h3>Listen</h3><p>Tune into Salish Sea hydrophones.</p></div><b aria-hidden="true">→</b></Link>
           </div>
         </section>
       </main>
 
-      <footer className="homeFooter"><div><b>OC</b> OrcaCast</div><span>Plan thoughtfully. Watch respectfully.</span><span>Salish Sea · Pacific Northwest</span></footer>
+      <SiteFooter tagline="Plan thoughtfully. Watch respectfully." />
 
       <ReturnToTopButton className="homeReturnToTop" />
 

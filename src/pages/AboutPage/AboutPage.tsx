@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
 import { ReturnToTopButton } from "../../shared/components/ReturnToTopButton";
+import { SiteFooter } from "../../shared/components/SiteFooter";
 import { appConfig } from "../../shared/config/appConfig";
 import { getCachedDataMeta, loadDataMeta, type DataMeta } from "../../shared/data/meta";
 import { useMapState } from "../../shared/state/MapStateContext";
@@ -471,17 +472,7 @@ export function AboutPage() {
         </section>
       </main>
 
-      <footer className="aboutGuideFooter">
-        <strong>OrcaCast</strong>
-        <nav aria-label="About footer navigation">
-          <a href="#about-top">About</a>
-          <a href="#responsible-viewing">Responsible viewing</a>
-          <a href="#methodology">Methodology</a>
-          <Link to="/about/model">Learn how the model works</Link>
-          <Link to="/planner">Plan a trip</Link>
-        </nav>
-        <span>Plan thoughtfully. Watch respectfully.</span>
-      </footer>
+      <SiteFooter tagline="Plan thoughtfully. Watch respectfully." links={[{ label: "About", to: "#about-top", external: true }, { label: "Responsible viewing", to: "#responsible-viewing", external: true }, { label: "Methodology", to: "#methodology", external: true }, { label: "Learn how the model works", to: "/about/model" }, { label: "Plan a trip", to: "/planner" }]} />
 
       <ReturnToTopButton className="aboutReturnToTop" />
 

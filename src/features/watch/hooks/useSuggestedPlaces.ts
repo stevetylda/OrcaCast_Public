@@ -371,6 +371,7 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
   const effectivePlaces = enabled ? places : EMPTY_SUGGESTED_PLACES;
   const effectiveIsLoading = enabled ? isLoading : false;
   const effectiveError = enabled ? error : null;
+  const { Park: includeParks, Marina: includeMarinas, Ferry: includeFerries } = poiFilters;
 
   useEffect(() => {
     if (!enabled) return;
@@ -384,7 +385,8 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
       }
       const baselinePayloadPromise = loadTripPlannerOccurrencePayload(resolution);
       const [poiBundle, grid, baselinePayload] = await Promise.all([loadPoiDataBundle(), loadGrid(resolution), baselinePayloadPromise]);
-      const activePoiFilters = hasActivePoiFilter(poiFilters) ? poiFilters : undefined;
+      const requestedPoiFilters = { Park: includeParks, Marina: includeMarinas, Ferry: includeFerries };
+      const activePoiFilters = hasActivePoiFilter(requestedPoiFilters) ? requestedPoiFilters : undefined;
       const pois = filterPoisByType(poiBundle.items, activePoiFilters).map(enrichPlannerPoi);
       if (pois.length === 0) return [];
 
@@ -436,9 +438,9 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
     limit,
     maxTravelDistanceMiles,
     modelId,
-    poiFilters.Ferry,
-    poiFilters.Marina,
-    poiFilters.Park,
+    includeFerries,
+    includeMarinas,
+    includeParks,
     resolution,
   ]);
 

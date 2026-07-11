@@ -137,17 +137,6 @@ export function WeekTimelineBar({
           aria-label="Selected forecast week"
         />
       </div>
-
-      <button
-        type="button"
-        className="weekTimeline__iconBtn weekTimeline__iconBtn--calendar"
-        onClick={() => onPlayingChange(false)}
-        aria-label="Current weekly forecast selection"
-      >
-        <span className="material-symbols-rounded" aria-hidden="true">
-          calendar_month
-        </span>
-      </button>
     </div>
   );
 }

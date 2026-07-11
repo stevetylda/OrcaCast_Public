@@ -28,7 +28,6 @@ export type WatchPageController = ReturnType<typeof useWatchPageController>;
 export function useWatchPageController() {
   const {
     darkMode,
-    setThemeMode,
     unitsMode,
     setUnitsMode,
     surfaceMode,
@@ -194,6 +193,7 @@ export function useWatchPageController() {
     forecastPath,
     fallbackForecastPath: latestForecastPath,
     enabled: periods.length > 0,
+    limit: 25,
     poiFilters,
   });
 
@@ -365,7 +365,7 @@ export function useWatchPageController() {
     setGridDetailCellId(null);
     setGridDetailSelectedWeek(null);
     setGridDetailSelectedWeekYear(null);
-    setResolution("H4");
+    setResolution("H6");
     setModelId(appConfig.compositeModelId);
     setHotspotsEnabled(false);
     setHotspotMode("modeled");
@@ -470,7 +470,6 @@ export function useWatchPageController() {
     retryPageLoad,
     primaryMapRef,
     darkMode,
-    setThemeMode,
     unitsMode,
     setUnitsMode,
     surfaceMode,

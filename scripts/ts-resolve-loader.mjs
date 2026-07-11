@@ -38,6 +38,9 @@ export async function resolve(specifier, context, defaultResolve) {
 
 export async function load(url, context, defaultLoad) {
   const pathname = new URL(url).pathname;
+  if (pathname.endsWith(".css")) {
+    return { format: "module", shortCircuit: true, source: "export default {};" };
+  }
   if (!TS_EXTENSIONS.some((extension) => pathname.endsWith(extension))) {
     return defaultLoad(url, context, defaultLoad);
   }

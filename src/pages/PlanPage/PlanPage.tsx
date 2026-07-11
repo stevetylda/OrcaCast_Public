@@ -4,7 +4,8 @@ import { ForecastMap, type ForecastMapHandle, type ForecastMapProps } from "../.
 import { appConfig } from "../../shared/config/appConfig";
 import { DEFAULT_RECOMMENDATION_RADIUS_MILES } from "../../shared/config/planner";
 import { AppHeader } from "../../shared/components/AppHeader";
-import { SwimmingOrcaLoader } from "../../shared/components/SwimmingOrcaLoader";
+import { AmbientSwimmingOrca } from "../../shared/components/AmbientSwimmingOrca";
+import { LoadingAnimation, LoadingOverlay } from "../../shared/components/loading";
 import {
   buildTripPlannerRangeFromDates,
 } from "../../shared/data/tripPlanner";
@@ -14,7 +15,6 @@ import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlace
 import type { SuggestedPlace } from "../../features/locations/types";
 import { isoWeekFromDate, isoWeekYearFromDate } from "../../shared/time/forecastPeriodToIsoWeek";
 import { PALETTES } from "../../shared/geo/palettes";
-import { H3ResolutionPill } from "../../features/watch/components/H3ResolutionPill";
 import type { TripPlanSelection } from "../../features/planner/model/plannerTypes";
 import {
   clearStoredPlannerState,
@@ -33,7 +33,6 @@ import {
   PlannerDateRangeField,
   PlannerLocationField,
 } from "../../features/planner/components/PlannerFields";
-import { PlannerFerryLoader } from "../../features/planner/components/PlannerFerryLoader";
 import {
   PlannerLoadingState,
   PlannerPlaceCard,
@@ -188,7 +187,6 @@ export function PlannerPage() {
     surfaceMode,
     setSurfaceMode,
     resolution,
-    setResolution,
     selectedPaletteId,
     setSelectedPaletteId,
   } = useMapState();
@@ -960,7 +958,7 @@ export function PlannerPage() {
 
   const mapProps = {
     darkMode: false,
-    basemapMode: "raster" as const,
+    basemapMode: "vector" as const,
     showMapControls: false,
     showLegendControl: false,
     colorNoData: true,
@@ -1036,14 +1034,14 @@ export function PlannerPage() {
         </div>
 
         {tripRevealPending ? (
-          <div
-            className={`plannerResultsPage__revealGate${plannerRevealComplete ? " isComplete" : ""}`}
-            role="status"
-            aria-live="polite"
-            aria-label="Preparing the trip planner map, activity layers, and recommended viewing spots."
-          >
-            <PlannerFerryLoader complete={plannerRevealComplete} />
-          </div>
+          <LoadingOverlay complete={plannerRevealComplete}>
+            <LoadingAnimation
+              variant="ferry"
+              complete={plannerRevealComplete}
+              label="Preparing your trip"
+              completeLabel="Your trip is ready"
+            />
+          </LoadingOverlay>
         ) : tripLoading ? (
           <div
             className="plannerResultsPage__screenLoading"
@@ -1051,7 +1049,7 @@ export function PlannerPage() {
             aria-live="polite"
             aria-label="Loading historical sightings, the activity map, and trip recommendations."
           >
-            <SwimmingOrcaLoader />
+            <AmbientSwimmingOrca />
           </div>
         ) : null}
 
@@ -2147,13 +2145,6 @@ export function PlannerPage() {
                   <label className="footerDock__settingRow footerDock__settingRow--select">
                     <span className="footerDock__settingLabel">Surface view</span>
                     <span className="footerDock__settingControls footerDock__settingControls--layers">
-                      <span className="footerDock__resolutionInline">
-                        <H3ResolutionPill
-                          value={resolution === "H4" ? 4 : resolution === "H5" ? 5 : 6}
-                          onChange={(next) => setResolution(next === 4 ? "H4" : next === 5 ? "H5" : "H6")}
-                          compact
-                        />
-                      </span>
                       <span className="footerDock__selectWrap">
                         <select
                           className="select select--footer"

@@ -1,0 +1,1678 @@
+/* This Week shares the planner's field-guide vocabulary: paper cards, ink
+   outlines, bright operational accents, and a map-first composition. */
+
+.thisWeekResultsPage {
+  --planner-ink: #061d3c;
+  --planner-paper: #fff8e9;
+  --planner-aqua: #47d1ca;
+  --planner-coral: #ff6458;
+  --planner-yellow: #ffda4c;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #e8f0ed;
+}
+
+.thisWeekResultsPage__main {
+  min-height: calc(100dvh - 74px);
+  height: calc(100dvh - 74px);
+  overflow: hidden;
+}
+
+.thisWeekResultsPage__mapLayer {
+  border: 1px solid rgba(177, 208, 233, 0.48);
+}
+
+.thisWeekResultsPage__mapLayer::after {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.42), transparent 31%),
+    linear-gradient(135deg, rgba(244, 250, 255, 0.38) 0%, rgba(244, 250, 255, 0.08) 42%, transparent 100%);
+}
+
+.mapPageRoot--thisWeek .header--home .homeNav a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 7px;
+  text-decoration-color: var(--planner-coral, #ff6458);
+}
+
+/* Weekly digest card ------------------------------------------------------ */
+
+.thisWeekResultsPage__summaryCard {
+  position: absolute;
+  z-index: 7;
+  top: 24px;
+  left: 24px;
+  display: grid;
+  grid-template-columns: 54px max-content;
+  align-items: center;
+  gap: 14px;
+  width: max-content;
+  max-width: calc(100% - var(--this-week-panel-offset, 0px) - 92px);
+  padding: 13px 20px;
+  border: 3px solid var(--planner-ink);
+  border-radius: 25px;
+  background: var(--planner-paper);
+  color: var(--planner-ink);
+  box-shadow: 7px 8px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage__summaryIcon,
+.thisWeekResultsPage__timelineIcon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border: 3px solid var(--planner-ink);
+  border-radius: 50%;
+  background: var(--planner-aqua);
+  color: var(--planner-ink);
+}
+
+.thisWeekResultsPage__summaryIcon {
+  width: 54px;
+  height: 54px;
+}
+
+.thisWeekResultsPage__summaryIcon .material-symbols-rounded,
+.thisWeekResultsPage__timelineIcon .material-symbols-rounded {
+  font-size: 31px;
+  font-variation-settings: "FILL" 0, "wght" 650, "GRAD" 0, "opsz" 32;
+}
+
+.thisWeekResultsPage__summaryBody {
+  min-width: 0;
+}
+
+.thisWeekResultsPage__eyebrow {
+  margin: 0;
+  color: #08787c;
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.thisWeekResultsPage__summaryBody h1 {
+  margin: 3px 0 0;
+  color: var(--planner-ink);
+  font-size: clamp(1.7rem, 2.45vw, 2.4rem);
+  font-weight: 950;
+  letter-spacing: -.065em;
+  line-height: .98;
+  white-space: nowrap;
+}
+
+.thisWeekResultsPage__summaryLine {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.thisWeekResultsPage__summaryCopy {
+  margin: 0;
+  color: #425a72;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.thisWeekResultsPage__summaryMeta {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.thisWeekResultsPage__summaryMeta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 999px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.thisWeekResultsPage__summaryMeta > span:nth-child(2) {
+  background: #d9f4ef;
+}
+
+.thisWeekResultsPage__summaryMeta > span:nth-child(3) {
+  background: var(--planner-yellow);
+}
+
+.thisWeekResultsPage__summaryMeta .material-symbols-rounded {
+  font-size: 16px;
+}
+
+.thisWeekResultsPage__caveat {
+  grid-column: 1 / -1;
+  margin: -2px 0 0;
+  padding: 8px 10px;
+  border-left: 5px solid var(--planner-coral);
+  background: #fff0ef;
+  color: #425a72;
+  font-size: .7rem;
+  font-weight: 760;
+  line-height: 1.3;
+}
+
+/* Recommended field-picks notebook -------------------------------------- */
+
+.thisWeekResultsPage .suggestedPlacesPanel {
+  position: absolute;
+  z-index: 9;
+  top: 24px;
+  right: 24px;
+  bottom: 116px;
+  left: auto;
+  display: block;
+  width: 410px;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  border: 3px solid var(--planner-ink);
+  border-radius: 28px;
+  background: var(--planner-paper);
+  color: var(--planner-ink);
+  box-shadow: 7px 8px 0 var(--planner-ink);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.thisWeekPlaceCard__actions {
+  display: flex;
+  gap: 7px;
+  max-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: max-height 160ms ease, margin 160ms ease, opacity 160ms ease, transform 160ms ease;
+}
+
+.thisWeekPlaceCard:hover .thisWeekPlaceCard__actions,
+.thisWeekPlaceCard:focus-within .thisWeekPlaceCard__actions {
+  max-height: 36px;
+  margin-top: 7px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.thisWeekPlaceCard__itineraryAction,
+.thisWeekPlaceCard__detailAction {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 999px;
+  background: var(--planner-teal);
+  color: var(--planner-ink);
+  font-size: .62rem;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.thisWeekPlaceCard__detailAction { background: #fffdf6; }
+
+.thisWeekPlaceCard__itineraryAction.isAdded { background: #9ce6dc; }
+
+.thisWeekPlaceDetail__itineraryButton {
+  display: flex;
+  width: min(290px, 100%);
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px auto 0;
+  border: 3px solid var(--planner-ink);
+  border-radius: 999px;
+  background: var(--planner-teal);
+  color: var(--planner-ink);
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 3px 4px 0 var(--planner-ink);
+}
+
+.thisWeekPlaceDetail__itineraryButton.isAdded { background: #9ce6dc; }
+
+.thisWeekResultsPage__itineraryPopover {
+  position: absolute;
+  z-index: 10;
+  top: 126px;
+  left: 24px;
+  width: min(460px, calc(100% - 48px));
+  padding: 14px;
+  border: 3px solid var(--planner-ink);
+  border-radius: 17px;
+  background: #fff8e9;
+  box-shadow: 6px 7px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage__itineraryPopover:not(.isExpanded) {
+  width: auto;
+  min-width: 0;
+  padding: 10px 13px;
+  border-radius: 999px;
+}
+
+.thisWeekResultsPage__itineraryPopover.isNewlyAdded {
+  animation: thisWeekItineraryPopIn 340ms cubic-bezier(.18, 1.35, .45, 1) both;
+}
+
+.thisWeekResultsPage__itineraryPopoverHeader { display: flex; width: 100%; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; color: var(--planner-ink); font: inherit; cursor: pointer; text-align: left; }
+.thisWeekResultsPage__itineraryPopover:not(.isExpanded) .thisWeekResultsPage__itineraryPopoverHeader { width: auto; gap: 6px; }
+.thisWeekResultsPage__itineraryPopoverHeader > .material-symbols-rounded { color: #08787c; }
+.thisWeekResultsPage__itineraryPopover strong { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; }
+.thisWeekResultsPage__itineraryPopover em { display: grid; width: 27px; height: 27px; place-items: center; margin-left: auto; border-radius: 50%; background: var(--planner-coral); color: #fffdf6; font-style: normal; font-weight: 950; }
+.thisWeekResultsPage__itineraryPopover:not(.isExpanded) em { margin-left: 0; }
+.thisWeekResultsPage__itineraryAddStamp { display: grid; min-width: 28px; height: 22px; place-items: center; margin-left: -4px; border: 2px solid var(--planner-ink); border-radius: 999px; background: var(--planner-yellow); color: var(--planner-ink); font-size: .66rem; font-weight: 950; animation: thisWeekItineraryAddStamp 900ms ease-out both; }
+.thisWeekResultsPage__itineraryPopoverChevron { margin-left: 2px; font-size: 21px; }
+.thisWeekResultsPage__itineraryPopover:not(.isExpanded) .thisWeekResultsPage__itineraryMapButton,
+.thisWeekResultsPage__itineraryPopover:not(.isExpanded) .thisWeekResultsPage__itineraryPopoverChevron { display: none; }
+.thisWeekResultsPage__itineraryExportLaunch { display: inline-flex; align-items: center; gap: 5px; margin: 9px 0 0; padding: 6px 10px; border: 2px solid var(--planner-ink); border-radius: 999px; background: var(--planner-teal); color: var(--planner-ink); font: inherit; font-size: .62rem; font-weight: 950; letter-spacing: .05em; text-transform: uppercase; box-shadow: 2px 3px 0 var(--planner-ink); cursor: pointer; }
+.thisWeekResultsPage__itineraryExportLaunch .material-symbols-rounded { font-size: 16px; }
+.thisWeekResultsPage__itineraryPopover ol { display: grid; gap: 5px; margin: 11px 0; padding: 0; color: var(--planner-ink); font-size: .74rem; font-weight: 800; list-style: none; }
+.thisWeekResultsPage__itineraryPopover li { position: relative; display: grid; grid-template-columns: 26px 34px minmax(0, 1fr) 28px; align-items: center; gap: 8px; min-height: 55px; padding: 9px 7px; border: 0; border-bottom: 2px solid rgba(6, 29, 60, .17); border-radius: 0; background: transparent; transition: transform 140ms ease, background 140ms ease; }
+.thisWeekResultsPage__itineraryPopover li:last-child { border-bottom: 0; }
+.thisWeekResultsPage__itineraryPopover li:not(:last-child)::after { content: ""; position: absolute; top: 43px; bottom: -10px; left: 58px; border-left: 3px dashed #168d93; pointer-events: none; }
+.thisWeekResultsPage__itineraryPopover li.isDragging { opacity: .55; transform: rotate(-1deg) scale(.98); }
+.thisWeekResultsPage__itineraryPopover li.isDropTarget { background: #d7f2ed; transform: translateY(2px); }
+
+.thisWeekItineraryExport__overlay { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; overflow: auto; background: rgba(6, 29, 60, .52); backdrop-filter: blur(7px); }
+.thisWeekItineraryExport { --planner-ink: #061d3c; --planner-paper: #fff8e9; --planner-teal: #47d1ca; --planner-aqua: #47d1ca; --planner-coral: #ff6458; --planner-yellow: #ffda4c; width: min(900px, 100%); max-height: calc(100dvh - 48px); padding: 28px; overflow: auto; border: 3px solid var(--planner-ink); border-radius: 30px; background: var(--planner-paper); color: var(--planner-ink); box-shadow: 10px 12px 0 var(--planner-ink); }
+.thisWeekItineraryExport__header { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.thisWeekItineraryExport__brand { display: flex; align-items: center; gap: 10px; }
+.thisWeekItineraryExport__brand > .material-symbols-rounded { display: grid; width: 48px; height: 48px; place-items: center; border: 3px solid var(--planner-ink); border-radius: 50%; background: var(--planner-aqua); font-size: 27px; }
+.thisWeekItineraryExport__brand strong { font-size: 1.65rem; font-weight: 950; letter-spacing: -.06em; }
+.thisWeekItineraryExport__brand em { padding: 5px 9px; border: 2px solid var(--planner-ink); border-radius: 999px; background: var(--planner-teal); font-size: .59rem; font-style: normal; font-weight: 950; letter-spacing: .1em; text-transform: uppercase; transform: rotate(2deg); }
+.thisWeekItineraryExport__fieldLabel { margin-right: 42px; padding-bottom: 5px; border-bottom: 4px solid var(--planner-coral); font-size: .7rem; font-weight: 950; letter-spacing: .13em; text-transform: uppercase; }
+.thisWeekItineraryExport__close { position: absolute; top: -10px; right: -10px; display: grid; width: 38px; height: 38px; place-items: center; border: 2px solid var(--planner-ink); border-radius: 50%; background: #fffdf6; color: var(--planner-ink); cursor: pointer; }
+.thisWeekItineraryExport__titleRow { margin: 24px 0 17px; }
+.thisWeekItineraryExport__titleRow h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.25rem); font-weight: 950; letter-spacing: -.075em; line-height: .95; }
+.thisWeekItineraryExport__titleRow p { margin: 13px 0 0; color: #425a72; font-size: 1.05rem; font-weight: 800; }
+.thisWeekItineraryExport__titleRow p strong { color: #168d93; }
+.thisWeekItineraryExport__map { height: 390px; padding: 3px; overflow: hidden; border: 4px solid var(--planner-ink); border-radius: 24px; background: var(--planner-ink); box-shadow: 0 5px 0 rgba(6, 29, 60, .16); }
+.thisWeekItineraryExport__map .mapStage { width: 100%; height: 100%; min-height: 0; }
+.thisWeekItineraryExport__map .maplibregl-map { overflow: hidden; border-radius: 17px; }
+.thisWeekItineraryExport__map .plannerMapMarker.is-itinerary {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--planner-paper);
+  border-radius: 50%;
+  background: var(--planner-coral);
+  color: #fff;
+  box-shadow: 0 2px 0 var(--planner-ink), 0 5px 12px rgba(6, 29, 60, .28);
+}
+.thisWeekItineraryExport__map .plannerMapMarker.is-itinerary::after,
+.thisWeekItineraryExport__map .plannerMapMarker__label { display: none; }
+.thisWeekItineraryExport__map .plannerMapMarker__itineraryBadge {
+  position: static;
+  display: block;
+  font: 800 14px/1 "IBM Plex Sans", sans-serif;
+  letter-spacing: -.02em;
+}
+.thisWeekItineraryExport__stops { display: grid; margin-top: 16px; }
+.thisWeekItineraryExport__stop { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 60px; border-bottom: 2px solid rgba(6,29,60,.22); }
+.thisWeekItineraryExport__stop > span { display: grid; width: 34px; height: 34px; place-items: center; border: 2px solid var(--planner-ink); border-radius: 50%; background: var(--planner-coral); color: #fffdf6; font-weight: 950; box-shadow: 1px 2px 0 var(--planner-ink); }
+.thisWeekItineraryExport__stop div { display: grid; gap: 2px; }
+.thisWeekItineraryExport__stop div strong { font-size: 1rem; }
+.thisWeekItineraryExport__stop div small { color: #61768a; font-weight: 700; }
+.thisWeekItineraryExport__stop em { display: inline-flex; align-items: center; gap: 6px; color: #257a86; font-size: .78rem; font-style: normal; font-weight: 850; }
+.thisWeekItineraryExport__stop em .material-symbols-rounded { font-size: 20px; }
+.thisWeekItineraryExport__care { display: grid; grid-template-columns: 1.1fr .75fr .9fr; gap: 12px; margin-top: 20px; padding: 18px; border: 2px solid #168d93; border-radius: 20px; background: #edf7ef; }
+.thisWeekItineraryExport__careHeading { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; }
+.thisWeekItineraryExport__careHeading > .material-symbols-rounded { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--planner-aqua); font-size: 24px; }
+.thisWeekItineraryExport__careHeading div { display: grid; gap: 2px; }
+.thisWeekItineraryExport__careHeading strong { color: #08787c; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.thisWeekItineraryExport__careHeading small { color: var(--planner-ink); font-size: .84rem; font-weight: 800; }
+.thisWeekItineraryExport__distance { display: grid; align-content: center; gap: 4px; min-height: 86px; padding: 12px; border-radius: 15px; background: var(--planner-coral); color: #fffdf6; }
+.thisWeekItineraryExport__distance--navy { background: var(--planner-ink); }
+.thisWeekItineraryExport__distance strong { font-size: 1.15rem; font-weight: 950; text-transform: uppercase; }
+.thisWeekItineraryExport__distance span { font-size: .69rem; font-weight: 750; line-height: 1.3; }
+.thisWeekItineraryExport__care ul { align-self: center; margin: 0; padding-left: 18px; color: #425a72; font-size: .69rem; font-weight: 750; line-height: 1.4; }
+.thisWeekItineraryExport__footer { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 20px; padding-top: 18px; border-top: 2px solid rgba(6,29,60,.25); }
+.thisWeekItineraryExport__footer > span { color: #526c84; font-size: .72rem; font-weight: 800; }
+.thisWeekItineraryExport__footer button { display: inline-flex; min-height: 44px; align-items: center; gap: 7px; padding: 0 18px; border: 3px solid var(--planner-ink); border-radius: 999px; background: var(--planner-yellow); color: var(--planner-ink); font: inherit; font-size: .72rem; font-weight: 950; box-shadow: 3px 4px 0 var(--planner-ink); cursor: pointer; text-transform: uppercase; }
+.thisWeekItineraryExport__footer button:disabled { cursor: wait; opacity: .65; }
+
+@media (max-width: 720px) {
+  .thisWeekItineraryExport__overlay { padding: 10px; }
+  .thisWeekItineraryExport { max-height: calc(100dvh - 20px); padding: 18px; border-radius: 22px; }
+  .thisWeekItineraryExport__brand em, .thisWeekItineraryExport__fieldLabel { display: none; }
+  .thisWeekItineraryExport__map { height: 300px; }
+  .thisWeekItineraryExport__care { grid-template-columns: 1fr; }
+  .thisWeekItineraryExport__careHeading { grid-column: auto; }
+  .thisWeekItineraryExport__footer { align-items: stretch; flex-direction: column; }
+  .thisWeekItineraryExport__footer button { justify-content: center; }
+}
+.thisWeekResultsPage__itineraryDragHandle { width: 26px; height: 28px; padding: 0; border: 0 !important; border-bottom: 0 !important; background: transparent !important; color: #587085 !important; font-size: 1.1rem !important; cursor: grab !important; }
+.thisWeekResultsPage__itineraryDragHandle:active { cursor: grabbing !important; }
+.thisWeekResultsPage__itineraryStopNumber { position: relative; z-index: 1; display: grid; width: 34px; height: 34px; place-items: center; border: 2px solid var(--planner-ink); border-radius: 50%; background: var(--planner-coral); color: #fffdf6; font-size: .7rem; font-weight: 950; box-shadow: 1px 2px 0 var(--planner-ink); }
+.thisWeekResultsPage__itineraryStopCopy { min-width: 0; }
+.thisWeekResultsPage__itineraryStopCopy strong { display: block; overflow: hidden; color: var(--planner-ink); font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+.thisWeekResultsPage__itineraryStopCopy small { display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; color: #567087; font-size: .63rem; font-weight: 800; }
+.thisWeekResultsPage__itineraryStopCopy small .material-symbols-rounded { color: #168d93; font-size: 16px; }
+.thisWeekResultsPage__itineraryStopRemove { display: grid; width: 28px; height: 28px; place-items: center; padding: 0; border: 0; background: transparent; color: var(--planner-coral); cursor: pointer; }
+.thisWeekResultsPage__itineraryStopRemove .material-symbols-rounded { font-size: 22px; }
+.thisWeekResultsPage__itineraryMapButton { display: grid; width: 30px; height: 30px; place-items: center; margin-left: 3px; padding: 0; border: 2px solid var(--planner-ink); border-radius: 50%; background: #d7f2ed; color: var(--planner-ink); cursor: pointer; }
+.thisWeekResultsPage__itineraryMapButton.isActive { background: var(--planner-yellow); }
+.thisWeekResultsPage__itineraryMapButton .material-symbols-rounded { font-size: 19px; }
+.thisWeekResultsPage .suggestedPlacesPanel__iconBtn.isMapFilterActive { background: var(--planner-yellow); }
+
+.thisWeekResultsPage.isRecommendedCollapsed .plannerResultsPage__legendCard {
+  right: 188px !important;
+  left: auto !important;
+}
+
+@media (max-width: 900px) {
+  .thisWeekResultsPage.isRecommendedCollapsed .plannerResultsPage__legendCard {
+    right: 14px !important;
+  }
+}
+
+@keyframes thisWeekItineraryPopIn {
+  0% { opacity: 0; transform: translateY(-10px) scale(.72); }
+  65% { opacity: 1; transform: translateY(1px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes thisWeekItineraryAddStamp {
+  0% { opacity: 0; transform: translateY(8px) scale(.55) rotate(-9deg); }
+  28% { opacity: 1; transform: translateY(-2px) scale(1.08) rotate(3deg); }
+  62% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-8px) scale(.88); }
+}
+
+/* Reuse the planner card component verbatim, including its two-face hover interaction. */
+.thisWeekResultsPage .suggestedPlacesPanel__list--plannerCards { gap: 9px; }
+.thisWeekResultsPage .plannerResultsPage__spotCard,
+.thisWeekResultsPage .plannerResultsPage__spotCardInner { min-height: 82px !important; height: 82px !important; }
+.thisWeekResultsPage .plannerResultsPage__spotCard { perspective: 1200px; }
+.thisWeekResultsPage .plannerResultsPage__spotCardInner { position: relative; transform-style: preserve-3d !important; transition: transform 260ms cubic-bezier(.2, .8, .2, 1) 250ms !important; }
+.thisWeekResultsPage .plannerResultsPage__spotCard:hover .plannerResultsPage__spotCardInner,
+.thisWeekResultsPage .plannerResultsPage__spotCard:focus-within .plannerResultsPage__spotCardInner { transform: rotateY(180deg) !important; transition-delay: 0ms !important; }
+.thisWeekResultsPage .plannerResultsPage__spotCardFace { position: absolute !important; inset: 0 !important; min-height: 82px !important; height: 82px !important; backface-visibility: hidden !important; -webkit-backface-visibility: hidden !important; }
+.thisWeekResultsPage .plannerResultsPage__spotCardFace--front { display: grid !important; grid-template-columns: 76px minmax(0, 1fr) !important; gap: 10px; padding: 7px !important; transform: rotateY(0deg) !important; }
+.thisWeekResultsPage .plannerResultsPage__spotCardFace--back { display: grid !important; place-items: center; padding: 9px !important; border: 2px solid var(--planner-ink) !important; border-radius: 14px !important; background: var(--planner-aqua) !important; box-shadow: none !important; transform: rotateY(180deg) !important; }
+.thisWeekResultsPage .plannerResultsPage__spotThumbWrap { width: 76px !important; height: 66px !important; border-radius: 10px; }
+.thisWeekResultsPage .plannerResultsPage__spotRegion { display: flex; align-items: center; justify-content: space-between; gap: 7px; margin: 6px 0 0; }
+.thisWeekResultsPage .plannerResultsPage__spotDistance { flex: 0 0 auto; margin: 0 !important; color: #08787c; font-size: .59rem !important; font-weight: 950; letter-spacing: .025em; white-space: nowrap; text-transform: uppercase; }
+.thisWeekResultsPage .plannerResultsPage__spotDistance { display: none; }
+.thisWeekResultsPage .plannerResultsPage__spotCardActionWrap { width: 100%; display: grid; gap: 7px; }
+.thisWeekResultsPage .plannerResultsPage__spotCardActionLabel { overflow: hidden; color: var(--planner-ink); font-size: .72rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.thisWeekResultsPage .plannerResultsPage__spotCardActions { display: grid; width: 100%; grid-template-columns: 1fr 1fr; gap: 8px; }
+.thisWeekResultsPage .plannerResultsPage__spotCardActionBtn { min-height: 42px; display: grid; grid-template-columns: auto auto; place-content: center; gap: 6px; padding: 7px 9px; border: 2px solid var(--planner-ink); border-radius: 999px; background: #fffdf6; color: var(--planner-ink); font: inherit; font-size: .65rem; font-weight: 950; box-shadow: 2px 3px 0 var(--planner-ink); }
+.thisWeekResultsPage .plannerResultsPage__spotCardActionBtn--primary,
+.thisWeekResultsPage .plannerResultsPage__spotCardActionBtn.isAdded { background: var(--planner-yellow); }
+.thisWeekResultsPage .plannerResultsPage__spotCardActionBtn .material-symbols-rounded { font-size: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .thisWeekResultsPage .plannerResultsPage__spotCardInner { transition: none !important; }
+}
+
+.suggestedPlacesPanel__panel {
+  position: absolute;
+  inset: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-height: 0;
+  height: auto;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  opacity: 1;
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+  transform: translateX(0);
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__face--back {
+  z-index: 2;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(28px);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel.isDetailOpen .suggestedPlacesPanel__face--front {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-28px);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel.isDetailOpen .suggestedPlacesPanel__face--back {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__header {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  flex: 0 0 auto;
+  padding: 2px 2px 12px;
+  border: 0;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggestedPlacesPanel__headerIcon {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  overflow: hidden;
+  border: 3px solid var(--planner-ink);
+  border-radius: 50%;
+  background: var(--planner-aqua);
+}
+
+.suggestedPlacesPanel__headerIcon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__titleGroup {
+  display: block;
+  min-width: 0;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__eyebrow {
+  margin: 0;
+  color: #08787c;
+  font-size: .64rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__title {
+  margin: 3px 0 1px;
+  overflow: hidden;
+  color: var(--planner-ink);
+  font-size: 1.92rem;
+  font-weight: 950;
+  letter-spacing: -.075em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__title > span {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  margin-left: 6px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--planner-yellow);
+  color: var(--planner-ink);
+  font-size: .72rem;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__subtle {
+  margin: 3px 0 0;
+  overflow: hidden;
+  color: #526c84;
+  font-size: .7rem;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__iconBtn {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 2px solid var(--planner-ink);
+  border-radius: 50%;
+  background: var(--planner-yellow);
+  color: var(--planner-ink);
+  box-shadow: 2px 3px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__iconBtn:hover,
+.thisWeekResultsPage .suggestedPlacesPanel__iconBtn:focus-visible {
+  border-color: var(--planner-ink);
+  background: var(--planner-coral);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__iconBtn .material-symbols-rounded {
+  font-size: 22px;
+}
+
+.suggestedPlacesPanel__filters {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+  padding: 1px 1px 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.suggestedPlacesPanel__filters button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 999px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+  font: inherit;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.suggestedPlacesPanel__filters button.isActive {
+  background: var(--planner-yellow);
+}
+
+.suggestedPlacesPanel__filters button:hover,
+.suggestedPlacesPanel__filters button:focus-visible {
+  background: var(--planner-coral);
+  outline: none;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__content {
+  display: block;
+  min-height: 110px;
+  max-height: none;
+  flex: 1 1 0;
+  padding: 2px 7px 34px 1px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--planner-ink) #d8e9e6;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__content::-webkit-scrollbar {
+  width: 9px;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__content::-webkit-scrollbar-thumb {
+  border: 2px solid #d8e9e6;
+  border-radius: 999px;
+  background: var(--planner-ink);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__status {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin: 4px 1px;
+  padding: 15px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 16px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__status > .material-symbols-rounded {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--planner-aqua);
+  font-size: 23px;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__status strong,
+.thisWeekResultsPage .suggestedPlacesPanel__status small {
+  display: block;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__status strong {
+  font-size: .82rem;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__status small {
+  margin-top: 3px;
+  color: #526c84;
+  font-size: .69rem;
+  line-height: 1.35;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__status--warning {
+  background: #fff0ef;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__status--warning > .material-symbols-rounded {
+  background: var(--planner-coral);
+  color: #fff;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__list {
+  display: grid;
+  gap: 9px;
+}
+
+.thisWeekPlaceCard {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+  min-height: 104px;
+  padding: 7px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 16px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.thisWeekPlaceCard:hover,
+.thisWeekPlaceCard:focus-visible {
+  background: #eef8f5;
+  outline: none;
+  transform: translateY(-1px);
+  box-shadow: 3px 4px 0 var(--planner-ink);
+}
+
+.thisWeekPlaceCard.isSelected {
+  background: #fff4c7;
+  box-shadow: 0 0 0 4px var(--planner-yellow);
+}
+
+.thisWeekPlaceCard__media {
+  position: relative;
+  display: block;
+  width: 92px;
+  height: 90px;
+  overflow: hidden;
+  border: 2px solid var(--planner-ink);
+  border-radius: 10px;
+  background: #d9f4ef;
+}
+
+.thisWeekPlaceCard__media img,
+.thisWeekPlaceDetail__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thisWeekPlaceCard__placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .72), transparent 30%),
+    linear-gradient(145deg, #d9f4ef, #c8e5f1);
+  color: var(--planner-ink);
+}
+
+.thisWeekPlaceCard__placeholder .material-symbols-rounded {
+  font-size: 28px;
+}
+
+.thisWeekPlaceCard__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.thisWeekPlaceCard__topline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.thisWeekPlaceCard__rank {
+  display: inline-grid;
+  width: auto;
+  min-width: 0;
+  height: 22px;
+  padding: 0 7px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--planner-ink);
+  color: #fff8e9;
+  font-size: .55rem;
+  font-weight: 950;
+  letter-spacing: .055em;
+  white-space: nowrap;
+}
+
+.thisWeekPlaceCard__name {
+  overflow: hidden;
+  color: var(--planner-ink);
+  font-size: .94rem;
+  font-weight: 950;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thisWeekResultsPage .viewingPotentialBadge {
+  flex: 0 0 auto;
+  min-height: 25px;
+  padding: 0 7px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 999px;
+  background: #d9f4ef;
+  color: var(--planner-ink);
+  font-size: .54rem;
+  font-weight: 950;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.thisWeekResultsPage .viewingPotentialBadge--very-high,
+.thisWeekResultsPage .viewingPotentialBadge--high {
+  background: var(--planner-yellow);
+}
+
+.thisWeekResultsPage .viewingPotentialBadge--low,
+.thisWeekResultsPage .viewingPotentialBadge--very-low {
+  background: #e7edf1;
+}
+
+.thisWeekPlaceCard__meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #08787c;
+  font-size: .61rem;
+  font-weight: 850;
+  letter-spacing: .025em;
+  white-space: nowrap;
+}
+
+.thisWeekPlaceCard__meta > span:not(:first-child) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thisWeekPlaceCard__meta > span + span::before {
+  content: "•";
+  margin-right: 5px;
+  color: #7890a3;
+}
+
+.thisWeekPlaceCard__reason {
+  display: -webkit-box;
+  margin-top: 5px;
+  overflow: hidden;
+  color: #526c84;
+  font-size: .68rem;
+  font-weight: 680;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.thisWeekPlaceCard__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: auto;
+  padding-top: 5px;
+  color: var(--planner-ink);
+  font-size: .62rem;
+  font-weight: 950;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.thisWeekPlaceCard__cta .material-symbols-rounded {
+  font-size: 15px;
+}
+
+/* Place detail ----------------------------------------------------------- */
+
+.thisWeekPlaceDetail {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-color: var(--planner-ink) #d8e9e6;
+  scrollbar-width: thin;
+}
+
+.thisWeekPlaceDetail__header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 2px 10px;
+}
+
+.thisWeekPlaceDetail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 999px;
+  background: #d9f4ef;
+  color: var(--planner-ink);
+  font: inherit;
+  font-size: .67rem;
+  font-weight: 950;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.thisWeekPlaceDetail__back:hover,
+.thisWeekPlaceDetail__back:focus-visible {
+  background: var(--planner-yellow);
+  outline: none;
+}
+
+.thisWeekPlaceDetail__back .material-symbols-rounded {
+  font-size: 17px;
+}
+
+.thisWeekPlaceDetail__media {
+  flex: 0 0 auto;
+  height: 190px;
+  overflow: hidden;
+  border: 3px solid var(--planner-ink);
+  border-radius: 17px;
+  background: #d9f4ef;
+}
+
+.thisWeekPlaceDetail__body {
+  display: grid;
+  gap: 10px;
+  padding: 14px 2px 24px;
+}
+
+.thisWeekPlaceDetail__titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.thisWeekPlaceDetail__titleRow h3 {
+  margin: 0;
+  color: var(--planner-ink);
+  font-size: 1.7rem;
+  font-weight: 950;
+  letter-spacing: -.06em;
+  line-height: 1;
+}
+
+.thisWeekPlaceDetail__titleRow p {
+  margin: 4px 0 0;
+  color: #526c84;
+  font-size: .75rem;
+  font-weight: 750;
+}
+
+.thisWeekPlaceDetail__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.thisWeekPlaceDetail__stats > div {
+  min-width: 0;
+  padding: 9px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 11px;
+  background: #eef8f5;
+}
+
+.thisWeekPlaceDetail__stats span,
+.thisWeekPlaceDetail__stats strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thisWeekPlaceDetail__stats span {
+  color: #567087;
+  font-size: .54rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.thisWeekPlaceDetail__stats strong {
+  margin-top: 3px;
+  color: var(--planner-ink);
+  font-size: .68rem;
+  white-space: nowrap;
+}
+
+.thisWeekPlaceDetail__recommendation {
+  padding: 12px;
+  border-left: 5px solid var(--planner-coral);
+  background: #fff0ef;
+}
+
+.thisWeekPlaceDetail__recommendation h4 {
+  margin: 0 0 4px;
+  color: var(--planner-ink);
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.thisWeekPlaceDetail__recommendation p {
+  margin: 0;
+  color: #425a72;
+  font-size: .73rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.thisWeekPlaceDetail__coordinates {
+  display: flex;
+  gap: 7px;
+}
+
+.thisWeekPlaceDetail__coordinates span {
+  flex: 1;
+  padding: 8px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 10px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+  font-size: .67rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.thisWeekPlaceDetail__mapButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 16px;
+  border: 3px solid var(--planner-ink);
+  border-radius: 999px;
+  background: var(--planner-yellow);
+  color: var(--planner-ink);
+  box-shadow: 4px 5px 0 var(--planner-ink);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.thisWeekPlaceDetail__mapButton:hover,
+.thisWeekPlaceDetail__mapButton:focus-visible {
+  background: var(--planner-coral);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+/* Collapsed panel notebook ------------------------------------------------ */
+
+.thisWeekFieldNotebook {
+  position: absolute;
+  z-index: 9;
+  top: 24px;
+  right: 24px;
+  display: grid;
+  width: 148px;
+  height: 184px;
+  grid-template-rows: 1fr auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--planner-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.thisWeekFieldNotebook__graphic {
+  position: relative;
+  display: block;
+  width: 120px;
+  height: 142px;
+  margin-left: auto;
+}
+
+.thisWeekFieldNotebook__page {
+  position: absolute;
+  inset: 0 0 0 12px;
+  border: 3px solid var(--planner-ink);
+  border-radius: 14px 22px 22px 14px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 20px, rgba(6, 29, 60, .12) 20px 22px),
+    var(--planner-yellow);
+  box-shadow: 6px 7px 0 var(--planner-ink);
+  transform: rotate(3deg);
+}
+
+.thisWeekFieldNotebook__ring {
+  position: absolute;
+  left: 1px;
+  width: 29px;
+  height: 11px;
+  border: 3px solid var(--planner-ink);
+  border-radius: 999px;
+  background: var(--planner-aqua);
+  transform: rotate(3deg);
+}
+
+.thisWeekFieldNotebook__ring--one { top: 25px; }
+.thisWeekFieldNotebook__ring--two { top: 55px; }
+.thisWeekFieldNotebook__ring--three { top: 85px; }
+.thisWeekFieldNotebook__ring--four { top: 115px; }
+
+.thisWeekFieldNotebook__label {
+  position: absolute;
+  top: 55px;
+  right: 10px;
+  width: 78px;
+  color: var(--planner-ink);
+  font-size: .8rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(3deg);
+}
+
+.thisWeekFieldNotebook__count {
+  position: absolute;
+  top: 91px;
+  right: 35px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid var(--planner-ink);
+  border-radius: 50%;
+  background: var(--planner-coral);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 950;
+  transform: rotate(3deg);
+}
+
+.thisWeekFieldNotebook:hover .thisWeekFieldNotebook__page,
+.thisWeekFieldNotebook:focus-visible .thisWeekFieldNotebook__page {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 20px, rgba(6, 29, 60, .12) 20px 22px),
+    #ffe783;
+}
+
+.thisWeekFieldNotebook:focus-visible {
+  outline: 3px solid var(--planner-coral);
+  outline-offset: 6px;
+}
+
+/* Planner-style week control -------------------------------------------- */
+
+.thisWeekResultsPage__timelineCard {
+  position: absolute;
+  z-index: 8;
+  right: calc(var(--this-week-panel-offset, 0px) + 24px);
+  bottom: 24px;
+  left: 24px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-height: 142px;
+  padding: 13px 16px;
+  border: 3px solid var(--planner-ink);
+  border-radius: 25px;
+  background: var(--planner-paper);
+  color: var(--planner-ink);
+  box-shadow: 7px 8px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage__timelineHeading {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 224px;
+}
+
+.thisWeekResultsPage__timelineIcon {
+  width: 50px;
+  height: 50px;
+}
+
+.thisWeekResultsPage__timelineIcon .material-symbols-rounded {
+  font-size: 25px;
+}
+
+.thisWeekResultsPage__timelineHeading h2 {
+  margin: 3px 0 0;
+  color: var(--planner-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline {
+  position: relative;
+  inset: auto;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  gap: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: none;
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__iconBtn {
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 50%;
+  background: var(--planner-yellow);
+  color: var(--planner-ink);
+  box-shadow: 3px 4px 0 var(--planner-ink);
+}
+
+
+.thisWeekResultsPage__timelineCard .weekTimeline__iconBtn:hover,
+.thisWeekResultsPage__timelineCard .weekTimeline__iconBtn:focus-visible {
+  border-color: var(--planner-ink);
+  background: var(--planner-coral);
+  box-shadow: 3px 4px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__main {
+  gap: 8px;
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__weeks {
+  gap: 5px;
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__week {
+  min-height: 53px;
+  padding: 7px 5px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 11px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__week:hover,
+.thisWeekResultsPage__timelineCard .weekTimeline__week:focus-visible {
+  border-color: var(--planner-ink);
+  background: #d9f4ef;
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__week.isSelected {
+  border-color: var(--planner-ink);
+  background: var(--planner-aqua);
+  color: var(--planner-ink);
+  box-shadow: 3px 4px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__weekLabel {
+  font-size: .57rem;
+  font-weight: 950;
+  letter-spacing: .045em;
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__weekDate {
+  font-size: .67rem;
+  font-weight: 850;
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__slider {
+  height: 15px;
+  accent-color: var(--planner-coral);
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__slider::-webkit-slider-runnable-track,
+.thisWeekResultsPage__timelineCard .weekTimeline__slider::-moz-range-track {
+  height: 7px;
+  border: 2px solid var(--planner-ink);
+  background: var(--planner-yellow);
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__slider::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border: 3px solid var(--planner-ink);
+  background: var(--planner-coral);
+  box-shadow: 2px 3px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage__timelineCard .weekTimeline__slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--planner-ink);
+  background: var(--planner-coral);
+  box-shadow: 2px 3px 0 var(--planner-ink);
+}
+
+.thisWeekResultsPage__statusBanner {
+  position: absolute;
+  z-index: 8;
+  bottom: 184px;
+  left: 24px;
+  display: inline-flex;
+  max-width: min(540px, calc(100% - 510px));
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 13px;
+  background: var(--planner-yellow);
+  color: var(--planner-ink);
+  box-shadow: 4px 5px 0 var(--planner-ink);
+  font-size: .71rem;
+  font-weight: 850;
+}
+
+.thisWeekResultsPage__statusBanner .material-symbols-rounded {
+  font-size: 19px;
+}
+
+/* The shared footer dock is already used by the planner. Tint its rail to
+   match the same field-guide system on This Week. */
+
+.mapPageRoot--thisWeek .footerDock__button {
+  border: 3px solid var(--planner-ink, #061d3c);
+  border-radius: 999px;
+  background: var(--planner-paper, #fff8e9);
+  color: var(--planner-ink, #061d3c);
+  box-shadow: 4px 5px 0 var(--planner-ink, #061d3c);
+}
+
+.mapPageRoot--thisWeek .footerDock__button:first-child {
+  background: #d9f4ef;
+}
+
+.mapPageRoot--thisWeek .footerDock__button:nth-child(2) {
+  background: var(--planner-yellow, #ffda4c);
+}
+
+.mapPageRoot--thisWeek .footerDock__button--iconOnly {
+  background: #f48ab3;
+}
+
+.mapPageRoot--thisWeek .footerDock__button:hover,
+.mapPageRoot--thisWeek .footerDock__button:focus-visible,
+.mapPageRoot--thisWeek .footerDock__button.isActive {
+  border-color: var(--planner-ink, #061d3c);
+  box-shadow: 5px 6px 0 var(--planner-ink, #061d3c);
+}
+
+/* Dark theme ------------------------------------------------------------- */
+
+.app--dark .thisWeekResultsPage {
+  --planner-ink: #d9fbf6;
+  --planner-paper: #10263e;
+  --planner-aqua: #2dbcb7;
+  --planner-coral: #ff7b70;
+  --planner-yellow: #f2c94c;
+  background: #071624;
+}
+
+.app--dark .thisWeekResultsPage__mapLayer::after {
+  background: linear-gradient(135deg, rgba(5, 18, 33, .12), transparent 44%);
+}
+
+.app--dark .thisWeekResultsPage__summaryCard,
+.app--dark .thisWeekResultsPage .suggestedPlacesPanel,
+.app--dark .thisWeekResultsPage__timelineCard {
+  background: #10263e;
+  color: #edf9fa;
+}
+
+.app--dark .thisWeekResultsPage__summaryBody h1,
+.app--dark .thisWeekResultsPage__timelineHeading h2,
+.app--dark .thisWeekResultsPage .suggestedPlacesPanel__title,
+.app--dark .thisWeekPlaceCard__name,
+.app--dark .thisWeekPlaceDetail__titleRow h3,
+.app--dark .thisWeekPlaceDetail__recommendation h4 {
+  color: #edf9fa;
+}
+
+.app--dark .thisWeekResultsPage__summaryCopy,
+.app--dark .thisWeekResultsPage .suggestedPlacesPanel__subtle,
+.app--dark .thisWeekPlaceCard__reason,
+.app--dark .thisWeekPlaceDetail__titleRow p,
+.app--dark .thisWeekPlaceDetail__recommendation p {
+  color: #b7cbd7;
+}
+
+.app--dark .thisWeekResultsPage__summaryMeta > span,
+.app--dark .thisWeekPlaceCard,
+.app--dark .thisWeekResultsPage .suggestedPlacesPanel__status,
+.app--dark .thisWeekPlaceDetail__coordinates span,
+.app--dark .thisWeekResultsPage__timelineCard .weekTimeline__week,
+.app--dark .suggestedPlacesPanel__filters button {
+  background: #17324c;
+  color: #edf9fa;
+}
+
+.app--dark .thisWeekPlaceCard:hover,
+.app--dark .thisWeekPlaceCard:focus-visible,
+.app--dark .thisWeekResultsPage__timelineCard .weekTimeline__week:hover,
+.app--dark .thisWeekResultsPage__timelineCard .weekTimeline__week:focus-visible {
+  background: #1d4356;
+}
+
+.app--dark .thisWeekPlaceDetail__stats > div {
+  background: #17384a;
+}
+
+.app--dark .thisWeekPlaceDetail__recommendation,
+.app--dark .thisWeekResultsPage__caveat {
+  background: #3b2732;
+}
+
+.app--dark .thisWeekResultsPage .viewingPotentialBadge,
+.app--dark .thisWeekPlaceDetail__back {
+  color: #061d3c;
+}
+
+.app--dark .mapPageRoot--thisWeek .footerDock__button {
+  color: #061d3c;
+}
+
+/* Responsive composition ------------------------------------------------ */
+
+@media (max-width: 1180px) {
+  .thisWeekResultsPage .suggestedPlacesPanel {
+    width: 370px;
+  }
+
+  .thisWeekResultsPage__timelineCard {
+    right: calc(var(--this-week-panel-offset, 0px) + 24px);
+  }
+
+  .thisWeekResultsPage__timelineHeading {
+    width: 190px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .thisWeekResultsPage {
+    overflow: hidden;
+  }
+
+  .thisWeekResultsPage__main {
+    padding: 12px;
+  }
+
+  .thisWeekResultsPage__mapLayer {
+    inset: 12px;
+    border-radius: 26px;
+  }
+
+  .thisWeekResultsPage__summaryCard {
+    display: none;
+  }
+
+  .thisWeekResultsPage__timelineCard {
+    top: 14px;
+    right: 14px;
+    bottom: auto;
+    left: 14px;
+    min-height: 118px;
+    padding: 10px 12px;
+  }
+
+  .thisWeekResultsPage__timelineHeading {
+    width: 188px;
+  }
+
+  .thisWeekResultsPage .suggestedPlacesPanel {
+    top: auto;
+    right: 14px;
+    bottom: 98px;
+    left: 14px;
+    width: auto;
+    height: min(48dvh, 520px);
+    min-height: 320px;
+  }
+
+  .thisWeekFieldNotebook {
+    top: auto;
+    right: 14px;
+    bottom: 98px;
+  }
+
+  .thisWeekResultsPage__statusBanner {
+    top: 148px;
+    bottom: auto;
+    left: 14px;
+    max-width: calc(100% - 28px);
+  }
+}
+
+@media (max-width: 760px) {
+  .thisWeekResultsPage__timelineCard {
+    display: block;
+    min-height: 108px;
+    border-radius: 20px;
+  }
+
+  .thisWeekResultsPage__timelineHeading {
+    display: none;
+  }
+
+  .thisWeekResultsPage__timelineCard .weekTimeline {
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    gap: 7px;
+  }
+
+  .thisWeekResultsPage__timelineCard .weekTimeline__iconBtn {
+    width: 40px;
+    height: 40px;
+    box-shadow: 2px 3px 0 var(--planner-ink);
+  }
+
+  .thisWeekResultsPage__timelineCard .weekTimeline__weeks {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .thisWeekResultsPage__timelineCard .weekTimeline__week {
+    flex: 0 0 84px;
+    min-height: 48px;
+    scroll-snap-align: center;
+  }
+
+  .thisWeekResultsPage .suggestedPlacesPanel {
+    right: 10px;
+    bottom: 86px;
+    left: 10px;
+    height: min(51dvh, 500px);
+    min-height: 300px;
+    border-radius: 24px;
+  }
+
+  .thisWeekResultsPage .suggestedPlacesPanel__header {
+    grid-template-columns: 48px minmax(0, 1fr) 36px;
+    gap: 9px;
+  }
+
+  .suggestedPlacesPanel__headerIcon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .thisWeekResultsPage .suggestedPlacesPanel__title {
+    font-size: 1.6rem;
+  }
+
+  .thisWeekResultsPage .suggestedPlacesPanel__title > span {
+    width: 30px;
+    height: 30px;
+  }
+
+  .thisWeekPlaceCard {
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 9px;
+    min-height: 96px;
+  }
+
+  .thisWeekPlaceCard__media {
+    width: 78px;
+    height: 82px;
+  }
+
+  .thisWeekPlaceCard__topline {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 5px;
+  }
+
+  .thisWeekPlaceCard__rank {
+    width: auto;
+    height: 22px;
+  }
+
+  .thisWeekPlaceCard__name {
+    font-size: .84rem;
+  }
+
+  .thisWeekPlaceCard__reason {
+    -webkit-line-clamp: 1;
+  }
+
+  .thisWeekFieldNotebook {
+    right: 10px;
+    bottom: 86px;
+    transform: scale(.88);
+    transform-origin: bottom right;
+  }
+
+  .thisWeekResultsPage__statusBanner {
+    top: 132px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .thisWeekResultsPage__timelineCard {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 9px;
+    border-width: 2px;
+    box-shadow: 4px 5px 0 var(--planner-ink);
+  }
+
+  .thisWeekResultsPage .suggestedPlacesPanel {
+    min-height: 285px;
+    border-width: 2px;
+    box-shadow: 4px 5px 0 var(--planner-ink);
+  }
+
+  .suggestedPlacesPanel__panel {
+    inset: 9px;
+  }
+
+  .thisWeekResultsPage .suggestedPlacesPanel__subtle {
+    display: none;
+  }
+
+  .suggestedPlacesPanel__filters {
+    padding-bottom: 6px;
+  }
+
+  .thisWeekPlaceCard__meta > span:nth-child(n + 3) {
+    display: none;
+  }
+
+  .thisWeekPlaceDetail__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .thisWeekPlaceDetail__stats > div:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .mapPageRoot--thisWeek .app__footer {
+    right: 10px;
+    bottom: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thisWeekResultsPage .suggestedPlacesPanel__face,
+  .thisWeekPlaceCard,
+  .thisWeekFieldNotebook__page,
+  .thisWeekPlaceDetail__mapButton {
+    transition: none;
+  }
+}

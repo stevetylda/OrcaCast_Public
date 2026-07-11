@@ -114,6 +114,7 @@ export function PlannerPlaceCard({
           aria-pressed={selected}
         >
           <div className="plannerResultsPage__spotThumbWrap suggestedPlaceCard__media">
+            <span className="plannerResultsPage__spotRank" aria-label={`Recommendation rank ${rank}`}>{rank}</span>
             {imageSrc ? (
               <img
                 className="plannerResultsPage__spotThumb suggestedPlaceCard__thumb"
@@ -140,7 +141,6 @@ export function PlannerPlaceCard({
           </div>
           <div className="plannerResultsPage__spotBody suggestedPlaceCard__body">
             <div className="plannerResultsPage__spotTopline suggestedPlaceCard__topline">
-              <span className="plannerResultsPage__spotRank" aria-label={`Rank ${rank}`}>{String(rank).padStart(2, "0")}</span>
               <h3 className="suggestedPlaceCard__name">{place.name}</h3>
               <span className={`viewingPotentialBadge viewingPotentialBadge--${place.viewingPotential}`}>
                 {potentialLabel[place.viewingPotential]}

@@ -1,16 +1,13 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { H3Resolution } from "../config/dataPaths";
 import { appConfig } from "../config/appConfig";
 import { DEFAULT_PALETTE_ID, getPaletteOrDefault, type PaletteId } from "../geo/palettes";
 
-type ThemeMode = "light" | "dark" | "system";
 type ForecastPlaybackDirection = 1 | -1;
 type SurfaceMode = "grid" | "surface";
 export type UnitsMode = "imperial" | "metric";
 
 type MapState = {
-  themeMode: ThemeMode;
-  setThemeMode: (mode: ThemeMode) => void;
   darkMode: boolean;
   surfaceMode: SurfaceMode;
   setSurfaceMode: (value: SurfaceMode) => void;
@@ -37,30 +34,19 @@ type MapState = {
 };
 
 const MapStateContext = createContext<MapState | null>(null);
-const THEME_MODE_STORAGE_KEY = "orcacast.themeMode";
 const PALETTE_STORAGE_KEY = "orcacast.paletteId";
 const SURFACE_MODE_STORAGE_KEY = "orcacast.surfaceMode";
 const UNITS_MODE_STORAGE_KEY = "orcacast.unitsMode";
 
-const getSystemPrefersDark = () => {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false;
-};
-
-const getStoredThemeMode = (): ThemeMode => {
-  if (typeof window === "undefined") return "dark";
-  const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
-  if (stored === "light" || stored === "dark" || stored === "system") return stored;
-  return "dark";
-};
-
 export function MapStateProvider({ children }: { children: ReactNode }) {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredThemeMode);
   const [surfaceMode, setSurfaceMode] = useState<SurfaceMode>(() => {
     if (typeof window === "undefined") return "grid";
     return window.localStorage.getItem(SURFACE_MODE_STORAGE_KEY) === "surface" ? "surface" : "grid";
   });
-  const [resolution, setResolution] = useState<H3Resolution>("H6");
+  const resolution: H3Resolution = "H6";
+  const setResolution = useCallback((value: H3Resolution) => {
+    void value;
+  }, []);
   const [modelId, setModelId] = useState(appConfig.compositeModelId);
   const [forecastIndex, setForecastIndex] = useState(-1);
   const [forecastPlaybackPlaying, setForecastPlaybackPlaying] = useState(false);
@@ -91,23 +77,13 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(THEME_MODE_STORAGE_KEY, themeMode);
-  }, [themeMode]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
     window.localStorage.setItem(UNITS_MODE_STORAGE_KEY, unitsMode);
   }, [unitsMode]);
 
-  const darkMode = useMemo(() => {
-    if (themeMode === "system") return getSystemPrefersDark();
-    return themeMode === "dark";
-  }, [themeMode]);
+  const darkMode = false;
 
   const value = useMemo(
     () => ({
-      themeMode,
-      setThemeMode,
       darkMode,
       surfaceMode,
       setSurfaceMode,
@@ -133,10 +109,10 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       setUnitsMode,
     }),
     [
-      themeMode,
       darkMode,
       surfaceMode,
       resolution,
+      setResolution,
       modelId,
       forecastIndex,
       forecastPlaybackPlaying,

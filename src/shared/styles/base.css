@@ -32,6 +32,63 @@
   --glass-light: rgba(255, 255, 255, 0.92);
 }
 
+/* Shared footer chrome across the editorial pages. */
+.appSiteFooter {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 24px;
+  padding: 28px clamp(24px, 5vw, 72px);
+  border-top: 3px solid #061d3c;
+  background: #eef7f5;
+  color: #061d3c;
+}
+
+.appSiteFooter__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  font-size: 1.35rem;
+  font-weight: 950;
+  letter-spacing: -.045em;
+  text-decoration: none;
+}
+
+.appSiteFooter__brand img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.appSiteFooter__nav {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.appSiteFooter__nav a,
+.appSiteFooter__tagline,
+.appSiteFooter__region {
+  color: #425a72;
+  font-size: .7rem;
+  font-weight: 850;
+  letter-spacing: .06em;
+  text-decoration: none;
+}
+
+.appSiteFooter__nav a:hover,
+.appSiteFooter__nav a:focus-visible { color: #08787c; }
+.appSiteFooter__tagline { text-align: center; }
+.appSiteFooter__region { text-align: right; text-transform: uppercase; }
+
+@media (max-width: 760px) {
+  .appSiteFooter { grid-template-columns: 1fr; gap: 14px; padding: 24px; text-align: center; }
+  .appSiteFooter__brand, .appSiteFooter__nav { justify-content: center; }
+  .appSiteFooter__region { text-align: center; }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -178,62 +235,69 @@ body {
 }
 
 .plannerMapMarker {
-  width: 30px;
-  height: 30px;
+  position: relative;
+  width: 27px;
+  height: 32px;
   padding: 0;
-  border: 2px solid #6f8d99;
-  border-radius: 999px;
-  background: #ffffff;
+  border: 2px solid #173f62;
+  border-radius: 50%;
+  background: #fff7e8;
   color: #061d3c;
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: 0 5px 14px rgba(7, 49, 68, 0.3), 0 0 0 3px rgba(255, 255, 255, 0.72);
+  box-shadow: 0 6px 14px rgba(7, 49, 68, 0.26), 0 0 0 2px rgba(255, 247, 232, 0.72);
 }
 
 .plannerMapMarker--suggested {
-  border-color: #315ad9;
-  background: #dbe7ff;
-  color: #183caa;
+  border-color: #173f62;
+  background: #fff7e8;
+  color: #061d3c;
 }
 
 .plannerMapMarker::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -5px;
-  width: 9px;
-  height: 9px;
-  border-right: inherit;
-  border-bottom: inherit;
-  background: inherit;
-  transform: translateX(-50%) rotate(45deg);
+  bottom: -8px;
+  width: 0;
+  height: 0;
+  border: 0;
+  border-top: 9px solid #173f62;
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+  background: transparent;
+  transform: translateX(-50%);
   z-index: -1;
 }
 
 .plannerMapMarker .material-symbols-rounded {
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1;
   font-variation-settings: "FILL" 1, "wght" 650, "GRAD" 0, "opsz" 20;
 }
 
 .plannerMapMarker--base {
-  width: 34px;
-  height: 34px;
-  border-color: #158fa2;
-  background: #ffffff;
-  color: #0b718d;
+  width: 29px;
+  height: 33px;
+  border-color: #173f62;
+  background: #fff7e8;
+  color: #061d3c;
+}
+
+.plannerMapMarker.is-itinerary > .material-symbols-rounded {
+  display: none;
 }
 
 .plannerMapMarker--camera {
-  border-color: #6f8d99;
-  background: #ffffff;
+  border-color: #173f62;
+  background: #fff7e8;
   color: #061d3c;
 }
 
 .plannerMapMarker--hydrophone {
-  border-color: #6f8d99;
-  background: #ffffff;
+  border-color: #173f62;
+  background: #fff7e8;
   color: #061d3c;
 }
 

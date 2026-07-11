@@ -44,6 +44,7 @@ export type ForecastMapProps = {
   onGridCellCount?: (count: number) => void;
   onGridCellSelect?: (h3: string) => void;
   onGridCellExpand?: (request: GridCellExpandRequest) => void;
+  enableGridInteraction?: boolean;
   forecastPath?: string;
   fallbackForecastPath?: string;
   colorScaleValues?: Record<string, number>;
@@ -64,6 +65,7 @@ export type ForecastMapProps = {
   pulseSelectedPlaceMarker?: boolean;
   onPlaceSelect?: (place: SuggestedPlace) => void;
   showTripHotspotMarkers?: boolean;
+  forceDomSuggestedMarkers?: boolean;
   baseLocation?: PlannerBaseLocation | null;
   maxTravelDistanceMiles?: number | null;
   showCameras?: boolean;
@@ -75,6 +77,7 @@ export type ForecastMapProps = {
 
 export type ForecastMapHandle = {
   captureSnapshot: () => Promise<Blob | null>;
+  captureItinerarySnapshot: (locations: LngLat[]) => Promise<Blob | null>;
   capturePlacePreview: (options: {
     center: LngLat;
     zoom?: number;

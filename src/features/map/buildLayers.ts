@@ -2,7 +2,10 @@ import { Map as MapLibreMap, type StyleSpecification } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import { getPerfObjectId } from "../../shared/debug/perf";
 
-export const VOYAGER_STYLE = "https://tiles.stadiamaps.com/styles/alidade_smooth.json";
+const LIGHT_BASEMAP_STYLE_URL = import.meta.env.VITE_BASEMAP_STYLE_URL?.trim();
+
+export const VOYAGER_STYLE =
+  LIGHT_BASEMAP_STYLE_URL || "https://tiles.openfreemap.org/styles/bright";
 export const DARK_STYLE = "https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json";
 const STADIA_ATTRIBUTION =
   '<a href="https://stadiamaps.com/" target="_blank">&copy; Stadia Maps</a> <a href="https://openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap</a>';
@@ -97,13 +100,60 @@ export function applyBasemapVisualTuning(map: MapLibreMap, isDarkBasemap: boolea
   }
 
   layers.forEach((layer) => {
+    const layerRecord = layer as unknown as Record<string, unknown>;
+    const sourceLayer = typeof layerRecord["source-layer"] === "string" ? layerRecord["source-layer"] : "";
+    const layerKey = `${layer.id} ${sourceLayer}`.toLowerCase();
+    const isBasemapLayer = layer.type === "background" || layer.type === "raster" || sourceLayer.length > 0;
+
+    // OrcaCast overlays and markers use app-owned GeoJSON/image sources without
+    // a vector-tile source-layer. Never let basemap tuning overwrite their paint.
+    if (!isBasemapLayer) return;
+
+    if (!isDarkBasemap) {
+      try {
+        const isPoi = /(^|[-_\s])(poi|housenumber)([-_\s]|$)/.test(layerKey);
+        const isPark = /(park|grass|wood|forest|national_park|nature_reserve|landcover)/.test(layerKey);
+        const isWater = /(water|ocean|lake|river)/.test(layerKey);
+        const isRoad = /(road|transportation|highway|street|bridge|tunnel)/.test(layerKey);
+        const isCoastline = /(coast|shoreline)/.test(layerKey);
+
+        if (isPoi) {
+          map.setLayoutProperty(layer.id, "visibility", "none");
+          return;
+        }
+        if (layer.type === "background") {
+          map.setPaintProperty(layer.id, "background-color", "#fff7e8");
+        } else if (layer.type === "fill" && isWater) {
+          map.setPaintProperty(layer.id, "fill-color", "#c8eeea");
+          map.setPaintProperty(layer.id, "fill-outline-color", "#173f62");
+        } else if (layer.type === "fill" && isPark) {
+          map.setPaintProperty(layer.id, "fill-color", "#b9c9a5");
+          map.setPaintProperty(layer.id, "fill-opacity", 0.72);
+        } else if (layer.type === "fill") {
+          map.setPaintProperty(layer.id, "fill-color", "#fff7e8");
+        } else if (layer.type === "line" && (isCoastline || isWater)) {
+          map.setPaintProperty(layer.id, "line-color", "#173f62");
+          map.setPaintProperty(layer.id, "line-opacity", 0.8);
+        } else if (layer.type === "line" && isRoad) {
+          map.setPaintProperty(layer.id, "line-color", "#b9aa91");
+          map.setPaintProperty(layer.id, "line-opacity", 0.16);
+        }
+      } catch {
+        // Upstream styles can omit paint/layout properties for some layer types.
+      }
+    }
+
     if (layer.type === "symbol") {
       const layout = (layer as { layout?: Record<string, unknown> }).layout ?? {};
       if ("text-field" in layout) {
         map.setPaintProperty(layer.id, "text-opacity", isDarkBasemap ? DARK_LABEL_OPACITY : 1);
+        if (!isDarkBasemap) {
+          map.setPaintProperty(layer.id, "text-color", "#102f4f");
+          map.setPaintProperty(layer.id, "text-halo-color", "rgba(255, 247, 232, 0.9)");
+        }
       }
       if ("icon-image" in layout) {
-        map.setPaintProperty(layer.id, "icon-opacity", isDarkBasemap ? 0.92 : 1);
+        map.setPaintProperty(layer.id, "icon-opacity", isDarkBasemap ? 0.92 : 0);
       }
       return;
     }

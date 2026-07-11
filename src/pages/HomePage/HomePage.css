@@ -30,7 +30,7 @@
 .homePageRoot .header--home .iconBtn { width: 60px; height: 60px; border: 3px solid var(--home-navy); border-radius: 50%; background: var(--home-yellow); color: var(--home-navy); box-shadow: none; }
 .homePageRoot .header--home .iconBtn:hover, .homePageRoot .header--home .iconBtn:focus-visible { background: #ffe57c; box-shadow: none; }
 .homePageRoot .header--home .header__right > .iconBtn { background: var(--home-pink); }
-.header--home .brandBtn { position: absolute; left: clamp(104px, 10vw, 174px); transform: none; }
+.header--home .brandBtn { position: absolute; left: clamp(92px, 8.5vw, 150px); transform: none; }
 .header--home .brandBtn,
 .header--home .brand__title { overflow: visible; }
 .header--home .brand__title { max-width: none; color: var(--home-navy) !important; font-size: clamp(1.55rem, 2.25vw, 2.15rem); font-weight: 900; letter-spacing: -.06em; text-overflow: clip; text-shadow: none; }

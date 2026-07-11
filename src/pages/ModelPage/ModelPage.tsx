@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
+import { SiteFooter } from "../../shared/components/SiteFooter";
 import { appConfig } from "../../shared/config/appConfig";
 import {
   getCachedDataMeta,
@@ -586,16 +587,7 @@ export function ModelPage() {
         </section>
       </main>
 
-      <footer className="aboutGuideFooter">
-        <strong>OrcaCast</strong>
-        <nav aria-label="Model page footer navigation">
-          <Link to="/about">About</Link>
-          <a href="#model-journey">Model layers</a>
-          <Link to="/planner">Plan a trip</Link>
-          <Link to="/watch">This week</Link>
-        </nav>
-        <span>Signals in. Context out.</span>
-      </footer>
+      <SiteFooter tagline="Signals in. Context out." links={[{ label: "About", to: "/about" }, { label: "Model layers", to: "#model-journey", external: true }, { label: "Plan a trip", to: "/planner" }, { label: "This week", to: "/watch" }]} />
 
       <Suspense fallback={null}>
         {infoOpen ? (

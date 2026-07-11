@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useMapState } from "../state/MapStateContext";
 import { useMenu } from "../state/MenuContext";
 
 type Props = {
@@ -25,7 +24,6 @@ export function PageShell({
   stageClassName = "",
 }: Props) {
   const { setMenuOpen } = useMenu();
-  const { darkMode, setThemeMode } = useMapState();
   const chromeOn = showBottomRail || showFooter;
 
   const stageClasses = [
@@ -54,17 +52,6 @@ export function PageShell({
         </div>
 
         <div className="pageHeader__right">
-          <button
-            className="iconBtn"
-            onClick={() => setThemeMode(darkMode ? "light" : "dark")}
-            aria-label="Toggle dark mode"
-            title="Dark/Light Mode"
-            type="button"
-          >
-            <span className="material-symbols-rounded" aria-hidden="true">
-              {darkMode ? "light_mode" : "dark_mode"}
-            </span>
-          </button>
           <Link className="backToMap" to="/" aria-label="Back home" title="Back home">
             <span className="backToMap__icon">
               <span className="material-symbols-rounded" aria-hidden="true">

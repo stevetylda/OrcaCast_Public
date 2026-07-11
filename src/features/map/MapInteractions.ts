@@ -265,6 +265,7 @@ export function createGridInteractionHandlers({
   };
 
   const handleSparklineClick = (event: maplibregl.MapMouseEvent) => {
+    if (!enableSparklinePopupRef.current) return;
     const features = map.queryRenderedFeatures(event.point, { layers: ["grid-fill"] });
     const feature = features[0];
     if (!feature) return;
@@ -284,7 +285,6 @@ export function createGridInteractionHandlers({
       }
     }
 
-    if (!enableSparklinePopupRef.current) return;
     const fullPeriods = periodsRef.current ?? [];
     if (fullPeriods.length === 0) return;
 

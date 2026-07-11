@@ -4,11 +4,10 @@ import { startMapTour } from "../../shared/tour/startMapTour";
 import { WatchPageErrorBoundary } from "./WatchPageErrorBoundary";
 import { WatchPageLayout } from "./WatchPageLayout";
 import { useWatchPageController } from "./useWatchPageController";
+import "../PlanPage/PlanPage.css";
+import "./WatchPage.css";
 
 const InfoModal = lazy(() => import("../../shared/components/InfoModal").then((m) => ({ default: m.InfoModal })));
-const AnalystGridDetailModal = lazy(() =>
-  import("../../features/analyst/grid-detail/AnalystGridDetailModal").then((m) => ({ default: m.AnalystGridDetailModal }))
-);
 
 export function WatchPage() {
   const [boundaryKey, setBoundaryKey] = useState(0);
@@ -35,19 +34,6 @@ export function WatchPage() {
               onClose={() => controller.setInfoOpen(false)}
               onStartTour={() => startMapTour()}
               darkMode={controller.darkMode}
-            />
-          )}
-          {controller.gridDetailOpen && (
-            <AnalystGridDetailModal
-              open={controller.gridDetailOpen}
-              onClose={() => controller.setGridDetailOpen(false)}
-              darkMode={controller.darkMode}
-              cellId={controller.gridDetailCellId}
-              periods={controller.periods}
-              resolution={controller.gridDetailResolution}
-              modelId={controller.gridDetailModelId}
-              selectedWeek={controller.gridDetailSelectedWeek ?? controller.currentWeek}
-              selectedWeekYear={controller.gridDetailSelectedWeekYear ?? controller.currentWeekYear}
             />
           )}
         </Suspense>

@@ -162,7 +162,8 @@ function getPlannerMarkerSymbol(kind: PlannerLocationKind, type?: SuggestedPlace
 function createPlannerDomMarker(properties: PlannerLocationFeatureProperties) {
   const element = document.createElement("button");
   element.type = "button";
-  element.className = `plannerMapMarker plannerMapMarker--${properties.kind}${properties.selected ? " is-selected" : ""}`;
+  const hasItineraryOrder = typeof properties.itineraryOrder === "number" && properties.itineraryOrder > 0;
+  element.className = `plannerMapMarker plannerMapMarker--${properties.kind}${properties.selected ? " is-selected" : ""}${hasItineraryOrder ? " is-itinerary" : ""}`;
   element.setAttribute("aria-label", `${properties.name}, ${properties.markerType}`);
   element.title = properties.name;
 
@@ -178,10 +179,10 @@ function createPlannerDomMarker(properties: PlannerLocationFeatureProperties) {
   label.setAttribute("aria-hidden", "true");
   element.append(label);
 
-  if (typeof properties.itineraryOrder === "number" && properties.itineraryOrder > 0) {
+  if (hasItineraryOrder) {
     const badge = document.createElement("span");
     badge.className = "plannerMapMarker__itineraryBadge";
-    badge.textContent = String(properties.itineraryOrder);
+    badge.textContent = String(properties.itineraryOrder).padStart(2, "0");
     badge.setAttribute("aria-hidden", "true");
     element.append(badge);
   }
@@ -860,6 +861,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     onGridCellCount,
     onGridCellSelect,
     onGridCellExpand,
+    enableGridInteraction = true,
     forecastPath,
     fallbackForecastPath,
     colorScaleValues,
@@ -880,6 +882,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     pulseSelectedPlaceMarker = false,
     onPlaceSelect,
     showTripHotspotMarkers = false,
+    forceDomSuggestedMarkers = false,
     baseLocation = null,
     maxTravelDistanceMiles = null,
     showCameras = false,
@@ -905,6 +908,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
           : VOYAGER_STYLE,
     [basemapMode, darkMode]
   );
+
   const sidebarPaddingRight = useMemo(
     () => (sidebarOffsetPx > 0 ? Math.max(0, Math.round(sidebarOffsetPx * 0.72)) : 0),
     [sidebarOffsetPx]
@@ -964,10 +968,35 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   const sparkRequestIdRef = useRef(0);
   const onGridCellSelectRef = useRef(onGridCellSelect);
   const onGridCellExpandRef = useRef(onGridCellExpand);
+  const enableGridInteractionRef = useRef(enableGridInteraction);
 
   const [legendSpec, setLegendSpec] = useState<HeatScale | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !forceDomSuggestedMarkers) return;
+
+    const itineraryOrderById = new Map(itineraryPlaceIds.map((id, index) => [id, index + 1]));
+    const markers = suggestedPlaces.flatMap((place) => {
+      const coordinates = getPointCoordinates(place.latitude, place.longitude);
+      if (!coordinates) return [];
+      const element = createPlannerDomMarker({
+        id: place.id,
+        kind: "suggested",
+        name: place.name,
+        markerType: place.type,
+        iconName: getPlannerLocationIconName("suggested", place.type),
+        selected: false,
+        selectedPulseOn: false,
+        itineraryOrder: itineraryOrderById.get(place.id) ?? 0,
+        score: place.score,
+      });
+      return [new maplibregl.Marker({ element, anchor: "bottom" }).setLngLat(coordinates).addTo(map)];
+    });
+
+    return () => markers.forEach((marker) => marker.remove());
+  }, [forceDomSuggestedMarkers, itineraryPlaceIds, mapReady, suggestedPlaces]);
   const [poiItems, setPoiItems] = useState<PublicPoi[]>([]);
 
   const hasForecastLegend = legendSpec !== null;
@@ -1173,12 +1202,14 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       width,
       height,
       includeForecastOverlay = true,
+      itineraryLocations,
     }: {
       center?: LngLat;
       zoom?: number;
       width?: number;
       height?: number;
       includeForecastOverlay?: boolean;
+      itineraryLocations?: LngLat[];
     } = {}) => {
       const sourceMap = mapRef.current;
       const sourceCanvas = sourceMap?.getCanvas();
@@ -1256,6 +1287,44 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
           }
         }
 
+        if (itineraryLocations && itineraryLocations.length > 0) {
+          tempMap.addSource("itinerary-export-stops", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: itineraryLocations.map((coordinates, index) => ({
+                type: "Feature",
+                properties: { order: String(index + 1) },
+                geometry: { type: "Point", coordinates },
+              })),
+            },
+          });
+          tempMap.addLayer({
+            id: "itinerary-export-stop-halo",
+            type: "circle",
+            source: "itinerary-export-stops",
+            paint: { "circle-radius": 20, "circle-color": "#fff8e9", "circle-opacity": 0.96 },
+          });
+          tempMap.addLayer({
+            id: "itinerary-export-stop-circle",
+            type: "circle",
+            source: "itinerary-export-stops",
+            paint: {
+              "circle-radius": 16,
+              "circle-color": "#ff6458",
+              "circle-stroke-color": "#061d3c",
+              "circle-stroke-width": 2,
+            },
+          });
+          tempMap.addLayer({
+            id: "itinerary-export-stop-number",
+            type: "symbol",
+            source: "itinerary-export-stops",
+            layout: { "text-field": ["get", "order"], "text-size": 16, "text-font": ["Noto Sans Bold"] },
+            paint: { "text-color": "#fffdf6" },
+          });
+        }
+
         tempMap.resize();
         const rendered = await waitForMapRender(tempMap);
         if (!rendered) return null;
@@ -1280,6 +1349,17 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
   const captureCurrentMapSnapshot = useCallback(async () => {
     return captureMapSnapshot();
   }, [captureMapSnapshot]);
+
+  const captureItinerarySnapshot = useCallback(
+    async (locations: LngLat[]) =>
+      captureMapSnapshot({
+        width: 1080,
+        height: 520,
+        includeForecastOverlay: false,
+        itineraryLocations: locations,
+      }),
+    [captureMapSnapshot]
+  );
 
   const fitLocations = useCallback(
     (locations: LngLat[], options?: { padding?: MapViewportPadding; maxZoom?: number }) => {
@@ -1338,10 +1418,11 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     ref,
     () => ({
       captureSnapshot: captureCurrentMapSnapshot,
+      captureItinerarySnapshot,
       capturePlacePreview,
       fitLocations,
     }),
-    [captureCurrentMapSnapshot, capturePlacePreview, fitLocations]
+    [captureCurrentMapSnapshot, captureItinerarySnapshot, capturePlacePreview, fitLocations]
   );
 
   useForecastData({
@@ -1403,7 +1484,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
     selectedWeekYearRef.current = selectedWeekYear;
     onGridCellSelectRef.current = onGridCellSelect;
     onGridCellExpandRef.current = onGridCellExpand;
-  }, [periods, modelId, resolution, selectedWeek, selectedWeekYear, onGridCellSelect, onGridCellExpand]);
+    enableGridInteractionRef.current = enableGridInteraction;
+  }, [periods, modelId, resolution, selectedWeek, selectedWeekYear, onGridCellSelect, onGridCellExpand, enableGridInteraction]);
 
   useEffect(() => {
     hotspotsOnlyRef.current = hotspotsEnabled;
@@ -1453,7 +1535,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
         hoveredCellRef,
         onGridCellSelect: (h3) => onGridCellSelectRef.current?.(h3),
         onGridCellExpand: (request) => onGridCellExpandRef.current?.(request),
-        enableSparklinePopupRef: { current: true },
+        enableSparklinePopupRef: enableGridInteractionRef,
       });
 
     map.on("click", "grid-fill", handleSparklineClick);
@@ -1658,7 +1740,14 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       }
       if (cancelled || mapRef.current !== map) return;
 
-      await ensurePlannerLocationLayers(map, baseData);
+      try {
+        await ensurePlannerLocationLayers(map, baseData);
+      } catch (error) {
+        // A secondary map can finish loading its basemap while optional symbol
+        // layers are still unavailable. DOM pins do not depend on those layers,
+        // so keep rendering them instead of aborting the entire marker setup.
+        console.warn("[Map] optional planner layers were unavailable; using DOM markers", error);
+      }
       if (cancelled || mapRef.current !== map) return;
 
       // DOM markers are the single visual marker renderer. The GeoJSON layers
@@ -1704,6 +1793,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       for (const feature of baseData.features) {
         if (feature.geometry?.type !== "Point" || !feature.properties) continue;
         const properties = feature.properties as PlannerLocationFeatureProperties;
+        if (forceDomSuggestedMarkers && properties.kind === "suggested") continue;
         const coordinates = feature.geometry.coordinates as [number, number];
         const element = createPlannerDomMarker(properties);
         element.addEventListener("click", (event) => {
@@ -1800,7 +1890,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(funct
       domMarkers.forEach((marker) => marker.remove());
       popup.remove();
     };
-  }, [baseLocation, cameraLocations, hydrophoneLocations, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedCameraId, selectedHydrophoneId, selectedPlaceId, showCameras, showHydrophones, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
+  }, [baseLocation, cameraLocations, forceDomSuggestedMarkers, hydrophoneLocations, itineraryPlaceIds, mapReady, onPlaceSelect, poiFilters, poiItems, pulseSelectedPlaceMarker, selectedCameraId, selectedHydrophoneId, selectedPlaceId, showCameras, showHydrophones, showTripHotspotMarkers, styleUrl, suggestedPlaces]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -1,4 +1,4 @@
-export function SwimmingOrcaLoader() {
+export function AmbientSwimmingOrca() {
   return (
     <div className="swimmingOrcaLoader" aria-hidden="true">
       <div className="swimmingOrcaLoader__waterGlow" />
