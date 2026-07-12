@@ -1,301 +1,149 @@
-# OrcaCast Public
+# OrcaCast
 
-Public-facing subset of `OrcaCast_App` containing only the main forecast map and the about page.
+OrcaCast is a Salish Sea trip-planning and exploration application. It combines historical orca activity, forecast surfaces, weather, and local access information to help people choose dates and places for responsible, shore-first wildlife viewing.
 
-## Included surface
+The application is a React and TypeScript single-page app built with Vite. Its maps use MapLibre, H3 forecast grids, and locally packaged public data.
 
-- `/` for the forecast map
-- `/about` for interpretation guidance and responsible-use information
+> OrcaCast provides relative activity guidance, not real-time whale tracking or a guarantee of a sighting. Always follow current wildlife, marine, park, and safety guidance.
 
-## Included runtime data
+## Application pages
 
-- `public/data/activity`
-- `public/data/expected_count`
-- `public/data/forecasts`
-- `public/data/grids`
-- `public/data/last_week_sightings`
-- `public/data/population`
-- shared metadata files such as `public/data/meta.json`, `public/data/periods.json`, and `public/data/places_of_interest.json`
+### Home — `/`
 
-## Excluded from this repo copy
+![OrcaCast home page](docs/screenshots/home.jpg)
 
-- viewability pages and datasets
-- explainability pages and datasets
-- data provenance page
-- models and settings pages
+The Home page introduces OrcaCast and gives visitors a quick seasonal pulse before they start planning. It highlights the current week's historical activity, shows a compact Friday Harbor weather outlook, summarizes typical sightings through the year, and routes visitors into the Planner or Watch experiences.
+
+Key capabilities:
+
+- Current-week historical activity summary
+- Seasonal activity chart and short-range weather context
+- Direct entry points to trip planning, forecast exploration, cameras, and hydrophones
+- Responsible-use framing for the rest of the application
+
+### Watch — `/watch`
+
+![OrcaCast Watch page](docs/screenshots/watch.jpg)
+
+The Watch page is the interactive forecast workspace. It overlays relative activity on the Salish Sea, provides a week-by-week timeline, and pairs the forecast with practical places where visitors can observe from shore, ferries, parks, or marinas.
+
+Key capabilities:
+
+- Interactive forecast map with activity legend, selectable color palettes, and hotspot controls
+- Weekly forecast navigation and playback
+- Ranked Field Picks with place details and map focus
+- Park, marina, ferry, camera, and Orcasound hydrophone layers
+- Itinerary building, reordering, map preview, and export
+- Map reset, snapshot download, and sharing tools
+
+### Planner — `/planner`
+
+![OrcaCast Planner page](docs/screenshots/planner.jpg)
+
+The Planner turns a visitor's dates, base location, and optional travel range into a more focused Salish Sea trip view. After a plan is submitted, it presents seasonal context, a mapped travel area, recommended viewing locations, and tools for assembling an itinerary.
+
+Key capabilities:
+
+- Base-location, arrival-date, departure-date, and travel-distance inputs
+- Seasonal activity comparison for the selected travel window
+- Forecast map constrained around the trip plan
+- Recommended viewing spots with filters and detail views
+- Camera and hydrophone discovery
+- Persisted plan state and itinerary export
+
+### About — `/about`
+
+![OrcaCast About page](docs/screenshots/about.jpg)
+
+The About page explains how to interpret OrcaCast. It describes the signals used by the application, what the forecast can and cannot do, the geographic scope, data freshness, and responsible viewing principles.
+
+Key capabilities:
+
+- Plain-language overview of sightings, weather, seasonal patterns, and local access data
+- Forecast workflow and interpretation guidance
+- Clear limitations and uncertainty framing
+- Responsible viewing guidance and links to official resources
+- Current data and regional coverage context
+
+### Model Methodology — `/about/model`
+
+![OrcaCast model methodology page](docs/screenshots/model.jpg)
+
+The Model Methodology page provides a deeper, visual walkthrough of the layers behind the forecast. It follows the model from seasonal history and recent activity through observer effort, spatial context, environmental proxies, uncertainty, and personalized viewing opportunity.
+
+Key capabilities:
+
+- Ten-stage explanation of the forecast and planning pipeline
+- Status labels distinguishing current, integrating, and personalization layers
+- Details on observer bias, spatial context, ecological proxies, and uncertainty
+- Interpretation guidance for relative activity and viewing opportunity
 
 ## Local development
 
-```bash
-npm install
-npm run dev
-```
-
-When multiple models are present, the app can surface a synthetic `consensus` option (mean by cell). Note: this is not a valid verified forecast but can be helpful to see where all models agree.
-
----
-
-## 7. Temporal / Spatial / Evaluation Integrity
-
-Guard against silent drift in these areas:
-
-### Temporal integrity
-
-- Ensure forecast period indexing remains ISO-week consistent
-- Verify week-shift logic and period-fill logic do not leak future context
-- Confirm train/eval assumptions in model documentation remain causal
-
-### Spatial integrity
-
-- Validate H3 level (`H4/H5/H6`) remains consistent across joins/overlays
-- Confirm no CRS or coordinate-order drift when ingesting GeoJSON
-- Re-check any pruning/smoothing process that could alter hotspot geometry
-
-### Evaluation integrity
-
-- Ensure metrics are computed on intended populations, at intended time windows
-- Keep reporting-effort caveats explicit in interpretation text
-- Treat “forecast likelihood” as relative ranking, not absolute probability of presence
-
-### Reproducibility
-
-- Prefer config-driven behavior over ad-hoc constants
-- Keep file naming deterministic (`<year>_<week>_<Hn>`) for reproducible loads
-- Document any behavior-changing config updates in changelogs/PR notes
-
----
-
-## 8. Local Development
-
 ### Prerequisites
 
-- Node.js 18+ (Node 20 recommended)
+- Node.js 18 or newer (Node.js 20 recommended)
 - npm
-- Python 3.10+ for the utility modules in `src/cli`, `src/explainability`, `src/io`, and `src/visualization`
 
-### Frontend setup
+### Install and run
 
 ```bash
 npm install
-```
-
-### Run the app locally
-
-```bash
 npm run dev
 ```
 
-### Python tooling
+Vite prints the local development URL when the server starts. The app expects its runtime datasets and static assets under `public/`.
 
-The Python utilities use the packaging metadata in `pyproject.toml`, so the supported setup path is editable install plus `python -m` execution.
-
-#### Create a virtual environment
+### Quality checks
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+npm run typecheck
+npm run test
+npm run lint
+npm run build
 ```
 
-#### Install the utilities
+Use `npm run build:check` to create a production build and check the bundle budget. Use `npm run repo:check` or `npm run data:validate` to validate packaged artifacts.
 
-```bash
-python -m pip install -e .
+## Project structure
+
+```text
+src/
+  app/                 Application shell and routing
+  pages/               Home, Watch, Planner, About, and Model pages
+  features/            Map, planner, watch, location, and analyst features
+  shared/              Shared components, state, configuration, and data access
+public/
+  data/                 Forecasts, grids, activity, metadata, and locations
+  images/               Static illustrations and icons
+  spot-photos/          Viewing-location photography
+docs/screenshots/       README page screenshots
+scripts/                Build, test, and artifact-validation utilities
 ```
 
-#### Explore the CLI
+Important configuration lives in:
 
-Run the CLI either as a module or through the installed console script:
+- `src/shared/config/appConfig.ts` for application and forecast defaults
+- `src/shared/config/dataPaths.ts` for runtime data paths
+- `src/shared/config/planner.ts` for planner behavior
+- `vite.config.ts` for the frontend build
 
-```bash
-python -m src.cli --help
-orcacast-cli --help
-```
+## Runtime data
 
-Current supported subcommands include:
+The public application reads packaged datasets from `public/data`, including activity summaries, expected counts, forecasts, forecast grids, recent sightings, population context, periods, metadata, and places of interest. Keep temporal periods, H3 resolutions, model identifiers, and GeoJSON coordinate order consistent when refreshing these artifacts.
 
-```bash
-python -m src.cli explainability build --help
-```
+Forecast values should be interpreted as relative rankings across time and space. Reporting effort, access, weather, and sparse observations can all affect what is recorded and what can realistically be seen.
 
-#### Example: build explainability artifacts
-
-```bash
-python -m src.cli explainability build \
-  --run-id latest \
-  --model-id composite_linear_logit \
-  --target sighting_likelihood \
-  --resolution H4 \
-  --source-shap-dir public/data/forecasts/latest/shap \
-  --output-root artifacts/explainability
-```
-
-This writes artifact bundles under `artifacts/explainability/<run-id>/<model-id>/<target>/`.
-
-#### Optional Makefile shortcuts
-
-If you want short aliases for the most common Python commands:
-
-```bash
-make py-install
-make py-cli-help
-make py-exp-help
-```
-
-### Build the production bundle
+## Production deployment
 
 ```bash
 npm run build
 ```
 
-### Preview the production bundle
+Deploy the generated `dist/` directory to a static host. Because OrcaCast uses client-side routing, configure the host to serve `index.html` as the fallback for routes such as `/watch`, `/planner`, and `/about/model`.
 
-```bash
-npm run preview
-```
-
-### Validate the codebase
-
-```bash
-npm run lint
-npm run test
-npm run typecheck
-```
-
----
-
-## 9. Configuration Reference
-
-### `src/config/appConfig.ts`
-
-Primary runtime configuration:
-
-- default forecast period
-- best/default model identifier
-- KDE folder/run ids
-- geometry-pruning and rendering thresholds
-
-### `src/config/dataPaths.ts`
-
-Path builders for:
-
-- grids
-- weekly forecasts
-- actuals/sightings paths
-
-### `vite.config.ts`
-
-Build/serve base path is currently `/`. If deploying under a subpath, adjust `base` accordingly.
-
----
-
-## 10. Testing and Validation Checklist
-
-Before merging behavior-changing updates:
-
-1. **Route sanity**: verify all routed pages load (`/`, `/about`, `/models`, `/explainability`, `/data`)
-2. **Forecast load sanity**: select multiple periods/resolutions and confirm map layers render
-3. **Overlay sanity**: toggle last-week sightings and KDE contours on/off
-4. **Compare sanity**: test compare mode for at least one period pair and model pair
-5. **Data integrity spot-check**: open one forecast JSON and validate H3 keys align with target grid
-6. **Build/lint**: run `npm run build` and `npm run lint`
-
----
-
-## 11. Deployment
-
-### Cloudflare Pages
-Explainability artifact builder CLI:
-
-- `python3 -m src.cli explainability build --run-id ... --model-id ... --target ... --sample-n 50000 --top-k-interactions 50`
-
-These are not required to run the frontend app, but can be used in preprocessing workflows.
-
-## Deployment (Cloudflare Pages)
+For Cloudflare Pages:
 
 - Build command: `npm run build`
 - Output directory: `dist`
-- Node version: 18+
-
-Because OrcaCast is an SPA, ensure host-level fallback routing is configured so deep links resolve to `index.html`.
-
----
-
-## 12. Troubleshooting
-
-### Blank map / missing layers
-
-- Confirm required files exist for selected period/resolution
-- Check browser console for GeoJSON or JSON parse errors
-- Validate H3 keys and geometry properties are present
-
-### Forecast selector populated but no rendered values
-
-- Confirm matching `<year>_<week>_<Hn>.json` exists for each configured period
-- Verify model id selection exists in multi-model payloads
-
-### Inconsistent behavior between runs
-
-- Re-check config defaults and local storage flags
-- Verify data refresh did not silently remove a period or model
-
----
-
-## 13. Project Structure
-
-```text
-src/
-  App.tsx
-  components/
-    ForecastMap.tsx
-    SideDrawer.tsx
-    ToolDrawer.tsx
-    ...
-  config/
-    appConfig.ts
-    dataPaths.ts
-    attribution.ts
-  core/
-    time/
-  data/
-    forecastIO.ts
-    periods.ts
-    expectedCount.ts
-  features/
-    models/
-    analysis/
-  map/
-  pages/
-    MapPage.tsx
-    AboutPage.tsx
-    ModelsPage.tsx
-    ExplainabilityPage.tsx
-    DataPage.tsx
-    SettingsPage.tsx
-  state/
-    MapStateContext.tsx
-    MenuContext.tsx
-  tour/
-```
-
----
-
-## 14. Contributing Guidance
-
-When making model/data-facing changes:
-
-- Prefer minimal diffs that preserve behavior unless behavior change is intended
-- Document whether outputs change and under what conditions
-- Keep temporal/spatial assumptions explicit in code comments and PR notes
-- Avoid broad refactors that complicate traceability for review
-
-When changing UI-only behavior:
-
-- Update screenshots under `docs/screenshots`
-- Ensure route-level README gallery links remain valid
-
----
-
-## 15. License / Credits
-
-- Basemap and rendering acknowledgements are surfaced in the Data page.
-- OrcaCast is intended for educational and planning use with wildlife-safe practices.
+- Node.js version: 18 or newer
