@@ -59,15 +59,21 @@ export function AppFooter({
   const [activePanel, setActivePanel] = useState<DockPanelId>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement | null>(null);
-  const setDockPanel = (nextPanel: DockPanelId | ((current: DockPanelId) => DockPanelId)) => {
+  const setDockPanel = (
+    nextPanel: DockPanelId | ((current: DockPanelId) => DockPanelId),
+  ) => {
     setActivePanel((current) => {
-      const resolved = typeof nextPanel === "function" ? nextPanel(current) : nextPanel;
+      const resolved =
+        typeof nextPanel === "function" ? nextPanel(current) : nextPanel;
       if (resolved !== "settings") setPaletteOpen(false);
       return resolved;
     });
   };
 
-  const liveCamPlaces = useMemo(() => places.filter((place) => place.hasLiveFeed), [places]);
+  const liveCamPlaces = useMemo(
+    () => places.filter((place) => place.hasLiveFeed),
+    [places],
+  );
   const poiActive = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
 
   useEffect(() => {
@@ -90,8 +96,16 @@ export function AppFooter({
 
   const activePalette = PALETTES[selectedPaletteId];
 
-  const renderPlacesPanel = (items: SuggestedPlace[], emptyLabel: string, ctaLabel: string) => (
-    <div className="footerDock__panel footerDock__panel--places" role="dialog" aria-modal="false">
+  const renderPlacesPanel = (
+    items: SuggestedPlace[],
+    emptyLabel: string,
+    ctaLabel: string,
+  ) => (
+    <div
+      className="footerDock__panel footerDock__panel--places"
+      role="dialog"
+      aria-modal="false"
+    >
       <div className="footerDock__panelHeader">
         <div>
           <div className="footerDock__eyebrow">Watch tools</div>
@@ -134,7 +148,11 @@ export function AppFooter({
   );
 
   const renderHydrophonesPanel = () => (
-    <div className="footerDock__panel footerDock__panel--places" role="dialog" aria-modal="false">
+    <div
+      className="footerDock__panel footerDock__panel--places"
+      role="dialog"
+      aria-modal="false"
+    >
       <div className="footerDock__panelHeader">
         <div>
           <div className="footerDock__eyebrow">Live listening</div>
@@ -143,7 +161,9 @@ export function AppFooter({
         <span className="footerDock__count">{hydrophones.length}</span>
       </div>
       {hydrophones.length === 0 ? (
-        <div className="footerDock__empty">No Orcasound hydrophones are available right now.</div>
+        <div className="footerDock__empty">
+          No Orcasound hydrophones are available right now.
+        </div>
       ) : (
         <div className="footerDock__placeList">
           {hydrophones.map((hydrophone) => (
@@ -162,7 +182,9 @@ export function AppFooter({
               </span>
               <span className="footerDock__placeAction">
                 Show
-                <span className="material-symbols-rounded" aria-hidden="true">place</span>
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  place
+                </span>
               </span>
             </button>
           ))}
@@ -178,11 +200,15 @@ export function AppFooter({
           renderPlacesPanel(
             liveCamPlaces,
             "No currently suggested places have live cameras attached.",
-            "Cameras"
+            "Cameras",
           )}
         {activePanel === "hydrophones" && renderHydrophonesPanel()}
         {activePanel === "settings" && (
-          <div className="footerDock__panel footerDock__panel--settings" role="dialog" aria-modal="false">
+          <div
+            className="footerDock__panel footerDock__panel--settings"
+            role="dialog"
+            aria-modal="false"
+          >
             <div className="footerDock__panelHeader footerDock__panelHeader--settings">
               <div className="footerDock__titleRow" data-tour="theme-toggle">
                 <span className="footerDock__title">Settings</span>
@@ -234,13 +260,18 @@ export function AppFooter({
                   <select
                     className="select select--footer"
                     value={unitsMode}
-                    onChange={(event) => onUnitsModeChange(event.target.value as UnitsMode)}
+                    onChange={(event) =>
+                      onUnitsModeChange(event.target.value as UnitsMode)
+                    }
                     aria-label="Units"
                   >
                     <option value="imperial">Imperial</option>
                     <option value="metric">Metric</option>
                   </select>
-                  <span className="material-symbols-rounded footerDock__selectChevron" aria-hidden="true">
+                  <span
+                    className="material-symbols-rounded footerDock__selectChevron"
+                    aria-hidden="true"
+                  >
                     expand_more
                   </span>
                 </span>
@@ -255,34 +286,54 @@ export function AppFooter({
                   <select
                     className="select select--footer"
                     value={surfaceMode}
-                    onChange={(event) => onSurfaceModeChange(event.target.value as "grid" | "surface")}
+                    onChange={(event) =>
+                      onSurfaceModeChange(
+                        event.target.value as "grid" | "surface",
+                      )
+                    }
                     aria-label="Surface view"
                   >
                     <option value="grid">Hex grid</option>
                     <option value="surface">Smooth</option>
                   </select>
-                  <span className="material-symbols-rounded footerDock__selectChevron" aria-hidden="true">
+                  <span
+                    className="material-symbols-rounded footerDock__selectChevron"
+                    aria-hidden="true"
+                  >
                     expand_more
                   </span>
                 </span>
               </label>
               <div className="footerDock__settingBlock" data-tour="poi">
-                <div className="footerDock__settingCaption">Points of interest</div>
+                <div className="footerDock__settingCaption">
+                  Points of interest
+                </div>
                 <div className="footerDock__toggleGrid">
                   <button
                     type="button"
-                    className={poiActive ? "footerDock__chip isActive" : "footerDock__chip"}
+                    className={
+                      poiActive
+                        ? "footerDock__chip isActive"
+                        : "footerDock__chip"
+                    }
                     onClick={onTogglePoiAll}
                   >
                     All
                   </button>
                   <button
                     type="button"
-                    className={poiFilters.Park ? "footerDock__chip isActive" : "footerDock__chip"}
+                    className={
+                      poiFilters.Park
+                        ? "footerDock__chip isActive"
+                        : "footerDock__chip"
+                    }
                     onClick={() => onTogglePoiType("Park")}
                   >
                     <span className="footerDock__chipInner">
-                      <span className="footerDock__chipIcons footerDock__chipIcons--park" aria-hidden="true">
+                      <span
+                        className="footerDock__chipIcons footerDock__chipIcons--park"
+                        aria-hidden="true"
+                      >
                         <span className="material-symbols-rounded">park</span>
                       </span>
                       <span>Parks</span>
@@ -290,11 +341,18 @@ export function AppFooter({
                   </button>
                   <button
                     type="button"
-                    className={poiFilters.Marina ? "footerDock__chip isActive" : "footerDock__chip"}
+                    className={
+                      poiFilters.Marina
+                        ? "footerDock__chip isActive"
+                        : "footerDock__chip"
+                    }
                     onClick={() => onTogglePoiType("Marina")}
                   >
                     <span className="footerDock__chipInner">
-                      <span className="footerDock__chipIcons footerDock__chipIcons--marina" aria-hidden="true">
+                      <span
+                        className="footerDock__chipIcons footerDock__chipIcons--marina"
+                        aria-hidden="true"
+                      >
                         <span className="material-symbols-rounded">anchor</span>
                       </span>
                       <span>Marinas</span>
@@ -302,12 +360,21 @@ export function AppFooter({
                   </button>
                   <button
                     type="button"
-                    className={poiFilters.Ferry ? "footerDock__chip isActive" : "footerDock__chip"}
+                    className={
+                      poiFilters.Ferry
+                        ? "footerDock__chip isActive"
+                        : "footerDock__chip"
+                    }
                     onClick={() => onTogglePoiType("Ferry")}
                   >
                     <span className="footerDock__chipInner">
-                      <span className="footerDock__chipIcons footerDock__chipIcons--ferry" aria-hidden="true">
-                        <span className="material-symbols-rounded">directions_boat</span>
+                      <span
+                        className="footerDock__chipIcons footerDock__chipIcons--ferry"
+                        aria-hidden="true"
+                      >
+                        <span className="material-symbols-rounded">
+                          directions_boat
+                        </span>
                       </span>
                       <span>Ferries</span>
                     </span>
@@ -316,67 +383,96 @@ export function AppFooter({
               </div>
             </section>
 
-            {showPalette ? <section className="footerDock__section footerDock__section--settings" data-tour="palette-picker">
-              <div className="footerDock__sectionLabel">Color scale</div>
-              <div className="footerDock__settingBlock">
-                <div className="footerDock__settingCaption">Palette</div>
-                <button
-                  type="button"
-                  className={`footerDock__paletteTrigger${paletteOpen ? " isOpen" : ""}`}
-                  onClick={() => setPaletteOpen((value) => !value)}
-                  aria-expanded={paletteOpen}
-                  aria-label="Color scale"
-                >
-                  <span className="footerDock__paletteTriggerMain">
-                    <span className="footerDock__paletteSwatches" aria-hidden="true">
-                      {activePalette.colors.slice(0, 5).map((color, index) => (
-                        <span
-                          key={`${activePalette.id}-active-${index}`}
-                          className="footerDock__paletteSwatch"
-                          style={{ backgroundColor: color }}
-                        />
-                      ))}
+            {showPalette ? (
+              <section
+                className="footerDock__section footerDock__section--settings"
+                data-tour="palette-picker"
+              >
+                <div className="footerDock__sectionLabel">Color scale</div>
+                <div className="footerDock__settingBlock">
+                  <div className="footerDock__settingCaption">Palette</div>
+                  <button
+                    type="button"
+                    className={`footerDock__paletteTrigger${paletteOpen ? " isOpen" : ""}`}
+                    onClick={() => setPaletteOpen((value) => !value)}
+                    aria-expanded={paletteOpen}
+                    aria-label="Color scale"
+                  >
+                    <span className="footerDock__paletteTriggerMain">
+                      <span
+                        className="footerDock__paletteSwatches"
+                        aria-hidden="true"
+                      >
+                        {activePalette.colors
+                          .slice(0, 5)
+                          .map((color, index) => (
+                            <span
+                              key={`${activePalette.id}-active-${index}`}
+                              className="footerDock__paletteSwatch"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                      </span>
+                      <span className="footerDock__paletteName">
+                        {activePalette.name}
+                      </span>
                     </span>
-                    <span className="footerDock__paletteName">{activePalette.name}</span>
-                  </span>
-                  <span className="material-symbols-rounded footerDock__paletteChevron" aria-hidden="true">
-                    expand_more
-                  </span>
-                </button>
-                {paletteOpen && (
-                  <div className="footerDock__paletteList" role="listbox" aria-label="Color scale palettes">
-                    {Object.values(PALETTES).map((palette) => {
-                      const selected = palette.id === selectedPaletteId;
-                      return (
-                        <button
-                          key={palette.id}
-                          type="button"
-                          className={`footerDock__paletteRow${selected ? " isSelected" : ""}`}
-                          onClick={() => {
-                            onPaletteChange(palette.id);
-                            setPaletteOpen(false);
-                          }}
-                        >
-                          <span className="footerDock__paletteSwatches" aria-hidden="true">
-                            {palette.colors.slice(0, 5).map((color, index) => (
-                              <span
-                                key={`${palette.id}-${index}`}
-                                className="footerDock__paletteSwatch"
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
-                          </span>
-                          <span className="footerDock__paletteName">{palette.name}</span>
-                          <span className="material-symbols-rounded footerDock__paletteCheck" aria-hidden="true">
-                            {selected ? "check" : ""}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </section> : null}
+                    <span
+                      className="material-symbols-rounded footerDock__paletteChevron"
+                      aria-hidden="true"
+                    >
+                      expand_more
+                    </span>
+                  </button>
+                  {paletteOpen && (
+                    <div
+                      className="footerDock__paletteList"
+                      role="listbox"
+                      aria-label="Color scale palettes"
+                    >
+                      {Object.values(PALETTES).map((palette) => {
+                        const selected = palette.id === selectedPaletteId;
+                        return (
+                          <button
+                            key={palette.id}
+                            type="button"
+                            className={`footerDock__paletteRow${selected ? " isSelected" : ""}`}
+                            onClick={() => {
+                              onPaletteChange(palette.id);
+                              setPaletteOpen(false);
+                            }}
+                          >
+                            <span
+                              className="footerDock__paletteSwatches"
+                              aria-hidden="true"
+                            >
+                              {palette.colors
+                                .slice(0, 5)
+                                .map((color, index) => (
+                                  <span
+                                    key={`${palette.id}-${index}`}
+                                    className="footerDock__paletteSwatch"
+                                    style={{ backgroundColor: color }}
+                                  />
+                                ))}
+                            </span>
+                            <span className="footerDock__paletteName">
+                              {palette.name}
+                            </span>
+                            <span
+                              className="material-symbols-rounded footerDock__paletteCheck"
+                              aria-hidden="true"
+                            >
+                              {selected ? "check" : ""}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </section>
+            ) : null}
           </div>
         )}
 
@@ -409,7 +505,8 @@ export function AppFooter({
                 onClick={() => {
                   const nextOpen = !open;
                   if (item.id === "live-cams") onToggleLiveCameras?.(nextOpen);
-                  if (item.id === "hydrophones") onToggleHydrophones?.(nextOpen);
+                  if (item.id === "hydrophones")
+                    onToggleHydrophones?.(nextOpen);
                   setDockPanel(nextOpen ? item.id : null);
                 }}
                 data-tour={item.id === "settings" ? "tools" : undefined}
@@ -419,7 +516,9 @@ export function AppFooter({
                   {item.icon}
                 </span>
                 {item.id !== "settings" && <span>{item.label}</span>}
-                {typeof item.count === "number" && <span className="footerDock__buttonCount">{item.count}</span>}
+                {typeof item.count === "number" && (
+                  <span className="footerDock__buttonCount">{item.count}</span>
+                )}
               </button>
             );
           })}

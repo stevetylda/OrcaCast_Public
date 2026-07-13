@@ -1,5 +1,8 @@
 import { useMemo } from "react";
-import type { TripPlannerHistogramBin, TripPlannerRange } from "../../../shared/data/tripPlanner";
+import type {
+  TripPlannerHistogramBin,
+  TripPlannerRange,
+} from "../../../shared/data/tripPlanner";
 import { dayIsInTripRange } from "../../../shared/data/tripPlanner";
 
 type Props = {
@@ -22,12 +25,15 @@ const MONTH_TICKS = [
 
 function formatCount(value: number): string {
   if (!Number.isFinite(value)) return "0";
-  if (value >= 1000) return `${(value / 1000).toFixed(value >= 10_000 ? 0 : 1)}k`;
+  if (value >= 1000)
+    return `${(value / 1000).toFixed(value >= 10_000 ? 0 : 1)}k`;
   return String(Math.round(value));
 }
 
 function buildBars(histogram: TripPlannerHistogramBin[]) {
-  const byDay = new Map(histogram.map((row) => [Number(row.day_of_year), Number(row.count)]));
+  const byDay = new Map(
+    histogram.map((row) => [Number(row.day_of_year), Number(row.count)]),
+  );
   return Array.from({ length: 366 }, (_, index) => {
     const day = index + 1;
     const count = byDay.get(day) ?? 0;
@@ -35,18 +41,23 @@ function buildBars(histogram: TripPlannerHistogramBin[]) {
   });
 }
 
-function selectionStyle(range: TripPlannerRange | null, segment: "primary" | "tail") {
+function selectionStyle(
+  range: TripPlannerRange | null,
+  segment: "primary" | "tail",
+) {
   if (!range) return undefined;
   const denominator = 366;
   if (!range.crossesYear) {
     if (segment === "tail") return undefined;
     const left = ((range.startDayOfYear - 1) / denominator) * 100;
-    const width = ((range.endDayOfYear - range.startDayOfYear + 1) / denominator) * 100;
+    const width =
+      ((range.endDayOfYear - range.startDayOfYear + 1) / denominator) * 100;
     return { left: `${left}%`, width: `${Math.max(width, 0.7)}%` };
   }
   if (segment === "primary") {
     const left = ((range.startDayOfYear - 1) / denominator) * 100;
-    const width = ((denominator - range.startDayOfYear + 1) / denominator) * 100;
+    const width =
+      ((denominator - range.startDayOfYear + 1) / denominator) * 100;
     return { left: `${left}%`, width: `${Math.max(width, 0.7)}%` };
   }
   const width = (range.endDayOfYear / denominator) * 100;
@@ -68,7 +79,10 @@ export function TripPlannerHistogram({
   const tailSelectionStyle = selectionStyle(selectedRange, "tail");
 
   return (
-    <section className="tripHistogram" aria-label="Historical seasonal sightings histogram">
+    <section
+      className="tripHistogram"
+      aria-label="Historical seasonal sightings histogram"
+    >
       <div className="tripHistogram__header">
         <div>
           <p className="tripHistogram__eyebrow">Historical activity</p>
@@ -92,12 +106,28 @@ export function TripPlannerHistogram({
         </div>
       </div>
 
-      <div className={`tripHistogram__chart${loading ? " tripHistogram__chart--loading" : ""}`}>
-        {primarySelectionStyle && <span className="tripHistogram__selection" style={primarySelectionStyle} />}
-        {tailSelectionStyle && <span className="tripHistogram__selection" style={tailSelectionStyle} />}
+      <div
+        className={`tripHistogram__chart${loading ? " tripHistogram__chart--loading" : ""}`}
+      >
+        {primarySelectionStyle && (
+          <span
+            className="tripHistogram__selection"
+            style={primarySelectionStyle}
+          />
+        )}
+        {tailSelectionStyle && (
+          <span
+            className="tripHistogram__selection"
+            style={tailSelectionStyle}
+          />
+        )}
         {bars.map((bar) => {
-          const selected = selectedRange ? dayIsInTripRange(bar.day, selectedRange) : false;
-          const height = hasHistogram ? Math.max(4, (bar.count / maxCount) * 100) : 18;
+          const selected = selectedRange
+            ? dayIsInTripRange(bar.day, selectedRange)
+            : false;
+          const height = hasHistogram
+            ? Math.max(4, (bar.count / maxCount) * 100)
+            : 18;
           return (
             <span
               key={bar.day}
@@ -111,7 +141,10 @@ export function TripPlannerHistogram({
 
       <div className="tripHistogram__axis" aria-hidden="true">
         {MONTH_TICKS.map((tick) => (
-          <span key={tick.day} style={{ left: `${((tick.day - 1) / 365) * 100}%` }}>
+          <span
+            key={tick.day}
+            style={{ left: `${((tick.day - 1) / 365) * 100}%` }}
+          >
             {tick.label}
           </span>
         ))}

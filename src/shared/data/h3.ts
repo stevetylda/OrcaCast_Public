@@ -11,7 +11,9 @@ export const H3_CELL_ID_KEYS = [
   "CELL_ID",
 ] as const;
 
-export function getH3CellId(props: H3LikeProperties | null | undefined): string {
+export function getH3CellId(
+  props: H3LikeProperties | null | undefined,
+): string {
   if (!props) return "";
 
   for (const key of H3_CELL_ID_KEYS) {

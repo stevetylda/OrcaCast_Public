@@ -1,7 +1,10 @@
 import maplibregl, { type Map as MapLibreMap } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import type { MutableRefObject } from "react";
-import { getForecastPathForPeriod, type H3Resolution } from "../../shared/config/dataPaths";
+import {
+  getForecastPathForPeriod,
+  type H3Resolution,
+} from "../../shared/config/dataPaths";
 import { loadForecast } from "../../shared/data/forecastIO";
 import { getH3CellId } from "../../shared/data/h3";
 import type { Period } from "../../shared/data/periods";
@@ -19,10 +22,14 @@ function escapeHtml(value: string): string {
 }
 
 function formatModelLabel(value: string): string {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (match) => match.toUpperCase());
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
-export function getFeatureCellId(feature: { properties?: Record<string, unknown> } | undefined): string {
+export function getFeatureCellId(
+  feature: { properties?: Record<string, unknown> } | undefined,
+): string {
   const props = feature?.properties as Record<string, unknown> | undefined;
   return getH3CellId(props);
 }
@@ -36,7 +43,7 @@ function pointInRing([lng, lat]: LngLat, ring: number[][]): boolean {
     const yj = Number(ring[j]?.[1]);
     const intersects =
       yi > lat !== yj > lat &&
-      lng < ((xj - xi) * (lat - yi)) / ((yj - yi) || Number.EPSILON) + xi;
+      lng < ((xj - xi) * (lat - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (intersects) inside = !inside;
   }
   return inside;
@@ -51,15 +58,22 @@ function pointInPolygon([lng, lat]: LngLat, rings: number[][][]): boolean {
   return true;
 }
 
-function extractCellPolygons(cellId: string, fc: FeatureCollection | null): number[][][][] {
+function extractCellPolygons(
+  cellId: string,
+  fc: FeatureCollection | null,
+): number[][][][] {
   if (!fc) return [];
   for (const feature of fc.features ?? []) {
-    const featureCellId = getFeatureCellId(feature as { properties?: Record<string, unknown> });
+    const featureCellId = getFeatureCellId(
+      feature as { properties?: Record<string, unknown> },
+    );
     if (!featureCellId || featureCellId !== cellId) continue;
     const geometry = feature.geometry;
     if (!geometry) return [];
-    if (geometry.type === "Polygon") return [geometry.coordinates as number[][][]];
-    if (geometry.type === "MultiPolygon") return geometry.coordinates as number[][][][];
+    if (geometry.type === "Polygon")
+      return [geometry.coordinates as number[][][]];
+    if (geometry.type === "MultiPolygon")
+      return geometry.coordinates as number[][][][];
     return [];
   }
   return [];
@@ -72,10 +86,15 @@ function withBase(url: string): string {
   return `${normalized}${trimmed}`;
 }
 
-async function loadWeeklySightingPoints(year: number, week: number): Promise<LngLat[]> {
+async function loadWeeklySightingPoints(
+  year: number,
+  week: number,
+): Promise<LngLat[]> {
   const response = await fetch(
-    withBase(`data/last_week_sightings/last_week_sightings_${year}-W${week}.geojson`),
-    { cache: "force-cache" }
+    withBase(
+      `data/last_week_sightings/last_week_sightings_${year}-W${week}.geojson`,
+    ),
+    { cache: "force-cache" },
   );
   if (!response.ok) return [];
   const payload = (await response.json()) as FeatureCollection;
@@ -102,7 +121,7 @@ function buildSparklineSvg(
   selectedIndex: number,
   periods: Period[],
   width = 270,
-  height = 72
+  height = 72,
 ): string {
   const paddingLeft = 6;
   const paddingRight = 20;
@@ -131,15 +150,29 @@ function buildSparklineSvg(
     return [x, y] as const;
   });
 
-  const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
-  const sightingsPath = sightingPoints
-    .map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`)
+  const path = points
+    .map(
+      (p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`,
+    )
     .join(" ");
-  const marker = selectedIndex >= 0 && selectedIndex < points.length ? points[selectedIndex] : null;
+  const sightingsPath = sightingPoints
+    .map(
+      (p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`,
+    )
+    .join(" ");
+  const marker =
+    selectedIndex >= 0 && selectedIndex < points.length
+      ? points[selectedIndex]
+      : null;
   const markerX =
-    selectedIndex >= 0 && selectedIndex < points.length ? (paddingLeft + step * selectedIndex).toFixed(1) : null;
+    selectedIndex >= 0 && selectedIndex < points.length
+      ? (paddingLeft + step * selectedIndex).toFixed(1)
+      : null;
   const axisY = chartBottom + 3;
-  const weekTicks = periods.map((period, i) => ({ x: paddingLeft + step * i, label: String(period.stat_week) }));
+  const weekTicks = periods.map((period, i) => ({
+    x: paddingLeft + step * i,
+    label: String(period.stat_week),
+  }));
   const monthTicks: Array<{ x: number; label: string }> = [];
   let lastMonth = -1;
   let lastYear = -1;
@@ -181,7 +214,9 @@ type GridInteractionOptions = {
   selectedWeekRef: MutableRefObject<number>;
   selectedWeekYearRef: MutableRefObject<number>;
   sparklineCacheRef: MutableRefObject<Map<string, SparklineSeries>>;
-  forecastPeriodCacheRef: MutableRefObject<Map<string, Promise<Record<string, number>>>>;
+  forecastPeriodCacheRef: MutableRefObject<
+    Map<string, Promise<Record<string, number>>>
+  >;
   sightingsWeekCacheRef: MutableRefObject<Map<string, Promise<LngLat[]>>>;
   sparkPopupRef: MutableRefObject<maplibregl.Popup | null>;
   sparkRequestIdRef: MutableRefObject<number>;
@@ -210,7 +245,7 @@ function rememberLru<K, V>(cache: Map<K, V>, key: K, value: V, limit: number) {
 async function mapWithConcurrency<T, R>(
   items: T[],
   limit: number,
-  worker: (item: T, index: number) => Promise<R>
+  worker: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let nextIndex = 0;
@@ -222,7 +257,7 @@ async function mapWithConcurrency<T, R>(
         nextIndex += 1;
         results[currentIndex] = await worker(items[currentIndex], currentIndex);
       }
-    })
+    }),
   );
   return results;
 }
@@ -252,7 +287,8 @@ export function createGridInteractionHandlers({
   const attachExpandHandler = (cellId: string) => {
     if (!sparkPopupRef.current || !onGridCellExpand) return;
     const popupRoot = sparkPopupRef.current.getElement();
-    const button = popupRoot.querySelector<HTMLButtonElement>("[data-grid-expand]");
+    const button =
+      popupRoot.querySelector<HTMLButtonElement>("[data-grid-expand]");
     if (!button) return;
     button.onclick = () =>
       onGridCellExpand({
@@ -266,10 +302,14 @@ export function createGridInteractionHandlers({
 
   const handleSparklineClick = (event: maplibregl.MapMouseEvent) => {
     if (!enableSparklinePopupRef.current) return;
-    const features = map.queryRenderedFeatures(event.point, { layers: ["grid-fill"] });
+    const features = map.queryRenderedFeatures(event.point, {
+      layers: ["grid-fill"],
+    });
     const feature = features[0];
     if (!feature) return;
-    const cellId = getFeatureCellId(feature as { properties?: Record<string, unknown> });
+    const cellId = getFeatureCellId(
+      feature as { properties?: Record<string, unknown> },
+    );
     if (!cellId) return;
     onGridCellSelect?.(cellId);
 
@@ -277,9 +317,16 @@ export function createGridInteractionHandlers({
       const popupHtml = cellPopupHtmlBuilder(cellId);
       if (popupHtml) {
         if (!sparkPopupRef.current) {
-          sparkPopupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: true, offset: 10 });
+          sparkPopupRef.current = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: true,
+            offset: 10,
+          });
         }
-        sparkPopupRef.current.setLngLat(event.lngLat).setHTML(popupHtml).addTo(map);
+        sparkPopupRef.current
+          .setLngLat(event.lngLat)
+          .setHTML(popupHtml)
+          .addTo(map);
         attachExpandHandler(cellId);
         return;
       }
@@ -289,19 +336,32 @@ export function createGridInteractionHandlers({
     if (fullPeriods.length === 0) return;
 
     const selectedFullIndex = fullPeriods.findIndex(
-      (p) => p.year === selectedWeekYearRef.current && p.stat_week === selectedWeekRef.current
+      (p) =>
+        p.year === selectedWeekYearRef.current &&
+        p.stat_week === selectedWeekRef.current,
     );
-    const endIndex = selectedFullIndex >= 0 ? selectedFullIndex : fullPeriods.length - 1;
+    const endIndex =
+      selectedFullIndex >= 0 ? selectedFullIndex : fullPeriods.length - 1;
     const startIndex = Math.max(0, endIndex - 11);
     const periodsList = fullPeriods.slice(startIndex, endIndex + 1);
-    const selectedIndex = selectedFullIndex >= 0 ? selectedFullIndex - startIndex : periodsList.length - 1;
+    const selectedIndex =
+      selectedFullIndex >= 0
+        ? selectedFullIndex - startIndex
+        : periodsList.length - 1;
 
     if (!sparkPopupRef.current) {
-      sparkPopupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: true, offset: 10 });
+      sparkPopupRef.current = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: true,
+        offset: 10,
+      });
     }
 
     const modelLabel = formatModelLabel(modelIdRef.current);
-    sparkPopupRef.current.setLngLat(event.lngLat).setHTML(`
+    sparkPopupRef.current
+      .setLngLat(event.lngLat)
+      .setHTML(
+        `
       <div class="sparkPopup">
         <div class="sparkPopup__title">Cell ${escapeHtml(cellId)}</div>
         <div class="sparkPopup__meta">Model: ${escapeHtml(modelLabel)}</div>
@@ -309,11 +369,18 @@ export function createGridInteractionHandlers({
         <div class="sparkPopup__loading">Loading sparkline…</div>
         <button class="sparkPopup__expandBtn" type="button" data-grid-expand="true">Expand view</button>
       </div>
-    `).addTo(map);
+    `,
+      )
+      .addTo(map);
     attachExpandHandler(cellId);
 
     const requestId = (sparkRequestIdRef.current += 1);
-    const cacheKey = [resolutionRef.current, modelIdRef.current, cellId, periodsList.map((p) => p.periodKey).join("|")].join("|");
+    const cacheKey = [
+      resolutionRef.current,
+      modelIdRef.current,
+      cellId,
+      periodsList.map((p) => p.periodKey).join("|"),
+    ].join("|");
     const cached = sparklineCacheRef.current.get(cacheKey);
     if (cached) {
       sparkPopupRef.current.setHTML(`
@@ -334,19 +401,37 @@ export function createGridInteractionHandlers({
         periodsList,
         FORECAST_SERIES_CONCURRENCY,
         async (period) => {
-          const path = getForecastPathForPeriod(resolutionRef.current, period.fileId);
-          const periodCacheKey = [resolutionRef.current, modelIdRef.current, period.fileId].join("|");
+          const path = getForecastPathForPeriod(
+            resolutionRef.current,
+            period.fileId,
+          );
+          const periodCacheKey = [
+            resolutionRef.current,
+            modelIdRef.current,
+            period.fileId,
+          ].join("|");
           try {
-            let periodPromise = forecastPeriodCacheRef.current.get(periodCacheKey);
+            let periodPromise =
+              forecastPeriodCacheRef.current.get(periodCacheKey);
             if (!periodPromise) {
               periodPromise = loadForecast(resolutionRef.current, {
                 kind: "explicit",
                 explicitPath: path,
                 modelId: modelIdRef.current,
               }).then((forecast) => forecast.values ?? {});
-              rememberLru(forecastPeriodCacheRef.current, periodCacheKey, periodPromise, FORECAST_PERIOD_CACHE_LIMIT);
+              rememberLru(
+                forecastPeriodCacheRef.current,
+                periodCacheKey,
+                periodPromise,
+                FORECAST_PERIOD_CACHE_LIMIT,
+              );
             } else {
-              rememberLru(forecastPeriodCacheRef.current, periodCacheKey, periodPromise, FORECAST_PERIOD_CACHE_LIMIT);
+              rememberLru(
+                forecastPeriodCacheRef.current,
+                periodCacheKey,
+                periodPromise,
+                FORECAST_PERIOD_CACHE_LIMIT,
+              );
             }
             const values = await periodPromise;
             const value = Number(values?.[cellId] ?? 0);
@@ -355,7 +440,7 @@ export function createGridInteractionHandlers({
             forecastPeriodCacheRef.current.delete(periodCacheKey);
             return 0;
           }
-        }
+        },
       );
 
       const cellPolygons = extractCellPolygons(cellId, overlayRef.current);
@@ -365,16 +450,36 @@ export function createGridInteractionHandlers({
           : await Promise.all(
               periodsList.map(async (period) => {
                 const weekKey = `${period.year}-W${period.stat_week}`;
-                let weekPointsPromise = sightingsWeekCacheRef.current.get(weekKey);
+                let weekPointsPromise =
+                  sightingsWeekCacheRef.current.get(weekKey);
                 if (!weekPointsPromise) {
-                  weekPointsPromise = loadWeeklySightingPoints(period.year, period.stat_week).catch(() => []);
-                  rememberLru(sightingsWeekCacheRef.current, weekKey, weekPointsPromise, SIGHTINGS_WEEK_CACHE_LIMIT);
+                  weekPointsPromise = loadWeeklySightingPoints(
+                    period.year,
+                    period.stat_week,
+                  ).catch(() => []);
+                  rememberLru(
+                    sightingsWeekCacheRef.current,
+                    weekKey,
+                    weekPointsPromise,
+                    SIGHTINGS_WEEK_CACHE_LIMIT,
+                  );
                 } else {
-                  rememberLru(sightingsWeekCacheRef.current, weekKey, weekPointsPromise, SIGHTINGS_WEEK_CACHE_LIMIT);
+                  rememberLru(
+                    sightingsWeekCacheRef.current,
+                    weekKey,
+                    weekPointsPromise,
+                    SIGHTINGS_WEEK_CACHE_LIMIT,
+                  );
                 }
                 const weekPoints = await weekPointsPromise;
-                return weekPoints.some((point) => cellPolygons.some((polygon) => pointInPolygon(point, polygon))) ? 1 : 0;
-              })
+                return weekPoints.some((point) =>
+                  cellPolygons.some((polygon) =>
+                    pointInPolygon(point, polygon),
+                  ),
+                )
+                  ? 1
+                  : 0;
+              }),
             );
 
       return { forecast: forecastValues, sightings };
@@ -383,7 +488,12 @@ export function createGridInteractionHandlers({
     fetchSeries()
       .then((series) => {
         if (sparkRequestIdRef.current !== requestId) return;
-        rememberLru(sparklineCacheRef.current, cacheKey, series, SPARKLINE_CACHE_LIMIT);
+        rememberLru(
+          sparklineCacheRef.current,
+          cacheKey,
+          series,
+          SPARKLINE_CACHE_LIMIT,
+        );
         sparkPopupRef.current?.setHTML(`
           <div class="sparkPopup">
             <div class="sparkPopup__title">Cell ${escapeHtml(cellId)}</div>
@@ -420,8 +530,12 @@ export function createGridInteractionHandlers({
     hoverRafId = window.requestAnimationFrame(() => {
       hoverRafId = 0;
       if (!pendingHoverPoint) return;
-      const features = map.queryRenderedFeatures(pendingHoverPoint, { layers: ["grid-fill"] });
-      const cellId = getFeatureCellId(features[0] as { properties?: Record<string, unknown> } | undefined);
+      const features = map.queryRenderedFeatures(pendingHoverPoint, {
+        layers: ["grid-fill"],
+      });
+      const cellId = getFeatureCellId(
+        features[0] as { properties?: Record<string, unknown> } | undefined,
+      );
       if (!cellId || hoveredCellRef.current === cellId) return;
       hoveredCellRef.current = cellId;
       setGridHoverCell(map, cellId);
@@ -439,5 +553,10 @@ export function createGridInteractionHandlers({
     map.getCanvas().style.cursor = "";
   };
 
-  return { handleSparklineClick, handleMouseEnter, handleMouseMove, handleMouseLeave };
+  return {
+    handleSparklineClick,
+    handleMouseEnter,
+    handleMouseMove,
+    handleMouseLeave,
+  };
 }

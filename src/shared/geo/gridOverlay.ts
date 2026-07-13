@@ -1,4 +1,10 @@
-import type { Feature, FeatureCollection, GeoJsonProperties, MultiPolygon, Polygon } from "geojson";
+import type {
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  MultiPolygon,
+  Polygon,
+} from "geojson";
 import type {
   GeoJSONSource,
   Map as MapLibreMap,
@@ -85,7 +91,12 @@ type SurfaceBounds = {
 
 type SurfaceRaster = {
   url: string;
-  coordinates: [[number, number], [number, number], [number, number], [number, number]];
+  coordinates: [
+    [number, number],
+    [number, number],
+    [number, number],
+    [number, number],
+  ];
 };
 
 type SurfaceRasterWorkerRequest = {
@@ -104,7 +115,12 @@ type SurfaceRasterWorkerResponse =
       ok: true;
       blob: Blob;
       bounds: SurfaceBounds;
-      coordinates: [[number, number], [number, number], [number, number], [number, number]];
+      coordinates: [
+        [number, number],
+        [number, number],
+        [number, number],
+        [number, number],
+      ];
     }
   | {
       id: number;
@@ -118,7 +134,9 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-function getFeatureProbability(properties: GeoJsonProperties | null | undefined) {
+function getFeatureProbability(
+  properties: GeoJsonProperties | null | undefined,
+) {
   return Number((properties as Record<string, unknown> | null)?.prob ?? 0);
 }
 
@@ -141,7 +159,7 @@ function getFeatureCenter(feature: Feature): [number, number] | null {
   }
   const [sumLng, sumLat] = coords.reduce<[number, number]>(
     (acc, [lng, lat]) => [acc[0] + Number(lng ?? 0), acc[1] + Number(lat ?? 0)],
-    [0, 0]
+    [0, 0],
   );
   return [sumLng / coords.length, sumLat / coords.length];
 }
@@ -184,7 +202,10 @@ function normalizeBounds(bounds: SurfaceBounds): SurfaceBounds {
   };
 }
 
-function padBounds(bounds: SurfaceBounds, fraction = SURFACE_VIEWPORT_PADDING_FRACTION): SurfaceBounds {
+function padBounds(
+  bounds: SurfaceBounds,
+  fraction = SURFACE_VIEWPORT_PADDING_FRACTION,
+): SurfaceBounds {
   const lngPad = Math.max(bounds.maxLng - bounds.minLng, 1e-6) * fraction;
   const latPad = Math.max(bounds.maxLat - bounds.minLat, 1e-6) * fraction;
   return {
@@ -195,7 +216,10 @@ function padBounds(bounds: SurfaceBounds, fraction = SURFACE_VIEWPORT_PADDING_FR
   };
 }
 
-function intersectBounds(a: SurfaceBounds, b: SurfaceBounds): SurfaceBounds | null {
+function intersectBounds(
+  a: SurfaceBounds,
+  b: SurfaceBounds,
+): SurfaceBounds | null {
   const minLng = Math.max(a.minLng, b.minLng);
   const maxLng = Math.min(a.maxLng, b.maxLng);
   const minLat = Math.max(a.minLat, b.minLat);
@@ -215,7 +239,10 @@ function getMapViewportBounds(map: MapLibreMap): SurfaceBounds | null {
   });
 }
 
-function resolveSurfaceRenderBounds(map: MapLibreMap, forecastBounds: SurfaceBounds): SurfaceBounds {
+function resolveSurfaceRenderBounds(
+  map: MapLibreMap,
+  forecastBounds: SurfaceBounds,
+): SurfaceBounds {
   const viewportBounds = getMapViewportBounds(map);
   if (!viewportBounds) return forecastBounds;
   const paddedViewport = padBounds(viewportBounds);
@@ -236,7 +263,10 @@ function boundsContains(outer: SurfaceBounds, inner: SurfaceBounds) {
 }
 
 function boundsArea(bounds: SurfaceBounds) {
-  return Math.max(bounds.maxLng - bounds.minLng, 0) * Math.max(mercatorY(bounds.maxLat) - mercatorY(bounds.minLat), 0);
+  return (
+    Math.max(bounds.maxLng - bounds.minLng, 0) *
+    Math.max(mercatorY(bounds.maxLat) - mercatorY(bounds.minLat), 0)
+  );
 }
 
 type SurfaceInput = {
@@ -248,26 +278,22 @@ type SurfaceInput = {
 };
 
 const surfaceInputCache = new WeakMap<FeatureCollection, SurfaceInput | null>();
-let surfaceRasterCache:
-  | {
-      fc: FeatureCollection;
-      styleSignature: string;
-      bounds: SurfaceBounds;
-      raster: SurfaceRaster;
-    }
-  | null = null;
+let surfaceRasterCache: {
+  fc: FeatureCollection;
+  styleSignature: string;
+  bounds: SurfaceBounds;
+  raster: SurfaceRaster;
+} | null = null;
 let surfaceRasterWorker: Worker | null = null;
 let surfaceRasterWorkerReady = true;
 let surfaceRasterRequestId = 0;
 let latestSurfaceRasterRequestId = 0;
-let pendingSurfaceRasterRequest:
-  | {
-      fc: FeatureCollection;
-      styleSignature: string;
-      bounds: SurfaceBounds;
-      requestId: number;
-    }
-  | null = null;
+let pendingSurfaceRasterRequest: {
+  fc: FeatureCollection;
+  styleSignature: string;
+  bounds: SurfaceBounds;
+  requestId: number;
+} | null = null;
 
 function buildSurfaceSamples(fc: FeatureCollection): SurfaceInput | null {
   const cached = surfaceInputCache.get(fc);
@@ -323,12 +349,24 @@ function buildSurfaceSamples(fc: FeatureCollection): SurfaceInput | null {
 
 function computeRasterDimensions(bounds: SurfaceBounds, map: MapLibreMap) {
   const canvas = map.getCanvas();
-  const dpr = clamp(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, 1, 2);
-  const viewportMaxSide = Math.max(canvas.clientWidth || 0, canvas.clientHeight || 0) * dpr;
-  const maxSide = clamp(Math.round(viewportMaxSide), SURFACE_MIN_SIDE, SURFACE_MAX_SIDE);
+  const dpr = clamp(
+    typeof window === "undefined" ? 1 : window.devicePixelRatio || 1,
+    1,
+    2,
+  );
+  const viewportMaxSide =
+    Math.max(canvas.clientWidth || 0, canvas.clientHeight || 0) * dpr;
+  const maxSide = clamp(
+    Math.round(viewportMaxSide),
+    SURFACE_MIN_SIDE,
+    SURFACE_MAX_SIDE,
+  );
 
   const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-6);
-  const mercatorSpan = Math.max(mercatorY(bounds.maxLat) - mercatorY(bounds.minLat), 1e-6);
+  const mercatorSpan = Math.max(
+    mercatorY(bounds.maxLat) - mercatorY(bounds.minLat),
+    1e-6,
+  );
   const aspect = lngSpan / mercatorSpan;
   let width = aspect >= 1 ? maxSide : Math.round(maxSide * aspect);
   let height = aspect >= 1 ? Math.round(maxSide / aspect) : maxSide;
@@ -347,7 +385,9 @@ function median(values: number[]) {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+  return sorted.length % 2 === 0
+    ? (sorted[middle - 1] + sorted[middle]) / 2
+    : sorted[middle];
 }
 
 function estimateMaxDistance(samples: SurfaceSample[]) {
@@ -364,7 +404,9 @@ function estimateMaxDistance(samples: SurfaceSample[]) {
     }
     if (Number.isFinite(minDistance)) nearest.push(minDistance);
   }
-  const spacing = median(nearest.filter((value) => Number.isFinite(value) && value > 0));
+  const spacing = median(
+    nearest.filter((value) => Number.isFinite(value) && value > 0),
+  );
   return spacing > 0 ? spacing * 3.05 : 0.5;
 }
 
@@ -373,7 +415,10 @@ function parseCssColor(color: string): RGBA {
   if (trimmed.startsWith("#")) {
     const hex = trimmed.slice(1);
     if (hex.length === 3 || hex.length === 4) {
-      const expanded = hex.split("").map((char) => char + char).join("");
+      const expanded = hex
+        .split("")
+        .map((char) => char + char)
+        .join("");
       return parseCssColor(`#${expanded}`);
     }
     if (hex.length === 6 || hex.length === 8) {
@@ -382,7 +427,12 @@ function parseCssColor(color: string): RGBA {
       if (hex.length === 6) {
         return [(value >> 16) & 255, (value >> 8) & 255, value & 255, 1];
       }
-      return [(value >> 24) & 255, (value >> 16) & 255, (value >> 8) & 255, (value & 255) / 255];
+      return [
+        (value >> 24) & 255,
+        (value >> 16) & 255,
+        (value >> 8) & 255,
+        (value & 255) / 255,
+      ];
     }
   }
   const match = trimmed.match(/rgba?\(([^)]+)\)/i);
@@ -407,41 +457,68 @@ function lerpColor(a: RGBA, b: RGBA, t: number): RGBA {
   ];
 }
 
-function buildColorStops(samples: SurfaceSample[], paletteColors: string[], scale?: HeatScale | null) {
+function buildColorStops(
+  samples: SurfaceSample[],
+  paletteColors: string[],
+  scale?: HeatScale | null,
+) {
   if (scale && scale.binColorsRgba.length > 0) {
     const minValue = scale.binRanges[0]?.probMin ?? scale.thresholds[0] ?? 0;
     const stopValues = [minValue, ...scale.thresholds];
     const stopColors = scale.binColorsRgba.map(parseCssColor);
-    return { stopValues, stopColors, zeroColor: parseCssColor(scale.zeroColor ?? "rgba(0,0,0,0)") };
+    return {
+      stopValues,
+      stopColors,
+      zeroColor: parseCssColor(scale.zeroColor ?? "rgba(0,0,0,0)"),
+    };
   }
-  const colors = paletteColors.length > 0 ? paletteColors.map(parseCssColor) : [parseCssColor("#ffffff")];
-  const positive = samples.map((sample) => sample.prob).filter((value) => value > 0);
+  const colors =
+    paletteColors.length > 0
+      ? paletteColors.map(parseCssColor)
+      : [parseCssColor("#ffffff")];
+  const positive = samples
+    .map((sample) => sample.prob)
+    .filter((value) => value > 0);
   const minValue = positive.length > 0 ? Math.min(...positive) : 0;
   const maxValue = positive.length > 0 ? Math.max(...positive) : 1;
   const steps = Math.max(1, colors.length - 1);
-  const stopValues = colors.map((_, index) => minValue + ((maxValue - minValue) * index) / steps);
+  const stopValues = colors.map(
+    (_, index) => minValue + ((maxValue - minValue) * index) / steps,
+  );
   return { stopValues, stopColors: colors, zeroColor: [0, 0, 0, 0] as RGBA };
 }
 
-function sampleColor(value: number, stopValues: number[], stopColors: RGBA[], zeroColor: RGBA): RGBA {
+function sampleColor(
+  value: number,
+  stopValues: number[],
+  stopColors: RGBA[],
+  zeroColor: RGBA,
+): RGBA {
   if (stopColors.length === 0) return zeroColor;
   if (value <= 0) return zeroColor;
-  if (stopColors.length === 1 || stopValues.length <= 1) return [...stopColors[0]] as RGBA;
+  if (stopColors.length === 1 || stopValues.length <= 1)
+    return [...stopColors[0]] as RGBA;
   if (value <= stopValues[0]) return [...stopColors[0]] as RGBA;
   for (let index = 0; index < stopValues.length - 1; index += 1) {
     const startValue = stopValues[index];
     const endValue = stopValues[index + 1];
     if (value <= endValue) {
       const span = Math.max(endValue - startValue, 1e-9);
-      return lerpColor(stopColors[index], stopColors[Math.min(index + 1, stopColors.length - 1)], (value - startValue) / span);
+      return lerpColor(
+        stopColors[index],
+        stopColors[Math.min(index + 1, stopColors.length - 1)],
+        (value - startValue) / span,
+      );
     }
   }
   return [...stopColors[stopColors.length - 1]] as RGBA;
 }
 
-
-
-function surfaceAlphaForValue(value: number, _stopValues: number[], baseAlpha: number) {
+function surfaceAlphaForValue(
+  value: number,
+  _stopValues: number[],
+  baseAlpha: number,
+) {
   if (!Number.isFinite(value) || value <= 0) return 0;
   return clamp(baseAlpha, 0, 1);
 }
@@ -468,7 +545,7 @@ function getNearestSamples(
   projX: number,
   projY: number,
   bucketSize: number,
-  maxDistance: number
+  maxDistance: number,
 ) {
   const centerBucketX = Math.floor(projX / bucketSize);
   const centerBucketY = Math.floor(projY / bucketSize);
@@ -476,10 +553,15 @@ function getNearestSamples(
   for (let ring = 0; ring <= 3; ring += 1) {
     for (let dx = -ring; dx <= ring; dx += 1) {
       for (let dy = -ring; dy <= ring; dy += 1) {
-        const bucket = buckets.get(getBucketKey(centerBucketX + dx, centerBucketY + dy));
+        const bucket = buckets.get(
+          getBucketKey(centerBucketX + dx, centerBucketY + dy),
+        );
         if (!bucket) continue;
         bucket.forEach((sample) => {
-          const distance = Math.hypot(sample.projX - projX, sample.projY - projY);
+          const distance = Math.hypot(
+            sample.projX - projX,
+            sample.projY - projY,
+          );
           if (distance <= maxDistance) candidates.push({ sample, distance });
         });
       }
@@ -495,9 +577,15 @@ function interpolateSurfaceValue(
   projX: number,
   projY: number,
   bucketSize: number,
-  maxDistance: number
+  maxDistance: number,
 ) {
-  const nearest = getNearestSamples(buckets, projX, projY, bucketSize, maxDistance);
+  const nearest = getNearestSamples(
+    buckets,
+    projX,
+    projY,
+    bucketSize,
+    maxDistance,
+  );
   if (nearest.length === 0) return null;
   if (nearest[0].distance <= IDW_EPSILON) return nearest[0].sample.prob;
   let weightedValue = 0;
@@ -516,9 +604,10 @@ function drawGeometryPath(
   geometry: Polygon | MultiPolygon,
   bounds: SurfaceBounds,
   width: number,
-  height: number
+  height: number,
 ) {
-  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+  const polygons =
+    geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
   for (const polygon of polygons) {
     for (const ring of polygon) {
       ring.forEach(([lng, lat], index) => {
@@ -535,7 +624,7 @@ function drawGeometryPath(
 function maskSurfaceToFootprint(
   canvas: HTMLCanvasElement,
   fc: FeatureCollection,
-  bounds: SurfaceBounds
+  bounds: SurfaceBounds,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -543,7 +632,11 @@ function maskSurfaceToFootprint(
   ctx.beginPath();
   (fc.features ?? []).forEach((feature) => {
     const geometry = feature.geometry;
-    if (!geometry || (geometry.type !== "Polygon" && geometry.type !== "MultiPolygon")) return;
+    if (
+      !geometry ||
+      (geometry.type !== "Polygon" && geometry.type !== "MultiPolygon")
+    )
+      return;
     drawGeometryPath(ctx, geometry, bounds, canvas.width, canvas.height);
   });
   ctx.fillStyle = "#ffffff";
@@ -556,12 +649,24 @@ function createSurfaceRasterStyleSignature(
   width: number,
   height: number,
   paletteColors: string[],
-  scale?: HeatScale | null
+  scale?: HeatScale | null,
 ) {
   const scaleSignature = scale
-    ? [scale.thresholds.join(","), scale.binColorsRgba.join(","), scale.binRanges.map((range) => `${range.probMin}:${range.probMax}`).join("|")].join(";")
+    ? [
+        scale.thresholds.join(","),
+        scale.binColorsRgba.join(","),
+        scale.binRanges
+          .map((range) => `${range.probMin}:${range.probMax}`)
+          .join("|"),
+      ].join(";")
     : "no-scale";
-  return [fc.features?.length ?? 0, width, height, paletteColors.join(","), scaleSignature].join("::");
+  return [
+    fc.features?.length ?? 0,
+    width,
+    height,
+    paletteColors.join(","),
+    scaleSignature,
+  ].join("::");
 }
 
 function supportsSurfaceRasterWorker() {
@@ -580,10 +685,7 @@ function revokeSurfaceRasterUrl(url: string) {
   URL.revokeObjectURL(url);
 }
 
-function updateSurfaceSource(
-  map: MapLibreMap,
-  raster: SurfaceRaster
-) {
+function updateSurfaceSource(map: MapLibreMap, raster: SurfaceRaster) {
   const source = map.getSource(SURFACE_SOURCE_ID) as ImageSource | undefined;
   if (source && typeof source.updateImage === "function") {
     source.updateImage({
@@ -620,7 +722,7 @@ function updateSurfaceSource(
         visibility: "none",
       },
     },
-    DEFAULT_FILL_ID
+    DEFAULT_FILL_ID,
   );
 }
 
@@ -628,9 +730,12 @@ function setSurfaceRasterCache(
   fc: FeatureCollection,
   styleSignature: string,
   bounds: SurfaceBounds,
-  raster: SurfaceRaster
+  raster: SurfaceRaster,
 ) {
-  if (surfaceRasterCache?.raster.url && surfaceRasterCache.raster.url !== raster.url) {
+  if (
+    surfaceRasterCache?.raster.url &&
+    surfaceRasterCache.raster.url !== raster.url
+  ) {
     revokeSurfaceRasterUrl(surfaceRasterCache.raster.url);
   }
   surfaceRasterCache = { fc, styleSignature, bounds, raster };
@@ -639,13 +744,14 @@ function setSurfaceRasterCache(
 function getCachedSurfaceRaster(
   fc: FeatureCollection,
   styleSignature: string,
-  targetBounds: SurfaceBounds
+  targetBounds: SurfaceBounds,
 ) {
   if (
     surfaceRasterCache?.fc === fc &&
     surfaceRasterCache.styleSignature === styleSignature &&
     boundsContains(surfaceRasterCache.bounds, targetBounds) &&
-    boundsArea(surfaceRasterCache.bounds) <= boundsArea(targetBounds) * SURFACE_CACHE_REUSE_AREA_RATIO
+    boundsArea(surfaceRasterCache.bounds) <=
+      boundsArea(targetBounds) * SURFACE_CACHE_REUSE_AREA_RATIO
   ) {
     return surfaceRasterCache.raster;
   }
@@ -668,11 +774,17 @@ function buildSurfaceRasterSync(
   map: MapLibreMap,
   fc: FeatureCollection,
   paletteColors: string[],
-  scale?: HeatScale | null
+  scale?: HeatScale | null,
 ): SurfaceRaster | null {
   const surface = buildSurfaceSamples(fc);
   if (!surface) return null;
-  const { samples, bounds: forecastBounds, buckets, bucketSize, maxDistance } = surface;
+  const {
+    samples,
+    bounds: forecastBounds,
+    buckets,
+    bucketSize,
+    maxDistance,
+  } = surface;
   const targetBounds = resolveSurfaceRenderBounds(map, forecastBounds);
   const bounds = {
     minLng: roundForSignature(targetBounds.minLng),
@@ -681,7 +793,13 @@ function buildSurfaceRasterSync(
     maxLat: roundForSignature(targetBounds.maxLat),
   };
   const { width, height } = computeRasterDimensions(bounds, map);
-  const styleSignature = createSurfaceRasterStyleSignature(fc, width, height, paletteColors, scale);
+  const styleSignature = createSurfaceRasterStyleSignature(
+    fc,
+    width,
+    height,
+    paletteColors,
+    scale,
+  );
   const cachedRaster = getCachedSurfaceRaster(fc, styleSignature, targetBounds);
   if (cachedRaster) return cachedRaster;
 
@@ -694,20 +812,35 @@ function buildSurfaceRasterSync(
   const imageData = ctx.createImageData(width, height);
   const pixels = imageData.data;
   const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-6);
-  const { stopValues, stopColors, zeroColor } = buildColorStops(samples, paletteColors, scale);
+  const { stopValues, stopColors, zeroColor } = buildColorStops(
+    samples,
+    paletteColors,
+    scale,
+  );
 
   for (let y = 0; y < height; y += 1) {
     const lat = canvasYToLat(y, bounds, height);
     const projY = mercatorY(lat);
     for (let x = 0; x < width; x += 1) {
       const lng = bounds.minLng + (x / Math.max(width - 1, 1)) * lngSpan;
-      const value = interpolateSurfaceValue(buckets, lng, projY, bucketSize, maxDistance);
+      const value = interpolateSurfaceValue(
+        buckets,
+        lng,
+        projY,
+        bucketSize,
+        maxDistance,
+      );
       const pixelIndex = (y * width + x) * 4;
       if (value === null || !Number.isFinite(value) || value <= 0) {
         pixels[pixelIndex + 3] = 0;
         continue;
       }
-      const [r, g, b, a] = sampleColor(value, stopValues, stopColors, zeroColor);
+      const [r, g, b, a] = sampleColor(
+        value,
+        stopValues,
+        stopColors,
+        zeroColor,
+      );
       const alpha = surfaceAlphaForValue(value, stopValues, a);
       if (alpha <= 0) {
         pixels[pixelIndex + 3] = 0;
@@ -755,7 +888,11 @@ function emptyHoverFilter(): ExpressionSpecification {
 function buildHoverFilter(cellId: string): ExpressionSpecification {
   return [
     "any",
-    ...H3_CELL_ID_KEYS.map((key) => ["==", ["to-string", ["coalesce", ["get", key], ""]], cellId]),
+    ...H3_CELL_ID_KEYS.map((key) => [
+      "==",
+      ["to-string", ["coalesce", ["get", key], ""]],
+      cellId,
+    ]),
   ] as ExpressionSpecification;
 }
 
@@ -771,7 +908,7 @@ export function addGridOverlay(
   sourceId = DEFAULT_SOURCE_ID,
   fillId = DEFAULT_FILL_ID,
   lineId = DEFAULT_LINE_ID,
-  visualStyle: GridVisualStyle = {}
+  visualStyle: GridVisualStyle = {},
 ) {
   const fillOpacity = visualStyle.fillOpacity ?? 0.8;
   const haloOpacity = visualStyle.haloOpacity ?? 0.45;
@@ -780,12 +917,17 @@ export function addGridOverlay(
   const DEBUG_MAP =
     import.meta.env.DEV &&
     typeof window !== "undefined" &&
-    ((window as { __ORCACAST_DEBUG_MAP?: boolean }).__ORCACAST_DEBUG_MAP === true ||
+    ((window as { __ORCACAST_DEBUG_MAP?: boolean }).__ORCACAST_DEBUG_MAP ===
+      true ||
       window.localStorage?.getItem("orcacast.debug.map") === "true");
 
   if (DEBUG_MAP) {
     const probs = (fc.features ?? [])
-      .map((feature) => Number((feature.properties as Record<string, unknown> | null)?.prob ?? 0))
+      .map((feature) =>
+        Number(
+          (feature.properties as Record<string, unknown> | null)?.prob ?? 0,
+        ),
+      )
       .filter((value) => Number.isFinite(value));
     const positive = probs.filter((value) => value > 0);
     console.info("[MapDebug] addGridOverlay", {
@@ -839,7 +981,10 @@ export function addGridOverlay(
     map.setPaintProperty(fillId, "fill-color", fillColor);
     map.setPaintProperty(fillId, "fill-opacity", fillOpacity);
     map.setPaintProperty(fillId, "fill-outline-color", borderColor);
-    map.setPaintProperty(fillId, "fill-opacity-transition", { duration: 200, delay: 0 });
+    map.setPaintProperty(fillId, "fill-opacity-transition", {
+      duration: 200,
+      delay: 0,
+    });
   } else {
     map.addLayer({
       id: fillId,
@@ -876,7 +1021,17 @@ export function addGridOverlay(
       source: sourceId,
       paint: {
         "line-color": "rgba(5,10,22,0.6)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.2, 9, 1.8, 12, 2.4] as ExpressionSpecification,
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          6,
+          1.2,
+          9,
+          1.8,
+          12,
+          2.4,
+        ] as ExpressionSpecification,
         "line-opacity": haloOpacity,
         "line-blur": 1.8,
       },
@@ -939,7 +1094,17 @@ export function addGridOverlay(
       filter: hoverFilter,
       paint: {
         "line-color": "rgba(25,240,215,0.9)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 2.8, 9, 3.8, 12, 5.0] as ExpressionSpecification,
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          6,
+          2.8,
+          9,
+          3.8,
+          12,
+          5.0,
+        ] as ExpressionSpecification,
         "line-opacity": 0.5,
         "line-blur": 2.4,
       },
@@ -956,14 +1121,28 @@ export function addGridOverlay(
       filter: hoverFilter,
       paint: {
         "line-color": "rgba(225,255,255,0.95)",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.0, 9, 1.4, 12, 1.8] as ExpressionSpecification,
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          6,
+          1.0,
+          9,
+          1.4,
+          12,
+          1.8,
+        ] as ExpressionSpecification,
         "line-opacity": 0.9,
       },
     });
   }
 
   if (shimmerThreshold !== undefined) {
-    const filter = [">=", ["get", "prob"], shimmerThreshold] as ExpressionSpecification;
+    const filter = [
+      ">=",
+      ["get", "prob"],
+      shimmerThreshold,
+    ] as ExpressionSpecification;
     if (map.getLayer(SHIMMER_ID)) {
       map.setFilter(SHIMMER_ID, filter);
       map.setPaintProperty(SHIMMER_ID, "fill-color", "rgba(140,255,245,0.35)");
@@ -997,7 +1176,17 @@ export function addGridOverlay(
         filter,
         paint: {
           "line-color": "rgba(96,190,204,0.38)",
-          "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.4, 9, 2.2, 12, 3.0] as ExpressionSpecification,
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            6,
+            1.4,
+            9,
+            2.2,
+            12,
+            3.0,
+          ] as ExpressionSpecification,
           "line-opacity": 0.24,
           "line-blur": 2.0,
         },
@@ -1011,7 +1200,11 @@ export function addGridOverlay(
 
     if (map.getLayer(BIO_GLOW_FILL_ID)) {
       map.setFilter(BIO_GLOW_FILL_ID, filter);
-      map.setPaintProperty(BIO_GLOW_FILL_ID, "fill-color", "rgba(88,248,230,0.52)");
+      map.setPaintProperty(
+        BIO_GLOW_FILL_ID,
+        "fill-color",
+        "rgba(88,248,230,0.52)",
+      );
       map.setPaintProperty(BIO_GLOW_FILL_ID, "fill-opacity", 0.16);
     } else {
       const layer: FillLayerSpecification = {
@@ -1033,7 +1226,11 @@ export function addGridOverlay(
 
     if (map.getLayer(BIO_CORE_FILL_ID)) {
       map.setFilter(BIO_CORE_FILL_ID, filter);
-      map.setPaintProperty(BIO_CORE_FILL_ID, "fill-color", "rgba(190,255,247,0.55)");
+      map.setPaintProperty(
+        BIO_CORE_FILL_ID,
+        "fill-color",
+        "rgba(190,255,247,0.55)",
+      );
       map.setPaintProperty(BIO_CORE_FILL_ID, "fill-opacity", 0.08);
     } else {
       const layer: FillLayerSpecification = {
@@ -1064,7 +1261,17 @@ export function addGridOverlay(
         filter,
         paint: {
           "line-color": "rgba(112,198,210,0.42)",
-          "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.9, 9, 1.25, 12, 1.8] as ExpressionSpecification,
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            6,
+            0.9,
+            9,
+            1.25,
+            12,
+            1.8,
+          ] as ExpressionSpecification,
           "line-opacity": 0.26,
           "line-blur": 0.35,
         },
@@ -1081,11 +1288,26 @@ export function addGridOverlay(
       ["linear"],
       ["zoom"],
       6,
-      ["case", [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold], 0.72, 0.38],
+      [
+        "case",
+        [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold],
+        0.72,
+        0.38,
+      ],
       9,
-      ["case", [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold], 0.96, 0.44],
+      [
+        "case",
+        [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold],
+        0.96,
+        0.44,
+      ],
       12,
-      ["case", [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold], 1.24, 0.56],
+      [
+        "case",
+        [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold],
+        1.24,
+        0.56,
+      ],
     ] as ExpressionSpecification);
     map.setPaintProperty(lineId, "line-color", [
       "case",
@@ -1104,8 +1326,14 @@ export function addGridOverlay(
   }
 
   if (hotspotThreshold !== undefined) {
-    const visibility = hotspotsVisible ? ("visible" as const) : ("none" as const);
-    const filter = [">=", ["get", "prob"], hotspotThreshold] as ExpressionSpecification;
+    const visibility = hotspotsVisible
+      ? ("visible" as const)
+      : ("none" as const);
+    const filter = [
+      ">=",
+      ["get", "prob"],
+      hotspotThreshold,
+    ] as ExpressionSpecification;
     // Visual "dissolve": avoid per-hex hotspot linework and use soft stacked fills.
     removeLayerIfExists(map, PEAK_GLOW_ID);
     removeLayerIfExists(map, PEAK_BASE_ID);
@@ -1139,7 +1367,11 @@ export function addGridOverlay(
     if (map.getLayer(HOT_FILL_HALO_ID)) {
       map.setFilter(HOT_FILL_HALO_ID, filter);
       map.setLayoutProperty(HOT_FILL_HALO_ID, "visibility", visibility);
-      map.setPaintProperty(HOT_FILL_HALO_ID, "fill-color", HOTSPOT_SPARKLE_COLOR);
+      map.setPaintProperty(
+        HOT_FILL_HALO_ID,
+        "fill-color",
+        HOTSPOT_SPARKLE_COLOR,
+      );
       map.setPaintProperty(HOT_FILL_HALO_ID, "fill-opacity", 0.22);
     } else {
       const layer: FillLayerSpecification = {
@@ -1173,7 +1405,7 @@ export function addSurfaceOverlay(
   map: MapLibreMap,
   fc: FeatureCollection,
   paletteColors: string[],
-  scale?: HeatScale | null
+  scale?: HeatScale | null,
 ) {
   const surface = buildSurfaceSamples(fc);
   if (!surface) return;
@@ -1185,7 +1417,13 @@ export function addSurfaceOverlay(
     maxLat: roundForSignature(targetBounds.maxLat),
   };
   const { width, height } = computeRasterDimensions(bounds, map);
-  const styleSignature = createSurfaceRasterStyleSignature(fc, width, height, paletteColors, scale);
+  const styleSignature = createSurfaceRasterStyleSignature(
+    fc,
+    width,
+    height,
+    paletteColors,
+    scale,
+  );
   const cachedRaster = getCachedSurfaceRaster(fc, styleSignature, targetBounds);
   if (cachedRaster) {
     updateSurfaceSource(map, cachedRaster);
@@ -1220,7 +1458,8 @@ export function addSurfaceOverlay(
     if (response.id !== requestId) return;
     worker.removeEventListener("message", handleMessage);
     worker.removeEventListener("error", handleError);
-    if (pendingSurfaceRasterRequest?.requestId === requestId) pendingSurfaceRasterRequest = null;
+    if (pendingSurfaceRasterRequest?.requestId === requestId)
+      pendingSurfaceRasterRequest = null;
     if (response.id !== latestSurfaceRasterRequestId) return;
     if (!response.ok) {
       surfaceRasterWorkerReady = false;
@@ -1248,7 +1487,8 @@ export function addSurfaceOverlay(
   const handleError = () => {
     worker.removeEventListener("message", handleMessage);
     worker.removeEventListener("error", handleError);
-    if (pendingSurfaceRasterRequest?.requestId === requestId) pendingSurfaceRasterRequest = null;
+    if (pendingSurfaceRasterRequest?.requestId === requestId)
+      pendingSurfaceRasterRequest = null;
     if (requestId !== latestSurfaceRasterRequestId) return;
     surfaceRasterWorkerReady = false;
     surfaceRasterWorker?.terminate();
@@ -1277,7 +1517,7 @@ export function setGridBaseVisibility(
   visible: boolean,
   fillId = DEFAULT_FILL_ID,
   lineId = DEFAULT_LINE_ID,
-  visualStyle: GridVisualStyle = {}
+  visualStyle: GridVisualStyle = {},
 ) {
   const fillOpacity = visualStyle.fillOpacity ?? 0.8;
   const haloOpacity = visualStyle.haloOpacity ?? 0.45;
@@ -1323,7 +1563,7 @@ export function setGridVisibility(
   visible: boolean,
   fillId = DEFAULT_FILL_ID,
   lineId = DEFAULT_LINE_ID,
-  visualStyle: GridVisualStyle = {}
+  visualStyle: GridVisualStyle = {},
 ) {
   setGridBaseVisibility(map, visible, fillId, lineId, visualStyle);
   if (!visible) {
@@ -1335,7 +1575,7 @@ export function setGridCoreLayerVisibility(
   map: MapLibreMap,
   visible: boolean,
   fillId = DEFAULT_FILL_ID,
-  lineId = DEFAULT_LINE_ID
+  lineId = DEFAULT_LINE_ID,
 ) {
   const visibility = visible ? "visible" : "none";
   [
@@ -1359,7 +1599,11 @@ export function setGridCoreLayerVisibility(
 
 export function setSurfaceVisibility(map: MapLibreMap, visible: boolean) {
   if (map.getLayer(SURFACE_LAYER_ID)) {
-    map.setLayoutProperty(SURFACE_LAYER_ID, "visibility", visible ? "visible" : "none");
+    map.setLayoutProperty(
+      SURFACE_LAYER_ID,
+      "visibility",
+      visible ? "visible" : "none",
+    );
   }
 }
 
@@ -1367,7 +1611,7 @@ export function removeGridOverlay(
   map: MapLibreMap,
   sourceId = DEFAULT_SOURCE_ID,
   fillId = DEFAULT_FILL_ID,
-  lineId = DEFAULT_LINE_ID
+  lineId = DEFAULT_LINE_ID,
 ) {
   removeLayerIfExists(map, PEAK_SHINE_ID);
   removeLayerIfExists(map, SHIMMER_ID);
@@ -1416,17 +1660,14 @@ export function setHotspotVisibility(map: MapLibreMap, visible: boolean) {
 export function updateGridFillColor(
   map: MapLibreMap,
   fillColorExpr: FillColorSpec,
-  fillId = DEFAULT_FILL_ID
+  fillId = DEFAULT_FILL_ID,
 ) {
   if (map.getLayer(fillId)) {
     map.setPaintProperty(fillId, "fill-color", fillColorExpr);
   }
 }
 
-export function setGridHoverCell(
-  map: MapLibreMap,
-  cellId: string | null
-) {
+export function setGridHoverCell(map: MapLibreMap, cellId: string | null) {
   const filter = cellId ? buildHoverFilter(cellId) : emptyHoverFilter();
   if (map.getLayer(HOVER_FILL_ID)) {
     map.setFilter(HOVER_FILL_ID, filter);

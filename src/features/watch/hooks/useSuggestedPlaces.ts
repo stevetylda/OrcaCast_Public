@@ -1,12 +1,24 @@
 import { useEffect, useState } from "react";
 import type { FeatureCollection, Geometry, Position } from "geojson";
 import type { H3Resolution } from "../../../shared/config/dataPaths";
-import { DEFAULT_RECOMMENDATION_RADIUS_MILES, KILOMETERS_PER_MILE } from "../../../shared/config/planner";
+import {
+  DEFAULT_RECOMMENDATION_RADIUS_MILES,
+  KILOMETERS_PER_MILE,
+} from "../../../shared/config/planner";
 import { loadForecast, loadGrid } from "../../../shared/data/forecastIO";
 import { getH3CellId } from "../../../shared/data/h3";
-import { loadTripPlannerOccurrencePayload, type TripPlannerOccurrencePayload } from "../../../shared/data/tripPlanner";
+import {
+  loadTripPlannerOccurrencePayload,
+  type TripPlannerOccurrencePayload,
+} from "../../../shared/data/tripPlanner";
 import type { SuggestedPlace, ViewingPotential } from "../../locations/types";
-import { filterPoisByType, hasActivePoiFilter, loadPoiDataBundle, type PoiFilters, type PublicPoi } from "../../locations/poiData";
+import {
+  filterPoisByType,
+  hasActivePoiFilter,
+  loadPoiDataBundle,
+  type PoiFilters,
+  type PublicPoi,
+} from "../../locations/poiData";
 
 type ForecastCellScore = {
   value: number;
@@ -102,22 +114,32 @@ function toPlaceId(poi: PublicPoi) {
 
 function flattenPositions(value: unknown): Position[] {
   if (!Array.isArray(value)) return [];
-  if (typeof value[0] === "number" && typeof value[1] === "number") return [value as Position];
+  if (typeof value[0] === "number" && typeof value[1] === "number")
+    return [value as Position];
   return value.flatMap((item) => flattenPositions(item));
 }
 
-function geometryCenter(geometry: Geometry | null | undefined): [number, number] | null {
+function geometryCenter(
+  geometry: Geometry | null | undefined,
+): [number, number] | null {
   if (!geometry) return null;
   if (geometry.type === "Point") {
     const [lon, lat] = geometry.coordinates;
     return Number.isFinite(lon) && Number.isFinite(lat) ? [lon, lat] : null;
   }
-  const positions = flattenPositions("coordinates" in geometry ? geometry.coordinates : []);
-  const valid = positions.filter((position) => Number.isFinite(position[0]) && Number.isFinite(position[1]));
+  const positions = flattenPositions(
+    "coordinates" in geometry ? geometry.coordinates : [],
+  );
+  const valid = positions.filter(
+    (position) => Number.isFinite(position[0]) && Number.isFinite(position[1]),
+  );
   if (valid.length === 0) return null;
   const sum = valid.reduce(
-    (acc, position) => ({ lon: acc.lon + Number(position[0]), lat: acc.lat + Number(position[1]) }),
-    { lon: 0, lat: 0 }
+    (acc, position) => ({
+      lon: acc.lon + Number(position[0]),
+      lat: acc.lat + Number(position[1]),
+    }),
+    { lon: 0, lat: 0 },
   );
   return [sum.lon / valid.length, sum.lat / valid.length];
 }
@@ -154,7 +176,8 @@ function dedupePoiLocations(pois: PublicPoi[]) {
   const seen = new Set<string>();
   const deduped: PublicPoi[] = [];
   for (const poi of pois) {
-    if (!Number.isFinite(poi.latitude) || !Number.isFinite(poi.longitude)) continue;
+    if (!Number.isFinite(poi.latitude) || !Number.isFinite(poi.longitude))
+      continue;
     const key = poiLocationKey(poi);
     if (seen.has(key)) continue;
     seen.add(key);
@@ -166,26 +189,44 @@ function dedupePoiLocations(pois: PublicPoi[]) {
 function filterPoisByBaseRadius(
   pois: PublicPoi[],
   baseLocation?: { latitude: number; longitude: number } | null,
-  maxTravelDistanceMiles?: number | null
+  maxTravelDistanceMiles?: number | null,
 ) {
-  if (!baseLocation || !Number.isFinite(baseLocation.latitude) || !Number.isFinite(baseLocation.longitude)) return pois;
+  if (
+    !baseLocation ||
+    !Number.isFinite(baseLocation.latitude) ||
+    !Number.isFinite(baseLocation.longitude)
+  )
+    return pois;
 
   const radiusMiles =
-    typeof maxTravelDistanceMiles === "number" && Number.isFinite(maxTravelDistanceMiles) && maxTravelDistanceMiles > 0
+    typeof maxTravelDistanceMiles === "number" &&
+    Number.isFinite(maxTravelDistanceMiles) &&
+    maxTravelDistanceMiles > 0
       ? maxTravelDistanceMiles
       : DEFAULT_RECOMMENDATION_RADIUS_MILES;
   const radiusKm = radiusMiles * KILOMETERS_PER_MILE;
-  const basePoint: [number, number] = [baseLocation.longitude, baseLocation.latitude];
+  const basePoint: [number, number] = [
+    baseLocation.longitude,
+    baseLocation.latitude,
+  ];
 
-  return pois.filter((poi) => haversineKm(basePoint, [poi.longitude, poi.latitude]) <= radiusKm);
+  return pois.filter(
+    (poi) => haversineKm(basePoint, [poi.longitude, poi.latitude]) <= radiusKm,
+  );
 }
 
-function buildForecastCellScores(grid: FeatureCollection, values: Record<string, number>): ForecastCellScore[] {
+function buildForecastCellScores(
+  grid: FeatureCollection,
+  values: Record<string, number>,
+): ForecastCellScore[] {
   return (grid.features ?? [])
     .map((feature) => {
-      const cellId = getH3CellId(feature.properties as Record<string, unknown> | null);
+      const cellId = getH3CellId(
+        feature.properties as Record<string, unknown> | null,
+      );
       const value = Number(values[cellId] ?? 0);
-      if (!Number.isFinite(value) || value < 0 || !feature.geometry) return null;
+      if (!Number.isFinite(value) || value < 0 || !feature.geometry)
+        return null;
       const center = geometryCenter(feature.geometry);
       if (!center) return null;
       return { value, center } satisfies ForecastCellScore;
@@ -193,7 +234,9 @@ function buildForecastCellScores(grid: FeatureCollection, values: Record<string,
     .filter((cell): cell is ForecastCellScore => cell !== null);
 }
 
-function buildAllTimeOccurrenceValues(payload: TripPlannerOccurrencePayload): Record<string, number> {
+function buildAllTimeOccurrenceValues(
+  payload: TripPlannerOccurrencePayload,
+): Record<string, number> {
   const values: Record<string, number> = {};
   payload.rows.forEach((row) => {
     const count = Number(row.count);
@@ -210,7 +253,10 @@ type ScoredPoi = {
   nearestDistanceKm: number;
 };
 
-function scorePoisAgainstCells(pois: PublicPoi[], cells: ForecastCellScore[]): ScoredPoi[] {
+function scorePoisAgainstCells(
+  pois: PublicPoi[],
+  cells: ForecastCellScore[],
+): ScoredPoi[] {
   return pois
     .map((poi): ScoredPoi => {
       const point: [number, number] = [poi.longitude, poi.latitude];
@@ -227,7 +273,8 @@ function scorePoisAgainstCells(pois: PublicPoi[], cells: ForecastCellScore[]): S
         nearestDistanceKm = Math.min(nearestDistanceKm, distanceKm);
       }
 
-      const meanNearbyScore = nearbyCellCount > 0 ? scoreSum / nearbyCellCount : 0;
+      const meanNearbyScore =
+        nearbyCellCount > 0 ? scoreSum / nearbyCellCount : 0;
 
       return {
         poi,
@@ -236,10 +283,17 @@ function scorePoisAgainstCells(pois: PublicPoi[], cells: ForecastCellScore[]): S
         nearestDistanceKm,
       };
     })
-    .sort((a, b) => b.meanNearbyScore - a.meanNearbyScore || a.poi.name.localeCompare(b.poi.name));
+    .sort(
+      (a, b) =>
+        b.meanNearbyScore - a.meanNearbyScore ||
+        a.poi.name.localeCompare(b.poi.name),
+    );
 }
 
-function percentileFromBaseline(score: number, sortedScoresAscending: number[]) {
+function percentileFromBaseline(
+  score: number,
+  sortedScoresAscending: number[],
+) {
   if (sortedScoresAscending.length <= 1) return 100;
   let low = 0;
   let high = sortedScoresAscending.length;
@@ -262,21 +316,30 @@ function rankPoiAgainstForecast(
   baseLocation?: { latitude: number; longitude: number } | null,
   maxTravelDistanceMiles?: number | null,
   limit?: number | null,
-  sourcePoisForFraction?: PublicPoi[]
+  sourcePoisForFraction?: PublicPoi[],
 ): SuggestedPlace[] {
-  const candidatePois = filterPoisByBaseRadius(dedupePoiLocations(pois), baseLocation, maxTravelDistanceMiles);
+  const candidatePois = filterPoisByBaseRadius(
+    dedupePoiLocations(pois),
+    baseLocation,
+    maxTravelDistanceMiles,
+  );
   if (candidatePois.length === 0 || cells.length === 0) return [];
 
   const scoredPois = scorePoisAgainstCells(candidatePois, cells);
   const baselinePois = dedupePoiLocations(sourcePoisForFraction ?? pois);
-  const baselineScoresAscending = scorePoisAgainstCells(baselinePois, baselineCells)
+  const baselineScoresAscending = scorePoisAgainstCells(
+    baselinePois,
+    baselineCells,
+  )
     .map((item) => item.meanNearbyScore)
     .sort((a, b) => a - b);
 
   // A POI only qualifies as a recommendation if it actually overlaps modeled water
   // cells and has a positive nearby mean. Otherwise zero-score POIs sort alphabetically
   // and masquerade as “top” places, which is worse than showing nothing.
-  const eligiblePois = scoredPois.filter((item) => item.nearbyCellCount > 0 && item.meanNearbyScore > 0);
+  const eligiblePois = scoredPois.filter(
+    (item) => item.nearbyCellCount > 0 && item.meanNearbyScore > 0,
+  );
   if (eligiblePois.length === 0) {
     if (import.meta.env.DEV) {
       console.info("[recommended POIs] no eligible POIs", {
@@ -287,14 +350,21 @@ function rankPoiAgainstForecast(
         scoreRadiusMiles: POI_SCORE_RADIUS_KM / KILOMETERS_PER_MILE,
         baseLatitude: baseLocation?.latitude,
         baseLongitude: baseLocation?.longitude,
-        maxTravelDistanceMiles: maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
+        maxTravelDistanceMiles:
+          maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
       });
     }
     return [];
   }
 
-  const requestedLimit = typeof limit === "number" && Number.isFinite(limit) && limit > 0 ? Math.round(limit) : null;
-  const topCount = Math.min(eligiblePois.length, requestedLimit ?? eligiblePois.length);
+  const requestedLimit =
+    typeof limit === "number" && Number.isFinite(limit) && limit > 0
+      ? Math.round(limit)
+      : null;
+  const topCount = Math.min(
+    eligiblePois.length,
+    requestedLimit ?? eligiblePois.length,
+  );
 
   if (import.meta.env.DEV) {
     console.info("[recommended POIs]", {
@@ -310,7 +380,8 @@ function rankPoiAgainstForecast(
       scoreRadiusMiles: POI_SCORE_RADIUS_KM / KILOMETERS_PER_MILE,
       baseLatitude: baseLocation?.latitude,
       baseLongitude: baseLocation?.longitude,
-      maxTravelDistanceMiles: maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
+      maxTravelDistanceMiles:
+        maxTravelDistanceMiles ?? DEFAULT_RECOMMENDATION_RADIUS_MILES,
       topNames: eligiblePois.slice(0, topCount).map((item) => ({
         name: item.poi.name,
         type: item.poi.type,
@@ -318,41 +389,52 @@ function rankPoiAgainstForecast(
         longitude: item.poi.longitude,
         meanNearbyScore: item.meanNearbyScore,
         nearbyCellCount: item.nearbyCellCount,
-        nearestDistanceKm: Number.isFinite(item.nearestDistanceKm) ? item.nearestDistanceKm : null,
+        nearestDistanceKm: Number.isFinite(item.nearestDistanceKm)
+          ? item.nearestDistanceKm
+          : null,
       })),
     });
   }
 
-  return eligiblePois.slice(0, topCount).map(({ poi, meanNearbyScore, nearbyCellCount, nearestDistanceKm }) => {
-    const percentileFromBottom = percentileFromBaseline(meanNearbyScore, baselineScoresAscending);
-    const normalizedName = normalizeId(poi.name);
-    const metadata = PLANNER_POI_METADATA[normalizedName];
-    const reason =
-      poi.reason ??
-      metadata?.reason ??
-      `One of the top ${topCount} viewing locations based on mean forecast score across ${nearbyCellCount} grid cells within 10 miles.`;
+  return eligiblePois
+    .slice(0, topCount)
+    .map(({ poi, meanNearbyScore, nearbyCellCount, nearestDistanceKm }) => {
+      const percentileFromBottom = percentileFromBaseline(
+        meanNearbyScore,
+        baselineScoresAscending,
+      );
+      const normalizedName = normalizeId(poi.name);
+      const metadata = PLANNER_POI_METADATA[normalizedName];
+      const reason =
+        poi.reason ??
+        metadata?.reason ??
+        `One of the top ${topCount} viewing locations based on mean forecast score across ${nearbyCellCount} grid cells within 10 miles.`;
 
-    return {
-      id: toPlaceId(poi),
-      spotId: getPlannerSpotId(poi),
-      name: poi.name,
-      region: poi.region,
-      type: poi.type,
-      latitude: poi.latitude,
-      longitude: poi.longitude,
-      viewingPotential: toViewingPotential(percentileFromBottom),
-      score: meanNearbyScore,
-      reason,
-      distanceKm: Number.isFinite(nearestDistanceKm) ? nearestDistanceKm : undefined,
-      imageUrl: poi.imageUrl,
-      hasLiveFeed: poi.hasLiveFeed,
-      liveCameraUrl: poi.liveCameraUrl,
-      hasHydrophone: poi.hasHydrophone,
-    } satisfies SuggestedPlace;
-  });
+      return {
+        id: toPlaceId(poi),
+        spotId: getPlannerSpotId(poi),
+        name: poi.name,
+        region: poi.region,
+        type: poi.type,
+        latitude: poi.latitude,
+        longitude: poi.longitude,
+        viewingPotential: toViewingPotential(percentileFromBottom),
+        score: meanNearbyScore,
+        reason,
+        distanceKm: Number.isFinite(nearestDistanceKm)
+          ? nearestDistanceKm
+          : undefined,
+        imageUrl: poi.imageUrl,
+        hasLiveFeed: poi.hasLiveFeed,
+        liveCameraUrl: poi.liveCameraUrl,
+        hasHydrophone: poi.hasHydrophone,
+      } satisfies SuggestedPlace;
+    });
 }
 
-export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPlacesResult {
+export function useSuggestedPlaces(
+  args: UseSuggestedPlacesArgs,
+): UseSuggestedPlacesResult {
   const {
     resolution,
     modelId,
@@ -371,7 +453,11 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
   const effectivePlaces = enabled ? places : EMPTY_SUGGESTED_PLACES;
   const effectiveIsLoading = enabled ? isLoading : false;
   const effectiveError = enabled ? error : null;
-  const { Park: includeParks, Marina: includeMarinas, Ferry: includeFerries } = poiFilters;
+  const {
+    Park: includeParks,
+    Marina: includeMarinas,
+    Ferry: includeFerries,
+  } = poiFilters;
 
   useEffect(() => {
     if (!enabled) return;
@@ -383,11 +469,24 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
         setIsLoading(true);
         setError(null);
       }
-      const baselinePayloadPromise = loadTripPlannerOccurrencePayload(resolution);
-      const [poiBundle, grid, baselinePayload] = await Promise.all([loadPoiDataBundle(), loadGrid(resolution), baselinePayloadPromise]);
-      const requestedPoiFilters = { Park: includeParks, Marina: includeMarinas, Ferry: includeFerries };
-      const activePoiFilters = hasActivePoiFilter(requestedPoiFilters) ? requestedPoiFilters : undefined;
-      const pois = filterPoisByType(poiBundle.items, activePoiFilters).map(enrichPlannerPoi);
+      const baselinePayloadPromise =
+        loadTripPlannerOccurrencePayload(resolution);
+      const [poiBundle, grid, baselinePayload] = await Promise.all([
+        loadPoiDataBundle(),
+        loadGrid(resolution),
+        baselinePayloadPromise,
+      ]);
+      const requestedPoiFilters = {
+        Park: includeParks,
+        Marina: includeMarinas,
+        Ferry: includeFerries,
+      };
+      const activePoiFilters = hasActivePoiFilter(requestedPoiFilters)
+        ? requestedPoiFilters
+        : undefined;
+      const pois = filterPoisByType(poiBundle.items, activePoiFilters).map(
+        enrichPlannerPoi,
+      );
       if (pois.length === 0) return [];
 
       const values =
@@ -398,7 +497,8 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
             explicitPath: forecastPath,
             modelId,
           }).catch(async (primaryError) => {
-            if (!fallbackForecastPath || fallbackForecastPath === forecastPath) throw primaryError;
+            if (!fallbackForecastPath || fallbackForecastPath === forecastPath)
+              throw primaryError;
             return loadForecast(resolution, {
               kind: "explicit",
               explicitPath: fallbackForecastPath,
@@ -407,8 +507,19 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
           })
         ).values;
       const cells = buildForecastCellScores(grid, values);
-      const baselineCells = buildForecastCellScores(grid, buildAllTimeOccurrenceValues(baselinePayload));
-      return rankPoiAgainstForecast(pois, cells, baselineCells, baseLocation, maxTravelDistanceMiles, limit, poiBundle.sourceItems);
+      const baselineCells = buildForecastCellScores(
+        grid,
+        buildAllTimeOccurrenceValues(baselinePayload),
+      );
+      return rankPoiAgainstForecast(
+        pois,
+        cells,
+        baselineCells,
+        baseLocation,
+        maxTravelDistanceMiles,
+        limit,
+        poiBundle.sourceItems,
+      );
     };
 
     load()
@@ -420,7 +531,11 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
       .catch((err) => {
         if (cancelled) return;
         setPlaces([]);
-        setError(err instanceof Error ? err.message : "Suggested places could not be loaded.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Suggested places could not be loaded.",
+        );
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -444,5 +559,9 @@ export function useSuggestedPlaces(args: UseSuggestedPlacesArgs): UseSuggestedPl
     resolution,
   ]);
 
-  return { places: effectivePlaces, isLoading: effectiveIsLoading, error: effectiveError };
+  return {
+    places: effectivePlaces,
+    isLoading: effectiveIsLoading,
+    error: effectiveError,
+  };
 }

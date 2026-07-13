@@ -3,7 +3,7 @@ import path from "node:path";
 
 const distDirectory = path.resolve("dist");
 const manifest = JSON.parse(
-  await readFile(path.join(distDirectory, ".vite", "manifest.json"), "utf8")
+  await readFile(path.join(distDirectory, ".vite", "manifest.json"), "utf8"),
 );
 const entries = Object.values(manifest).filter((item) => item.isEntry);
 
@@ -18,18 +18,22 @@ function visit(key) {
   if (visited.has(key)) return;
   visited.add(key);
   const item = manifest[key];
-  if (!item) throw new Error(`Bundle manifest references missing chunk: ${key}`);
+  if (!item)
+    throw new Error(`Bundle manifest references missing chunk: ${key}`);
   staticFiles.add(item.file);
   for (const cssFile of item.css ?? []) staticFiles.add(cssFile);
   for (const importedKey of item.imports ?? []) visit(importedKey);
 }
 
 const entryKey = Object.entries(manifest).find(([, item]) => item.isEntry)?.[0];
-if (!entryKey) throw new Error("Application entry was not found in the bundle manifest.");
+if (!entryKey)
+  throw new Error("Application entry was not found in the bundle manifest.");
 visit(entryKey);
 
 if ([...staticFiles].some((file) => file.includes("map-vendor"))) {
-  throw new Error("MapLibre is part of the initial application bundle; keep map routes lazy-loaded.");
+  throw new Error(
+    "MapLibre is part of the initial application bundle; keep map routes lazy-loaded.",
+  );
 }
 
 const budgets = {
@@ -47,11 +51,11 @@ for (const file of staticFiles) {
 for (const [kind, limit] of Object.entries(budgets)) {
   if (totals[kind] > limit) {
     throw new Error(
-      `Initial ${kind} bundle is ${(totals[kind] / 1024).toFixed(1)} kB; budget is ${(limit / 1024).toFixed(0)} kB.`
+      `Initial ${kind} bundle is ${(totals[kind] / 1024).toFixed(1)} kB; budget is ${(limit / 1024).toFixed(0)} kB.`,
     );
   }
 }
 
 console.log(
-  `Initial bundle within budget: ${(totals.javascript / 1024).toFixed(1)} kB JS, ${(totals.css / 1024).toFixed(1)} kB CSS.`
+  `Initial bundle within budget: ${(totals.javascript / 1024).toFixed(1)} kB JS, ${(totals.css / 1024).toFixed(1)} kB CSS.`,
 );

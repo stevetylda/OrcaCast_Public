@@ -9,11 +9,15 @@ export type SeasonalWeekBar = {
 export function buildHighlightedDays(
   startDay: number,
   endDay: number,
-  crossesYear: boolean
+  crossesYear: boolean,
 ) {
   const days = new Set<number>();
   for (let day = 1; day <= 366; day += 1) {
-    if (crossesYear ? day >= startDay || day <= endDay : day >= startDay && day <= endDay) {
+    if (
+      crossesYear
+        ? day >= startDay || day <= endDay
+        : day >= startDay && day <= endDay
+    ) {
       days.add(day);
     }
   }
@@ -22,7 +26,7 @@ export function buildHighlightedDays(
 
 export function buildSeasonalWeekBars(
   histogram: TripPlannerHistogramBin[],
-  highlightedDays: ReadonlySet<number>
+  highlightedDays: ReadonlySet<number>,
 ): SeasonalWeekBar[] {
   const counts = Array.from({ length: 53 }, (_, index) => ({
     index,
@@ -40,7 +44,11 @@ export function buildSeasonalWeekBars(
 
 export function dayOfYearUtc(date: Date) {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
-  const current = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const current = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+  );
   return Math.floor((current - start) / 86_400_000) + 1;
 }
 
@@ -58,18 +66,27 @@ export function relativeActivityLabel(percentile: number) {
 
 export function computeRelativeActivity(
   weekBars: Array<{ count: number }>,
-  currentWeekIndex: number
+  currentWeekIndex: number,
 ) {
   const counts = weekBars.map((bar) => bar.count).filter(Number.isFinite);
   if (counts.length === 0 || counts.every((count) => count <= 0)) return null;
   const currentCount = weekBars[currentWeekIndex]?.count;
-  if (typeof currentCount !== "number" || !Number.isFinite(currentCount)) return null;
+  if (typeof currentCount !== "number" || !Number.isFinite(currentCount))
+    return null;
   const ordered = [...counts].sort((a, b) => a - b);
   const strictlyLess = ordered.filter((count) => count < currentCount).length;
   const equal = ordered.filter((count) => count === currentCount).length;
   const percentile = ((strictlyLess + equal / 2) / ordered.length) * 100;
   const label = relativeActivityLabel(percentile);
   const bucketIndex =
-    label === "Very Low" ? 0 : label === "Low" ? 1 : label === "Moderate" ? 2 : label === "High" ? 3 : 4;
+    label === "Very Low"
+      ? 0
+      : label === "Low"
+        ? 1
+        : label === "Moderate"
+          ? 2
+          : label === "High"
+            ? 3
+            : 4;
   return { label, percentile, bucketIndex };
 }

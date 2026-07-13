@@ -7,7 +7,12 @@ type Props = {
   onLearnMore: () => void;
 };
 
-export function WelcomeModal({ open, onClose, onStartTour, onLearnMore }: Props) {
+export function WelcomeModal({
+  open,
+  onClose,
+  onStartTour,
+  onLearnMore,
+}: Props) {
   const titleId = useId();
 
   useEffect(() => {
@@ -22,7 +27,11 @@ export function WelcomeModal({ open, onClose, onStartTour, onLearnMore }: Props)
   if (!open) return null;
 
   return (
-    <div className="overlay overlay--welcome" onClick={onClose} role="presentation">
+    <div
+      className="overlay overlay--welcome"
+      onClick={onClose}
+      role="presentation"
+    >
       <section
         className="modal modal--welcome"
         onClick={(ev) => ev.stopPropagation()}
@@ -32,7 +41,11 @@ export function WelcomeModal({ open, onClose, onStartTour, onLearnMore }: Props)
       >
         <div className="modal__header welcome__header">
           <div className="welcome__titleWrap">
-            <img src="/images/OrcaHex_Logo.png" alt="OrcaCast logo" className="welcome__logo" />
+            <img
+              src="/images/OrcaCast-Icon.png"
+              alt="OrcaCast logo"
+              className="welcome__logo"
+            />
             <div className="modal__title welcome__title" id={titleId}>
               Welcome to OrcaCast!
             </div>
@@ -52,7 +65,8 @@ export function WelcomeModal({ open, onClose, onStartTour, onLearnMore }: Props)
 
         <div className="modal__body welcome__body">
           <p className="welcome__subtitle">
-            Explore weekly forecasts of orca presence across the Pacific Northwest.
+            Explore weekly forecasts of orca presence across the Pacific
+            Northwest.
           </p>
 
           <div className="welcome__sectionTitle">In OrcaCast you can…</div>
@@ -95,7 +109,11 @@ export function WelcomeModal({ open, onClose, onStartTour, onLearnMore }: Props)
             >
               Start Tour
             </button>
-            <button className="btn btn--ghost btn--soft" type="button" onClick={onClose}>
+            <button
+              className="btn btn--ghost btn--soft"
+              type="button"
+              onClick={onClose}
+            >
               Explore
             </button>
           </div>

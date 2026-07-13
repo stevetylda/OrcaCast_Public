@@ -8,9 +8,12 @@ export type DataMeta = {
 };
 
 const FALLBACK_DATA_VERSION = "";
-const VITE_ENV = (import.meta as { env?: { BASE_URL?: string; VITE_BUILD_ID?: string } }).env;
+const VITE_ENV = (
+  import.meta as { env?: { BASE_URL?: string; VITE_BUILD_ID?: string } }
+).env;
 const BUILD_VERSION =
-  typeof VITE_ENV?.VITE_BUILD_ID === "string" && VITE_ENV.VITE_BUILD_ID.trim().length > 0
+  typeof VITE_ENV?.VITE_BUILD_ID === "string" &&
+  VITE_ENV.VITE_BUILD_ID.trim().length > 0
     ? VITE_ENV.VITE_BUILD_ID.trim()
     : "";
 let cachedMetaPromise: Promise<DataMeta> | null = null;
@@ -29,19 +32,23 @@ function metaUrlCandidates(): string[] {
 
 function normalizeMeta(payload: Record<string, unknown>): DataMeta {
   const dataVersion =
-    (typeof payload.data_version === "string" && payload.data_version.trim().length > 0
+    typeof payload.data_version === "string" &&
+    payload.data_version.trim().length > 0
       ? payload.data_version.trim()
       : typeof payload.version === "string" && payload.version.trim().length > 0
         ? payload.version.trim()
-        : typeof payload.build_id === "string" && payload.build_id.trim().length > 0
+        : typeof payload.build_id === "string" &&
+            payload.build_id.trim().length > 0
           ? payload.build_id.trim()
-          : typeof payload.buildId === "string" && payload.buildId.trim().length > 0
+          : typeof payload.buildId === "string" &&
+              payload.buildId.trim().length > 0
             ? payload.buildId.trim()
-            : FALLBACK_DATA_VERSION);
+            : FALLBACK_DATA_VERSION;
   return {
     data_version: dataVersion,
     generated_at:
-      typeof payload.generated_at === "string" && payload.generated_at.trim().length > 0
+      typeof payload.generated_at === "string" &&
+      payload.generated_at.trim().length > 0
         ? payload.generated_at.trim()
         : "",
   };
@@ -72,11 +79,23 @@ export async function loadDataMeta(): Promise<DataMeta> {
       let lastNotFound: DataLoadError | null = null;
       for (const url of metaUrlCandidates()) {
         try {
-          const { url: resolvedUrl, data: payload } = await fetchJson<unknown>(url, { cache: "force-cache" });
-          const validPayload = parseWithSchema(dataMetaFileSchema, payload, resolvedUrl, "Metadata file");
+          const { url: resolvedUrl, data: payload } = await fetchJson<unknown>(
+            url,
+            { cache: "force-cache" },
+          );
+          const validPayload = parseWithSchema(
+            dataMetaFileSchema,
+            payload,
+            resolvedUrl,
+            "Metadata file",
+          );
           return normalizeMeta(validPayload);
         } catch (error) {
-          if (error instanceof DataLoadError && error.kind === "http" && error.status === 404) {
+          if (
+            error instanceof DataLoadError &&
+            error.kind === "http" &&
+            error.status === 404
+          ) {
             lastNotFound = error;
             continue;
           }
@@ -92,14 +111,14 @@ export async function loadDataMeta(): Promise<DataMeta> {
           message: "No metadata file found",
         })
       );
-    })()
-      .then((meta) => {
-        resolvedMeta = meta;
-        if (resolvedDataVersionToken === null) {
-          resolvedDataVersionToken = meta.data_version || BUILD_VERSION || FALLBACK_DATA_VERSION;
-        }
-        return meta;
-      });
+    })().then((meta) => {
+      resolvedMeta = meta;
+      if (resolvedDataVersionToken === null) {
+        resolvedDataVersionToken =
+          meta.data_version || BUILD_VERSION || FALLBACK_DATA_VERSION;
+      }
+      return meta;
+    });
   }
   return cachedMetaPromise;
 }

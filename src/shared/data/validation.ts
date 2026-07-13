@@ -1,7 +1,9 @@
 import { z, type ZodError } from "zod";
 import { DataLoadError } from "./errors";
 
-const finiteNumber = z.number().refine(Number.isFinite, { message: "Expected a finite number" });
+const finiteNumber = z
+  .number()
+  .refine(Number.isFinite, { message: "Expected a finite number" });
 
 const periodSchema = z.object({
   year: z.number().int().min(1900).max(9999),
@@ -28,7 +30,8 @@ export const dataMetaFileSchema = z
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Expected at least one of data_version, version, build_id, or buildId",
+        message:
+          "Expected at least one of data_version, version, build_id, or buildId",
       });
     }
   });
@@ -47,7 +50,7 @@ export const forecastPayloadSchema = z
           id: z.string().optional(),
           model: z.string().optional(),
           values: numericRecordSchema,
-        })
+        }),
       )
       .optional(),
     valuesByModel: z.record(z.string(), numericRecordSchema).optional(),
@@ -74,7 +77,7 @@ export function parseWithSchema<T>(
   schema: z.ZodType<T>,
   payload: unknown,
   path: string,
-  label: string
+  label: string,
 ): T {
   const parsed = schema.safeParse(payload);
   if (parsed.success) return parsed.data;

@@ -7,13 +7,20 @@ import { useWatchPageController } from "./useWatchPageController";
 import "../PlanPage/PlanPage.css";
 import "./WatchPage.css";
 
-const InfoModal = lazy(() => import("../../shared/components/InfoModal").then((m) => ({ default: m.InfoModal })));
+const InfoModal = lazy(() =>
+  import("../../shared/components/InfoModal").then((m) => ({
+    default: m.InfoModal,
+  })),
+);
 
 export function WatchPage() {
   const [boundaryKey, setBoundaryKey] = useState(0);
   const controller = useWatchPageController();
   return (
-    <WatchPageErrorBoundary onRetry={() => setBoundaryKey((value) => value + 1)} key={boundaryKey}>
+    <WatchPageErrorBoundary
+      onRetry={() => setBoundaryKey((value) => value + 1)}
+      key={boundaryKey}
+    >
       <>
         <WatchPageLayout controller={controller} />
         <Suspense fallback={<div className="modalLoading">Loading…</div>}>

@@ -17,11 +17,17 @@ import {
 const DEFAULT_ORCASOUND_URL = "https://live.orcasound.net/";
 
 export function usePlannerReferenceData() {
-  const [photoManifest, setPhotoManifest] = useState<ViewingSpotPhotoManifest>({});
+  const [photoManifest, setPhotoManifest] = useState<ViewingSpotPhotoManifest>(
+    {},
+  );
   const [baseLocations, setBaseLocations] = useState<PlannerBaseLocation[]>([]);
   const [cameraLocations, setCameraLocations] = useState<ViewingLocation[]>([]);
-  const [hydrophoneLocations, setHydrophoneLocations] = useState<OrcasoundHydrophone[]>([]);
-  const [hydrophoneListenUrl, setHydrophoneListenUrl] = useState(DEFAULT_ORCASOUND_URL);
+  const [hydrophoneLocations, setHydrophoneLocations] = useState<
+    OrcasoundHydrophone[]
+  >([]);
+  const [hydrophoneListenUrl, setHydrophoneListenUrl] = useState(
+    DEFAULT_ORCASOUND_URL,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -33,14 +39,24 @@ export function usePlannerReferenceData() {
     ]).then(([baseResult, photoResult, poiResult, hydrophoneResult]) => {
       if (cancelled) return;
       if (baseResult.status === "fulfilled") setBaseLocations(baseResult.value);
-      else console.warn("[Planner] failed to load base locations", baseResult.reason);
+      else
+        console.warn(
+          "[Planner] failed to load base locations",
+          baseResult.reason,
+        );
 
-      if (photoResult.status === "fulfilled") setPhotoManifest(photoResult.value);
+      if (photoResult.status === "fulfilled")
+        setPhotoManifest(photoResult.value);
 
       if (poiResult.status === "fulfilled") {
         setCameraLocations(
           poiResult.value
-            .filter((item) => item.hasLiveFeed && typeof item.liveCameraUrl === "string" && item.liveCameraUrl.length > 0)
+            .filter(
+              (item) =>
+                item.hasLiveFeed &&
+                typeof item.liveCameraUrl === "string" &&
+                item.liveCameraUrl.length > 0,
+            )
             .map((item, index) => ({
               id: `camera-${index}-${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
               name: item.name,
@@ -48,19 +64,33 @@ export function usePlannerReferenceData() {
               latitude: item.latitude,
               longitude: item.longitude,
               liveCameraUrl: item.liveCameraUrl,
-            }))
+            })),
         );
-      } else console.warn("[Planner] failed to load camera locations", poiResult.reason);
+      } else
+        console.warn(
+          "[Planner] failed to load camera locations",
+          poiResult.reason,
+        );
 
       if (hydrophoneResult.status === "fulfilled") {
         setHydrophoneLocations(hydrophoneResult.value.items);
         setHydrophoneListenUrl(hydrophoneResult.value.listenUrl);
-      } else console.warn("[Planner] failed to load Orcasound hydrophones", hydrophoneResult.reason);
+      } else
+        console.warn(
+          "[Planner] failed to load Orcasound hydrophones",
+          hydrophoneResult.reason,
+        );
     });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  return { baseLocations, photoManifest, cameraLocations, hydrophoneLocations, hydrophoneListenUrl };
+  return {
+    baseLocations,
+    photoManifest,
+    cameraLocations,
+    hydrophoneLocations,
+    hydrophoneListenUrl,
+  };
 }

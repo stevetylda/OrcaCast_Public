@@ -1,0 +1,9 @@
+dist/
+node_modules/
+public/data/
+public/images/
+public/spot-images/
+public/spot-photos/
+docs/screenshots/
+*.css
+docs/planner-page-data-requirements.md

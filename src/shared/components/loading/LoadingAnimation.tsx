@@ -15,9 +15,15 @@ export type LoadingAnimationProps = {
   className?: string;
 };
 
-const DEFAULT_LABELS: Record<LoadingAnimationVariant, { loading: string; complete: string }> = {
+const DEFAULT_LABELS: Record<
+  LoadingAnimationVariant,
+  { loading: string; complete: string }
+> = {
   ferry: { loading: "Preparing your trip", complete: "Your trip is ready" },
-  orca: { loading: "Preparing this week's forecast", complete: "This week's forecast is ready" },
+  orca: {
+    loading: "Preparing this week's forecast",
+    complete: "This week's forecast is ready",
+  },
 };
 
 export function LoadingAnimation({
@@ -36,16 +42,27 @@ export function LoadingAnimation({
     `loadingAnimation--${appearance}`,
     complete ? "isComplete" : "",
     className ?? "",
-  ].filter(Boolean).join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className={classes} role="status" aria-live="polite" aria-label={announcedLabel}>
+    <div
+      className={classes}
+      role="status"
+      aria-live="polite"
+      aria-label={announcedLabel}
+    >
       <div className="loadingAnimation__eyebrow">{announcedLabel}</div>
       <div className="loadingAnimation__viewport">
         {variant === "ferry" ? <FerryLoadingScene /> : <OrcaLoadingScene />}
       </div>
       {showProgress ? (
-        <div className="loadingAnimation__progress" aria-hidden="true" data-complete={complete ? "true" : "false"}>
+        <div
+          className="loadingAnimation__progress"
+          aria-hidden="true"
+          data-complete={complete ? "true" : "false"}
+        >
           <span className="loadingAnimation__progressFill" />
           <span className="loadingAnimation__progressGlint" />
         </div>

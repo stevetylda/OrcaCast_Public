@@ -84,7 +84,11 @@ export function SideDrawer({ open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div className="overlay overlay--editorial" onClick={onClose} role="presentation">
+    <div
+      className="overlay overlay--editorial"
+      onClick={onClose}
+      role="presentation"
+    >
       <aside
         className="sideDrawer sideDrawer--editorial"
         onClick={(e) => e.stopPropagation()}
@@ -112,7 +116,9 @@ export function SideDrawer({ open, onClose }: Props) {
             const isDisabled = Boolean(item.comingSoon);
             const isActive =
               !isDisabled &&
-              (item.path === "/about" ? pathname.startsWith("/about") : pathname === item.path);
+              (item.path === "/about"
+                ? pathname.startsWith("/about")
+                : pathname === item.path);
 
             return (
               <button
@@ -139,10 +145,18 @@ export function SideDrawer({ open, onClose }: Props) {
                   {item.icon}
                 </span>
                 <span className="sideDrawer__itemLabel">
-                  <span className={isDisabled ? "sideDrawer__itemLabelText sideDrawer__itemLabelText--soon" : "sideDrawer__itemLabelText"}>
+                  <span
+                    className={
+                      isDisabled
+                        ? "sideDrawer__itemLabelText sideDrawer__itemLabelText--soon"
+                        : "sideDrawer__itemLabelText"
+                    }
+                  >
                     {item.label}
                   </span>
-                  {isDisabled && <span className="sideDrawer__soonTag">Coming soon</span>}
+                  {isDisabled && (
+                    <span className="sideDrawer__soonTag">Coming soon</span>
+                  )}
                 </span>
               </button>
             );

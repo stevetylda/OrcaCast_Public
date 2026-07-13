@@ -21,7 +21,8 @@ const ALL_STEPS: TourStepDef[] = [
   {
     id: "top-bar",
     title: "Top bar",
-    description: "Global controls for navigation, forecast period, and view options. Use this row to set the week and overall map look.",
+    description:
+      "Global controls for navigation, forecast period, and view options. Use this row to set the week and overall map look.",
     detail: "",
     targetSelector: '[data-tour="top-bar"]',
     side: "bottom",
@@ -204,8 +205,11 @@ const ALL_STEPS: TourStepDef[] = [
 type Rect = { left: number; top: number; right: number; bottom: number };
 
 function getTargets(step: TourStepDef) {
-  const selectors = step.targetSelectors ?? (step.targetSelector ? [step.targetSelector] : []);
-  return selectors.flatMap((selector) => Array.from(document.querySelectorAll(selector)));
+  const selectors =
+    step.targetSelectors ?? (step.targetSelector ? [step.targetSelector] : []);
+  return selectors.flatMap((selector) =>
+    Array.from(document.querySelectorAll(selector)),
+  );
 }
 
 function stepIsAvailable(step: TourStepDef) {
@@ -299,7 +303,9 @@ function clamp(value: number, min: number, max: number) {
 function applySpotlight(step: TourStepDef) {
   const elements = getTargets(step);
   const rect =
-    step.spotlightMode === "bridge" ? getBridgeRect(elements) : getUnionRect(elements);
+    step.spotlightMode === "bridge"
+      ? getBridgeRect(elements)
+      : getUnionRect(elements);
   if (!rect) return;
 
   const padding = step.spotlightPadding ?? SPOTLIGHT_PADDING;
@@ -318,7 +324,9 @@ function applySpotlight(step: TourStepDef) {
 }
 
 function ensureToolDrawerOpen() {
-  const toggle = document.querySelector('[data-tour="tools"]') as HTMLElement | null;
+  const toggle = document.querySelector(
+    '[data-tour="tools"]',
+  ) as HTMLElement | null;
   if (!toggle) return;
   const panel = document.querySelector(".footerDock__panel--settings");
   if (!panel) toggle.click();
@@ -377,7 +385,10 @@ export function startMapTour() {
         const index = availableDefs.findIndex((step) => step.id === id);
         if (index < 0) return;
         const progress = (index + 1) / availableDefs.length;
-        document.documentElement.style.setProperty("--tour-progress", `${progress}`);
+        document.documentElement.style.setProperty(
+          "--tour-progress",
+          `${progress}`,
+        );
       };
 
       applySpotlight(availableDefs[0]);
@@ -396,7 +407,10 @@ export function startMapTour() {
         doneBtnText: "Done",
         closeBtnText: "Skip",
         steps,
-        onHighlightStarted: (_element: unknown, step: { id?: string } | undefined) => {
+        onHighlightStarted: (
+          _element: unknown,
+          step: { id?: string } | undefined,
+        ) => {
           const current = availableDefs.find((entry) => entry.id === step?.id);
           if (!current) return;
           applySpotlight(current);

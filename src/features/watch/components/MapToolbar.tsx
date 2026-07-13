@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { HotspotsSettingsSection } from "./HotspotsSettingsSection";
-import { PALETTES, getPalette, type PaletteId } from "../../../shared/geo/palettes";
+import {
+  PALETTES,
+  getPalette,
+  type PaletteId,
+} from "../../../shared/geo/palettes";
 
 type Props = {
   surfaceMode: "grid" | "surface";
@@ -106,24 +110,38 @@ export function MapToolbar({
   }, [paletteOpen]);
 
   return (
-    <div className={className ? `toolbar ${className}` : "toolbar"} data-tour="toolbar">
+    <div
+      className={className ? `toolbar ${className}` : "toolbar"}
+      data-tour="toolbar"
+    >
       <div className="toolMenu">
         <button
           className={`toolBtn${surfaceMode === "surface" ? " toolBtn--active" : ""}`}
-          onClick={() => onSurfaceModeChange(surfaceMode === "surface" ? "grid" : "surface")}
-          title={surfaceMode === "surface" ? "Show hex grid" : "Show smooth surface"}
-          aria-label={surfaceMode === "surface" ? "Show hex grid" : "Show smooth surface"}
+          onClick={() =>
+            onSurfaceModeChange(surfaceMode === "surface" ? "grid" : "surface")
+          }
+          title={
+            surfaceMode === "surface" ? "Show hex grid" : "Show smooth surface"
+          }
+          aria-label={
+            surfaceMode === "surface" ? "Show hex grid" : "Show smooth surface"
+          }
           aria-pressed={surfaceMode === "surface"}
         >
           <span className="toolBtn__iconStack" aria-hidden="true">
-            <span className="material-symbols-rounded toolBtn__iconBase">blur_on</span>
+            <span className="material-symbols-rounded toolBtn__iconBase">
+              blur_on
+            </span>
             <span className="material-symbols-rounded toolBtn__iconBadge">
               {surfaceMode === "surface" ? "check" : "swap_horiz"}
             </span>
           </span>
         </button>
       </div>
-      <div ref={poiRef} className={`toolMenu${poiOpen ? " toolMenu--open" : ""}`}>
+      <div
+        ref={poiRef}
+        className={`toolMenu${poiOpen ? " toolMenu--open" : ""}`}
+      >
         <button
           className={`toolBtn${poiActive ? " toolBtn--active" : ""}`}
           onClick={() => {
@@ -137,7 +155,11 @@ export function MapToolbar({
           <span className="material-symbols-rounded">pin_drop</span>
         </button>
         {poiOpen && (
-          <div className="toolMenu__popover" role="menu" aria-label="Points of interest">
+          <div
+            className="toolMenu__popover"
+            role="menu"
+            aria-label="Points of interest"
+          >
             <button
               className={`toolMenu__option${poiFilters.Park ? " toolMenu__option--active" : ""}`}
               onClick={() => onTogglePoiType("Park")}
@@ -165,7 +187,10 @@ export function MapToolbar({
           </div>
         )}
       </div>
-      <div ref={hotspotRef} className={`toolMenu${hotspotOpen ? " toolMenu--open" : ""}`}>
+      <div
+        ref={hotspotRef}
+        className={`toolMenu${hotspotOpen ? " toolMenu--open" : ""}`}
+      >
         <button
           className={`toolBtn${hotspotsEnabled ? " toolBtn--active" : ""}`}
           onClick={() => setHotspotOpen((v) => !v)}
@@ -177,7 +202,9 @@ export function MapToolbar({
             <span className="material-symbols-rounded toolBtn__iconBase toolBtn__iconBase--hotspot">
               local_fire_department
             </span>
-            <span className="material-symbols-rounded toolBtn__iconBadge">settings</span>
+            <span className="material-symbols-rounded toolBtn__iconBadge">
+              settings
+            </span>
           </span>
         </button>
         {hotspotOpen && (
@@ -199,7 +226,10 @@ export function MapToolbar({
           </div>
         )}
       </div>
-      <div ref={paletteRef} className={`toolMenu toolDrawer__paletteMenu${paletteOpen ? " toolMenu--open" : ""}`}>
+      <div
+        ref={paletteRef}
+        className={`toolMenu toolDrawer__paletteMenu${paletteOpen ? " toolMenu--open" : ""}`}
+      >
         <button
           className="toolBtn toolDrawer__paletteToggle"
           onClick={() => setPaletteOpen((v) => !v)}
@@ -214,7 +244,9 @@ export function MapToolbar({
             >
               palette
             </span>
-            <span className="material-symbols-rounded toolBtn__iconBadge">settings</span>
+            <span className="material-symbols-rounded toolBtn__iconBadge">
+              settings
+            </span>
           </span>
         </button>
         {paletteOpen && (
@@ -247,8 +279,13 @@ export function MapToolbar({
                       />
                     ))}
                   </span>
-                  <span className="toolDrawer__paletteLabel">{palette.name}</span>
-                  <span className="toolDrawer__paletteCheck material-symbols-rounded" aria-hidden="true">
+                  <span className="toolDrawer__paletteLabel">
+                    {palette.name}
+                  </span>
+                  <span
+                    className="toolDrawer__paletteCheck material-symbols-rounded"
+                    aria-hidden="true"
+                  >
                     {selected ? "check" : ""}
                   </span>
                 </button>

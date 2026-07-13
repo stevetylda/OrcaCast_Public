@@ -18,7 +18,14 @@ function formatProbability(value: number): string {
 
 function buildBinTooltip(
   label: string,
-  binRange: { percentileMin: number; percentileMax: number; probMin: number; probMax: number } | undefined
+  binRange:
+    | {
+        percentileMin: number;
+        percentileMax: number;
+        probMin: number;
+        probMax: number;
+      }
+    | undefined,
 ): string {
   if (!binRange) return label;
   const pMinPct = formatPercentile(binRange.percentileMin);
@@ -34,7 +41,12 @@ export function ProbabilityLegend({ scale }: Props) {
   const nonZeroLabels = labels.slice(1, 1 + binColorsRgba.length);
 
   return (
-    <div className="legend" aria-label="Probability legend" data-tour="legend">
+    <div
+      className="legend"
+      role="img"
+      aria-label="Probability legend"
+      data-tour="legend"
+    >
       <div className="legend__header">
         <div className="legend__title">Sighting Outlook</div>
       </div>
@@ -44,7 +56,10 @@ export function ProbabilityLegend({ scale }: Props) {
           data-tooltip="No probability observed for this cell in the selected week (p=0)."
           tabIndex={0}
         >
-          <span className="legend__swatch" style={{ background: zeroColor ?? ZERO_COLOR }} />
+          <span
+            className="legend__swatch"
+            style={{ background: zeroColor ?? ZERO_COLOR }}
+          />
           <div className="legend__label">{labels[0]}</div>
         </div>
 
@@ -64,7 +79,9 @@ export function ProbabilityLegend({ scale }: Props) {
           );
         })}
       </div>
-      <div className="legend__note">Relative likelihoods binned within week.</div>
+      <div className="legend__note">
+        Relative likelihoods binned within week.
+      </div>
     </div>
   );
 }

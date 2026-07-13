@@ -6,6 +6,7 @@ export const basemapSources = [
 ];
 
 export const attribution = {
-  inlineText: "© OpenStreetMap contributors · © OpenMapTiles · © Stadia Maps · OpenFreeMap",
+  inlineText:
+    "© OpenStreetMap contributors · © OpenMapTiles · © Stadia Maps · OpenFreeMap",
   sources: [...basemapSources, "Acartia", "The Whale Museum", "iNaturalist"],
 };

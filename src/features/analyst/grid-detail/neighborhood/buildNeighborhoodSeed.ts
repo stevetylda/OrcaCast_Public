@@ -1,26 +1,43 @@
 import { getH3CellId } from "../../../../shared/data/h3";
 import type { NeighborhoodSeedEntry } from "../types";
-import { computeFeatureCentroid, extractFeaturePolygons, squaredDistance } from "./neighborhoodGeometry";
+import {
+  computeFeatureCentroid,
+  extractFeaturePolygons,
+  squaredDistance,
+} from "./neighborhoodGeometry";
 
-type GridPayload = Awaited<ReturnType<typeof import("../../../../shared/data/forecastIO").loadGrid>>;
+type GridPayload = Awaited<
+  ReturnType<typeof import("../../../../shared/data/forecastIO").loadGrid>
+>;
 
 export function buildNeighborhoodSeed(
   cellId: string,
-  grid: GridPayload | null
+  grid: GridPayload | null,
 ): NeighborhoodSeedEntry[] {
   const cells = (grid?.features ?? [])
     .map((feature) => {
-      const props = (feature.properties as Record<string, unknown> | null) ?? null;
+      const props =
+        (feature.properties as Record<string, unknown> | null) ?? null;
       const featureCellId = getH3CellId(props);
       const centroid = computeFeatureCentroid(feature.geometry);
       const polygons = extractFeaturePolygons(feature.geometry);
       if (!featureCellId || !centroid || polygons.length === 0) return null;
       return { cellId: featureCellId, centroid, polygons };
     })
-    .filter((entry): entry is { cellId: string; centroid: [number, number]; polygons: number[][][][] } => entry !== null);
+    .filter(
+      (
+        entry,
+      ): entry is {
+        cellId: string;
+        centroid: [number, number];
+        polygons: number[][][][];
+      } => entry !== null,
+    );
   const selected = cells.find((entry) => entry.cellId === cellId);
   if (!selected) {
-    return [{ cellId, label: "Center", isSelected: true, ringIndex: 0, polygons: [] }];
+    return [
+      { cellId, label: "Center", isSelected: true, ringIndex: 0, polygons: [] },
+    ];
   }
   const nearest = cells
     .filter((entry) => entry.cellId !== cellId)

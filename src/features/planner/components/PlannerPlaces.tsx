@@ -1,4 +1,8 @@
-import type { SuggestedPlace, ViewingLocation, ViewingPotential } from "../../locations/types";
+import type {
+  SuggestedPlace,
+  ViewingLocation,
+  ViewingPotential,
+} from "../../locations/types";
 import type { OrcasoundHydrophone } from "../../../shared/data/orcasoundHydrophones";
 import {
   getViewingSpotPhoto,
@@ -27,14 +31,25 @@ function getPlaceTypeIcon(type: SuggestedPlace["type"]) {
   return "place";
 }
 
-function getPlacePresentation(place: SuggestedPlace, photoManifest: ViewingSpotPhotoManifest) {
+function getPlacePresentation(
+  place: SuggestedPlace,
+  photoManifest: ViewingSpotPhotoManifest,
+) {
   const photo = getViewingSpotPhoto(place.spotId, photoManifest);
   const showApprovedPhoto = hasApprovedSpotPhoto(photo);
   const showPlaceImage = !showApprovedPhoto && Boolean(place.imageUrl);
   return {
-    imageSrc: showApprovedPhoto ? photo?.imageSrc ?? PLACE_IMAGE_PLACEHOLDER_SRC : place.imageUrl ?? PLACE_IMAGE_PLACEHOLDER_SRC,
-    imageAlt: showApprovedPhoto ? photo?.alt ?? place.name : showPlaceImage ? `Photo of ${place.name}` : "",
-    imagePosition: showApprovedPhoto ? photo?.focalPoint ?? "50% 50%" : undefined,
+    imageSrc: showApprovedPhoto
+      ? (photo?.imageSrc ?? PLACE_IMAGE_PLACEHOLDER_SRC)
+      : (place.imageUrl ?? PLACE_IMAGE_PLACEHOLDER_SRC),
+    imageAlt: showApprovedPhoto
+      ? (photo?.alt ?? place.name)
+      : showPlaceImage
+        ? `Photo of ${place.name}`
+        : "",
+    imagePosition: showApprovedPhoto
+      ? (photo?.focalPoint ?? "50% 50%")
+      : undefined,
   };
 }
 
@@ -42,7 +57,9 @@ function safeExternalHref(value: string | undefined) {
   if (!value) return null;
   try {
     const url = new URL(value, "https://orcacast.app");
-    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+    return url.protocol === "https:" || url.protocol === "http:"
+      ? url.href
+      : null;
   } catch {
     return null;
   }
@@ -65,7 +82,10 @@ export function PlannerLoadingState({
       aria-label={`${title}. ${message}`}
     >
       <div className="plannerResultsPage__loadingPanel">
-        <span className="plannerResultsPage__loadingIcon material-symbols-rounded" aria-hidden="true">
+        <span
+          className="plannerResultsPage__loadingIcon material-symbols-rounded"
+          aria-hidden="true"
+        >
           travel_explore
         </span>
         <div className="plannerResultsPage__loadingCopy">
@@ -98,7 +118,10 @@ export function PlannerPlaceCard({
   onShowOnMap: () => void;
   onViewDetails: () => void;
 }) {
-  const { imageSrc, imageAlt, imagePosition } = getPlacePresentation(place, photoManifest);
+  const { imageSrc, imageAlt, imagePosition } = getPlacePresentation(
+    place,
+    photoManifest,
+  );
 
   return (
     <article
@@ -114,14 +137,21 @@ export function PlannerPlaceCard({
           aria-pressed={selected}
         >
           <div className="plannerResultsPage__spotThumbWrap suggestedPlaceCard__media">
-            <span className="plannerResultsPage__spotRank" aria-label={`Recommendation rank ${rank}`}>{rank}</span>
+            <span
+              className="plannerResultsPage__spotRank"
+              aria-label={`Recommendation rank ${rank}`}
+            >
+              {rank}
+            </span>
             {imageSrc ? (
               <img
                 className="plannerResultsPage__spotThumb suggestedPlaceCard__thumb"
                 src={imageSrc}
                 alt={imageAlt}
                 loading="lazy"
-                style={imagePosition ? { objectPosition: imagePosition } : undefined}
+                style={
+                  imagePosition ? { objectPosition: imagePosition } : undefined
+                }
                 onError={(event) => {
                   const image = event.currentTarget;
                   if (image.dataset.fallbackApplied === "true") return;
@@ -142,19 +172,28 @@ export function PlannerPlaceCard({
           <div className="plannerResultsPage__spotBody suggestedPlaceCard__body">
             <div className="plannerResultsPage__spotTopline suggestedPlaceCard__topline">
               <h3 className="suggestedPlaceCard__name">{place.name}</h3>
-              <span className={`viewingPotentialBadge viewingPotentialBadge--${place.viewingPotential}`}>
+              <span
+                className={`viewingPotentialBadge viewingPotentialBadge--${place.viewingPotential}`}
+              >
                 {potentialLabel[place.viewingPotential]}
               </span>
             </div>
             <p className="plannerResultsPage__spotRegion suggestedPlaceCard__meta">
-              <span className={`suggestedPlaceType suggestedPlaceType--${place.type.toLowerCase()}`}>
-                <span className="material-symbols-rounded suggestedPlaceType__icon" aria-hidden="true">
+              <span
+                className={`suggestedPlaceType suggestedPlaceType--${place.type.toLowerCase()}`}
+              >
+                <span
+                  className="material-symbols-rounded suggestedPlaceType__icon"
+                  aria-hidden="true"
+                >
                   {getPlaceTypeIcon(place.type)}
                 </span>
                 <span>{formatPlaceType(place.type)}</span>
               </span>
               <span className="plannerResultsPage__spotDistance">
-                {place.distanceKm !== undefined ? `${Math.round(place.distanceKm * 0.621371)} mi from base` : "In trip range"}
+                {place.distanceKm !== undefined
+                  ? `${Math.round(place.distanceKm * 0.621371)} mi from base`
+                  : "In trip range"}
               </span>
             </p>
           </div>
@@ -162,9 +201,15 @@ export function PlannerPlaceCard({
 
         <div className="plannerResultsPage__spotCardFace plannerResultsPage__spotCardFace--back">
           <div className="plannerResultsPage__spotCardActionWrap">
-            <span className="plannerResultsPage__spotCardActionLabel">{place.name}</span>
+            <span className="plannerResultsPage__spotCardActionLabel">
+              {place.name}
+            </span>
             <div className="plannerResultsPage__spotCardActions">
-              <button type="button" className="plannerResultsPage__spotCardActionBtn" onClick={onViewDetails}>
+              <button
+                type="button"
+                className="plannerResultsPage__spotCardActionBtn"
+                onClick={onViewDetails}
+              >
                 <span className="material-symbols-rounded" aria-hidden="true">
                   travel_explore
                 </span>
@@ -177,7 +222,9 @@ export function PlannerPlaceCard({
                     ? "plannerResultsPage__spotCardActionBtn--danger"
                     : "plannerResultsPage__spotCardActionBtn--primary"
                 }${itineraryAdded ? " isAdded" : ""}`}
-                onClick={itineraryAdded ? onRemoveFromItinerary : onAddToItinerary}
+                onClick={
+                  itineraryAdded ? onRemoveFromItinerary : onAddToItinerary
+                }
                 aria-pressed={itineraryAdded}
               >
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -216,12 +263,19 @@ export function PlannerPlaceDetailView({
   onViewItinerary: () => void;
   onBack: () => void;
 }) {
-  const { imageSrc, imageAlt, imagePosition } = getPlacePresentation(place, photoManifest);
+  const { imageSrc, imageAlt, imagePosition } = getPlacePresentation(
+    place,
+    photoManifest,
+  );
 
   return (
     <div className="plannerResultsPage__spotDetail">
       <div className="plannerResultsPage__spotDetailHeader">
-        <button type="button" className="plannerResultsPage__spotDetailBack" onClick={onBack}>
+        <button
+          type="button"
+          className="plannerResultsPage__spotDetailBack"
+          onClick={onBack}
+        >
           <span className="material-symbols-rounded" aria-hidden="true">
             arrow_back
           </span>
@@ -235,7 +289,9 @@ export function PlannerPlaceDetailView({
             src={imageSrc}
             alt={imageAlt}
             loading="lazy"
-            style={imagePosition ? { objectPosition: imagePosition } : undefined}
+            style={
+              imagePosition ? { objectPosition: imagePosition } : undefined
+            }
             onError={(event) => {
               const image = event.currentTarget;
               if (image.dataset.fallbackApplied === "true") return;
@@ -251,12 +307,19 @@ export function PlannerPlaceDetailView({
       <div className="plannerResultsPage__spotDetailBody">
         <div className="plannerResultsPage__spotDetailTitleRow">
           <div>
-            <div className="plannerResultsPage__spotsEyebrow">Location details</div>
+            <div className="plannerResultsPage__spotsEyebrow">
+              Location details
+            </div>
             <h3>{place.name}</h3>
             <p>{place.region ?? "Salish Sea"}</p>
           </div>
-          <span className={`suggestedPlaceType suggestedPlaceType--${place.type.toLowerCase()}`}>
-            <span className="material-symbols-rounded suggestedPlaceType__icon" aria-hidden="true">
+          <span
+            className={`suggestedPlaceType suggestedPlaceType--${place.type.toLowerCase()}`}
+          >
+            <span
+              className="material-symbols-rounded suggestedPlaceType__icon"
+              aria-hidden="true"
+            >
               {getPlaceTypeIcon(place.type)}
             </span>
             <span>{formatPlaceType(place.type)}</span>
@@ -274,7 +337,11 @@ export function PlannerPlaceDetailView({
           </div>
           <div>
             <span>Travel</span>
-            <strong>{place.distanceKm !== undefined ? `${Math.round(place.distanceKm * 0.621371)} mi from base` : "In range"}</strong>
+            <strong>
+              {place.distanceKm !== undefined
+                ? `${Math.round(place.distanceKm * 0.621371)} mi from base`
+                : "In range"}
+            </strong>
           </div>
         </div>
 
@@ -289,7 +356,7 @@ export function PlannerPlaceDetailView({
           </div>
         </div>
 
-        {(matchedCameras.length > 0 || matchedHydrophones.length > 0) ? (
+        {matchedCameras.length > 0 || matchedHydrophones.length > 0 ? (
           <div className="plannerResultsPage__spotDetailAssets">
             {matchedCameras.length > 0 ? (
               <div className="plannerResultsPage__spotDetailAssetGroup">
@@ -300,13 +367,22 @@ export function PlannerPlaceDetailView({
                   <span>Nearby camera</span>
                 </div>
                 {matchedCameras.map((camera) => (
-                  <div key={camera.id} className="plannerResultsPage__spotDetailAssetCard">
+                  <div
+                    key={camera.id}
+                    className="plannerResultsPage__spotDetailAssetCard"
+                  >
                     <div>
                       <strong>{camera.name}</strong>
                       <p>{camera.region}</p>
                     </div>
                     {safeExternalHref(camera.liveCameraUrl) ? (
-                      <a href={safeExternalHref(camera.liveCameraUrl) ?? undefined} target="_blank" rel="noreferrer">
+                      <a
+                        href={
+                          safeExternalHref(camera.liveCameraUrl) ?? undefined
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         Watch
                       </a>
                     ) : null}
@@ -324,13 +400,22 @@ export function PlannerPlaceDetailView({
                   <span>Nearby hydrophone</span>
                 </div>
                 {matchedHydrophones.map((hydrophone) => (
-                  <div key={hydrophone.id} className="plannerResultsPage__spotDetailAssetCard">
+                  <div
+                    key={hydrophone.id}
+                    className="plannerResultsPage__spotDetailAssetCard"
+                  >
                     <div>
                       <strong>{hydrophone.name}</strong>
                       <p>{hydrophone.region}</p>
                     </div>
                     {safeExternalHref(hydrophoneListenUrl) ? (
-                      <a href={safeExternalHref(hydrophoneListenUrl) ?? undefined} target="_blank" rel="noreferrer">
+                      <a
+                        href={
+                          safeExternalHref(hydrophoneListenUrl) ?? undefined
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         Listen
                       </a>
                     ) : null}
@@ -344,8 +429,9 @@ export function PlannerPlaceDetailView({
         <div className="plannerResultsPage__spotDetailRecommendation">
           <h4>Why it is recommended</h4>
           <p>
-            This location overlaps higher-probability forecast waters for your selected window and keeps the trip anchored
-            around accessible Salish Sea viewing points.
+            This location overlaps higher-probability forecast waters for your
+            selected window and keeps the trip anchored around accessible Salish
+            Sea viewing points.
           </p>
         </div>
 
@@ -359,10 +445,16 @@ export function PlannerPlaceDetailView({
             <span className="material-symbols-rounded" aria-hidden="true">
               {itineraryAdded ? "check_circle" : "playlist_add"}
             </span>
-            <span>{itineraryAdded ? "Added to itinerary" : "Add to itinerary"}</span>
+            <span>
+              {itineraryAdded ? "Added to itinerary" : "Add to itinerary"}
+            </span>
           </button>
           {itineraryAdded ? (
-            <button type="button" className="plannerResultsPage__spotDetailSecondaryAction" onClick={onViewItinerary}>
+            <button
+              type="button"
+              className="plannerResultsPage__spotDetailSecondaryAction"
+              onClick={onViewItinerary}
+            >
               View itinerary
             </button>
           ) : null}

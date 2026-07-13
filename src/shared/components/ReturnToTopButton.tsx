@@ -5,7 +5,10 @@ type ReturnToTopButtonProps = {
   label?: string;
 };
 
-export function ReturnToTopButton({ className = "", label = "Return to top" }: ReturnToTopButtonProps) {
+export function ReturnToTopButton({
+  className = "",
+  label = "Return to top",
+}: ReturnToTopButtonProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -23,7 +26,9 @@ export function ReturnToTopButton({ className = "", label = "Return to top" }: R
   }, []);
 
   const scrollToTop = () => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   };
 

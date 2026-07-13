@@ -1,10 +1,22 @@
-import { useEffect, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
+import {
+  useEffect,
+  type Dispatch,
+  type MutableRefObject,
+  type SetStateAction,
+} from "react";
 import type { FeatureCollection } from "geojson";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { GRID_PATH } from "../../shared/config/dataPaths";
 import type { H3Resolution } from "../../shared/config/dataPaths";
-import { normalizeDataLoadError, type DataLoadError } from "../../shared/data/errors";
-import { attachProbabilities, loadForecast, loadGrid } from "../../shared/data/forecastIO";
+import {
+  normalizeDataLoadError,
+  type DataLoadError,
+} from "../../shared/data/errors";
+import {
+  attachProbabilities,
+  loadForecast,
+  loadGrid,
+} from "../../shared/data/forecastIO";
 import { buildAutoColorExprFromValues } from "../../shared/geo/colorScale";
 import { removeGridOverlay } from "../../shared/geo/gridOverlay";
 import type { HeatScale } from "../../shared/geo/colorScale";
@@ -39,7 +51,7 @@ type UseForecastDataArgs = {
   scheduleForecastRender: (
     map: MapLibreMap,
     isCancelled?: () => boolean,
-    onRendered?: () => void
+    onRendered?: () => void,
   ) => void;
   onFatalDataError?: (error: DataLoadError) => void;
   onOverlayLoaded?: () => void;
@@ -100,15 +112,23 @@ export function useForecastData({
     const DEBUG_MAP =
       import.meta.env.DEV &&
       typeof window !== "undefined" &&
-      ((window as { __ORCACAST_DEBUG_MAP?: boolean }).__ORCACAST_DEBUG_MAP === true ||
+      ((window as { __ORCACAST_DEBUG_MAP?: boolean }).__ORCACAST_DEBUG_MAP ===
+        true ||
         window.localStorage?.getItem("orcacast.debug.map") === "true");
 
     const applyScaleToCurrentValues = (values: Record<string, number>) => {
       const scaleSourceValues =
-        useExternalColorScale && colorScaleValuesRef.current && Object.keys(colorScaleValuesRef.current).length > 0
+        useExternalColorScale &&
+        colorScaleValuesRef.current &&
+        Object.keys(colorScaleValuesRef.current).length > 0
           ? colorScaleValuesRef.current
           : values;
-      const { fillColorExpr, scale } = buildAutoColorExprFromValues(scaleSourceValues, paletteColors, ["get", "prob"], colorNoData);
+      const { fillColorExpr, scale } = buildAutoColorExprFromValues(
+        scaleSourceValues,
+        paletteColors,
+        ["get", "prob"],
+        colorNoData,
+      );
       const valueList = Object.values(values)
         .map((v) => Number(v))
         .filter((v) => Number.isFinite(v) && v > 0)
@@ -117,7 +137,8 @@ export function useForecastData({
       legendSpecRef.current = scale;
       setLegendSpec(scale);
       modeledHotspotThresholdRef.current =
-        scale?.hotspotThreshold ?? (valueList.length > 0 ? Math.max(...valueList) : undefined);
+        scale?.hotspotThreshold ??
+        (valueList.length > 0 ? Math.max(...valueList) : undefined);
       hotspotThresholdRef.current = modeledHotspotThresholdRef.current;
       shimmerThresholdRef.current = pulseAllGridCells
         ? 0
@@ -138,10 +159,20 @@ export function useForecastData({
             let forecast;
             if (forecastPath) {
               try {
-                forecast = await loadForecast(resolution, { kind: "explicit", explicitPath: forecastPath, modelId });
+                forecast = await loadForecast(resolution, {
+                  kind: "explicit",
+                  explicitPath: forecastPath,
+                  modelId,
+                });
               } catch (err) {
-                if (fallbackForecastPath && fallbackForecastPath !== forecastPath) {
-                  console.warn("[Forecast] explicit path failed, falling back to latest period", err);
+                if (
+                  fallbackForecastPath &&
+                  fallbackForecastPath !== forecastPath
+                ) {
+                  console.warn(
+                    "[Forecast] explicit path failed, falling back to latest period",
+                    err,
+                  );
                   forecast = await loadForecast(resolution, {
                     kind: "explicit",
                     explicitPath: fallbackForecastPath,
@@ -164,8 +195,10 @@ export function useForecastData({
             onFatalDataError?.(
               normalizeDataLoadError(
                 err,
-                forecastPath ?? fallbackForecastPath ?? `forecast:${resolution}`
-              )
+                forecastPath ??
+                  fallbackForecastPath ??
+                  `forecast:${resolution}`,
+              ),
             );
             return;
           }
@@ -188,17 +221,25 @@ export function useForecastData({
             positiveCount: positiveVals.length,
             min: positiveVals.length ? Math.min(...positiveVals) : null,
             median: positiveVals.length
-              ? positiveVals.slice().sort((a, b) => a - b)[Math.floor(positiveVals.length / 2)]
+              ? positiveVals.slice().sort((a, b) => a - b)[
+                  Math.floor(positiveVals.length / 2)
+                ]
               : null,
             p90: positiveVals.length
-              ? positiveVals.slice().sort((a, b) => a - b)[Math.floor(positiveVals.length * 0.9)]
+              ? positiveVals.slice().sort((a, b) => a - b)[
+                  Math.floor(positiveVals.length * 0.9)
+                ]
               : null,
             max: positiveVals.length ? Math.max(...positiveVals) : null,
           });
         }
 
         const featureValues = (joined.features ?? [])
-          .map((feature) => Number((feature.properties as Record<string, unknown> | null)?.prob ?? 0))
+          .map((feature) =>
+            Number(
+              (feature.properties as Record<string, unknown> | null)?.prob ?? 0,
+            ),
+          )
           .filter((v) => Number.isFinite(v));
         sortedValuesDescRef.current = [...featureValues].sort((a, b) => b - a);
         totalCellsRef.current = featureValues.length;
@@ -211,8 +252,11 @@ export function useForecastData({
             resolution,
             modelId,
             featureCount: joined.features?.length ?? 0,
-            nonZeroValues: Object.values(values).filter((value) => Number(value) > 0).length,
-            nonZeroJoinedFeatures: featureValues.filter((value) => value > 0).length,
+            nonZeroValues: Object.values(values).filter(
+              (value) => Number(value) > 0,
+            ).length,
+            nonZeroJoinedFeatures: featureValues.filter((value) => value > 0)
+              .length,
             forecastPath,
             fallbackForecastPath,
           });

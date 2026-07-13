@@ -9,16 +9,17 @@ type Props = {
 
 export function AttributionHover({ className, sources }: Props) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const [portalStyle, setPortalStyle] = useState<React.CSSProperties | undefined>(undefined);
+  const [portalStyle, setPortalStyle] = useState<
+    React.CSSProperties | undefined
+  >(undefined);
   const [open, setOpen] = useState(false);
   const resolvedSources = sources ?? attribution.sources;
   const extraCount = useMemo(
     () => Math.max(0, resolvedSources.length - basemapSources.length),
-    [resolvedSources]
+    [resolvedSources],
   );
 
-  const inlineText =
-    extraCount > 0 ? `Sources +${extraCount}` : "Sources";
+  const inlineText = extraCount > 0 ? `Sources +${extraCount}` : "Sources";
 
   useEffect(() => {
     if (!open || !wrapperRef.current) return;
@@ -66,7 +67,7 @@ export function AttributionHover({ className, sources }: Props) {
               ))}
             </ul>
           </div>,
-          document.body
+          document.body,
         )}
     </div>
   );

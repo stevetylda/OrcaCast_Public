@@ -10,8 +10,7 @@ import type { SuggestedPlace, ViewingLocation } from "../locations/types";
 export type FillColorSpec = DataDrivenPropertyValueSpecification<string>;
 export type LngLat = [number, number];
 export type MapViewportPadding =
-  | number
-  | { top: number; right: number; bottom: number; left: number };
+  number | { top: number; right: number; bottom: number; left: number };
 export type SparklineSeries = { forecast: number[]; sightings: number[] };
 
 export type GridCellExpandRequest = {
@@ -84,5 +83,8 @@ export type ForecastMapHandle = {
     width?: number;
     height?: number;
   }) => Promise<Blob | null>;
-  fitLocations: (locations: LngLat[], options?: { padding?: MapViewportPadding; maxZoom?: number }) => void;
+  fitLocations: (
+    locations: LngLat[],
+    options?: { padding?: MapViewportPadding; maxZoom?: number },
+  ) => void;
 };

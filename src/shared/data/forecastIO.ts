@@ -15,10 +15,16 @@ type ForecastPayload = {
 const gridCache = new Map<H3Resolution, FeatureCollection>();
 const forecastCache = new Map<string, ForecastPayload>();
 const forecastRawCache = new Map<string, ForecastPayloadRaw>();
-const DISABLE_RUNTIME_DATA_CACHE = Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
+const DISABLE_RUNTIME_DATA_CACHE = Boolean(
+  (import.meta as { env?: { DEV?: boolean } }).env?.DEV,
+);
 
-export async function loadGrid(resolution: H3Resolution): Promise<FeatureCollection> {
-  const cached = DISABLE_RUNTIME_DATA_CACHE ? undefined : gridCache.get(resolution);
+export async function loadGrid(
+  resolution: H3Resolution,
+): Promise<FeatureCollection> {
+  const cached = DISABLE_RUNTIME_DATA_CACHE
+    ? undefined
+    : gridCache.get(resolution);
   if (cached) return structuredClone(cached);
   const url = GRID_PATH[resolution];
   const { data } = await fetchJson<FeatureCollection>(url, {
@@ -34,12 +40,18 @@ type ForecastPayloadRaw = {
   target_end?: string;
   values?: Record<string, number>;
   model?: string;
-  models?: Array<{ id?: string; model?: string; values: Record<string, number> }>;
+  models?: Array<{
+    id?: string;
+    model?: string;
+    values: Record<string, number>;
+  }>;
   valuesByModel?: Record<string, Record<string, number>>;
 };
 
 async function loadForecastRaw(url: string): Promise<ForecastPayloadRaw> {
-  const cached = DISABLE_RUNTIME_DATA_CACHE ? undefined : forecastRawCache.get(url);
+  const cached = DISABLE_RUNTIME_DATA_CACHE
+    ? undefined
+    : forecastRawCache.get(url);
   if (cached) return cached;
   const raw = parseWithSchema(
     forecastPayloadSchema,
@@ -50,7 +62,7 @@ async function loadForecastRaw(url: string): Promise<ForecastPayloadRaw> {
       })
     ).data,
     url,
-    "Forecast payload"
+    "Forecast payload",
   );
   if (!DISABLE_RUNTIME_DATA_CACHE) forecastRawCache.set(url, raw);
   return raw;
@@ -77,7 +89,9 @@ function collectModelEntries(raw: ForecastPayloadRaw): ModelValuesEntry[] {
   return [];
 }
 
-function buildConsensusMean(entries: ModelValuesEntry[]): Record<string, number> {
+function buildConsensusMean(
+  entries: ModelValuesEntry[],
+): Record<string, number> {
   const modelCount = entries.length;
   if (modelCount === 0) return {};
   const keys = new Set<string>();
@@ -99,13 +113,16 @@ function buildConsensusMean(entries: ModelValuesEntry[]): Record<string, number>
 function resolveModelValues(raw: ForecastPayloadRaw, modelId?: string) {
   if (raw.models && raw.models.length > 0) {
     if (modelId) {
-      const match = raw.models.find((entry) => entry.id === modelId || entry.model === modelId);
+      const match = raw.models.find(
+        (entry) => entry.id === modelId || entry.model === modelId,
+      );
       if (match) return match.values;
     }
     return raw.models[0].values;
   }
   if (raw.valuesByModel) {
-    if (modelId && raw.valuesByModel[modelId]) return raw.valuesByModel[modelId];
+    if (modelId && raw.valuesByModel[modelId])
+      return raw.valuesByModel[modelId];
     const firstKey = Object.keys(raw.valuesByModel)[0];
     if (firstKey) return raw.valuesByModel[firstKey];
   }
@@ -114,11 +131,17 @@ function resolveModelValues(raw: ForecastPayloadRaw, modelId?: string) {
 
 export async function loadForecast(
   resolution: H3Resolution,
-  opts: { kind?: "latest" | "explicit"; explicitPath?: string; modelId?: string } = {}
+  opts: {
+    kind?: "latest" | "explicit";
+    explicitPath?: string;
+    modelId?: string;
+  } = {},
 ): Promise<ForecastPayload> {
   const url = getForecastPath(resolution, opts);
   const cacheKey = `${resolution}|${url}|${opts.modelId ?? ""}`;
-  const cached = DISABLE_RUNTIME_DATA_CACHE ? undefined : forecastCache.get(cacheKey);
+  const cached = DISABLE_RUNTIME_DATA_CACHE
+    ? undefined
+    : forecastCache.get(cacheKey);
   if (cached) return cached;
   const raw = await loadForecastRaw(url);
   const values =
@@ -136,7 +159,7 @@ export async function loadForecast(
 
 export async function loadForecastModelIds(
   resolution: H3Resolution,
-  opts: { kind?: "latest" | "explicit"; explicitPath?: string } = {}
+  opts: { kind?: "latest" | "explicit"; explicitPath?: string } = {},
 ): Promise<string[]> {
   const url = getForecastPath(resolution, opts);
   const raw = await loadForecastRaw(url);
@@ -161,12 +184,14 @@ export async function loadForecastModelIds(
 export function attachProbabilities(
   fc: FeatureCollection,
   values: Record<string, number>,
-  outKey = "prob"
+  outKey = "prob",
 ): FeatureCollection {
   return {
     ...fc,
     features: (fc.features ?? []).map((feature) => {
-      const props = { ...((feature.properties ?? {}) as Record<string, unknown>) };
+      const props = {
+        ...((feature.properties ?? {}) as Record<string, unknown>),
+      };
       const id = getH3CellId(props);
       const raw = values[id];
       const numeric = Number(raw);

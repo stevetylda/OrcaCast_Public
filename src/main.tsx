@@ -13,7 +13,7 @@ async function bootstrap() {
     root.render(
       <React.StrictMode>
         <App />
-      </React.StrictMode>
+      </React.StrictMode>,
     );
   } catch (error) {
     const dataError = normalizeDataLoadError(error, "/data/meta.json");
@@ -27,7 +27,7 @@ async function bootstrap() {
           details={dataError.details ?? dataError.message}
           onRetry={() => window.location.reload()}
         />
-      </React.StrictMode>
+      </React.StrictMode>,
     );
   }
 }

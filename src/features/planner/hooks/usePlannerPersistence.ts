@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import type { UnitsMode } from "../../../shared/state/MapStateContext";
-import type { TripPlanSelection, TripPlannerDraft } from "../model/plannerTypes";
+import type {
+  TripPlanSelection,
+  TripPlannerDraft,
+} from "../model/plannerTypes";
 import {
   writeStoredPlannerDraft,
   writeStoredPlannerOpen,
@@ -44,5 +47,11 @@ export function usePlannerPersistence({
         }
       : null;
     writeStoredPlannerDraft(draft);
-  }, [draftArrivalDate, draftCity, draftDepartureDate, draftMaxTravelDistance, unitsMode]);
+  }, [
+    draftArrivalDate,
+    draftCity,
+    draftDepartureDate,
+    draftMaxTravelDistance,
+    unitsMode,
+  ]);
 }

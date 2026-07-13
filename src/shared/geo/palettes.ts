@@ -165,58 +165,33 @@ export const PALETTES: Record<PaletteId, PaletteDef> = {
   forecast_lab: {
     id: "forecast_lab",
     name: "Forecast Lab",
-    colors: [
-      "#E8F4F1",
-      "#B9E4DF",
-      "#76CFCA",
-      "#38A9AA",
-      "#176F7D",
-      "#0C1C3A",
-    ],
+    colors: ["#E8F4F1", "#B9E4DF", "#76CFCA", "#38A9AA", "#176F7D", "#0C1C3A"],
     dominant: "#38A9AA",
   },
   forecast_lab_glow: {
     id: "forecast_lab_glow",
     name: "Forecast Lab Glow",
-    colors: [
-      "#0C1C3A",
-      "#288E99",
-      "#76CFCA",
-      "#B9DCB6",
-      "#F8D769",
-      "#FFF4C8",
-    ],
+    colors: ["#0C1C3A", "#288E99", "#76CFCA", "#B9DCB6", "#F8D769", "#FFF4C8"],
     dominant: "#76CFCA",
   },
   orca_cobalt: {
     id: "orca_cobalt",
     name: "Orca Cobalt",
-    colors: [
-      "#EEF1FF",
-      "#CDD7FF",
-      "#93A8F2",
-      "#5F78DC",
-      "#455FC6",
-      "#182E72",
-    ],
+    colors: ["#EEF1FF", "#CDD7FF", "#93A8F2", "#5F78DC", "#455FC6", "#182E72"],
     dominant: "#5F78DC",
   },
   salish_postcard: {
     id: "salish_postcard",
     name: "Salish Postcard",
-    colors: [
-      "#FEF8EB",
-      "#F8D769",
-      "#F2AE76",
-      "#EE7465",
-      "#4A9DA1",
-      "#0C1C3A",
-    ],
+    colors: ["#FEF8EB", "#F8D769", "#F2AE76", "#EE7465", "#4A9DA1", "#0C1C3A"],
     dominant: "#EE7465",
   },
 };
 
-export const VIEWABILITY_ONLY_PALETTES: Record<ViewabilityOnlyPaletteId, PaletteDef<ViewabilityOnlyPaletteId>> = {
+export const VIEWABILITY_ONLY_PALETTES: Record<
+  ViewabilityOnlyPaletteId,
+  PaletteDef<ViewabilityOnlyPaletteId>
+> = {
   relief_atlas: {
     id: "relief_atlas",
     name: "Relief Atlas",
@@ -235,7 +210,9 @@ export const VIEWABILITY_ONLY_PALETTES: Record<ViewabilityOnlyPaletteId, Palette
 };
 
 export const VIEWABILITY_PALETTE_OPTIONS: PaletteDef<ViewabilityPaletteId>[] = [
-  ...Object.values(PALETTES).filter((palette) => palette.id !== "orcacast_classic"),
+  ...Object.values(PALETTES).filter(
+    (palette) => palette.id !== "orcacast_classic",
+  ),
   ...Object.values(VIEWABILITY_ONLY_PALETTES),
 ];
 
@@ -243,12 +220,16 @@ export function getPalette(paletteId: PaletteId): PaletteDef {
   return PALETTES[paletteId];
 }
 
-export function getPaletteOrDefault(paletteId: string | null | undefined): PaletteDef {
+export function getPaletteOrDefault(
+  paletteId: string | null | undefined,
+): PaletteDef {
   if (!paletteId) return PALETTES[DEFAULT_PALETTE_ID];
   return PALETTES[paletteId as PaletteId] ?? PALETTES[DEFAULT_PALETTE_ID];
 }
 
-export function getViewabilityPaletteOrDefault(paletteId: string | null | undefined): PaletteDef<ViewabilityPaletteId> {
+export function getViewabilityPaletteOrDefault(
+  paletteId: string | null | undefined,
+): PaletteDef<ViewabilityPaletteId> {
   if (!paletteId) return PALETTES.mediterranean_atlas;
   return (
     PALETTES[paletteId as PaletteId] ??
@@ -258,10 +239,13 @@ export function getViewabilityPaletteOrDefault(paletteId: string | null | undefi
 }
 
 if (import.meta.env.DEV) {
-  [...Object.values(PALETTES), ...Object.values(VIEWABILITY_ONLY_PALETTES)].forEach((palette) => {
+  [
+    ...Object.values(PALETTES),
+    ...Object.values(VIEWABILITY_ONLY_PALETTES),
+  ].forEach((palette) => {
     if (palette.colors.length < 2) {
       const message = `[palettes] Palette "${palette.id}" must define at least 2 colors, got ${palette.colors.length}.`;
-       
+
       console.warn(message);
       throw new Error(message);
     }

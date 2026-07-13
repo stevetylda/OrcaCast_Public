@@ -17,7 +17,11 @@ export class PageErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error(`[${this.props.pageName}] unrecoverable page error`, error, info.componentStack);
+    console.error(
+      `[${this.props.pageName}] unrecoverable page error`,
+      error,
+      info.componentStack,
+    );
   }
 
   render() {
@@ -25,7 +29,10 @@ export class PageErrorBoundary extends Component<Props, State> {
     return (
       <main className="pageFailureState" role="alert">
         <h1>{this.props.pageName} is temporarily unavailable</h1>
-        <p>Try reloading the page. Your saved trip details will remain in this browser session.</p>
+        <p>
+          Try reloading the page. Your saved trip details will remain in this
+          browser session.
+        </p>
         <button type="button" onClick={() => window.location.reload()}>
           Reload page
         </button>

@@ -1,7 +1,19 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { H3Resolution } from "../config/dataPaths";
 import { appConfig } from "../config/appConfig";
-import { DEFAULT_PALETTE_ID, getPaletteOrDefault, type PaletteId } from "../geo/palettes";
+import {
+  DEFAULT_PALETTE_ID,
+  getPaletteOrDefault,
+  type PaletteId,
+} from "../geo/palettes";
 
 type ForecastPlaybackDirection = 1 | -1;
 type SurfaceMode = "grid" | "surface";
@@ -41,7 +53,9 @@ const UNITS_MODE_STORAGE_KEY = "orcacast.unitsMode";
 export function MapStateProvider({ children }: { children: ReactNode }) {
   const [surfaceMode, setSurfaceMode] = useState<SurfaceMode>(() => {
     if (typeof window === "undefined") return "grid";
-    return window.localStorage.getItem(SURFACE_MODE_STORAGE_KEY) === "surface" ? "surface" : "grid";
+    return window.localStorage.getItem(SURFACE_MODE_STORAGE_KEY) === "surface"
+      ? "surface"
+      : "grid";
   });
   const resolution: H3Resolution = "H6";
   const setResolution = useCallback((value: H3Resolution) => {
@@ -53,7 +67,9 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   const [forecastPlaybackDirection, setForecastPlaybackDirection] =
     useState<ForecastPlaybackDirection>(-1);
   const [hotspotsEnabled, setHotspotsEnabled] = useState(false);
-  const [hotspotMode, setHotspotMode] = useState<"modeled" | "custom">("modeled");
+  const [hotspotMode, setHotspotMode] = useState<"modeled" | "custom">(
+    "modeled",
+  );
   const [hotspotPercentile, setHotspotPercentile] = useState(1);
   const [selectedPaletteId, setSelectedPaletteId] = useState<PaletteId>(() => {
     if (typeof window === "undefined") return DEFAULT_PALETTE_ID;
@@ -62,7 +78,9 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   });
   const [unitsMode, setUnitsMode] = useState<UnitsMode>(() => {
     if (typeof window === "undefined") return "imperial";
-    return window.localStorage.getItem(UNITS_MODE_STORAGE_KEY) === "metric" ? "metric" : "imperial";
+    return window.localStorage.getItem(UNITS_MODE_STORAGE_KEY) === "metric"
+      ? "metric"
+      : "imperial";
   });
 
   useEffect(() => {
@@ -122,10 +140,14 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       hotspotPercentile,
       selectedPaletteId,
       unitsMode,
-    ]
+    ],
   );
 
-  return <MapStateContext.Provider value={value}>{children}</MapStateContext.Provider>;
+  return (
+    <MapStateContext.Provider value={value}>
+      {children}
+    </MapStateContext.Provider>
+  );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

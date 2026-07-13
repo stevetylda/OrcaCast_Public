@@ -1,4 +1,10 @@
-import type { Feature, FeatureCollection, GeoJsonProperties, MultiPolygon, Polygon } from "geojson";
+import type {
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  MultiPolygon,
+  Polygon,
+} from "geojson";
 import type { HeatScale } from "./colorScale";
 
 type SurfaceBounds = {
@@ -34,7 +40,12 @@ type SurfaceRasterWorkerResponse =
       ok: true;
       blob: Blob;
       bounds: SurfaceBounds;
-      coordinates: [[number, number], [number, number], [number, number], [number, number]];
+      coordinates: [
+        [number, number],
+        [number, number],
+        [number, number],
+        [number, number],
+      ];
     }
   | {
       id: number;
@@ -60,7 +71,9 @@ function extractGeometryCoordinates(geometry: Feature["geometry"]): number[][] {
   return [];
 }
 
-function getFeatureProbability(properties: GeoJsonProperties | null | undefined) {
+function getFeatureProbability(
+  properties: GeoJsonProperties | null | undefined,
+) {
   return Number((properties as Record<string, unknown> | null)?.prob ?? 0);
 }
 
@@ -83,7 +96,7 @@ function getFeatureCenter(feature: Feature): [number, number] | null {
   }
   const [sumLng, sumLat] = coords.reduce<[number, number]>(
     (acc, [lng, lat]) => [acc[0] + Number(lng ?? 0), acc[1] + Number(lat ?? 0)],
-    [0, 0]
+    [0, 0],
   );
   return [sumLng / coords.length, sumLat / coords.length];
 }
@@ -121,7 +134,9 @@ function median(values: number[]) {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+  return sorted.length % 2 === 0
+    ? (sorted[middle - 1] + sorted[middle]) / 2
+    : sorted[middle];
 }
 
 function estimateMaxDistance(samples: SurfaceSample[]) {
@@ -138,7 +153,9 @@ function estimateMaxDistance(samples: SurfaceSample[]) {
     }
     if (Number.isFinite(minDistance)) nearest.push(minDistance);
   }
-  const spacing = median(nearest.filter((value) => Number.isFinite(value) && value > 0));
+  const spacing = median(
+    nearest.filter((value) => Number.isFinite(value) && value > 0),
+  );
   return spacing > 0 ? spacing * 3.05 : 0.5;
 }
 
@@ -147,7 +164,10 @@ function parseCssColor(color: string): RGBA {
   if (trimmed.startsWith("#")) {
     const hex = trimmed.slice(1);
     if (hex.length === 3 || hex.length === 4) {
-      const expanded = hex.split("").map((char) => char + char).join("");
+      const expanded = hex
+        .split("")
+        .map((char) => char + char)
+        .join("");
       return parseCssColor(`#${expanded}`);
     }
     if (hex.length === 6 || hex.length === 8) {
@@ -156,7 +176,12 @@ function parseCssColor(color: string): RGBA {
       if (hex.length === 6) {
         return [(value >> 16) & 255, (value >> 8) & 255, value & 255, 1];
       }
-      return [(value >> 24) & 255, (value >> 16) & 255, (value >> 8) & 255, (value & 255) / 255];
+      return [
+        (value >> 24) & 255,
+        (value >> 16) & 255,
+        (value >> 8) & 255,
+        (value & 255) / 255,
+      ];
     }
   }
   const match = trimmed.match(/rgba?\(([^)]+)\)/i);
@@ -181,25 +206,41 @@ function lerpColor(a: RGBA, b: RGBA, t: number): RGBA {
   ];
 }
 
-function buildColorStops(samples: SurfaceSample[], paletteColors: string[], scale?: HeatScale | null) {
+function buildColorStops(
+  samples: SurfaceSample[],
+  paletteColors: string[],
+  scale?: HeatScale | null,
+) {
   if (scale && scale.binColorsRgba.length > 0) {
     const minValue = scale.binRanges[0]?.probMin ?? scale.thresholds[0] ?? 0;
     const stopValues = [minValue, ...scale.thresholds];
     const stopColors = scale.binColorsRgba.map(parseCssColor);
     return { stopValues, stopColors };
   }
-  const colors = paletteColors.length > 0 ? paletteColors.map(parseCssColor) : [parseCssColor("#ffffff")];
-  const positive = samples.map((sample) => sample.prob).filter((value) => value > 0);
+  const colors =
+    paletteColors.length > 0
+      ? paletteColors.map(parseCssColor)
+      : [parseCssColor("#ffffff")];
+  const positive = samples
+    .map((sample) => sample.prob)
+    .filter((value) => value > 0);
   const minValue = positive.length > 0 ? Math.min(...positive) : 0;
   const maxValue = positive.length > 0 ? Math.max(...positive) : 1;
   const steps = Math.max(1, colors.length - 1);
-  const stopValues = colors.map((_, index) => minValue + ((maxValue - minValue) * index) / steps);
+  const stopValues = colors.map(
+    (_, index) => minValue + ((maxValue - minValue) * index) / steps,
+  );
   return { stopValues, stopColors: colors };
 }
 
-function sampleColor(value: number, stopValues: number[], stopColors: RGBA[]): RGBA {
+function sampleColor(
+  value: number,
+  stopValues: number[],
+  stopColors: RGBA[],
+): RGBA {
   if (stopColors.length === 0 || value <= 0) return [0, 0, 0, 0];
-  if (stopColors.length === 1 || stopValues.length <= 1) return [...stopColors[0]] as RGBA;
+  if (stopColors.length === 1 || stopValues.length <= 1)
+    return [...stopColors[0]] as RGBA;
   if (value <= stopValues[0]) return [...stopColors[0]] as RGBA;
   for (let index = 0; index < stopValues.length - 1; index += 1) {
     const startValue = stopValues[index];
@@ -209,14 +250,18 @@ function sampleColor(value: number, stopValues: number[], stopColors: RGBA[]): R
       return lerpColor(
         stopColors[index],
         stopColors[Math.min(index + 1, stopColors.length - 1)],
-        (value - startValue) / span
+        (value - startValue) / span,
       );
     }
   }
   return [...stopColors[stopColors.length - 1]] as RGBA;
 }
 
-function surfaceAlphaForValue(value: number, _stopValues: number[], baseAlpha: number) {
+function surfaceAlphaForValue(
+  value: number,
+  _stopValues: number[],
+  baseAlpha: number,
+) {
   if (!Number.isFinite(value) || value <= 0) return 0;
   return clamp(baseAlpha, 0, 1);
 }
@@ -243,7 +288,7 @@ function getNearestSamples(
   projX: number,
   projY: number,
   bucketSize: number,
-  maxDistance: number
+  maxDistance: number,
 ) {
   const centerBucketX = Math.floor(projX / bucketSize);
   const centerBucketY = Math.floor(projY / bucketSize);
@@ -251,10 +296,15 @@ function getNearestSamples(
   for (let ring = 0; ring <= 3; ring += 1) {
     for (let dx = -ring; dx <= ring; dx += 1) {
       for (let dy = -ring; dy <= ring; dy += 1) {
-        const bucket = buckets.get(getBucketKey(centerBucketX + dx, centerBucketY + dy));
+        const bucket = buckets.get(
+          getBucketKey(centerBucketX + dx, centerBucketY + dy),
+        );
         if (!bucket) continue;
         bucket.forEach((sample) => {
-          const distance = Math.hypot(sample.projX - projX, sample.projY - projY);
+          const distance = Math.hypot(
+            sample.projX - projX,
+            sample.projY - projY,
+          );
           if (distance <= maxDistance) candidates.push({ sample, distance });
         });
       }
@@ -270,9 +320,15 @@ function interpolateSurfaceValue(
   projX: number,
   projY: number,
   bucketSize: number,
-  maxDistance: number
+  maxDistance: number,
 ) {
-  const nearest = getNearestSamples(buckets, projX, projY, bucketSize, maxDistance);
+  const nearest = getNearestSamples(
+    buckets,
+    projX,
+    projY,
+    bucketSize,
+    maxDistance,
+  );
   if (nearest.length === 0) return null;
   if (nearest[0].distance <= IDW_EPSILON) return nearest[0].sample.prob;
   let weightedValue = 0;
@@ -291,9 +347,10 @@ function drawGeometryPath(
   geometry: Polygon | MultiPolygon,
   bounds: SurfaceBounds,
   width: number,
-  height: number
+  height: number,
 ) {
-  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+  const polygons =
+    geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
   for (const polygon of polygons) {
     for (const ring of polygon) {
       ring.forEach(([lng, lat], index) => {
@@ -307,14 +364,22 @@ function drawGeometryPath(
   }
 }
 
-function maskSurfaceToFootprint(canvas: OffscreenCanvas, fc: FeatureCollection, bounds: SurfaceBounds) {
+function maskSurfaceToFootprint(
+  canvas: OffscreenCanvas,
+  fc: FeatureCollection,
+  bounds: SurfaceBounds,
+) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   ctx.globalCompositeOperation = "destination-in";
   ctx.beginPath();
   (fc.features ?? []).forEach((feature) => {
     const geometry = feature.geometry;
-    if (!geometry || (geometry.type !== "Polygon" && geometry.type !== "MultiPolygon")) return;
+    if (
+      !geometry ||
+      (geometry.type !== "Polygon" && geometry.type !== "MultiPolygon")
+    )
+      return;
     drawGeometryPath(ctx, geometry, bounds, canvas.width, canvas.height);
   });
   ctx.fillStyle = "#ffffff";
@@ -352,14 +417,24 @@ async function buildSurfaceRasterBlob(request: SurfaceRasterWorkerRequest) {
   const imageData = ctx.createImageData(width, height);
   const pixels = imageData.data;
   const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-6);
-  const { stopValues, stopColors } = buildColorStops(samples, paletteColors, scale);
+  const { stopValues, stopColors } = buildColorStops(
+    samples,
+    paletteColors,
+    scale,
+  );
 
   for (let y = 0; y < height; y += 1) {
     const lat = canvasYToLat(y, bounds, height);
     const projY = mercatorY(lat);
     for (let x = 0; x < width; x += 1) {
       const lng = bounds.minLng + (x / Math.max(width - 1, 1)) * lngSpan;
-      const value = interpolateSurfaceValue(buckets, lng, projY, bucketSize, maxDistance);
+      const value = interpolateSurfaceValue(
+        buckets,
+        lng,
+        projY,
+        bucketSize,
+        maxDistance,
+      );
       const pixelIndex = (y * width + x) * 4;
       if (value === null || !Number.isFinite(value) || value <= 0) {
         pixels[pixelIndex + 3] = 0;
@@ -388,7 +463,12 @@ async function buildSurfaceRasterBlob(request: SurfaceRasterWorkerRequest) {
       [bounds.maxLng, bounds.maxLat],
       [bounds.maxLng, bounds.minLat],
       [bounds.minLng, bounds.minLat],
-    ] as [[number, number], [number, number], [number, number], [number, number]],
+    ] as [
+      [number, number],
+      [number, number],
+      [number, number],
+      [number, number],
+    ],
   };
 }
 
@@ -408,7 +488,10 @@ self.onmessage = async (event: MessageEvent<SurfaceRasterWorkerRequest>) => {
     const response: SurfaceRasterWorkerResponse = {
       id: request.id,
       ok: false,
-      error: error instanceof Error ? error.message : "Unknown surface raster worker error",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unknown surface raster worker error",
     };
     self.postMessage(response);
   }

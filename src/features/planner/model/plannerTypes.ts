@@ -15,4 +15,7 @@ export type TripPlannerDraft = {
   unitsMode?: UnitsMode;
 };
 
-export type PlannerStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export type PlannerStorage = Pick<
+  Storage,
+  "getItem" | "setItem" | "removeItem"
+>;

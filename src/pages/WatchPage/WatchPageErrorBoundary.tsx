@@ -28,7 +28,11 @@ export class WatchPageErrorBoundary extends Component<Props, State> {
   render() {
     const { error, errorInfo } = this.state;
     if (error) {
-      const detailParts = [error.message, errorInfo?.componentStack?.trim(), error.stack?.trim()]
+      const detailParts = [
+        error.message,
+        errorInfo?.componentStack?.trim(),
+        error.stack?.trim(),
+      ]
         .filter((part): part is string => Boolean(part))
         .join("\n\n");
       return (

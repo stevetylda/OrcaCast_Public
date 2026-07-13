@@ -32,7 +32,9 @@ export function HotspotsSettingsSection({
     <section className="hotspotsSettings">
       <div className="hotspotsSettings__header">
         <div className="hotspotsSettings__title">
-          <span className="material-symbols-rounded hotspotsSettings__icon">local_fire_department</span>
+          <span className="material-symbols-rounded hotspotsSettings__icon">
+            local_fire_department
+          </span>
           <span>Hotspots</span>
         </div>
         <button
@@ -46,10 +48,18 @@ export function HotspotsSettingsSection({
         </button>
       </div>
 
-      <div className="hotspotsSettings__mode" role="group" aria-label="Hotspot mode">
+      <div
+        className="hotspotsSettings__mode"
+        role="group"
+        aria-label="Hotspot mode"
+      >
         <button
           type="button"
-          className={mode === "modeled" ? "hotspotSegment hotspotSegment--active" : "hotspotSegment"}
+          className={
+            mode === "modeled"
+              ? "hotspotSegment hotspotSegment--active"
+              : "hotspotSegment"
+          }
           onClick={() => onModeChange("modeled")}
           aria-pressed={mode === "modeled"}
         >
@@ -57,7 +67,11 @@ export function HotspotsSettingsSection({
         </button>
         <button
           type="button"
-          className={mode === "custom" ? "hotspotSegment hotspotSegment--active" : "hotspotSegment"}
+          className={
+            mode === "custom"
+              ? "hotspotSegment hotspotSegment--active"
+              : "hotspotSegment"
+          }
           onClick={() => onModeChange("custom")}
           aria-pressed={mode === "custom"}
         >
@@ -67,12 +81,20 @@ export function HotspotsSettingsSection({
 
       {mode === "custom" && (
         <div className="hotspotsSettings__custom">
-          <div className="hotspotsSettings__chips" role="listbox" aria-label="Hotspot presets">
+          <div
+            className="hotspotsSettings__chips"
+            role="listbox"
+            aria-label="Hotspot presets"
+          >
             {PRESET_VALUES.map((value) => (
               <button
                 key={value}
                 type="button"
-                className={value === percentile ? "hotspotChip hotspotChip--active" : "hotspotChip"}
+                className={
+                  value === percentile
+                    ? "hotspotChip hotspotChip--active"
+                    : "hotspotChip"
+                }
                 onClick={() => onPercentileChange(value)}
                 aria-pressed={value === percentile}
               >
@@ -81,7 +103,9 @@ export function HotspotsSettingsSection({
             ))}
           </div>
           <div className="hotspotsSettings__feedback">
-            {showingCount ? `Showing: ${showingCount.toLocaleString()} cells` : "Showing: —"}
+            {showingCount
+              ? `Showing: ${showingCount.toLocaleString()} cells`
+              : "Showing: —"}
           </div>
         </div>
       )}

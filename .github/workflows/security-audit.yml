@@ -1,0 +1,27 @@
+name: security-audit
+
+on:
+  schedule:
+    - cron: "41 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  existing-dependency-backlog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Record current audit backlog without blocking deployments
+        run: npm audit --json > npm-audit.json
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-${{ github.run_id }}
+          path: npm-audit.json
+          retention-days: 30
+          if-no-files-found: error

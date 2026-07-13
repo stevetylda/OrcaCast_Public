@@ -1,4 +1,8 @@
-import { isoWeekFromDate, isoWeekToDateRange, isoWeekYearFromDate } from "../time/forecastPeriodToIsoWeek";
+import {
+  isoWeekFromDate,
+  isoWeekToDateRange,
+  isoWeekYearFromDate,
+} from "../time/forecastPeriodToIsoWeek";
 import type { Period } from "../data/periods";
 
 export const FORECAST_PERIOD_OVERRIDE_QUERY_PARAM = "period";
@@ -21,7 +25,11 @@ function parseIsoDateAsUtc(value: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function buildPeriod(year: number, statWeek: number, label?: string): Period {
+export function buildPeriod(
+  year: number,
+  statWeek: number,
+  label?: string,
+): Period {
   const range = isoWeekToDateRange(year, statWeek);
   return {
     year,
@@ -32,7 +40,9 @@ export function buildPeriod(year: number, statWeek: number, label?: string): Per
   };
 }
 
-export function parseForecastPeriodOverride(raw: string | null | undefined): ForecastPeriodOverride | null {
+export function parseForecastPeriodOverride(
+  raw: string | null | undefined,
+): ForecastPeriodOverride | null {
   if (!raw) return null;
   const match = /^(\d{4}-\d{2}-\d{2})__(\d{4}-\d{2}-\d{2})$/.exec(raw.trim());
   if (!match) return null;
@@ -52,12 +62,12 @@ export function readForecastPeriodOverride(): ForecastPeriodOverride | null {
 
   const params = new URLSearchParams(window.location.search);
   const queryOverride = parseForecastPeriodOverride(
-    params.get(FORECAST_PERIOD_OVERRIDE_QUERY_PARAM)
+    params.get(FORECAST_PERIOD_OVERRIDE_QUERY_PARAM),
   );
   if (queryOverride) return { ...queryOverride, source: "query" };
 
   const storageOverride = parseForecastPeriodOverride(
-    window.localStorage.getItem(FORECAST_PERIOD_OVERRIDE_STORAGE_KEY)
+    window.localStorage.getItem(FORECAST_PERIOD_OVERRIDE_STORAGE_KEY),
   );
   if (storageOverride) return storageOverride;
 
@@ -65,7 +75,7 @@ export function readForecastPeriodOverride(): ForecastPeriodOverride | null {
 }
 
 export function buildPeriodFromOverride(
-  override: Pick<ForecastPeriodOverride, "start" | "end">
+  override: Pick<ForecastPeriodOverride, "start" | "end">,
 ): Period | null {
   const start = parseIsoDateAsUtc(override.start);
   if (!start) return null;
@@ -78,8 +88,11 @@ export function periodRange(period: Pick<Period, "year" | "stat_week">) {
   return isoWeekToDateRange(period.year, period.stat_week);
 }
 
-function comparePeriods(a: Pick<Period, "year" | "stat_week">, b: Pick<Period, "year" | "stat_week">) {
-  return (a.year - b.year) || (a.stat_week - b.stat_week);
+function comparePeriods(
+  a: Pick<Period, "year" | "stat_week">,
+  b: Pick<Period, "year" | "stat_week">,
+) {
+  return a.year - b.year || a.stat_week - b.stat_week;
 }
 
 export function selectLatestPeriod(periods: Period[]): Period | null {
@@ -96,7 +109,7 @@ export function selectLatestPeriod(periods: Period[]): Period | null {
 export function resolvePeriodsForSelection(
   periods: Period[],
   override: ForecastPeriodOverride | null,
-  fallbackPeriod: Period
+  fallbackPeriod: Period,
 ): { periods: Period[]; selectedIndex: number } {
   const byKey = new Map(periods.map((period) => [period.periodKey, period]));
 
@@ -108,7 +121,9 @@ export function resolvePeriodsForSelection(
     if (existing) {
       return {
         periods,
-        selectedIndex: periods.findIndex((period) => period.periodKey === existing.periodKey),
+        selectedIndex: periods.findIndex(
+          (period) => period.periodKey === existing.periodKey,
+        ),
       };
     }
 
@@ -118,7 +133,9 @@ export function resolvePeriodsForSelection(
       const merged = Array.from(byKey.values()).sort(comparePeriods);
       return {
         periods: merged,
-        selectedIndex: merged.findIndex((period) => period.periodKey === derived.periodKey),
+        selectedIndex: merged.findIndex(
+          (period) => period.periodKey === derived.periodKey,
+        ),
       };
     }
   }
@@ -129,7 +146,7 @@ export function resolvePeriodsForSelection(
       periods,
       selectedIndex: Math.max(
         0,
-        periods.findIndex((period) => period.periodKey === latest.periodKey)
+        periods.findIndex((period) => period.periodKey === latest.periodKey),
       ),
     };
   }

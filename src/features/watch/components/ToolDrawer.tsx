@@ -55,7 +55,11 @@ export function ToolDrawer({
 
       {open && (
         <>
-          <div className="toolDrawer__overlay" onClick={onClose} role="presentation" />
+          <div
+            className="toolDrawer__overlay"
+            onClick={onClose}
+            role="presentation"
+          />
           <div className="toolDrawer__panel">
             <MapToolbar
               className="toolbar--drawer"

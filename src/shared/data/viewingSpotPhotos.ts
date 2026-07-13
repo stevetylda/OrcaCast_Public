@@ -52,39 +52,71 @@ let cachedManifestPromise: Promise<ViewingSpotPhotoManifest> | null = null;
 let validatedManifest = false;
 
 function isValidLicense(value: unknown): value is SpotPhotoLicense {
-  return typeof value === "string" && VALID_LICENSES.includes(value as SpotPhotoLicense);
+  return (
+    typeof value === "string" &&
+    VALID_LICENSES.includes(value as SpotPhotoLicense)
+  );
 }
 
 function isValidStatus(value: unknown): value is SpotPhotoStatus {
-  return typeof value === "string" && VALID_STATUSES.includes(value as SpotPhotoStatus);
+  return (
+    typeof value === "string" &&
+    VALID_STATUSES.includes(value as SpotPhotoStatus)
+  );
 }
 
-function normalizeViewingSpotPhoto(key: string, value: unknown): ViewingSpotPhoto | null {
+function normalizeViewingSpotPhoto(
+  key: string,
+  value: unknown,
+): ViewingSpotPhoto | null {
   if (!value || typeof value !== "object") return null;
   const candidate = value as Partial<ViewingSpotPhoto>;
-  if (typeof candidate.spotId !== "string" || candidate.spotId.trim().length === 0) return null;
-  if (candidate.spotId !== key) return { ...candidate, spotId: String(candidate.spotId), alt: String(candidate.alt ?? ""), status: isValidStatus(candidate.status) ? candidate.status : "missing" };
+  if (
+    typeof candidate.spotId !== "string" ||
+    candidate.spotId.trim().length === 0
+  )
+    return null;
+  if (candidate.spotId !== key)
+    return {
+      ...candidate,
+      spotId: String(candidate.spotId),
+      alt: String(candidate.alt ?? ""),
+      status: isValidStatus(candidate.status) ? candidate.status : "missing",
+    };
   if (!isValidStatus(candidate.status)) return null;
   if (typeof candidate.alt !== "string") return null;
 
   return {
     spotId: candidate.spotId,
-    imageSrc: typeof candidate.imageSrc === "string" ? candidate.imageSrc : undefined,
+    imageSrc:
+      typeof candidate.imageSrc === "string" ? candidate.imageSrc : undefined,
     alt: candidate.alt,
     status: candidate.status,
     title: typeof candidate.title === "string" ? candidate.title : undefined,
-    creator: typeof candidate.creator === "string" ? candidate.creator : undefined,
-    sourceName: typeof candidate.sourceName === "string" ? candidate.sourceName : undefined,
-    sourceUrl: typeof candidate.sourceUrl === "string" ? candidate.sourceUrl : undefined,
+    creator:
+      typeof candidate.creator === "string" ? candidate.creator : undefined,
+    sourceName:
+      typeof candidate.sourceName === "string"
+        ? candidate.sourceName
+        : undefined,
+    sourceUrl:
+      typeof candidate.sourceUrl === "string" ? candidate.sourceUrl : undefined,
     license: isValidLicense(candidate.license) ? candidate.license : undefined,
-    licenseUrl: typeof candidate.licenseUrl === "string" ? candidate.licenseUrl : undefined,
-    focalPoint: typeof candidate.focalPoint === "string" ? candidate.focalPoint : undefined,
+    licenseUrl:
+      typeof candidate.licenseUrl === "string"
+        ? candidate.licenseUrl
+        : undefined,
+    focalPoint:
+      typeof candidate.focalPoint === "string"
+        ? candidate.focalPoint
+        : undefined,
     notes: typeof candidate.notes === "string" ? candidate.notes : undefined,
   };
 }
 
 function normalizeManifest(payload: unknown): ViewingSpotPhotoManifest {
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {};
+  if (!payload || typeof payload !== "object" || Array.isArray(payload))
+    return {};
   const manifest: ViewingSpotPhotoManifest = {};
   for (const [key, value] of Object.entries(payload)) {
     const normalized = normalizeViewingSpotPhoto(key, value);
@@ -93,7 +125,10 @@ function normalizeManifest(payload: unknown): ViewingSpotPhotoManifest {
   return manifest;
 }
 
-export function getViewingSpotPhoto(spotId?: string, manifest?: ViewingSpotPhotoManifest): ViewingSpotPhoto | undefined {
+export function getViewingSpotPhoto(
+  spotId?: string,
+  manifest?: ViewingSpotPhotoManifest,
+): ViewingSpotPhoto | undefined {
   if (!spotId) return undefined;
   return (manifest ?? cachedManifest ?? {})[spotId];
 }
@@ -102,13 +137,22 @@ export function hasApprovedSpotPhoto(photo?: ViewingSpotPhoto): boolean {
   return Boolean(photo?.status === "approved" && photo.imageSrc);
 }
 
-export function getSpotPhotoAttribution(photo?: ViewingSpotPhoto): string | undefined {
+export function getSpotPhotoAttribution(
+  photo?: ViewingSpotPhoto,
+): string | undefined {
   if (!photo || photo.status !== "approved") return undefined;
-  const parts = [photo.title, photo.creator, photo.sourceName, photo.license].filter(Boolean);
+  const parts = [
+    photo.title,
+    photo.creator,
+    photo.sourceName,
+    photo.license,
+  ].filter(Boolean);
   return parts.length > 0 ? parts.join(" · ") : undefined;
 }
 
-export function validateViewingSpotPhotos(manifest: ViewingSpotPhotoManifest): void {
+export function validateViewingSpotPhotos(
+  manifest: ViewingSpotPhotoManifest,
+): void {
   if (!import.meta.env.DEV) return;
 
   const seenSpotIds = new Set<string>();
@@ -129,7 +173,9 @@ export function validateViewingSpotPhotos(manifest: ViewingSpotPhotoManifest): v
         console.warn(`[spot photos] Approved photo missing alt text: ${key}`);
       }
       if (!photo.sourceName || !photo.sourceUrl || !photo.license) {
-        console.warn(`[spot photos] Approved photo missing attribution metadata: ${key}`);
+        console.warn(
+          `[spot photos] Approved photo missing attribution metadata: ${key}`,
+        );
       }
     }
   }

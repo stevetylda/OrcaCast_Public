@@ -63,7 +63,12 @@ export function AmbientSwimmingOrca() {
                 d="M158 85C168 96 171 108 166 122C155 113 147 102 145 91Z"
               />
 
-              <circle className="swimmingOrcaLoader__eye" cx="224" cy="61" r="2.2" />
+              <circle
+                className="swimmingOrcaLoader__eye"
+                cx="224"
+                cy="61"
+                r="2.2"
+              />
               <path
                 className="swimmingOrcaLoader__smile"
                 d="M223 74C229 76 235 75 239 72"

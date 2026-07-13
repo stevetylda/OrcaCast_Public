@@ -18,7 +18,10 @@ const cachedPeriodsByResolution = new Map<H3Resolution, Period[]>();
 export function buildPeriodsUrl(): string {
   const base = import.meta.env.BASE_URL || "/";
   const cleanBase = base.endsWith("/") ? base : `${base}/`;
-  return new URL(`${cleanBase}data/periods.json`, window.location.origin).toString();
+  return new URL(
+    `${cleanBase}data/periods.json`,
+    window.location.origin,
+  ).toString();
 }
 
 export function resetPeriodsCache(): void {
@@ -29,7 +32,10 @@ export function resetPeriodsCache(): void {
 export function buildManifestUrl(): string {
   const base = import.meta.env.BASE_URL || "/";
   const cleanBase = base.endsWith("/") ? base : `${base}/`;
-  return new URL(`${cleanBase}data/manifest.json`, window.location.origin).toString();
+  return new URL(
+    `${cleanBase}data/manifest.json`,
+    window.location.origin,
+  ).toString();
 }
 
 type PublicDataManifest = {
@@ -51,11 +57,19 @@ async function loadManifestFileSet(): Promise<Set<string> | null> {
 
 export async function loadPeriods(): Promise<Period[]> {
   if (cachedPeriods) return cachedPeriods;
-  const { url, data: parsedJson } = await fetchJson<unknown>(buildPeriodsUrl(), {
-    cache: "force-cache",
-    cacheToken: getDataVersionToken(),
-  });
-  const data = parseWithSchema(periodsFileSchema, parsedJson, url, "periods.json");
+  const { url, data: parsedJson } = await fetchJson<unknown>(
+    buildPeriodsUrl(),
+    {
+      cache: "force-cache",
+      cacheToken: getDataVersionToken(),
+    },
+  );
+  const data = parseWithSchema(
+    periodsFileSchema,
+    parsedJson,
+    url,
+    "periods.json",
+  );
   cachedPeriods = data
     .filter((p) => Number.isFinite(p.year) && Number.isFinite(p.stat_week))
     .map((p) => {
@@ -65,12 +79,13 @@ export async function loadPeriods(): Promise<Period[]> {
       const fileId = `${p.year}_${p.stat_week}`;
       return { year: p.year, stat_week: p.stat_week, label, periodKey, fileId };
     })
-    .sort((a, b) => (a.year - b.year) || (a.stat_week - b.stat_week));
+    .sort((a, b) => a.year - b.year || a.stat_week - b.stat_week);
   return cachedPeriods;
 }
 
-
-export async function loadPeriodsForResolution(resolution: H3Resolution): Promise<Period[]> {
+export async function loadPeriodsForResolution(
+  resolution: H3Resolution,
+): Promise<Period[]> {
   const cached = cachedPeriodsByResolution.get(resolution);
   if (cached) return cached;
   const periods = await loadPeriods();
@@ -80,7 +95,9 @@ export async function loadPeriodsForResolution(resolution: H3Resolution): Promis
     return periods;
   }
   const filtered = periods.filter((period) =>
-    manifestFiles.has(`forecasts/latest/weekly/${period.fileId}_${resolution}.json`)
+    manifestFiles.has(
+      `forecasts/latest/weekly/${period.fileId}_${resolution}.json`,
+    ),
   );
   const resolved = filtered.length > 0 ? filtered : periods;
   cachedPeriodsByResolution.set(resolution, resolved);

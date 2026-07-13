@@ -20,7 +20,10 @@ export function AppHeader({
   variant = "default",
 }: Props) {
   return (
-    <header className={`header${variant === "home" ? " header--home" : ""}`} data-tour="top-bar">
+    <header
+      className={`header${variant === "home" ? " header--home" : ""}`}
+      data-tour="top-bar"
+    >
       <div className="header__left">
         <button
           className="iconBtn iconBtn--menu"

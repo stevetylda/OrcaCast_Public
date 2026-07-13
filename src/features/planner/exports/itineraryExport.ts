@@ -10,14 +10,21 @@ export function escapeXml(value: string) {
     .replaceAll("'", "&apos;");
 }
 
-export async function rasterizeSvgToPngBlob(svgMarkup: string, width: number, height: number) {
-  const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
+export async function rasterizeSvgToPngBlob(
+  svgMarkup: string,
+  width: number,
+  height: number,
+) {
+  const svgBlob = new Blob([svgMarkup], {
+    type: "image/svg+xml;charset=utf-8",
+  });
   const url = URL.createObjectURL(svgBlob);
   try {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const next = new Image();
       next.onload = () => resolve(next);
-      next.onerror = () => reject(new Error("Card image could not be rendered."));
+      next.onerror = () =>
+        reject(new Error("Card image could not be rendered."));
       next.src = url;
     });
 
@@ -58,7 +65,8 @@ export function buildItineraryCardSvg({
   const itineraryStartY = 234;
   const chartHeight = 164;
   const chartWidth = width - innerPad * 2;
-  const chartTop = itineraryStartY + Math.max(itineraryPlaces.length, 1) * lineHeight + 70;
+  const chartTop =
+    itineraryStartY + Math.max(itineraryPlaces.length, 1) * lineHeight + 70;
   const height = Math.max(700, chartTop + chartHeight + 94);
   const barMax = Math.max(1, ...weekBars.map((bar) => bar.count));
   const barWidth = chartWidth / Math.max(weekBars.length, 1);
@@ -78,10 +86,15 @@ export function buildItineraryCardSvg({
 
   const barMarkup = weekBars
     .map((bar) => {
-      const heightScale = Math.max(8, (bar.count / barMax) * (chartHeight - 28));
+      const heightScale = Math.max(
+        8,
+        (bar.count / barMax) * (chartHeight - 28),
+      );
       const x = innerPad + bar.index * barWidth + 1.5;
       const y = chartTop + chartHeight - heightScale - 22;
-      const fill = bar.highlighted ? "url(#tripBarGradient)" : "rgba(179, 210, 235, 0.7)";
+      const fill = bar.highlighted
+        ? "url(#tripBarGradient)"
+        : "rgba(179, 210, 235, 0.7)";
       return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(4, barWidth - 3).toFixed(2)}" height="${heightScale.toFixed(2)}" rx="8" fill="${fill}" />`;
     })
     .join("");
@@ -139,5 +152,3 @@ export function buildItineraryCardSvg({
 
   return { svg, width, height };
 }
-
-

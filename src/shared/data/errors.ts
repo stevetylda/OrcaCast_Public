@@ -1,4 +1,10 @@
-export type DataErrorKind = "network" | "timeout" | "http" | "invalid_json" | "invalid_content" | "validation";
+export type DataErrorKind =
+  | "network"
+  | "timeout"
+  | "http"
+  | "invalid_json"
+  | "invalid_content"
+  | "validation";
 
 export class DataLoadError extends Error {
   kind: DataErrorKind;
@@ -38,7 +44,10 @@ export function formatDataPath(path: string): string {
   }
 }
 
-export function normalizeDataLoadError(error: unknown, fallbackUrl: string): DataLoadError {
+export function normalizeDataLoadError(
+  error: unknown,
+  fallbackUrl: string,
+): DataLoadError {
   if (error instanceof DataLoadError) return error;
   if (error instanceof Error) {
     return new DataLoadError({

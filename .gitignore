@@ -7,6 +7,8 @@ build/
 .vite/
 .next/
 coverage/
+playwright-report/
+test-results/
 
 # Python artifacts
 __pycache__/

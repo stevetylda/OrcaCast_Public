@@ -7,16 +7,30 @@ import {
   readForecastPeriodOverride,
   resolvePeriodsForSelection,
 } from "../../shared/config/forecastPeriod";
-import { getForecastPathForPeriod, type H3Resolution } from "../../shared/config/dataPaths";
+import {
+  getForecastPathForPeriod,
+  type H3Resolution,
+} from "../../shared/config/dataPaths";
 import {
   isoWeekFromDate,
   isoWeekToDateRange,
   isoWeekYearFromDate,
 } from "../../shared/time/forecastPeriodToIsoWeek";
-import { normalizeDataLoadError, type DataLoadError } from "../../shared/data/errors";
-import { loadActualActivitySeries, loadExpectedCountSeries } from "../../shared/data/expectedCount";
+import {
+  normalizeDataLoadError,
+  type DataLoadError,
+} from "../../shared/data/errors";
+import {
+  loadActualActivitySeries,
+  loadExpectedCountSeries,
+} from "../../shared/data/expectedCount";
 import { loadForecast } from "../../shared/data/forecastIO";
-import { buildPeriodsUrl, loadPeriodsForResolution, resetPeriodsCache, type Period } from "../../shared/data/periods";
+import {
+  buildPeriodsUrl,
+  loadPeriodsForResolution,
+  resetPeriodsCache,
+  type Period,
+} from "../../shared/data/periods";
 import { DEFAULT_PALETTE_ID } from "../../shared/geo/palettes";
 import { useMenu } from "../../shared/state/MenuContext";
 import { useMapState } from "../../shared/state/MapStateContext";
@@ -58,18 +72,33 @@ export function useWatchPageController() {
   const [toolsOpen, setToolsOpen] = useState(false);
   const [gridDetailOpen, setGridDetailOpen] = useState(false);
   const [gridDetailCellId, setGridDetailCellId] = useState<string | null>(null);
-  const [gridDetailResolution, setGridDetailResolution] = useState<H3Resolution>(resolution);
+  const [gridDetailResolution, setGridDetailResolution] =
+    useState<H3Resolution>(resolution);
   const [gridDetailModelId, setGridDetailModelId] = useState(modelId);
-  const [gridDetailSelectedWeek, setGridDetailSelectedWeek] = useState<number | null>(null);
-  const [gridDetailSelectedWeekYear, setGridDetailSelectedWeekYear] = useState<number | null>(null);
+  const [gridDetailSelectedWeek, setGridDetailSelectedWeek] = useState<
+    number | null
+  >(null);
+  const [gridDetailSelectedWeekYear, setGridDetailSelectedWeekYear] = useState<
+    number | null
+  >(null);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
-  const [hotspotTotalCells, setHotspotTotalCells] = useState<number | null>(null);
-  const [poiFilters, setPoiFilters] = useState({ Park: false, Marina: false, Ferry: false });
+  const [hotspotTotalCells, setHotspotTotalCells] = useState<number | null>(
+    null,
+  );
+  const [poiFilters, setPoiFilters] = useState({
+    Park: false,
+    Marina: false,
+    Ferry: false,
+  });
   const [mapResetNonce, setMapResetNonce] = useState(0);
   const [periods, setPeriods] = useState<Period[]>([]);
-  const [pageLoadError, setPageLoadError] = useState<DataLoadError | null>(null);
+  const [pageLoadError, setPageLoadError] = useState<DataLoadError | null>(
+    null,
+  );
   const [reloadToken, setReloadToken] = useState(0);
-  const [selectedPeriodHasForecast, setSelectedPeriodHasForecast] = useState<boolean | null>(null);
+  const [selectedPeriodHasForecast, setSelectedPeriodHasForecast] = useState<
+    boolean | null
+  >(null);
   const [showNoForecastNotice, setShowNoForecastNotice] = useState(false);
   const [shareBusy, setShareBusy] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
@@ -138,7 +167,11 @@ export function useWatchPageController() {
     loadPeriodsForResolution(resolution)
       .then((list) => {
         if (!active) return;
-        const resolved = resolvePeriodsForSelection(list, override, fallbackPeriod);
+        const resolved = resolvePeriodsForSelection(
+          list,
+          override,
+          fallbackPeriod,
+        );
         setPeriods(resolved.periods);
         if (!didInitializeForecastIndexRef.current) {
           didInitializeForecastIndexRef.current = true;
@@ -146,7 +179,7 @@ export function useWatchPageController() {
           setForecastIndex(resolved.selectedIndex);
         } else if (resolved.periods.length > 0) {
           setForecastIndex((idx) =>
-            idx >= resolved.periods.length ? resolved.periods.length - 1 : idx
+            idx >= resolved.periods.length ? resolved.periods.length - 1 : idx,
           );
         }
       })
@@ -163,19 +196,29 @@ export function useWatchPageController() {
 
   useEffect(() => {
     if (periods.length === 0) return;
-    setForecastIndex((idx) => (idx >= periods.length ? periods.length - 1 : idx));
+    setForecastIndex((idx) =>
+      idx >= periods.length ? periods.length - 1 : idx,
+    );
   }, [periods, setForecastIndex]);
 
   const selectedForecast = useMemo(
-    () => (forecastIndex >= 0 && forecastIndex < periods.length ? periods[forecastIndex] : null),
-    [forecastIndex, periods]
+    () =>
+      forecastIndex >= 0 && forecastIndex < periods.length
+        ? periods[forecastIndex]
+        : null,
+    [forecastIndex, periods],
   );
-  const selectedPeriodKeyForNotice = selectedForecast?.periodKey ?? fallbackPeriod.periodKey;
+  const selectedPeriodKeyForNotice =
+    selectedForecast?.periodKey ?? fallbackPeriod.periodKey;
   const selectedPeriodYear = selectedForecast?.year ?? fallbackPeriod.year;
-  const selectedPeriodWeek = selectedForecast?.stat_week ?? fallbackPeriod.stat_week;
+  const selectedPeriodWeek =
+    selectedForecast?.stat_week ?? fallbackPeriod.stat_week;
   const forecastPath = useMemo(
-    () => (selectedForecast ? getForecastPathForPeriod(resolution, selectedForecast.fileId) : undefined),
-    [resolution, selectedForecast]
+    () =>
+      selectedForecast
+        ? getForecastPathForPeriod(resolution, selectedForecast.fileId)
+        : undefined,
+    [resolution, selectedForecast],
   );
   const latestForecastPath = useMemo(() => {
     if (periods.length === 0) return undefined;
@@ -198,7 +241,12 @@ export function useWatchPageController() {
   });
 
   useEffect(() => {
-    if (selectedPlaceId && !suggestedPlaces.some((place: SuggestedPlace) => place.id === selectedPlaceId)) {
+    if (
+      selectedPlaceId &&
+      !suggestedPlaces.some(
+        (place: SuggestedPlace) => place.id === selectedPlaceId,
+      )
+    ) {
       setSelectedPlaceId(null);
     }
   }, [selectedPlaceId, suggestedPlaces]);
@@ -229,7 +277,12 @@ export function useWatchPageController() {
       `${year}-${String(statWeek).padStart(2, "0")}`;
     const expectedLookup = new Map<
       string,
-      { expected_count: number; lower_ci?: number; upper_ci?: number; typical_error?: number }
+      {
+        expected_count: number;
+        lower_ci?: number;
+        upper_ci?: number;
+        typical_error?: number;
+      }
     >();
     expectedSeries.forEach((row) => {
       expectedLookup.set(keyFor(row.year, row.stat_week), {
@@ -247,15 +300,17 @@ export function useWatchPageController() {
     const selectedKey = keyFor(selectedPeriodYear, selectedPeriodWeek);
     const current = expectedLookup.get(selectedKey)?.expected_count ?? null;
     const previous = shiftIsoWeek(selectedPeriodYear, selectedPeriodWeek, -1);
-    const previousValue = actualLookup.get(keyFor(previous.year, previous.statWeek)) ?? null;
+    const previousValue =
+      actualLookup.get(keyFor(previous.year, previous.statWeek)) ?? null;
     const baselineWeeks = Array.from({ length: 12 }, (_, index) =>
-      shiftIsoWeek(selectedPeriodYear, selectedPeriodWeek, -(index + 1))
+      shiftIsoWeek(selectedPeriodYear, selectedPeriodWeek, -(index + 1)),
     )
       .map((week) => actualLookup.get(keyFor(week.year, week.statWeek)))
       .filter((value): value is number => value !== undefined);
     const vs12WeekAvg =
       baselineWeeks.length > 0
-        ? baselineWeeks.reduce((sum, value) => sum + value, 0) / baselineWeeks.length
+        ? baselineWeeks.reduce((sum, value) => sum + value, 0) /
+          baselineWeeks.length
         : null;
 
     let trend: "up" | "down" | "steady" | "none" = "none";
@@ -266,13 +321,13 @@ export function useWatchPageController() {
     }
 
     const chartWeeks = Array.from({ length: 12 }, (_, index) =>
-      shiftIsoWeek(selectedPeriodYear, selectedPeriodWeek, -(11 - index))
+      shiftIsoWeek(selectedPeriodYear, selectedPeriodWeek, -(11 - index)),
     );
     const actualChartValues = chartWeeks.map(
-      (week) => actualLookup.get(keyFor(week.year, week.statWeek)) ?? null
+      (week) => actualLookup.get(keyFor(week.year, week.statWeek)) ?? null,
     );
     const forecastChartValues = chartWeeks.map((_, index) =>
-      index === chartWeeks.length - 1 ? current : null
+      index === chartWeeks.length - 1 ? current : null,
     );
 
     return {
@@ -306,7 +361,11 @@ export function useWatchPageController() {
           }
         }
 
-        if (hasForecastForSelectedPeriod === false && latestForecastPath && latestForecastPath !== forecastPath) {
+        if (
+          hasForecastForSelectedPeriod === false &&
+          latestForecastPath &&
+          latestForecastPath !== forecastPath
+        ) {
           await loadForecast(resolution, {
             kind: "explicit",
             explicitPath: latestForecastPath,
@@ -341,10 +400,14 @@ export function useWatchPageController() {
       setShowNoForecastNotice(false);
       return;
     }
-    if (lastMissingNoticePeriodKeyRef.current === selectedPeriodKeyForNotice) return;
+    if (lastMissingNoticePeriodKeyRef.current === selectedPeriodKeyForNotice)
+      return;
     lastMissingNoticePeriodKeyRef.current = selectedPeriodKeyForNotice;
     setShowNoForecastNotice(true);
-    const timeoutId = window.setTimeout(() => setShowNoForecastNotice(false), 3200);
+    const timeoutId = window.setTimeout(
+      () => setShowNoForecastNotice(false),
+      3200,
+    );
     return () => window.clearTimeout(timeoutId);
   }, [selectedPeriodHasForecast, selectedPeriodKeyForNotice]);
 
@@ -352,11 +415,11 @@ export function useWatchPageController() {
 
   const currentWeek = useMemo(
     () => selectedForecast?.stat_week ?? fallbackPeriod.stat_week,
-    [fallbackPeriod.stat_week, selectedForecast]
+    [fallbackPeriod.stat_week, selectedForecast],
   );
   const currentWeekYear = useMemo(
     () => selectedForecast?.year ?? fallbackPeriod.year,
-    [fallbackPeriod.year, selectedForecast]
+    [fallbackPeriod.year, selectedForecast],
   );
 
   const handleResetMap = () => {
@@ -374,8 +437,11 @@ export function useWatchPageController() {
     setPoiFilters({ Park: false, Marina: false, Ferry: false });
     setForecastIndex(
       periods.length > 0
-        ? Math.max(0, Math.min(defaultForecastIndexRef.current, periods.length - 1))
-        : 0
+        ? Math.max(
+            0,
+            Math.min(defaultForecastIndexRef.current, periods.length - 1),
+          )
+        : 0,
     );
     setSelectedPlaceId(null);
     setMapResetNonce((value) => value + 1);
@@ -418,15 +484,17 @@ export function useWatchPageController() {
       const blob = await primaryMapRef.current?.captureSnapshot();
       if (!blob) throw new Error("Snapshot not available");
 
-      const fileName = `orcacast_${currentWeekYear}-W${String(currentWeek).padStart(
-        2,
-        "0"
-      )}_${resolution}_${toFileSafeToken(modelId)}.png`;
+      const fileName = `orcacast_${currentWeekYear}-W${String(
+        currentWeek,
+      ).padStart(2, "0")}_${resolution}_${toFileSafeToken(modelId)}.png`;
       const snapshotFile = new File([blob], fileName, { type: "image/png" });
-      const nav = navigator as Navigator & { canShare?: (data?: ShareData) => boolean };
+      const nav = navigator as Navigator & {
+        canShare?: (data?: ShareData) => boolean;
+      };
       const canNativeShareFiles =
         typeof nav.share === "function" &&
-        (typeof nav.canShare !== "function" || nav.canShare({ files: [snapshotFile] }));
+        (typeof nav.canShare !== "function" ||
+          nav.canShare({ files: [snapshotFile] }));
 
       if (canNativeShareFiles) {
         await nav.share({
@@ -452,10 +520,9 @@ export function useWatchPageController() {
     try {
       const blob = await primaryMapRef.current?.captureSnapshot();
       if (!blob) throw new Error("Snapshot not available");
-      const fileName = `orcacast_${currentWeekYear}-W${String(currentWeek).padStart(
-        2,
-        "0"
-      )}_${resolution}_${toFileSafeToken(modelId)}.png`;
+      const fileName = `orcacast_${currentWeekYear}-W${String(
+        currentWeek,
+      ).padStart(2, "0")}_${resolution}_${toFileSafeToken(modelId)}.png`;
       downloadSnapshot(blob, fileName);
     } catch (error) {
       console.error("[Download] Snapshot failed", error);

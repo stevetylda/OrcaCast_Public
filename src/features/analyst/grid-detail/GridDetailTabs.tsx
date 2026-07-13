@@ -14,7 +14,11 @@ const TAB_LABELS: Array<{ key: GridDetailTab; label: string }> = [
 
 export function GridDetailTabs({ activeTab, onChange }: Props) {
   return (
-    <div className="gridDetail__tabs" role="tablist" aria-label="Grid detail views">
+    <div
+      className="gridDetail__tabs"
+      role="tablist"
+      aria-label="Grid detail views"
+    >
       {TAB_LABELS.map((tab) => (
         <button
           key={tab.key}

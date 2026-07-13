@@ -3,10 +3,12 @@ import type { UnitsMode } from "../../../shared/state/MapStateContext";
 
 export function formatPlannerDistanceValue(
   miles: number | null | undefined,
-  unitsMode: UnitsMode
+  unitsMode: UnitsMode,
 ) {
-  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0) return "";
-  const displayValue = unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles;
+  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0)
+    return "";
+  const displayValue =
+    unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles;
   return String(Math.round(displayValue));
 }
 
@@ -20,18 +22,19 @@ export function parsePlannerDistanceInput(value: string, unitsMode: UnitsMode) {
 
 export function formatPlannerDistanceLabel(
   miles: number | null | undefined,
-  unitsMode: UnitsMode
+  unitsMode: UnitsMode,
 ) {
-  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0) return null;
+  if (typeof miles !== "number" || !Number.isFinite(miles) || miles <= 0)
+    return null;
   const displayValue = Math.round(
-    unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles
+    unitsMode === "metric" ? miles * KILOMETERS_PER_MILE : miles,
   );
   return `Up to ${displayValue} ${unitsMode === "metric" ? "km" : "mi"}`;
 }
 
 export function formatTravelRangeLabel(
   miles: number | undefined,
-  unitsMode: UnitsMode
+  unitsMode: UnitsMode,
 ) {
   if (!miles || !Number.isFinite(miles) || miles <= 0) {
     return "Set an optional travel range";

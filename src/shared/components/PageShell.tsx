@@ -52,7 +52,12 @@ export function PageShell({
         </div>
 
         <div className="pageHeader__right">
-          <Link className="backToMap" to="/" aria-label="Back home" title="Back home">
+          <Link
+            className="backToMap"
+            to="/"
+            aria-label="Back home"
+            title="Back home"
+          >
             <span className="backToMap__icon">
               <span className="material-symbols-rounded" aria-hidden="true">
                 home
@@ -66,7 +71,13 @@ export function PageShell({
       </header>
 
       <main className={fullBleed ? "page page--fullBleed" : "page"}>
-        <div className={fullBleed ? "page__content page__content--fullBleed" : "page__content"}>
+        <div
+          className={
+            fullBleed
+              ? "page__content page__content--fullBleed"
+              : "page__content"
+          }
+        >
           {children}
         </div>
       </main>
@@ -74,12 +85,16 @@ export function PageShell({
       {/* keep the exact same footer chrome as map pages (optional) */}
       {showFooter && (
         <div className="app__footer">
-          <div className="footer">{/* optional attribution / links later */}</div>
+          <div className="footer">
+            {/* optional attribution / links later */}
+          </div>
         </div>
       )}
 
       {/* optional rail (map chrome) */}
-      {showBottomRail && <div className="appShell__bottomRail" aria-hidden="true" />}
+      {showBottomRail && (
+        <div className="appShell__bottomRail" aria-hidden="true" />
+      )}
     </div>
   );
 }

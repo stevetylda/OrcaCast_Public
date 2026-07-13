@@ -1,8 +1,17 @@
 import { useRef, useState } from "react";
-import { buildLinearTicks, buildTickIndexes, getChartTheme, getModelColor } from "./chartUtils";
+import {
+  buildLinearTicks,
+  buildTickIndexes,
+  getChartTheme,
+  getModelColor,
+} from "./chartUtils";
 import { useResizeObserver } from "./useResizeObserver";
 import type { GridSeriesPoint, ModelSeries } from "../types";
-import { formatForecastValue, formatObservedFlag, isObservedActual } from "../utils/formatGridDetail";
+import {
+  formatForecastValue,
+  formatObservedFlag,
+  isObservedActual,
+} from "../utils/formatGridDetail";
 
 type Props = {
   points: GridSeriesPoint[];
@@ -12,8 +21,16 @@ type Props = {
   darkMode: boolean;
 };
 
-export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeModelId, darkMode }: Props) {
-  const visibleSeries = modelSeries.filter((series) => series.values.some((value) => value > 0));
+export function ModelOverlapChart({
+  points,
+  modelSeries,
+  selectedIndex,
+  activeModelId,
+  darkMode,
+}: Props) {
+  const visibleSeries = modelSeries.filter((series) =>
+    series.values.some((value) => value > 0),
+  );
   const panelRef = useRef<HTMLDivElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const size = useResizeObserver(wrapRef);
@@ -24,16 +41,22 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
   const plotHeight = height - margin.top - margin.bottom;
   const xStep = points.length > 1 ? plotWidth / (points.length - 1) : 0;
   const xFor = (index: number) => margin.left + index * xStep;
-  const maxY = Math.max(0.01, ...visibleSeries.flatMap((series) => series.values));
+  const maxY = Math.max(
+    0.01,
+    ...visibleSeries.flatMap((series) => series.values),
+  );
   const yFor = (value: number) => margin.top + plotHeight * (1 - value / maxY);
   const selectedX = selectedIndex >= 0 ? xFor(selectedIndex) : null;
   const yTicks = buildLinearTicks(maxY, 4);
   const xTicks = buildTickIndexes(points.length);
   const { axisText, gridStroke, actualDotColor } = getChartTheme(darkMode);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const activeIndex = hoverIndex ?? (selectedIndex >= 0 ? selectedIndex : null);
-  const activePoint = activeIndex !== null ? points[activeIndex] ?? null : null;
+  const activePoint =
+    activeIndex !== null ? (points[activeIndex] ?? null) : null;
   const tooltipRows =
     activeIndex === null
       ? []
@@ -49,7 +72,10 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
     if (!rect) return;
     const tooltipWidth = 440;
     setTooltipPos({
-      x: Math.min(rect.width - tooltipWidth - 12, Math.max(18, clientX - rect.left + 12)),
+      x: Math.min(
+        rect.width - tooltipWidth - 12,
+        Math.max(18, clientX - rect.left + 12),
+      ),
       y: Math.min(rect.height - 18, Math.max(18, clientY - rect.top - 16)),
     });
   };
@@ -58,11 +84,19 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
     <>
       <div ref={panelRef} className="gridDetail__chartPanel">
         {activePoint && tooltipPos && (
-          <div className="gridDetail__tooltip gridDetail__tooltip--models" style={{ left: tooltipPos.x, top: tooltipPos.y }}>
+          <div
+            className="gridDetail__tooltip gridDetail__tooltip--models"
+            style={{ left: tooltipPos.x, top: tooltipPos.y }}
+          >
             <span>{activePoint.weekLabel}</span>
-            <span>Actual observation: {formatObservedFlag(activePoint.actual)}</span>
+            <span>
+              Actual observation: {formatObservedFlag(activePoint.actual)}
+            </span>
             {tooltipRows.map((row) => (
-              <span key={row.label} style={{ color: row.color, fontWeight: row.active ? 700 : 500 }}>
+              <span
+                key={row.label}
+                style={{ color: row.color, fontWeight: row.active ? 700 : 500 }}
+              >
                 {row.label}: {formatForecastValue(row.value)}
               </span>
             ))}
@@ -76,11 +110,30 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
             setTooltipPos(null);
           }}
         >
-          <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} role="img" aria-label="Overlapped model probability chart">
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            width="100%"
+            height={height}
+            role="img"
+            aria-label="Overlapped model probability chart"
+          >
             {yTicks.map((tick) => (
               <g key={`y-${tick}`}>
-                <line x1={margin.left} x2={width - margin.right} y1={yFor(tick)} y2={yFor(tick)} stroke={gridStroke} strokeWidth={1} />
-                <text x={margin.left - 10} y={yFor(tick) + 4} textAnchor="end" fontSize="11" fill={axisText}>
+                <line
+                  x1={margin.left}
+                  x2={width - margin.right}
+                  y1={yFor(tick)}
+                  y2={yFor(tick)}
+                  stroke={gridStroke}
+                  strokeWidth={1}
+                />
+                <text
+                  x={margin.left - 10}
+                  y={yFor(tick) + 4}
+                  textAnchor="end"
+                  fontSize="11"
+                  fill={axisText}
+                >
                   {formatForecastValue(tick)}
                 </text>
               </g>
@@ -100,7 +153,10 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
               const color = getModelColor(index);
               const isActive = series.modelId === activeModelId;
               const path = series.values
-                .map((value, pointIndex) => `${pointIndex === 0 ? "M" : "L"}${xFor(pointIndex).toFixed(1)} ${yFor(value).toFixed(1)}`)
+                .map(
+                  (value, pointIndex) =>
+                    `${pointIndex === 0 ? "M" : "L"}${xFor(pointIndex).toFixed(1)} ${yFor(value).toFixed(1)}`,
+                )
                 .join(" ");
               return (
                 <path
@@ -109,7 +165,15 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
                   fill="none"
                   stroke={color}
                   strokeWidth={isActive ? 3.2 : 1.9}
-                  strokeOpacity={hoverIndex !== null ? (isActive ? 1 : 0.18) : isActive ? 1 : 0.72}
+                  strokeOpacity={
+                    hoverIndex !== null
+                      ? isActive
+                        ? 1
+                        : 0.18
+                      : isActive
+                        ? 1
+                        : 0.72
+                  }
                 />
               );
             })}
@@ -123,7 +187,9 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
                   cy={margin.top}
                   r={isActive ? 5 : 4}
                   fill={actualDotColor}
-                  stroke={darkMode ? "rgba(8,18,44,0.92)" : "rgba(255,255,255,0.98)"}
+                  stroke={
+                    darkMode ? "rgba(8,18,44,0.92)" : "rgba(255,255,255,0.98)"
+                  }
                   strokeWidth={isActive ? 2 : 1.5}
                 />
               );
@@ -139,25 +205,48 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
                   opacity={0.95}
                 />
               ))}
-            {activeIndex !== null && isObservedActual(points[activeIndex].actual) && (
-              <circle
-                cx={xFor(activeIndex)}
-                cy={margin.top}
-                r={5}
-                fill={actualDotColor}
-                stroke={darkMode ? "rgba(8,18,44,0.92)" : "rgba(255,255,255,0.98)"}
-                strokeWidth={2}
-              />
-            )}
+            {activeIndex !== null &&
+              isObservedActual(points[activeIndex].actual) && (
+                <circle
+                  cx={xFor(activeIndex)}
+                  cy={margin.top}
+                  r={5}
+                  fill={actualDotColor}
+                  stroke={
+                    darkMode ? "rgba(8,18,44,0.92)" : "rgba(255,255,255,0.98)"
+                  }
+                  strokeWidth={2}
+                />
+              )}
             {xTicks.map((index) => (
               <g key={`mx-${index}`}>
-                <line x1={xFor(index)} x2={xFor(index)} y1={height - margin.bottom} y2={height - margin.bottom + 6} stroke={gridStroke} strokeWidth={1} />
-                <text x={xFor(index)} y={height - margin.bottom + 20} textAnchor="middle" fontSize="11" fill={axisText}>
+                <line
+                  x1={xFor(index)}
+                  x2={xFor(index)}
+                  y1={height - margin.bottom}
+                  y2={height - margin.bottom + 6}
+                  stroke={gridStroke}
+                  strokeWidth={1}
+                />
+                <text
+                  x={xFor(index)}
+                  y={height - margin.bottom + 20}
+                  textAnchor="middle"
+                  fontSize="11"
+                  fill={axisText}
+                >
                   {points[index].weekLabel}
                 </text>
               </g>
             ))}
-            <text x={margin.left + plotWidth / 2} y={height - 18} textAnchor="middle" fontSize="12" fill={axisText} fontWeight="600">
+            <text
+              x={margin.left + plotWidth / 2}
+              y={height - 18}
+              textAnchor="middle"
+              fontSize="12"
+              fill={axisText}
+              fontWeight="600"
+            >
               Forecast period
             </text>
             <text
@@ -171,11 +260,20 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
             >
               Forecast probability
             </text>
-            <text x={width - margin.right} y={height - 40} textAnchor="end" fontSize="11" fill={axisText}>
+            <text
+              x={width - margin.right}
+              y={height - 40}
+              textAnchor="end"
+              fontSize="11"
+              fill={axisText}
+            >
               Observed weeks shown as top dots
             </text>
             {points.map((point, index) => {
-              const hitWidth = Math.max(12, plotWidth / Math.max(points.length, 24));
+              const hitWidth = Math.max(
+                12,
+                plotWidth / Math.max(points.length, 24),
+              );
               const x = xFor(index) - hitWidth / 2;
               return (
                 <rect
@@ -203,8 +301,14 @@ export function ModelOverlapChart({ points, modelSeries, selectedIndex, activeMo
         {visibleSeries.map((series, index) => {
           const isActive = series.modelId === activeModelId;
           return (
-            <div className={`gridDetail__legendItem${isActive ? " gridDetail__legendItem--active" : ""}`} key={series.modelId}>
-              <span className="gridDetail__legendSwatch" style={{ background: getModelColor(index) }} />
+            <div
+              className={`gridDetail__legendItem${isActive ? " gridDetail__legendItem--active" : ""}`}
+              key={series.modelId}
+            >
+              <span
+                className="gridDetail__legendSwatch"
+                style={{ background: getModelColor(index) }}
+              />
               <span>{series.label}</span>
             </div>
           );

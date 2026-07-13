@@ -299,6 +299,7 @@ export function ModelPage() {
 
           <div
             className="modelStoryHero__visual"
+            role="img"
             aria-label="Illustration of data layers becoming a forecast and trip plan"
           >
             <div className="modelStoryHero__rope" aria-hidden="true" />
@@ -402,6 +403,7 @@ export function ModelPage() {
             </p>
             <div
               className="modelStoryLegend"
+              role="group"
               aria-label="Model layer status legend"
             >
               <span>
@@ -524,6 +526,7 @@ export function ModelPage() {
 
           <div
             className="modelStoryResult__ticket"
+            role="group"
             aria-label="Example personalized OrcaCast output"
           >
             <div className="modelStoryResult__ticketHeader">
@@ -587,7 +590,15 @@ export function ModelPage() {
         </section>
       </main>
 
-      <SiteFooter tagline="Signals in. Context out." links={[{ label: "About", to: "/about" }, { label: "Model layers", to: "#model-journey", external: true }, { label: "Plan a trip", to: "/planner" }, { label: "This week", to: "/watch" }]} />
+      <SiteFooter
+        tagline="Signals in. Context out."
+        links={[
+          { label: "About", to: "/about" },
+          { label: "Model layers", to: "#model-journey", external: true },
+          { label: "Plan a trip", to: "/planner" },
+          { label: "This week", to: "/watch" },
+        ]}
+      />
 
       <Suspense fallback={null}>
         {infoOpen ? (

@@ -50,12 +50,15 @@ export function ForecastPeriodPill({
     selectedRef.current = selectedIndex;
   }, [selectedIndex]);
 
-  useEffect(() => () => {
-    if (debounceRef.current) {
-      window.clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -94,12 +97,21 @@ export function ForecastPeriodPill({
       onChangeIndex(next);
     }, SPEED_MS[speed]);
     return () => window.clearTimeout(id);
-  }, [disabled, isPlaying, onPlayDirChange, playDir, periods.length, selectedIndex, speed, onChangeIndex]);
-
-  const currentLabel = useMemo(() => periods[selectedIndex]?.label ?? "Forecast", [
-    periods,
+  }, [
+    disabled,
+    isPlaying,
+    onPlayDirChange,
+    playDir,
+    periods.length,
     selectedIndex,
+    speed,
+    onChangeIndex,
   ]);
+
+  const currentLabel = useMemo(
+    () => periods[selectedIndex]?.label ?? "Forecast",
+    [periods, selectedIndex],
+  );
 
   const commitIndex = (idx: number) => {
     if (idx === selectedRef.current) return;
@@ -163,20 +175,29 @@ export function ForecastPeriodPill({
       >
         <span className="periodPill__label">Forecast</span>
         <span className="periodPill__value">{currentLabel}</span>
-        <span className="material-symbols-rounded periodPill__playIcon" aria-hidden="true">
+        <span
+          className="material-symbols-rounded periodPill__playIcon"
+          aria-hidden="true"
+        >
           play_arrow
         </span>
       </button>
 
       {open && (
-        <div className="periodPopover" role="dialog" aria-label="Forecast period controls">
+        <div
+          className="periodPopover"
+          role="dialog"
+          aria-label="Forecast period controls"
+        >
           <input
             className="periodPopover__slider"
             type="range"
             min={0}
             max={Math.max(0, periods.length - 1)}
             step={1}
-            value={periods.length === 0 ? 0 : isDragging ? scrubIndex : selectedIndex}
+            value={
+              periods.length === 0 ? 0 : isDragging ? scrubIndex : selectedIndex
+            }
             disabled={disabled || periods.length === 0}
             onChange={(e) => handleSliderChange(Number(e.target.value))}
             onMouseDown={() => {

@@ -34,13 +34,19 @@ function formatWeekDate(period: Period) {
 }
 
 function getVisibleWindow(periods: Period[], selectedIndex: number) {
-  if (periods.length <= MAX_VISIBLE_WEEKS) return periods.map((period, index) => ({ period, index }));
+  if (periods.length <= MAX_VISIBLE_WEEKS)
+    return periods.map((period, index) => ({ period, index }));
   const half = Math.floor(MAX_VISIBLE_WEEKS / 2);
-  const start = Math.max(0, Math.min(selectedIndex - half, periods.length - MAX_VISIBLE_WEEKS));
-  return periods.slice(start, start + MAX_VISIBLE_WEEKS).map((period, offset) => ({
-    period,
-    index: start + offset,
-  }));
+  const start = Math.max(
+    0,
+    Math.min(selectedIndex - half, periods.length - MAX_VISIBLE_WEEKS),
+  );
+  return periods
+    .slice(start, start + MAX_VISIBLE_WEEKS)
+    .map((period, offset) => ({
+      period,
+      index: start + offset,
+    }));
 }
 
 export function WeekTimelineBar({
@@ -74,11 +80,19 @@ export function WeekTimelineBar({
       onChangeIndex(next);
     }, SPEED_MS[speed]);
     return () => window.clearTimeout(id);
-  }, [isPlaying, onChangeIndex, onPlayDirChange, periods.length, playDir, selectedIndex, speed]);
+  }, [
+    isPlaying,
+    onChangeIndex,
+    onPlayDirChange,
+    periods.length,
+    playDir,
+    selectedIndex,
+    speed,
+  ]);
 
   const visiblePeriods = useMemo(
     () => getVisibleWindow(periods, Math.max(0, selectedIndex)),
-    [periods, selectedIndex]
+    [periods, selectedIndex],
   );
 
   const handlePlayToggle = () => {
@@ -106,7 +120,11 @@ export function WeekTimelineBar({
       </button>
 
       <div className="weekTimeline__main">
-        <div className="weekTimeline__weeks" role="tablist" aria-label="Forecast weeks">
+        <div
+          className="weekTimeline__weeks"
+          role="tablist"
+          aria-label="Forecast weeks"
+        >
           {visiblePeriods.map(({ period, index }) => {
             const isSelected = index === selectedIndex;
             return (
@@ -118,8 +136,12 @@ export function WeekTimelineBar({
                 role="tab"
                 aria-selected={isSelected}
               >
-                <span className="weekTimeline__weekLabel">Week {period.stat_week}</span>
-                <span className="weekTimeline__weekDate">{formatWeekDate(period)}</span>
+                <span className="weekTimeline__weekLabel">
+                  Week {period.stat_week}
+                </span>
+                <span className="weekTimeline__weekDate">
+                  {formatWeekDate(period)}
+                </span>
               </button>
             );
           })}

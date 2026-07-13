@@ -13,7 +13,10 @@ function bumpCounter(key: string): number {
   return next;
 }
 
-export function trackPerfCounter(key: string, meta?: Record<string, unknown>): number {
+export function trackPerfCounter(
+  key: string,
+  meta?: Record<string, unknown>,
+): number {
   const count = bumpCounter(key);
   if (isPerfDebugEnabled()) {
     console.info(`[Perf] ${key}`, { count, ...meta });
@@ -21,7 +24,10 @@ export function trackPerfCounter(key: string, meta?: Record<string, unknown>): n
   return count;
 }
 
-export function trackRender(name: string, meta?: Record<string, unknown>): number {
+export function trackRender(
+  name: string,
+  meta?: Record<string, unknown>,
+): number {
   return trackPerfCounter(`render:${name}`, meta);
 }
 
@@ -29,7 +35,10 @@ export function trackFetch(url: string, attempt: number): number {
   return trackPerfCounter("fetch:request", { url, attempt });
 }
 
-export function trackLayerRebuild(name: string, meta?: Record<string, unknown>): number {
+export function trackLayerRebuild(
+  name: string,
+  meta?: Record<string, unknown>,
+): number {
   return trackPerfCounter(`layers:${name}`, meta);
 }
 

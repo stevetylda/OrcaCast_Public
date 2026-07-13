@@ -24,13 +24,21 @@ export function useHotspotAnimation({
 
     const hasStyleLayer = (layerId: string) => {
       try {
-        return map.isStyleLoaded() && !!map.getStyle()?.layers && !!map.getLayer(layerId);
+        return (
+          map.isStyleLoaded() &&
+          !!map.getStyle()?.layers &&
+          !!map.getLayer(layerId)
+        );
       } catch {
         return false;
       }
     };
 
-    const setLayerPaint = (layerId: string, property: string, value: number | string) => {
+    const setLayerPaint = (
+      layerId: string,
+      property: string,
+      value: number | string,
+    ) => {
       try {
         if (hasStyleLayer(layerId)) {
           map.setPaintProperty(layerId, property, value);
@@ -53,17 +61,55 @@ export function useHotspotAnimation({
         const hideGrid = hotspotsOnlyRef.current;
         const z = map.getZoom();
         const edgeBaseWidth =
-          z <= 6 ? 0.9 : z <= 9 ? 0.9 + ((z - 6) / 3) * 0.35 : z <= 12 ? 1.25 + ((z - 9) / 3) * 0.55 : 1.8;
+          z <= 6
+            ? 0.9
+            : z <= 9
+              ? 0.9 + ((z - 6) / 3) * 0.35
+              : z <= 12
+                ? 1.25 + ((z - 9) / 3) * 0.55
+                : 1.8;
         const edgePulseWidth = edgeBaseWidth + 0.1 * Math.sin(t * 1.7 + 0.5);
         const opacityPairs: Array<[string, string, number]> = [
-          ["grid-shimmer-fill", "fill-opacity", hideGrid ? 0 : 0.16 + 0.06 * Math.sin(t * 0.6)],
-          ["grid-peak-shine", "line-opacity", hideGrid ? 0 : 0.22 + 0.06 * Math.sin(t * 0.5 + 0.8)],
-          ["grid-bio-glow-fill", "fill-opacity", hideGrid ? 0 : 0.13 + 0.06 * Math.sin(t * 1.35 + 0.4)],
-          ["grid-bio-core-fill", "fill-opacity", hideGrid ? 0 : 0.06 + 0.035 * Math.sin(t * 1.9 + 1.2)],
-          ["grid-bio-edge", "line-opacity", hideGrid ? 0 : 0.28 + 0.08 * Math.sin(t * 1.4 + 0.2)],
-          ["grid-hover-fill", "fill-opacity", hideGrid ? 0 : 0.16 + 0.06 * Math.sin(t * 1.5 + 0.2)],
-          ["grid-hover-glow", "line-opacity", hideGrid ? 0 : 0.42 + 0.18 * Math.sin(t * 1.9)],
-          ["grid-hover-core", "line-opacity", hideGrid ? 0 : 0.72 + 0.18 * Math.sin(t * 1.2 + 0.9)],
+          [
+            "grid-shimmer-fill",
+            "fill-opacity",
+            hideGrid ? 0 : 0.16 + 0.06 * Math.sin(t * 0.6),
+          ],
+          [
+            "grid-peak-shine",
+            "line-opacity",
+            hideGrid ? 0 : 0.22 + 0.06 * Math.sin(t * 0.5 + 0.8),
+          ],
+          [
+            "grid-bio-glow-fill",
+            "fill-opacity",
+            hideGrid ? 0 : 0.13 + 0.06 * Math.sin(t * 1.35 + 0.4),
+          ],
+          [
+            "grid-bio-core-fill",
+            "fill-opacity",
+            hideGrid ? 0 : 0.06 + 0.035 * Math.sin(t * 1.9 + 1.2),
+          ],
+          [
+            "grid-bio-edge",
+            "line-opacity",
+            hideGrid ? 0 : 0.28 + 0.08 * Math.sin(t * 1.4 + 0.2),
+          ],
+          [
+            "grid-hover-fill",
+            "fill-opacity",
+            hideGrid ? 0 : 0.16 + 0.06 * Math.sin(t * 1.5 + 0.2),
+          ],
+          [
+            "grid-hover-glow",
+            "line-opacity",
+            hideGrid ? 0 : 0.42 + 0.18 * Math.sin(t * 1.9),
+          ],
+          [
+            "grid-hover-core",
+            "line-opacity",
+            hideGrid ? 0 : 0.72 + 0.18 * Math.sin(t * 1.2 + 0.9),
+          ],
         ];
 
         opacityPairs.forEach(([layerId, property, value]) => {
@@ -72,7 +118,7 @@ export function useHotspotAnimation({
         setLayerPaint(
           "grid-shimmer-fill",
           "fill-color",
-          `rgba(140,255,245,${0.28 + 0.08 * Math.sin(t * 0.35)})`
+          `rgba(140,255,245,${0.28 + 0.08 * Math.sin(t * 0.35)})`,
         );
         setLayerPaint("grid-bio-edge", "line-width", edgePulseWidth);
       }

@@ -1,0 +1,79 @@
+name: preview
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-tests:
+    name: smoke-tests
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: preview
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PROJECT_NAME: orcacast
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Require local quality and contract gates before deployment
+        run: |
+          npm run format:check
+          npm run lint
+          npm run typecheck
+          npm test
+          npm run validate:data
+          npm run validate:assets
+      - name: Build the preview artifact
+        env:
+          VITE_BUILD_ID: ${{ github.sha }}
+        run: npm run build:check
+      - name: Create immutable checksum manifest
+        run: find dist -type f -print0 | sort -z | xargs -0 sha256sum > artifact-sha256.txt
+      - run: sha256sum --check artifact-sha256.txt
+      - name: Detect configured deployment credentials
+        id: credentials
+        shell: bash
+        run: |
+          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Preview deployment is staged but disabled until the preview environment has Cloudflare credentials."
+          fi
+      - name: Deploy immutable PR preview
+        if: steps.credentials.outputs.configured == 'true'
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=orcacast --branch=pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Chromium
+        if: steps.credentials.outputs.configured == 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Test deployed preview
+        if: steps.credentials.outputs.configured == 'true'
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: npm run test:e2e:chromium
+      - name: Upload browser diagnostics
+        if: always() && steps.credentials.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-browser-${{ github.event.pull_request.head.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14

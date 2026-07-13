@@ -1,8 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { getActualsPathForPeriod, getForecastPathForPeriod, type H3Resolution } from "../../../../shared/config/dataPaths";
-import { loadForecast, loadForecastModelIds, loadGrid } from "../../../../shared/data/forecastIO";
+import {
+  getActualsPathForPeriod,
+  getForecastPathForPeriod,
+  type H3Resolution,
+} from "../../../../shared/config/dataPaths";
+import {
+  loadForecast,
+  loadForecastModelIds,
+  loadGrid,
+} from "../../../../shared/data/forecastIO";
 import type { Period } from "../../../../shared/data/periods";
-import type { GridDetailPayload, GridSeriesPoint, SpreadSeriesPoint } from "../types";
+import type {
+  GridDetailPayload,
+  GridSeriesPoint,
+  SpreadSeriesPoint,
+} from "../types";
 import { buildNeighborhoodSeed } from "../neighborhood/buildNeighborhoodSeed";
 import { buildNeighborhoodContextPolygons } from "../neighborhood/neighborhoodGeometry";
 import { toModelLabel } from "../utils/modelLabels";
@@ -16,7 +28,13 @@ type Args = {
   modelId: string;
 };
 
-export function useGridDetailData({ open, cellId, periods, resolution, modelId }: Args) {
+export function useGridDetailData({
+  open,
+  cellId,
+  periods,
+  resolution,
+  modelId,
+}: Args) {
   const cacheRef = useRef<Map<string, GridDetailPayload>>(new Map());
   const [payload, setPayload] = useState<GridDetailPayload | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,14 +57,20 @@ export function useGridDetailData({ open, cellId, periods, resolution, modelId }
     setError(null);
 
     (async () => {
-      const firstForecastPath = getForecastPathForPeriod(resolution, periods[0].fileId);
+      const firstForecastPath = getForecastPathForPeriod(
+        resolution,
+        periods[0].fileId,
+      );
       const availableModelIds = (
         await loadForecastModelIds(resolution, {
           kind: "explicit",
           explicitPath: firstForecastPath,
         }).catch(() => [])
       ).filter((candidate) => candidate !== "consensus");
-      const modelSeriesSeed = new Map<string, { modelId: string; label: string; values: number[] }>(
+      const modelSeriesSeed = new Map<
+        string,
+        { modelId: string; label: string; values: number[] }
+      >(
         availableModelIds.map((candidate) => [
           candidate,
           {
@@ -54,11 +78,14 @@ export function useGridDetailData({ open, cellId, periods, resolution, modelId }
             label: toModelLabel(candidate),
             values: [],
           },
-        ])
+        ]),
       );
       const grid = await loadGrid(resolution).catch(() => null);
       const neighborhoodSeed = buildNeighborhoodSeed(cellId, grid);
-      const neighborhoodContextPolygons = buildNeighborhoodContextPolygons(neighborhoodSeed, grid);
+      const neighborhoodContextPolygons = buildNeighborhoodContextPolygons(
+        neighborhoodSeed,
+        grid,
+      );
       const neighborhoodForecastSeries = new Map<string, number[]>();
       const neighborhoodActualSeries = new Map<string, number[]>();
       neighborhoodSeed.forEach((neighbor) => {
@@ -68,7 +95,10 @@ export function useGridDetailData({ open, cellId, periods, resolution, modelId }
 
       const seriesRows = await Promise.all(
         periods.map(async (period) => {
-          const forecastPath = getForecastPathForPeriod(resolution, period.fileId);
+          const forecastPath = getForecastPathForPeriod(
+            resolution,
+            period.fileId,
+          );
           const [focusedForecastPayload, actualPayload] = await Promise.all([
             loadForecast(resolution, {
               kind: "explicit",
@@ -80,11 +110,18 @@ export function useGridDetailData({ open, cellId, periods, resolution, modelId }
               explicitPath: getActualsPathForPeriod(resolution, period.fileId),
             }).catch(() => ({ values: {} })),
           ]);
-          const forecastValues = focusedForecastPayload.values as Record<string, number>;
+          const forecastValues = focusedForecastPayload.values as Record<
+            string,
+            number
+          >;
           const actualValues = actualPayload.values as Record<string, number>;
           neighborhoodSeed.forEach((neighbor) => {
-            neighborhoodForecastSeries.get(neighbor.cellId)?.push(Number(forecastValues[neighbor.cellId] ?? 0));
-            neighborhoodActualSeries.get(neighbor.cellId)?.push(Number(actualValues[neighbor.cellId] ?? 0));
+            neighborhoodForecastSeries
+              .get(neighbor.cellId)
+              ?.push(Number(forecastValues[neighbor.cellId] ?? 0));
+            neighborhoodActualSeries
+              .get(neighbor.cellId)
+              ?.push(Number(actualValues[neighbor.cellId] ?? 0));
           });
           const candidateSeries = await Promise.all(
             availableModelIds.map(async (candidate) => {
@@ -93,11 +130,14 @@ export function useGridDetailData({ open, cellId, periods, resolution, modelId }
                 explicitPath: forecastPath,
                 modelId: candidate,
               }).catch(() => ({ values: {} }));
-              const candidateValues = candidatePayload.values as Record<string, number>;
+              const candidateValues = candidatePayload.values as Record<
+                string,
+                number
+              >;
               const value = Number(candidateValues[cellId] ?? 0);
               modelSeriesSeed.get(candidate)?.values.push(value);
               return value;
-            })
+            }),
           );
           const rankedValues = Object.values(forecastValues)
             .map((value) => Number(value))
@@ -124,7 +164,7 @@ export function useGridDetailData({ open, cellId, periods, resolution, modelId }
               percentile: computePercentile(selectedValue, rankedValues),
             } satisfies SpreadSeriesPoint,
           };
-        })
+        }),
       );
 
       return {
@@ -152,7 +192,11 @@ export function useGridDetailData({ open, cellId, periods, resolution, modelId }
       .catch((nextError) => {
         if (!active) return;
         setLoading(false);
-        setError(nextError instanceof Error ? nextError.message : "Unable to load grid detail");
+        setError(
+          nextError instanceof Error
+            ? nextError.message
+            : "Unable to load grid detail",
+        );
       });
 
     return () => {

@@ -20,7 +20,9 @@ function isPlannerBaseLocation(value: unknown): value is PlannerBaseLocation {
   );
 }
 
-export async function loadPlannerBaseLocations(): Promise<PlannerBaseLocation[]> {
+export async function loadPlannerBaseLocations(): Promise<
+  PlannerBaseLocation[]
+> {
   for (const url of BASE_LOCATION_URL_CANDIDATES) {
     try {
       const response = await fetch(url);

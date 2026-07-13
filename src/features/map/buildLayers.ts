@@ -6,30 +6,46 @@ const LIGHT_BASEMAP_STYLE_URL = import.meta.env.VITE_BASEMAP_STYLE_URL?.trim();
 
 export const VOYAGER_STYLE =
   LIGHT_BASEMAP_STYLE_URL || "https://tiles.openfreemap.org/styles/bright";
-export const DARK_STYLE = "https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json";
+export const DARK_STYLE =
+  "https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json";
 const STADIA_ATTRIBUTION =
   '<a href="https://stadiamaps.com/" target="_blank">&copy; Stadia Maps</a> <a href="https://openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap</a>';
 
-function buildRasterStyle(styleName: "alidade_smooth" | "alidade_smooth_dark", backgroundColor: string): StyleSpecification {
+function buildRasterStyle(
+  styleName: "alidade_smooth" | "alidade_smooth_dark",
+  backgroundColor: string,
+): StyleSpecification {
   return {
     version: 8,
     sources: {
       basemap: {
         type: "raster",
-        tiles: [`https://tiles.stadiamaps.com/tiles/${styleName}/{z}/{x}/{y}@2x.png`],
+        tiles: [
+          `https://tiles.stadiamaps.com/tiles/${styleName}/{z}/{x}/{y}@2x.png`,
+        ],
         tileSize: 512,
         attribution: STADIA_ATTRIBUTION,
       },
     },
     layers: [
-      { id: "basemap-background", type: "background", paint: { "background-color": backgroundColor } },
+      {
+        id: "basemap-background",
+        type: "background",
+        paint: { "background-color": backgroundColor },
+      },
       { id: "basemap-raster", type: "raster", source: "basemap" },
     ],
   };
 }
 
-export const VOYAGER_RASTER_STYLE = buildRasterStyle("alidade_smooth", "#f2f3f0");
-export const DARK_RASTER_STYLE = buildRasterStyle("alidade_smooth_dark", "#1a2634");
+export const VOYAGER_RASTER_STYLE = buildRasterStyle(
+  "alidade_smooth",
+  "#f2f3f0",
+);
+export const DARK_RASTER_STYLE = buildRasterStyle(
+  "alidade_smooth_dark",
+  "#1a2634",
+);
 export const BASEMAP_TINT_SOURCE_ID = "orcacast-basemap-tint-source";
 export const BASEMAP_TINT_LAYER_ID = "orcacast-basemap-tint-layer";
 export const DARK_LABEL_OPACITY = 0.86;
@@ -54,13 +70,18 @@ export function createGridLayerBuildSignature(inputs: {
   ].join("|");
 }
 
-export function applyBasemapVisualTuning(map: MapLibreMap, isDarkBasemap: boolean) {
+export function applyBasemapVisualTuning(
+  map: MapLibreMap,
+  isDarkBasemap: boolean,
+) {
   const style = map.getStyle();
   const layers = style?.layers ?? [];
   if (layers.length === 0) return;
 
   if (isDarkBasemap) {
-    const firstSymbolLayerId = layers.find((layer) => layer.type === "symbol")?.id;
+    const firstSymbolLayerId = layers.find(
+      (layer) => layer.type === "symbol",
+    )?.id;
     if (!map.getSource(BASEMAP_TINT_SOURCE_ID)) {
       map.addSource(BASEMAP_TINT_SOURCE_ID, {
         type: "geojson",
@@ -72,7 +93,15 @@ export function applyBasemapVisualTuning(map: MapLibreMap, isDarkBasemap: boolea
               properties: {},
               geometry: {
                 type: "Polygon",
-                coordinates: [[[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]]],
+                coordinates: [
+                  [
+                    [-180, -85],
+                    [180, -85],
+                    [180, 85],
+                    [-180, 85],
+                    [-180, -85],
+                  ],
+                ],
               },
             },
           ],
@@ -87,23 +116,32 @@ export function applyBasemapVisualTuning(map: MapLibreMap, isDarkBasemap: boolea
           source: BASEMAP_TINT_SOURCE_ID,
           paint: { "fill-color": "#3a4148", "fill-opacity": 0.14 },
         },
-        firstSymbolLayerId
+        firstSymbolLayerId,
       );
     } else {
       map.setPaintProperty(BASEMAP_TINT_LAYER_ID, "fill-color", "#3a4148");
       map.setPaintProperty(BASEMAP_TINT_LAYER_ID, "fill-opacity", 0.14);
-      if (firstSymbolLayerId) map.moveLayer(BASEMAP_TINT_LAYER_ID, firstSymbolLayerId);
+      if (firstSymbolLayerId)
+        map.moveLayer(BASEMAP_TINT_LAYER_ID, firstSymbolLayerId);
     }
   } else {
-    if (map.getLayer(BASEMAP_TINT_LAYER_ID)) map.removeLayer(BASEMAP_TINT_LAYER_ID);
-    if (map.getSource(BASEMAP_TINT_SOURCE_ID)) map.removeSource(BASEMAP_TINT_SOURCE_ID);
+    if (map.getLayer(BASEMAP_TINT_LAYER_ID))
+      map.removeLayer(BASEMAP_TINT_LAYER_ID);
+    if (map.getSource(BASEMAP_TINT_SOURCE_ID))
+      map.removeSource(BASEMAP_TINT_SOURCE_ID);
   }
 
   layers.forEach((layer) => {
     const layerRecord = layer as unknown as Record<string, unknown>;
-    const sourceLayer = typeof layerRecord["source-layer"] === "string" ? layerRecord["source-layer"] : "";
+    const sourceLayer =
+      typeof layerRecord["source-layer"] === "string"
+        ? layerRecord["source-layer"]
+        : "";
     const layerKey = `${layer.id} ${sourceLayer}`.toLowerCase();
-    const isBasemapLayer = layer.type === "background" || layer.type === "raster" || sourceLayer.length > 0;
+    const isBasemapLayer =
+      layer.type === "background" ||
+      layer.type === "raster" ||
+      sourceLayer.length > 0;
 
     // OrcaCast overlays and markers use app-owned GeoJSON/image sources without
     // a vector-tile source-layer. Never let basemap tuning overwrite their paint.
@@ -112,9 +150,13 @@ export function applyBasemapVisualTuning(map: MapLibreMap, isDarkBasemap: boolea
     if (!isDarkBasemap) {
       try {
         const isPoi = /(^|[-_\s])(poi|housenumber)([-_\s]|$)/.test(layerKey);
-        const isPark = /(park|grass|wood|forest|national_park|nature_reserve|landcover)/.test(layerKey);
+        const isPark =
+          /(park|grass|wood|forest|national_park|nature_reserve|landcover)/.test(
+            layerKey,
+          );
         const isWater = /(water|ocean|lake|river)/.test(layerKey);
-        const isRoad = /(road|transportation|highway|street|bridge|tunnel)/.test(layerKey);
+        const isRoad =
+          /(road|transportation|highway|street|bridge|tunnel)/.test(layerKey);
         const isCoastline = /(coast|shoreline)/.test(layerKey);
 
         if (isPoi) {
@@ -144,25 +186,54 @@ export function applyBasemapVisualTuning(map: MapLibreMap, isDarkBasemap: boolea
     }
 
     if (layer.type === "symbol") {
-      const layout = (layer as { layout?: Record<string, unknown> }).layout ?? {};
+      const layout =
+        (layer as { layout?: Record<string, unknown> }).layout ?? {};
       if ("text-field" in layout) {
-        map.setPaintProperty(layer.id, "text-opacity", isDarkBasemap ? DARK_LABEL_OPACITY : 1);
+        map.setPaintProperty(
+          layer.id,
+          "text-opacity",
+          isDarkBasemap ? DARK_LABEL_OPACITY : 1,
+        );
         if (!isDarkBasemap) {
           map.setPaintProperty(layer.id, "text-color", "#102f4f");
-          map.setPaintProperty(layer.id, "text-halo-color", "rgba(255, 247, 232, 0.9)");
+          map.setPaintProperty(
+            layer.id,
+            "text-halo-color",
+            "rgba(255, 247, 232, 0.9)",
+          );
         }
       }
       if ("icon-image" in layout) {
-        map.setPaintProperty(layer.id, "icon-opacity", isDarkBasemap ? 0.92 : 0);
+        map.setPaintProperty(
+          layer.id,
+          "icon-opacity",
+          isDarkBasemap ? 0.92 : 0,
+        );
       }
       return;
     }
 
     if (layer.type === "raster") {
-      map.setPaintProperty(layer.id, "raster-saturation", isDarkBasemap ? -0.2 : 0);
-      map.setPaintProperty(layer.id, "raster-brightness-min", isDarkBasemap ? 0.02 : 0);
-      map.setPaintProperty(layer.id, "raster-brightness-max", isDarkBasemap ? 0.92 : 1);
-      map.setPaintProperty(layer.id, "raster-contrast", isDarkBasemap ? -0.06 : 0);
+      map.setPaintProperty(
+        layer.id,
+        "raster-saturation",
+        isDarkBasemap ? -0.2 : 0,
+      );
+      map.setPaintProperty(
+        layer.id,
+        "raster-brightness-min",
+        isDarkBasemap ? 0.02 : 0,
+      );
+      map.setPaintProperty(
+        layer.id,
+        "raster-brightness-max",
+        isDarkBasemap ? 0.92 : 1,
+      );
+      map.setPaintProperty(
+        layer.id,
+        "raster-contrast",
+        isDarkBasemap ? -0.06 : 0,
+      );
     }
   });
 }

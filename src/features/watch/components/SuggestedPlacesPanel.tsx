@@ -51,21 +51,30 @@ function formatPlaceType(type: SuggestedPlace["type"]) {
   return type;
 }
 
-function buildPreviewUrlMap(places: SuggestedPlace[], cache: Map<string, string>) {
-  return Object.fromEntries(places.map((place) => [place.id, cache.get(place.id) ?? ""])) as Record<string, string>;
+function buildPreviewUrlMap(
+  places: SuggestedPlace[],
+  cache: Map<string, string>,
+) {
+  return Object.fromEntries(
+    places.map((place) => [place.id, cache.get(place.id) ?? ""]),
+  ) as Record<string, string>;
 }
 
 function getPlaceImage(
   place: SuggestedPlace,
   photoManifest: ViewingSpotPhotoManifest,
-  previewUrls: Record<string, string>
+  previewUrls: Record<string, string>,
 ) {
   const photo = getViewingSpotPhoto(place.spotId, photoManifest);
   const approvedPhoto = hasApprovedSpotPhoto(photo);
   return {
     src: approvedPhoto ? photo?.imageSrc : previewUrls[place.id],
-    alt: approvedPhoto ? photo?.alt ?? place.name : `Map preview for ${place.name}`,
-    objectPosition: approvedPhoto ? photo?.focalPoint ?? "50% 50%" : undefined,
+    alt: approvedPhoto
+      ? (photo?.alt ?? place.name)
+      : `Map preview for ${place.name}`,
+    objectPosition: approvedPhoto
+      ? (photo?.focalPoint ?? "50% 50%")
+      : undefined,
   };
 }
 
@@ -89,13 +98,16 @@ export function SuggestedPlacesPanel({
 }: SuggestedPlacesPanelProps) {
   const [activeFilter, setActiveFilter] = useState<PlaceFilter>("top");
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
-  const [photoManifest, setPhotoManifest] = useState<ViewingSpotPhotoManifest>({});
+  const [photoManifest, setPhotoManifest] = useState<ViewingSpotPhotoManifest>(
+    {},
+  );
   const previewUrlCacheRef = useRef<Map<string, string>>(new Map());
   const panelRef = useRef<HTMLElement | null>(null);
 
   const filteredPlaces = useMemo(() => {
     if (activeFilter === "top") return places;
-    if (activeFilter === "shore") return places.filter((place) => place.type !== "Ferry");
+    if (activeFilter === "shore")
+      return places.filter((place) => place.type !== "Ferry");
     return places.filter((place) => place.type === activeFilter);
   }, [activeFilter, places]);
 
@@ -107,7 +119,7 @@ export function SuggestedPlacesPanel({
 
   const selectedPlace = useMemo(
     () => places.find((place) => place.id === selectedPlaceId) ?? null,
-    [places, selectedPlaceId]
+    [places, selectedPlaceId],
   );
   const showingDetail = selectedPlace !== null;
 
@@ -149,7 +161,7 @@ export function SuggestedPlacesPanel({
       previewUrlCacheRef.current.forEach((url) => URL.revokeObjectURL(url));
       previewUrlCacheRef.current.clear();
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -172,8 +184,15 @@ export function SuggestedPlacesPanel({
     const updateLayout = () => {
       if (!onLayoutChange) return;
       if (!open) {
-        const compactPanelReservation = typeof window !== "undefined" && window.innerWidth <= 1180 ? 408 : 448;
-        onLayoutChange(typeof window !== "undefined" && window.innerWidth > 900 ? compactPanelReservation : 0);
+        const compactPanelReservation =
+          typeof window !== "undefined" && window.innerWidth <= 1180
+            ? 408
+            : 448;
+        onLayoutChange(
+          typeof window !== "undefined" && window.innerWidth > 900
+            ? compactPanelReservation
+            : 0,
+        );
         return;
       }
       if (typeof window !== "undefined" && window.innerWidth <= 900) {
@@ -197,7 +216,9 @@ export function SuggestedPlacesPanel({
   }, [onLayoutChange, open, places.length]);
 
   useEffect(() => {
-    const content = panelRef.current?.querySelector<HTMLElement>(".suggestedPlacesPanel__content");
+    const content = panelRef.current?.querySelector<HTMLElement>(
+      ".suggestedPlacesPanel__content",
+    );
     if (content) content.scrollTop = 0;
   }, [activeFilter, showingDetail]);
 
@@ -224,15 +245,27 @@ export function SuggestedPlacesPanel({
   }
 
   return (
-    <aside ref={panelRef} className={`suggestedPlacesPanel${showingDetail ? " isDetailOpen" : ""}`} aria-label="This week recommended places">
+    <aside
+      ref={panelRef}
+      className={`suggestedPlacesPanel${showingDetail ? " isDetailOpen" : ""}`}
+      aria-label="This week recommended places"
+    >
       <div className="suggestedPlacesPanel__panel">
-        <section className="suggestedPlacesPanel__face suggestedPlacesPanel__face--front" aria-hidden={showingDetail}>
+        <section
+          className="suggestedPlacesPanel__face suggestedPlacesPanel__face--front"
+          aria-hidden={showingDetail}
+        >
           <header className="suggestedPlacesPanel__header">
-            <div className="suggestedPlacesPanel__headerIcon" aria-hidden="true">
+            <div
+              className="suggestedPlacesPanel__headerIcon"
+              aria-hidden="true"
+            >
               <img src="/images/icons/binoculars_recreated.svg" alt="" />
             </div>
             <div className="suggestedPlacesPanel__titleGroup">
-              <p className="suggestedPlacesPanel__eyebrow">Recommended places</p>
+              <p className="suggestedPlacesPanel__eyebrow">
+                Recommended places
+              </p>
               <h2 className="suggestedPlacesPanel__title">
                 Field Picks <span>{places.length}</span>
               </h2>
@@ -246,7 +279,9 @@ export function SuggestedPlacesPanel({
                 aria-label="Show top 25 field picks on map"
                 title="Show Top 25 on map"
               >
-                <span className="material-symbols-rounded" aria-hidden="true">visibility</span>
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  visibility
+                </span>
               </button>
               <button
                 type="button"
@@ -255,12 +290,18 @@ export function SuggestedPlacesPanel({
                 aria-label="Collapse recommended places"
                 title="Collapse"
               >
-                <span className="material-symbols-rounded" aria-hidden="true">expand_more</span>
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  expand_more
+                </span>
               </button>
             </div>
           </header>
 
-          <div className="suggestedPlacesPanel__filters" role="group" aria-label="Filter recommended places">
+          <div
+            className="suggestedPlacesPanel__filters"
+            role="group"
+            aria-label="Filter recommended places"
+          >
             {FILTERS.map((filter) => (
               <button
                 key={filter.id}
@@ -274,26 +315,43 @@ export function SuggestedPlacesPanel({
             ))}
           </div>
 
-          <div className="suggestedPlacesPanel__content" role="region" aria-label="Recommended places" tabIndex={0}>
+          <div
+            className="suggestedPlacesPanel__content"
+            role="region"
+            aria-label="Recommended places"
+            tabIndex={0}
+          >
             {isLoading ? (
               <div className="suggestedPlacesPanel__status">
-                <span className="material-symbols-rounded" aria-hidden="true">travel_explore</span>
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  travel_explore
+                </span>
                 <span>
                   <strong>Scouting this week’s field picks…</strong>
-                  <small>Ranking accessible places against the selected forecast surface.</small>
+                  <small>
+                    Ranking accessible places against the selected forecast
+                    surface.
+                  </small>
                 </span>
               </div>
             ) : error ? (
               <div className="suggestedPlacesPanel__status suggestedPlacesPanel__status--warning">
-                <span className="material-symbols-rounded" aria-hidden="true">cloud_off</span>
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  cloud_off
+                </span>
                 <span>
                   <strong>Recommendations are temporarily unavailable.</strong>
-                  <small>The forecast map remains available while the place list reloads.</small>
+                  <small>
+                    The forecast map remains available while the place list
+                    reloads.
+                  </small>
                 </span>
               </div>
             ) : filteredPlaces.length === 0 ? (
               <div className="suggestedPlacesPanel__status">
-                <span className="material-symbols-rounded" aria-hidden="true">location_searching</span>
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  location_searching
+                </span>
                 <span>
                   <strong>No places match this filter.</strong>
                   <small>Try Top picks or another access type.</small>
@@ -320,12 +378,21 @@ export function SuggestedPlacesPanel({
           </div>
         </section>
 
-        <section className="suggestedPlacesPanel__face suggestedPlacesPanel__face--back" aria-hidden={!showingDetail}>
+        <section
+          className="suggestedPlacesPanel__face suggestedPlacesPanel__face--back"
+          aria-hidden={!showingDetail}
+        >
           {selectedPlace ? (
             <div className="thisWeekPlaceDetail">
               <div className="thisWeekPlaceDetail__header">
-                <button type="button" className="thisWeekPlaceDetail__back" onClick={() => onClearSelection?.()}>
-                  <span className="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+                <button
+                  type="button"
+                  className="thisWeekPlaceDetail__back"
+                  onClick={() => onClearSelection?.()}
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    arrow_back
+                  </span>
                   Back to field picks
                 </button>
                 <button
@@ -335,12 +402,18 @@ export function SuggestedPlacesPanel({
                   aria-label="Collapse recommended places"
                   title="Collapse"
                 >
-                  <span className="material-symbols-rounded" aria-hidden="true">expand_more</span>
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    expand_more
+                  </span>
                 </button>
               </div>
 
               {(() => {
-                const image = getPlaceImage(selectedPlace, photoManifest, previewUrls);
+                const image = getPlaceImage(
+                  selectedPlace,
+                  photoManifest,
+                  previewUrls,
+                );
                 return (
                   <div className="thisWeekPlaceDetail__media">
                     {image.src ? (
@@ -348,11 +421,20 @@ export function SuggestedPlacesPanel({
                         src={image.src}
                         alt={image.alt}
                         loading="lazy"
-                        style={image.objectPosition ? { objectPosition: image.objectPosition } : undefined}
+                        style={
+                          image.objectPosition
+                            ? { objectPosition: image.objectPosition }
+                            : undefined
+                        }
                       />
                     ) : (
                       <span className="thisWeekPlaceCard__placeholder">
-                        <span className="material-symbols-rounded" aria-hidden="true">map</span>
+                        <span
+                          className="material-symbols-rounded"
+                          aria-hidden="true"
+                        >
+                          map
+                        </span>
                       </span>
                     )}
                   </div>
@@ -360,13 +442,17 @@ export function SuggestedPlacesPanel({
               })()}
 
               <div className="thisWeekPlaceDetail__body">
-                <p className="suggestedPlacesPanel__eyebrow">Location details</p>
+                <p className="suggestedPlacesPanel__eyebrow">
+                  Location details
+                </p>
                 <div className="thisWeekPlaceDetail__titleRow">
                   <div>
                     <h3>{selectedPlace.name}</h3>
                     <p>{selectedPlace.region ?? "Salish Sea"}</p>
                   </div>
-                  <span className={`viewingPotentialBadge viewingPotentialBadge--${selectedPlace.viewingPotential}`}>
+                  <span
+                    className={`viewingPotentialBadge viewingPotentialBadge--${selectedPlace.viewingPotential}`}
+                  >
                     {potentialLabel[selectedPlace.viewingPotential]}
                   </span>
                 </div>
@@ -374,7 +460,9 @@ export function SuggestedPlacesPanel({
                 <div className="thisWeekPlaceDetail__stats">
                   <div>
                     <span>Outlook</span>
-                    <strong>{potentialLabel[selectedPlace.viewingPotential]}</strong>
+                    <strong>
+                      {potentialLabel[selectedPlace.viewingPotential]}
+                    </strong>
                   </div>
                   <div>
                     <span>Access</span>
@@ -403,20 +491,33 @@ export function SuggestedPlacesPanel({
                     onSelectPlace(selectedPlace);
                     mapRef.current?.fitLocations(
                       [[selectedPlace.longitude, selectedPlace.latitude]],
-                      { padding: { top: 70, right: 70, bottom: 110, left: 70 }, maxZoom: 13 }
+                      {
+                        padding: { top: 70, right: 70, bottom: 110, left: 70 },
+                        maxZoom: 13,
+                      },
                     );
                   }}
                 >
-                  <span className="material-symbols-rounded" aria-hidden="true">my_location</span>
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    my_location
+                  </span>
                   Center on map
                 </button>
                 <button
                   type="button"
                   className={`thisWeekPlaceDetail__itineraryButton${itineraryPlaceIds.includes(selectedPlace.id) ? " isAdded" : ""}`}
-                  onClick={() => itineraryPlaceIds.includes(selectedPlace.id) ? onRemoveFromItinerary?.(selectedPlace) : onAddToItinerary?.(selectedPlace)}
+                  onClick={() =>
+                    itineraryPlaceIds.includes(selectedPlace.id)
+                      ? onRemoveFromItinerary?.(selectedPlace)
+                      : onAddToItinerary?.(selectedPlace)
+                  }
                 >
-                  <span className="material-symbols-rounded" aria-hidden="true">playlist_add</span>
-                  {itineraryPlaceIds.includes(selectedPlace.id) ? "Added to itinerary" : "Add to itinerary"}
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    playlist_add
+                  </span>
+                  {itineraryPlaceIds.includes(selectedPlace.id)
+                    ? "Added to itinerary"
+                    : "Add to itinerary"}
                 </button>
               </div>
             </div>

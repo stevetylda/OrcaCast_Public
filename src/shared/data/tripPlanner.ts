@@ -2,7 +2,8 @@ import type { H3Resolution } from "../config/dataPaths";
 import { fetchJson } from "./fetchClient";
 import { getDataVersionToken } from "./meta";
 
-export type TripLengthOption = "1 day" | "2 days" | "3 days" | "5 days" | "Weekend";
+export type TripLengthOption =
+  "1 day" | "2 days" | "3 days" | "5 days" | "Weekend";
 
 export type TripPlannerRange = {
   startDate: string;
@@ -75,7 +76,11 @@ function withBase(path: string): string {
 
 function dayOfYear(date: Date): number {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
-  const current = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const current = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+  );
   return Math.floor((current - start) / 86_400_000) + 1;
 }
 
@@ -105,8 +110,11 @@ function formatDisplayDate(date: Date): string {
 
 export function daysForTripLength(length: TripLengthOption | string): number {
   if (length === "Weekend") return 2;
-  const parsedDays = Number(String(length).match(/^(\d+)\s*days?$/i)?.[1] ?? Number.NaN);
-  if (Number.isFinite(parsedDays) && parsedDays > 0) return Math.round(parsedDays);
+  const parsedDays = Number(
+    String(length).match(/^(\d+)\s*days?$/i)?.[1] ?? Number.NaN,
+  );
+  if (Number.isFinite(parsedDays) && parsedDays > 0)
+    return Math.round(parsedDays);
   if (length === "5 days") return 5;
   if (length === "2 days") return 2;
   if (length === "3 days") return 3;
@@ -115,7 +123,7 @@ export function daysForTripLength(length: TripLengthOption | string): number {
 
 export function buildTripPlannerRange(
   startDate: string,
-  tripLength: TripLengthOption | string
+  tripLength: TripLengthOption | string,
 ): TripPlannerRange | null {
   const start = parseTripDate(startDate);
   if (!start) return null;
@@ -123,7 +131,8 @@ export function buildTripPlannerRange(
   const end = addDays(start, Math.max(0, dayCount - 1));
   const startDay = dayOfYear(start);
   const endDay = dayOfYear(end);
-  const crossesYear = start.getUTCFullYear() !== end.getUTCFullYear() || endDay < startDay;
+  const crossesYear =
+    start.getUTCFullYear() !== end.getUTCFullYear() || endDay < startDay;
   const label =
     dayCount <= 1
       ? formatDisplayDate(start)
@@ -141,16 +150,20 @@ export function buildTripPlannerRange(
 
 export function buildTripPlannerRangeFromDates(
   arrivalDate: string,
-  departureDate: string
+  departureDate: string,
 ): TripPlannerRange | null {
   const start = parseTripDate(arrivalDate);
   const end = parseTripDate(departureDate);
   if (!start || !end || end.getTime() < start.getTime()) return null;
 
-  const dayCount = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1);
+  const dayCount = Math.max(
+    1,
+    Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1,
+  );
   const startDay = dayOfYear(start);
   const endDay = dayOfYear(end);
-  const crossesYear = start.getUTCFullYear() !== end.getUTCFullYear() || endDay < startDay;
+  const crossesYear =
+    start.getUTCFullYear() !== end.getUTCFullYear() || endDay < startDay;
   const label =
     dayCount <= 1
       ? formatDisplayDate(start)
@@ -167,7 +180,10 @@ export function buildTripPlannerRangeFromDates(
   };
 }
 
-export function dayIsInTripRange(dayOfYearValue: number, range: TripPlannerRange): boolean {
+export function dayIsInTripRange(
+  dayOfYearValue: number,
+  range: TripPlannerRange,
+): boolean {
   const day = Number(dayOfYearValue);
   if (!Number.isFinite(day)) return false;
   if (range.crossesYear) {
@@ -176,7 +192,9 @@ export function dayIsInTripRange(dayOfYearValue: number, range: TripPlannerRange
   return day >= range.startDayOfYear && day <= range.endDayOfYear;
 }
 
-function normalizePayload(payload: RawTripPlannerPayload): TripPlannerOccurrencePayload {
+function normalizePayload(
+  payload: RawTripPlannerPayload,
+): TripPlannerOccurrencePayload {
   const rows = (Array.isArray(payload.rows) ? payload.rows : [])
     .map((row) => {
       const h3 = String(row.h3 ?? row.H3_INDEX ?? row.h3_index ?? "").trim();
@@ -185,9 +203,14 @@ function normalizePayload(payload: RawTripPlannerPayload): TripPlannerOccurrence
       if (!h3 || !Number.isFinite(day) || !Number.isFinite(count)) return null;
       return { h3, day_of_year: Math.round(day), count };
     })
-    .filter((row): row is TripPlannerOccurrencePayload["rows"][number] => row !== null);
+    .filter(
+      (row): row is TripPlannerOccurrencePayload["rows"][number] =>
+        row !== null,
+    );
 
-  const histogramFromPayload = Array.isArray(payload.histogram) ? payload.histogram : [];
+  const histogramFromPayload = Array.isArray(payload.histogram)
+    ? payload.histogram
+    : [];
   const histogram = histogramFromPayload
     .map((row) => {
       const day = Number(row.day_of_year ?? row.doy);
@@ -200,13 +223,19 @@ function normalizePayload(payload: RawTripPlannerPayload): TripPlannerOccurrence
   return {
     rows,
     histogram: histogram.length > 0 ? histogram : buildHistogramFromRows(rows),
-    year_min: Number.isFinite(Number(payload.year_min)) ? Number(payload.year_min) : undefined,
-    year_max: Number.isFinite(Number(payload.year_max)) ? Number(payload.year_max) : undefined,
+    year_min: Number.isFinite(Number(payload.year_min))
+      ? Number(payload.year_min)
+      : undefined,
+    year_max: Number.isFinite(Number(payload.year_max))
+      ? Number(payload.year_max)
+      : undefined,
     source: typeof payload.source === "string" ? payload.source : undefined,
   };
 }
 
-function buildHistogramFromRows(rows: TripPlannerOccurrencePayload["rows"]): TripPlannerHistogramBin[] {
+function buildHistogramFromRows(
+  rows: TripPlannerOccurrencePayload["rows"],
+): TripPlannerHistogramBin[] {
   const byDay = new Map<number, number>();
   rows.forEach((row) => {
     byDay.set(row.day_of_year, (byDay.get(row.day_of_year) ?? 0) + row.count);
@@ -226,7 +255,7 @@ function occurrenceUrlCandidates(resolution: H3Resolution): string[] {
 }
 
 export async function loadTripPlannerOccurrencePayload(
-  resolution: H3Resolution
+  resolution: H3Resolution,
 ): Promise<TripPlannerOccurrencePayload> {
   const cached = occurrenceCache.get(resolution);
   if (cached) return cached;
@@ -245,12 +274,14 @@ export async function loadTripPlannerOccurrencePayload(
       lastError = error;
     }
   }
-  throw lastError instanceof Error ? lastError : new Error("Trip planner historical occurrence data is unavailable.");
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Trip planner historical occurrence data is unavailable.");
 }
 
 export function aggregateTripPlannerOccurrence(
   payload: TripPlannerOccurrencePayload,
-  range: TripPlannerRange
+  range: TripPlannerRange,
 ): TripPlannerOccurrenceResult {
   const values: Record<string, number> = {};
   let selectedCount = 0;
@@ -265,9 +296,13 @@ export function aggregateTripPlannerOccurrence(
 
   return {
     values,
-    histogram: payload.histogram.length > 0 ? payload.histogram : buildHistogramFromRows(payload.rows),
+    histogram:
+      payload.histogram.length > 0
+        ? payload.histogram
+        : buildHistogramFromRows(payload.rows),
     selectedCount,
-    activeCells: Object.values(values).filter((value) => Number(value) > 0).length,
+    activeCells: Object.values(values).filter((value) => Number(value) > 0)
+      .length,
     yearMin: payload.year_min,
     yearMax: payload.year_max,
     source: payload.source,

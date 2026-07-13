@@ -26,11 +26,17 @@ function isValidHydrophone(value: unknown): value is OrcasoundHydrophone {
 }
 
 function normalizePayload(payload: unknown): OrcasoundHydrophonePayload {
-  const candidate = payload && typeof payload === "object" ? (payload as Partial<OrcasoundHydrophonePayload>) : null;
-  const items = Array.isArray(candidate?.items) ? candidate.items.filter(isValidHydrophone) : [];
+  const candidate =
+    payload && typeof payload === "object"
+      ? (payload as Partial<OrcasoundHydrophonePayload>)
+      : null;
+  const items = Array.isArray(candidate?.items)
+    ? candidate.items.filter(isValidHydrophone)
+    : [];
   return {
     listenUrl:
-      typeof candidate?.listenUrl === "string" && candidate.listenUrl.trim().length > 0
+      typeof candidate?.listenUrl === "string" &&
+      candidate.listenUrl.trim().length > 0
         ? candidate.listenUrl
         : "https://live.orcasound.net/",
     items,
@@ -45,7 +51,7 @@ async function fetchHydrophonePayload(): Promise<OrcasoundHydrophonePayload> {
       `${normalizedBase}data/orcasound_hydrophones.json`,
       "/data/orcasound_hydrophones.json",
       "data/orcasound_hydrophones.json",
-    ])
+    ]),
   );
 
   for (const url of candidates) {

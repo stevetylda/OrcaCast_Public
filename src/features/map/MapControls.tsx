@@ -37,21 +37,37 @@ export const MapControls = memo(function MapControls({
           </button>
         </div>
       ) : null}
-      <div className="map__zoomControl" aria-label="Map zoom controls">
+      <div
+        className="map__zoomControl"
+        role="group"
+        aria-label="Map zoom controls"
+      >
         <div className="map__zoomStack">
-          <button type="button" className="map__zoomBtn" onClick={onZoomIn} aria-label="Zoom in">
+          <button
+            type="button"
+            className="map__zoomBtn"
+            onClick={onZoomIn}
+            aria-label="Zoom in"
+          >
             <span className="material-symbols-rounded" aria-hidden="true">
               add
             </span>
           </button>
-          <button type="button" className="map__zoomBtn" onClick={onZoomOut} aria-label="Zoom out">
+          <button
+            type="button"
+            className="map__zoomBtn"
+            onClick={onZoomOut}
+            aria-label="Zoom out"
+          >
             <span className="material-symbols-rounded" aria-hidden="true">
               remove
             </span>
           </button>
         </div>
       </div>
-      {hasForecastLegend && legendOpen && <ProbabilityLegend scale={legendSpec} />}
+      {hasForecastLegend && legendOpen && (
+        <ProbabilityLegend scale={legendSpec} />
+      )}
     </>
   );
 });

@@ -147,3 +147,23 @@ For Cloudflare Pages:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Node.js version: 18 or newer
+
+### CI/CD deployment ownership
+
+GitHub Actions validates, builds, deploys, and smoke-tests OrcaCast. The CI build uploads one
+checksummed `production-dist` artifact; preview, staging, and production jobs download those same
+bytes rather than rebuilding them. A failed production smoke test rolls Cloudflare Pages back to
+the previously successful production deployment.
+
+Before enabling deployment jobs:
+
+1. Create `preview` and `production` GitHub environments.
+2. Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets to both environments. Use a
+   scoped token with Pages write access, not a global API key.
+3. Add a repository variable named `PRODUCTION_URL` containing the canonical HTTPS origin.
+4. Disable Cloudflare Pages automatic production and preview Git builds so they cannot bypass CI.
+5. Enable the dependency graph, CodeQL, secret scanning, push protection, and validity checks.
+6. Protect `main` and require the `ci`, dependency-review, CodeQL, and deployed-preview checks.
+
+Browser-visible map keys are public configuration and must be restricted by domain, API, and quota
+at their provider. Never place private credentials in a `VITE_` variable.

@@ -49,16 +49,21 @@ function withBase(path: string): string {
 }
 
 export async function loadExpectedCountSeries(
-  resolution: H3Resolution
+  resolution: H3Resolution,
 ): Promise<ExpectedCountPoint[]> {
   const cached = cache.get(resolution);
   if (cached) return cached;
 
-  const preferredUrl = withBase(`data/expected_count/${resolution}_EXPECTED_ACTIVITY.json`);
-  const { data: payload } = await fetchJson<ExpectedCountPayload>(preferredUrl, {
-    cache: "no-store",
-    cacheToken: getDataVersionToken(),
-  });
+  const preferredUrl = withBase(
+    `data/expected_count/${resolution}_EXPECTED_ACTIVITY.json`,
+  );
+  const { data: payload } = await fetchJson<ExpectedCountPayload>(
+    preferredUrl,
+    {
+      cache: "no-store",
+      cacheToken: getDataVersionToken(),
+    },
+  );
 
   const rows = Array.isArray(payload.rows) ? payload.rows : [];
 
@@ -67,7 +72,11 @@ export async function loadExpectedCountSeries(
       const year = Number(row.year);
       const statWeek = Number(row.stat_week ?? row.period);
       const expectedCount = Number(row.expected_count);
-      if (!Number.isFinite(year) || !Number.isFinite(statWeek) || !Number.isFinite(expectedCount)) {
+      if (
+        !Number.isFinite(year) ||
+        !Number.isFinite(statWeek) ||
+        !Number.isFinite(expectedCount)
+      ) {
         return null;
       }
       const point: ExpectedCountPoint = {
@@ -84,23 +93,28 @@ export async function loadExpectedCountSeries(
       return point;
     })
     .filter((row): row is ExpectedCountPoint => row !== null)
-    .sort((a, b) => (a.year - b.year) || (a.stat_week - b.stat_week));
+    .sort((a, b) => a.year - b.year || a.stat_week - b.stat_week);
 
   cache.set(resolution, parsed);
   return parsed;
 }
 
 export async function loadActualActivitySeries(
-  resolution: H3Resolution
+  resolution: H3Resolution,
 ): Promise<ActualActivityPoint[]> {
   const cached = actualCache.get(resolution);
   if (cached) return cached;
 
-  const preferredUrl = withBase(`data/expected_count/${resolution}_ACTUAL_ACTIVITY.json`);
-  const { data: payload } = await fetchJson<ActualActivityPayload>(preferredUrl, {
-    cache: "no-store",
-    cacheToken: getDataVersionToken(),
-  });
+  const preferredUrl = withBase(
+    `data/expected_count/${resolution}_ACTUAL_ACTIVITY.json`,
+  );
+  const { data: payload } = await fetchJson<ActualActivityPayload>(
+    preferredUrl,
+    {
+      cache: "no-store",
+      cacheToken: getDataVersionToken(),
+    },
+  );
 
   const rows = Array.isArray(payload.rows) ? payload.rows : [];
   const parsed = rows
@@ -108,7 +122,11 @@ export async function loadActualActivitySeries(
       const year = Number(row.year);
       const statWeek = Number(row.stat_week ?? row.period);
       const actualCount = Number(row.actual_count ?? row.expected_count);
-      if (!Number.isFinite(year) || !Number.isFinite(statWeek) || !Number.isFinite(actualCount)) {
+      if (
+        !Number.isFinite(year) ||
+        !Number.isFinite(statWeek) ||
+        !Number.isFinite(actualCount)
+      ) {
         return null;
       }
       return {
@@ -118,7 +136,7 @@ export async function loadActualActivitySeries(
       };
     })
     .filter((row): row is ActualActivityPoint => row !== null)
-    .sort((a, b) => (a.year - b.year) || (a.stat_week - b.stat_week));
+    .sort((a, b) => a.year - b.year || a.stat_week - b.stat_week);
 
   actualCache.set(resolution, parsed);
   return parsed;

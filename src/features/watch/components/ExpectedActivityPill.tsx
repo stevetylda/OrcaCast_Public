@@ -22,8 +22,14 @@ function formatCount(value: number | null): string {
   return Math.round(value as number).toLocaleString();
 }
 
-function formatVs12WeekAvg(current: number | null, vs12WeekAvg: number | null): string {
-  if (!Number.isFinite(current ?? NaN) || !Number.isFinite(vs12WeekAvg ?? NaN)) {
+function formatVs12WeekAvg(
+  current: number | null,
+  vs12WeekAvg: number | null,
+): string {
+  if (
+    !Number.isFinite(current ?? NaN) ||
+    !Number.isFinite(vs12WeekAvg ?? NaN)
+  ) {
     return "12w avg: -- · Δ: --";
   }
   const avg = Math.round(vs12WeekAvg as number);
@@ -31,8 +37,14 @@ function formatVs12WeekAvg(current: number | null, vs12WeekAvg: number | null): 
   return `12w avg: ${avg.toLocaleString()} · Δ: ${delta > 0 ? "+" : ""}${delta.toLocaleString()}`;
 }
 
-function formatVsPriorWeek(current: number | null, vsPriorWeek: number | null): string {
-  if (!Number.isFinite(current ?? NaN) || !Number.isFinite(vsPriorWeek ?? NaN)) {
+function formatVsPriorWeek(
+  current: number | null,
+  vsPriorWeek: number | null,
+): string {
+  if (
+    !Number.isFinite(current ?? NaN) ||
+    !Number.isFinite(vsPriorWeek ?? NaN)
+  ) {
     return "vs prior week: --";
   }
   const delta = Math.round((current as number) - (vsPriorWeek as number));
@@ -48,13 +60,15 @@ function trendIcon(trend: Trend): string {
 
 function buildLinePath(points: Point[]) {
   return points
-    .map((p, idx) => `${idx === 0 ? "M" : "L"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .map(
+      (p, idx) => `${idx === 0 ? "M" : "L"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`,
+    )
     .join(" ");
 }
 
 function computeSeriesModel(
   actualValues: Array<number | null>,
-  forecastValues: Array<number | null>
+  forecastValues: Array<number | null>,
 ) {
   const width = 238;
   const height = 96;
@@ -64,23 +78,30 @@ function computeSeriesModel(
   const padBottom = 14;
   const chartWidth = width - padLeft - padRight;
   const chartHeight = height - padTop - padBottom;
-  const values = [...actualValues, ...forecastValues].filter((v): v is number => Number.isFinite(v ?? NaN));
+  const values = [...actualValues, ...forecastValues].filter((v): v is number =>
+    Number.isFinite(v ?? NaN),
+  );
   const pointCount = Math.max(actualValues.length, forecastValues.length);
   const minV = Math.min(...values);
   const maxV = Math.max(...values);
   const range = Math.max(1, maxV - minV);
 
   const pointFor = (value: number, idx: number): Point => {
-    const x = padLeft + (pointCount <= 1 ? 0 : (idx / (pointCount - 1)) * chartWidth);
+    const x =
+      padLeft + (pointCount <= 1 ? 0 : (idx / (pointCount - 1)) * chartWidth);
     const y = padTop + ((maxV - value) / range) * chartHeight;
     return { x, y, value, index: idx };
   };
 
   const actualPoints = actualValues
-    .map((value, idx) => (Number.isFinite(value ?? NaN) ? pointFor(value as number, idx) : null))
+    .map((value, idx) =>
+      Number.isFinite(value ?? NaN) ? pointFor(value as number, idx) : null,
+    )
     .filter((point): point is Point => point !== null);
   const forecastPoints = forecastValues
-    .map((value, idx) => (Number.isFinite(value ?? NaN) ? pointFor(value as number, idx) : null))
+    .map((value, idx) =>
+      Number.isFinite(value ?? NaN) ? pointFor(value as number, idx) : null,
+    )
     .filter((point): point is Point => point !== null);
 
   return {
@@ -110,18 +131,25 @@ export function ExpectedActivityPill({
 
   const trendClass = useMemo(() => {
     if (trend === "up") return "expectedPill__trend expectedPill__trend--up";
-    if (trend === "down") return "expectedPill__trend expectedPill__trend--down";
-    if (trend === "steady") return "expectedPill__trend expectedPill__trend--steady";
+    if (trend === "down")
+      return "expectedPill__trend expectedPill__trend--down";
+    if (trend === "steady")
+      return "expectedPill__trend expectedPill__trend--steady";
     return "expectedPill__trend expectedPill__trend--none";
   }, [trend]);
 
   const chartModel = useMemo(() => {
-    const usableValues = [...chart.actualValues, ...chart.forecastValues].filter((v) => Number.isFinite(v ?? NaN));
+    const usableValues = [
+      ...chart.actualValues,
+      ...chart.forecastValues,
+    ].filter((v) => Number.isFinite(v ?? NaN));
     if (usableValues.length < 2) return null;
     const model = computeSeriesModel(chart.actualValues, chart.forecastValues);
     const actualLinePath = buildLinePath(model.actualPoints);
     const predictionPoint =
-      model.forecastPoints.find((point) => point.index === chart.predictionIndex) ?? null;
+      model.forecastPoints.find(
+        (point) => point.index === chart.predictionIndex,
+      ) ?? null;
     return {
       ...model,
       actualLinePath,
@@ -160,7 +188,9 @@ export function ExpectedActivityPill({
         aria-label="Expected activity details"
       >
         <span className="expectedPill__label">Expected Active</span>
-        <span className="expectedPill__dot" aria-hidden="true">·</span>
+        <span className="expectedPill__dot" aria-hidden="true">
+          ·
+        </span>
         <span className="expectedPill__count">{formatCount(currentCount)}</span>
         <span className={trendClass} aria-hidden="true">
           <span className="material-symbols-rounded">{trendIcon(trend)}</span>
@@ -168,22 +198,35 @@ export function ExpectedActivityPill({
       </button>
 
       {open && (
-        <div className="expectedPopover" role="dialog" aria-label="Expected activity trend">
+        <div
+          className="expectedPopover"
+          role="dialog"
+          aria-label="Expected activity trend"
+        >
           <div className="expectedPopover__title">Expected Active Hexes</div>
           <div className="expectedPopover__desc">
-            Predicted active hexes for the selected forecast week, compared with recent actual active hexes.
+            Predicted active hexes for the selected forecast week, compared with
+            recent actual active hexes.
           </div>
           <div className="expectedPopover__summaryGrid">
             <div className="expectedPopover__summaryItem">
               <span className="expectedPopover__summaryLabel">Prediction</span>
-              <span className="expectedPopover__value">{formatCount(currentCount)}</span>
+              <span className="expectedPopover__value">
+                {formatCount(currentCount)}
+              </span>
             </div>
             <div className="expectedPopover__summaryItem">
-              <span className="expectedPopover__summaryLabel">Prior actual week</span>
-              <span className="expectedPopover__value expectedPopover__value--secondary">{formatCount(vsPriorWeek)}</span>
+              <span className="expectedPopover__summaryLabel">
+                Prior actual week
+              </span>
+              <span className="expectedPopover__value expectedPopover__value--secondary">
+                {formatCount(vsPriorWeek)}
+              </span>
             </div>
           </div>
-          <div className="expectedPopover__delta">{formatVsPriorWeek(currentCount, vsPriorWeek)}</div>
+          <div className="expectedPopover__delta">
+            {formatVsPriorWeek(currentCount, vsPriorWeek)}
+          </div>
           <div className="expectedPopover__delta expectedPopover__delta--secondary">
             {formatVs12WeekAvg(currentCount, vs12WeekAvg)}
           </div>
@@ -205,14 +248,25 @@ export function ExpectedActivityPill({
                 <text x={2} y={14} className="expectedPopover__axisLabel">
                   {Math.round(chartModel.maxV)}
                 </text>
-                <text x={2} y={chartModel.padTop + chartModel.chartHeight / 2 + 4} className="expectedPopover__axisLabel">
+                <text
+                  x={2}
+                  y={chartModel.padTop + chartModel.chartHeight / 2 + 4}
+                  className="expectedPopover__axisLabel"
+                >
                   {chartModel.midV}
                 </text>
-                <text x={2} y={chartModel.height - 8} className="expectedPopover__axisLabel">
+                <text
+                  x={2}
+                  y={chartModel.height - 8}
+                  className="expectedPopover__axisLabel"
+                >
                   {Math.round(chartModel.minV)}
                 </text>
 
-                <path d={chartModel.actualLinePath} className="expectedPopover__line expectedPopover__line--actual" />
+                <path
+                  d={chartModel.actualLinePath}
+                  className="expectedPopover__line expectedPopover__line--actual"
+                />
                 {chartModel.actualPoints.map((p, idx) => (
                   <circle
                     key={`actual-${p.x}-${idx}`}
@@ -238,10 +292,11 @@ export function ExpectedActivityPill({
                     className="expectedPopover__dot expectedPopover__dot--prediction"
                   />
                 )}
-
               </svg>
               <div className="expectedPopover__sparkMeta">
-                <span className="expectedPopover__sparkCaption">Past 12 weeks incl. selected week + prediction</span>
+                <span className="expectedPopover__sparkCaption">
+                  Past 12 weeks incl. selected week + prediction
+                </span>
                 <span className="expectedPopover__legend">
                   <span className="expectedPopover__legendItem">
                     <span className="expectedPopover__legendSwatch expectedPopover__legendSwatch--actual" />
@@ -255,7 +310,9 @@ export function ExpectedActivityPill({
               </div>
             </div>
           ) : (
-            <div className="expectedPopover__empty">Not enough history to render trend.</div>
+            <div className="expectedPopover__empty">
+              Not enough history to render trend.
+            </div>
           )}
         </div>
       )}

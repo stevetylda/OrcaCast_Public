@@ -65,7 +65,11 @@ export function addUtcDays(date: Date, days: number) {
   return next;
 }
 
-export function buildRadiusFitLocations(latitude: number, longitude: number, radiusMiles: number): Array<[number, number]> {
+export function buildRadiusFitLocations(
+  latitude: number,
+  longitude: number,
+  radiusMiles: number,
+): Array<[number, number]> {
   const kilometers = radiusMiles * KILOMETERS_PER_MILE;
   const latRadians = (latitude * Math.PI) / 180;
   const kmPerDegreeLat = 110.574;
@@ -95,7 +99,10 @@ export function clampTripLength(start: Date, end: Date) {
   return start;
 }
 
-export function toWeekBars(histogram: TripPlannerHistogramBin[], highlightedDays: Set<number>) {
+export function toWeekBars(
+  histogram: TripPlannerHistogramBin[],
+  highlightedDays: Set<number>,
+) {
   return buildSeasonalWeekBars(histogram, highlightedDays).map((entry) => ({
     ...entry,
     label:
@@ -137,22 +144,28 @@ export function computeActivityLabel(selectedCount: number, bars: WeekBar[]) {
 }
 
 export function computeTopWaters(places: SuggestedPlace[]) {
-  const unique = Array.from(new Set(places.map((place) => place.region).filter(Boolean) as string[]));
+  const unique = Array.from(
+    new Set(places.map((place) => place.region).filter(Boolean) as string[]),
+  );
   return unique.slice(0, 2).join(", ") || "San Juan Channel, Haro Strait";
 }
 
 export function buildMonthTicks(bars: WeekBar[]): AxisTick[] {
-  return bars.filter((bar) => bar.label).map((bar) => ({ index: bar.index, label: bar.label }));
+  return bars
+    .filter((bar) => bar.label)
+    .map((bar) => ({ index: bar.index, label: bar.label }));
 }
 
 export function modDayOfYear(day: number) {
-  return ((day - 1) % TRIP_BRUSH_DAYS + TRIP_BRUSH_DAYS) % TRIP_BRUSH_DAYS + 1;
+  return (
+    ((((day - 1) % TRIP_BRUSH_DAYS) + TRIP_BRUSH_DAYS) % TRIP_BRUSH_DAYS) + 1
+  );
 }
 
 export function buildDailyBars(
   histogram: TripPlannerHistogramBin[],
   range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>,
-  paddingDays = 10
+  paddingDays = 10,
 ): ChartBar[] {
   const byDay = new Map<number, number>();
   histogram.forEach((row) => {
@@ -177,7 +190,7 @@ export function buildDailyBars(
 
 export function buildDailyTicks(
   bars: ChartBar[],
-  range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>
+  range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>,
 ): AxisTick[] {
   const tripStartIndex = bars.findIndex((bar) => bar.highlighted);
   if (tripStartIndex < 0) return [];
@@ -196,7 +209,10 @@ export function buildDailyTicks(
     return [
       {
         index: bar.index,
-        label: new Intl.DateTimeFormat("en-US", { day: "numeric", timeZone: "UTC" }).format(date),
+        label: new Intl.DateTimeFormat("en-US", {
+          day: "numeric",
+          timeZone: "UTC",
+        }).format(date),
       },
     ];
   });
@@ -204,7 +220,7 @@ export function buildDailyTicks(
 
 export function buildDailyMonthBands(
   bars: ChartBar[],
-  range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>
+  range: NonNullable<ReturnType<typeof buildTripPlannerRangeFromDates>>,
 ): MonthBand[] {
   const tripStartIndex = bars.findIndex((bar) => bar.highlighted);
   if (tripStartIndex < 0) return [];
@@ -217,7 +233,10 @@ export function buildDailyMonthBands(
 
   bars.forEach((bar) => {
     const date = addUtcDays(firstDate, bar.index);
-    const label = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" }).format(date);
+    const label = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      timeZone: "UTC",
+    }).format(date);
     const current = bands[bands.length - 1];
     if (current && current.label === label) {
       current.span += 1;
@@ -229,8 +248,12 @@ export function buildDailyMonthBands(
   return bands;
 }
 
-export function buildChartWindowStyle(bars: Array<{ index: number; highlighted: boolean }>): CSSProperties | null {
-  const highlightedIndexes = bars.filter((bar) => bar.highlighted).map((bar) => bar.index);
+export function buildChartWindowStyle(
+  bars: Array<{ index: number; highlighted: boolean }>,
+): CSSProperties | null {
+  const highlightedIndexes = bars
+    .filter((bar) => bar.highlighted)
+    .map((bar) => bar.index);
   if (highlightedIndexes.length === 0) return null;
   const first = Math.min(...highlightedIndexes);
   const last = Math.max(...highlightedIndexes);
@@ -243,14 +266,15 @@ export function buildChartWindowStyle(bars: Array<{ index: number; highlighted: 
   } as CSSProperties;
 }
 
-
 export function buildInteractiveTripWindowSegments(
   range: ReturnType<typeof buildTripPlannerRangeFromDates>,
-  bars: WeekBar[]
+  bars: WeekBar[],
 ): TripWindowSegment[] {
   if (!range || bars.length === 0) return [];
 
-  const highlightedIndexes = bars.filter((bar) => bar.highlighted).map((bar) => bar.index);
+  const highlightedIndexes = bars
+    .filter((bar) => bar.highlighted)
+    .map((bar) => bar.index);
   if (highlightedIndexes.length === 0) return [];
 
   const segments: Array<{ startIndex: number; endIndex: number }> = [];
@@ -264,14 +288,21 @@ export function buildInteractiveTripWindowSegments(
   });
 
   const total = Math.max(1, bars.length);
-  const startWeekIndex = Math.min(52, Math.floor((range.startDayOfYear - 1) / 7));
+  const startWeekIndex = Math.min(
+    52,
+    Math.floor((range.startDayOfYear - 1) / 7),
+  );
   const endWeekIndex = Math.min(52, Math.floor((range.endDayOfYear - 1) / 7));
 
   return segments.map((segment, segmentIndex) => {
     const span = segment.endIndex - segment.startIndex + 1;
-    const containsStart = startWeekIndex >= segment.startIndex && startWeekIndex <= segment.endIndex;
-    const containsEnd = endWeekIndex >= segment.startIndex && endWeekIndex <= segment.endIndex;
-    const outlineDelayMs = Math.floor((segment.startIndex / total) * 1060) + 980;
+    const containsStart =
+      startWeekIndex >= segment.startIndex &&
+      startWeekIndex <= segment.endIndex;
+    const containsEnd =
+      endWeekIndex >= segment.startIndex && endWeekIndex <= segment.endIndex;
+    const outlineDelayMs =
+      Math.floor((segment.startIndex / total) * 1060) + 980;
 
     return {
       key: `segment-${segmentIndex}`,
@@ -290,7 +321,7 @@ export function buildInteractiveTripWindowSegments(
 export function applyTripBrushDelta(
   selection: TripPlanSelection,
   mode: TripBrushMode,
-  deltaDays: number
+  deltaDays: number,
 ): TripPlanSelection | null {
   const start = parseIsoDate(selection.arrivalDate);
   const end = parseIsoDate(selection.departureDate);
@@ -315,7 +346,10 @@ export function applyTripBrushDelta(
 
   const arrivalDate = formatIsoDate(nextStart);
   const departureDate = formatIsoDate(nextEnd);
-  if (arrivalDate === selection.arrivalDate && departureDate === selection.departureDate) {
+  if (
+    arrivalDate === selection.arrivalDate &&
+    departureDate === selection.departureDate
+  ) {
     return selection;
   }
 
