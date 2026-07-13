@@ -29,11 +29,11 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_PROJECT_NAME: orcacast
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: production-dist
           run-id: ${{ github.event.workflow_run.id }}
@@ -55,7 +55,7 @@ jobs:
       - name: Deploy immutable staging preview
         if: steps.credentials.outputs.configured == 'true'
         id: staging
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -76,7 +76,7 @@ jobs:
       - name: Deploy the tested artifact to production
         if: steps.credentials.outputs.configured == 'true'
         id: production
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -104,7 +104,7 @@ jobs:
           exit 1
       - name: Upload deployment browser diagnostics
         if: always() && steps.credentials.outputs.configured == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: production-browser-${{ github.event.workflow_run.head_sha }}
           path: |

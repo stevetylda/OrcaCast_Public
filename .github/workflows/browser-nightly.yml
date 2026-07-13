@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: npx playwright install --with-deps chromium firefox webkit
       - env:
           PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL }}
         run: npm run test:e2e
       - if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cross-browser-${{ github.run_id }}
           path: |
