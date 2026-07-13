@@ -11,6 +11,17 @@ updates:
         dependency-type: production
       development-dependencies:
         dependency-type: development
+        exclude-patterns:
+          # TypeScript releases must stay within typescript-eslint's supported
+          # peer range. Let Dependabot evaluate TypeScript independently rather
+          # than combining an incompatible compiler with the general dev group.
+          - typescript
+    ignore:
+      # typescript-eslint 8.x currently requires TypeScript < 6.1.0. Remove or
+      # raise this ceiling when its published peer range adds newer compilers.
+      - dependency-name: typescript
+        versions:
+          - ">=6.1.0"
   - package-ecosystem: github-actions
     directory: /
     schedule:
