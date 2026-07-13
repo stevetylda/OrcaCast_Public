@@ -55,6 +55,30 @@ const FORECAST_RIBBON = [
   "Built for the Salish Sea",
 ] as const;
 
+const HOME_REGIONS = [
+  {
+    name: "San Juan Islands",
+    status: "Island viewpoints",
+    detail: "historically active waters",
+    image: "/spot-photos/lime-kiln-point-state-park.webp",
+    tone: "teal",
+  },
+  {
+    name: "Central Salish Sea",
+    status: "Flexible access",
+    detail: "good shore access",
+    image: "/spot-photos/generic.webp",
+    tone: "teal",
+  },
+  {
+    name: "Strait of Juan de Fuca",
+    status: "Open-water views",
+    detail: "wide-water viewpoints",
+    image: "/spot-photos/generic.webp",
+    tone: "yellow",
+  },
+] as const;
+
 export function HomePage() {
   const { setMenuOpen } = useMenu();
   const { darkMode } = useMapState();
@@ -128,6 +152,18 @@ export function HomePage() {
   const activityLabel =
     typicalActivity?.label ??
     (activityState.status === "error" ? "Unavailable" : "Loading");
+  const strongSeasonalActivity = /high/i.test(activityLabel);
+  const activityCues = strongSeasonalActivity
+    ? [
+        { icon: "light_mode", label: "Peak season" },
+        { icon: "star", label: "Top seasonal window" },
+        { icon: "visibility", label: "Good for shore viewing" },
+      ]
+    : [
+        { icon: "calendar_month", label: "Seasonal context" },
+        { icon: "travel_explore", label: "Check live reports" },
+        { icon: "headphones", label: "Try cameras + hydrophones" },
+      ];
 
   return (
     <div className="homePageRoot">
@@ -168,14 +204,6 @@ export function HomePage() {
                 Peek at this week
               </a>
             </div>
-            <ul
-              className="homeHero__signals"
-              aria-label="What the trip forecast considers"
-            >
-              <li>01 Sightings</li>
-              <li>02 Weather</li>
-              <li>03 Local access</li>
-            </ul>
           </div>
           <div
             className="homeHero__image"
@@ -229,53 +257,71 @@ export function HomePage() {
             <h2 id="weekly-pulse-title">
               The water is giving <em>this week.</em>
             </h2>
+            <p className="homeWeek__intro">
+              A quick look at activity, seasonal context, and where to go.
+            </p>
           </div>
-          <div className="homeWeek__cards">
-            <article className="homeForecastCard homeForecastCard--yellow">
-              <div className="homeForecastCard__label">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  wb_sunny
-                </span>{" "}
-                Weekly outlook
+          <div className="homePulseGrid">
+            <article className="homePulseCard homePulseCard--outlook">
+              <div className="homePulseCard__header">
+                <span className="homePulseCard__icon homePulseCard__icon--yellow">
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    monitoring
+                  </span>
+                </span>
+                <div>
+                  <strong>This week at a glance</strong>
+                </div>
               </div>
-              <p>Typical activity</p>
-              <strong className="homeForecastCard__activity" role="status">
+              <img
+                className="homePulseLighthouse"
+                src="/images/home/orcacast-lighthouse-hires.png"
+                alt=""
+                aria-hidden="true"
+              />
+              <strong className="homePulseCard__activity" role="status">
                 {activityLabel}
               </strong>
-              <span className="homeForecastCard__week">
+              <span className="homePulseCard__week">
                 Week {currentWeekNumber}
               </span>
-              <p className="homeForecastCard__description">
-                {typicalActivity
-                  ? "Historical sightings are compared to the full seasonal record."
-                  : "Loading the historical seasonal record."}
+              <p className="homePulseCard__description">
+                {strongSeasonalActivity
+                  ? "Typical activity is near peak seasonal levels."
+                  : typicalActivity
+                    ? "Typical activity is compared with the full seasonal record."
+                    : "Loading the historical seasonal record."}
               </p>
-              {weatherState.status === "ready" &&
-              weatherState.week.length > 0 ? (
-                <div
-                  className="homeWeatherStrip"
-                  aria-label="Friday Harbor weather forecast"
-                >
-                  {weatherState.week.slice(0, 5).map((day) => (
-                    <span key={day.key} title={`${day.label}: ${day.summary}`}>
-                      {day.label}
-                      <b>{day.temperatureF ?? "–"}°</b>
+              <ul
+                className="homeActivityCues"
+                aria-label="Weekly activity cues"
+              >
+                {activityCues.map((cue) => (
+                  <li key={cue.label}>
+                    <span
+                      className="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      {cue.icon}
                     </span>
-                  ))}
-                </div>
-              ) : (
-                <div className="homeWeatherStrip homeWeatherStrip--pending">
-                  Weather{" "}
-                  {weatherState.status === "error" ? "unavailable" : "loading"}
-                </div>
-              )}
+                    {cue.label}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/watch" className="homePulseLink homePulseLink--yellow">
+                See weekly outlook <span aria-hidden="true">→</span>
+              </Link>
             </article>
 
-            <article className="homeForecastCard homeForecastCard--chart">
-              <div className="homeForecastCard__chartHeader">
+            <article className="homePulseCard homePulseCard--trend">
+              <div className="homePulseCard__chartHeader">
+                <span className="homePulseCard__icon homePulseCard__icon--teal">
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    equalizer
+                  </span>
+                </span>
                 <div>
-                  <p>Typical sightings by week</p>
-                  <span>Current week highlighted</span>
+                  <strong>Seasonal context</strong>
                 </div>
                 <b>Week {currentWeekNumber}</b>
               </div>
@@ -316,34 +362,86 @@ export function HomePage() {
                   ))}
                 </div>
               </div>
-            </article>
-
-            <article className="homeForecastCard homeForecastCard--aqua">
-              <div className="homeForecastCard__label">
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  location_on
-                </span>{" "}
-                Where to look
+              <div className="homePulseInsight">
+                <p>
+                  <span>
+                    The seasonal curve shows how historical reports change
+                    throughout the year.
+                  </span>
+                </p>
               </div>
-              <h3>
-                San Juan <em>Island</em>
-              </h3>
-              <p className="homeForecastCard__description">
-                Historically active waters with several shore-access viewpoints.
-              </p>
-              <div className="homeForecastCard__locationMeta">
-                <span>
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    park
-                  </span>{" "}
-                  8 viewpoints
-                </span>
-                <b>{activityLabel}</b>
-              </div>
-              <Link to="/watch" className="homeTextLink">
-                Explore the map <span aria-hidden="true">→</span>
+              <Link to="/watch" className="homePulseLink homePulseLink--teal">
+                Open weekly forecast <span aria-hidden="true">→</span>
               </Link>
             </article>
+
+            <article className="homePulseCard homePulseCard--regions">
+              <div className="homePulseCard__header">
+                <span className="homePulseCard__icon homePulseCard__icon--teal">
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    location_on
+                  </span>
+                </span>
+                <div>
+                  <strong>Featured regions</strong>
+                </div>
+              </div>
+              <div className="homeRegionList">
+                {HOME_REGIONS.map((region, index) => (
+                  <Link to="/watch" className="homeRegionRow" key={region.name}>
+                    <span
+                      className={`homeRegionRow__rank homeRegionRow__rank--${region.tone}`}
+                    >
+                      {index + 1}
+                    </span>
+                    <img src={region.image} alt="" aria-hidden="true" />
+                    <span>
+                      <strong>{region.name}</strong>
+                      <em>{region.status}</em>
+                      <small>{region.detail}</small>
+                    </span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                ))}
+              </div>
+              <Link to="/watch" className="homePulseLink homePulseLink--teal">
+                Browse all forecast areas <span aria-hidden="true">→</span>
+              </Link>
+            </article>
+          </div>
+
+          <div className="homeConditionsStrip">
+            <div className="homeConditionsStrip__title">
+              <span className="material-symbols-rounded" aria-hidden="true">
+                partly_cloudy_day
+              </span>
+              <strong>Viewing conditions</strong>
+            </div>
+            {weatherState.status === "ready" ? (
+              <div className="homeConditionsStrip__days">
+                {weatherState.week.slice(0, 3).map((day) => (
+                  <span key={day.key}>
+                    <span
+                      className="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      {day.icon}
+                    </span>
+                    <b>{day.label}</b>
+                    {day.summary}
+                    {day.temperatureF != null ? ` · ${day.temperatureF}°` : ""}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="homeConditionsStrip__status">
+                Weather{" "}
+                {weatherState.status === "error" ? "unavailable" : "loading"}
+              </span>
+            )}
+            <Link to="/planner">
+              See detailed conditions <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </section>
 
@@ -419,13 +517,12 @@ export function HomePage() {
           </div>
           <div className="homeExplore__cards">
             <Link className="homeExploreCard homeExploreCard--pink" to="/watch">
-              <i>01</i>
-              <span className="material-symbols-rounded" aria-hidden="true">
-                map
+              <span className="homeExploreCard__icon" aria-hidden="true">
+                <span className="material-symbols-rounded">map</span>
               </span>
               <div>
                 <h3>Explore</h3>
-                <p>See forecast waters and places to watch.</p>
+                <p>See waters and places.</p>
               </div>
               <b aria-hidden="true">→</b>
             </Link>
@@ -433,32 +530,50 @@ export function HomePage() {
               className="homeExploreCard homeExploreCard--yellow"
               to="/watch"
             >
-              <i>02</i>
-              <span className="material-symbols-rounded" aria-hidden="true">
-                photo_camera
+              <span className="homeExploreCard__icon" aria-hidden="true">
+                <span className="material-symbols-rounded">photo_camera</span>
               </span>
               <div>
                 <h3>Watch</h3>
-                <p>Find cameras around the Salish Sea.</p>
+                <p>View live cameras.</p>
               </div>
               <b aria-hidden="true">→</b>
             </Link>
-            <Link className="homeExploreCard homeExploreCard--aqua" to="/watch">
-              <i>03</i>
-              <span className="material-symbols-rounded" aria-hidden="true">
-                graphic_eq
+            <a
+              className="homeExploreCard homeExploreCard--aqua"
+              href="https://live.orcasound.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Listen live on Orcasound (opens in a new tab)"
+            >
+              <span className="homeExploreCard__icon" aria-hidden="true">
+                <span className="material-symbols-rounded">graphic_eq</span>
               </span>
               <div>
                 <h3>Listen</h3>
-                <p>Tune into Salish Sea hydrophones.</p>
+                <p>Tune into the Salish Sea.</p>
               </div>
               <b aria-hidden="true">→</b>
-            </Link>
+            </a>
           </div>
         </section>
       </main>
 
-      <SiteFooter tagline="Plan thoughtfully. Watch respectfully." />
+      <SiteFooter
+        tagline="Plan thoughtfully. Watch respectfully."
+        links={[
+          { label: "About", to: "/about" },
+          {
+            label: "Contribute",
+            to: "https://github.com/stevetylda/OrcaCast_Public",
+            external: true,
+            newTab: true,
+            icon: "github",
+            emphasis: true,
+            ariaLabel: "Contribute to OrcaCast on GitHub (opens in a new tab)",
+          },
+        ]}
+      />
 
       <ReturnToTopButton className="homeReturnToTop" />
 

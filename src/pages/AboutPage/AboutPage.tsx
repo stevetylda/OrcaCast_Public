@@ -681,6 +681,15 @@ export function AboutPage() {
           { label: "Methodology", to: "#methodology", external: true },
           { label: "Learn how the model works", to: "/about/model" },
           { label: "Plan a trip", to: "/planner" },
+          {
+            label: "Contribute",
+            to: "https://github.com/stevetylda/OrcaCast_Public",
+            external: true,
+            newTab: true,
+            icon: "github",
+            emphasis: true,
+            ariaLabel: "Contribute to OrcaCast on GitHub (opens in a new tab)",
+          },
         ]}
       />
 

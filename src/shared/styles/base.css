@@ -35,7 +35,7 @@
 /* Shared footer chrome across the editorial pages. */
 .appSiteFooter {
   display: grid;
-  grid-template-columns: minmax(190px, 1fr) minmax(0, 2fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 24px;
   padding: 28px clamp(24px, 5vw, 72px);
@@ -63,14 +63,13 @@
 
 .appSiteFooter__nav {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 18px;
   flex-wrap: wrap;
 }
 
 .appSiteFooter__nav a,
-.appSiteFooter__tagline,
-.appSiteFooter__region {
+.appSiteFooter__tagline {
   color: #425a72;
   font-size: .7rem;
   font-weight: 850;
@@ -78,15 +77,38 @@
   text-decoration: none;
 }
 
+.appSiteFooter__nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .appSiteFooter__nav a:hover,
 .appSiteFooter__nav a:focus-visible { color: #08787c; }
+
+.appSiteFooter__nav .appSiteFooter__contribute {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 2px solid #061d3c;
+  border-radius: 999px;
+  background: #ffda4c;
+  color: #061d3c;
+  transition: background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.appSiteFooter__nav .appSiteFooter__contribute:hover,
+.appSiteFooter__nav .appSiteFooter__contribute:focus-visible {
+  background: #47d1ca;
+  color: #061d3c;
+  box-shadow: 3px 3px 0 #061d3c;
+  transform: translate(-1px, -1px);
+}
+
 .appSiteFooter__tagline { text-align: center; }
-.appSiteFooter__region { text-align: right; text-transform: uppercase; }
 
 @media (max-width: 760px) {
   .appSiteFooter { grid-template-columns: 1fr; gap: 14px; padding: 24px; text-align: center; }
   .appSiteFooter__brand, .appSiteFooter__nav { justify-content: center; }
-  .appSiteFooter__region { text-align: center; }
 }
 
 * {
