@@ -559,7 +559,8 @@
   background: var(--model-integrating);
 }
 .modelStoryStatus--planner {
-  background: var(--model-planner);
+  background: #ff8b82;
+  color: var(--about-navy);
 }
 
 .modelStoryStage__number {
@@ -770,7 +771,7 @@
 }
 
 .modelStoryResult__ticketHeader strong {
-  color: var(--about-coral);
+  color: #c83d36;
   font-family: Georgia, serif;
   font-size: 2.1rem;
   font-style: italic;

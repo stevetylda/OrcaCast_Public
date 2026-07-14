@@ -177,7 +177,7 @@ export function HomePage() {
           <nav className="homeNav" aria-label="Homepage navigation">
             <a href="#this-week">This week</a>
             <Link to="/planner">Plan a trip</Link>
-            <a href="#explore">Explore</a>
+            <Link to="/explore">Explore</Link>
           </nav>
         }
       />
@@ -516,7 +516,10 @@ export function HomePage() {
             <h2 id="explore-title">Choose your own adventure.</h2>
           </div>
           <div className="homeExplore__cards">
-            <Link className="homeExploreCard homeExploreCard--pink" to="/watch">
+            <Link
+              className="homeExploreCard homeExploreCard--pink"
+              to="/explore"
+            >
               <span className="homeExploreCard__icon" aria-hidden="true">
                 <span className="material-symbols-rounded">map</span>
               </span>

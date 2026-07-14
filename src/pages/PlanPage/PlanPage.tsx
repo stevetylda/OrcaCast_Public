@@ -100,12 +100,12 @@ const DEFAULT_RECOMMENDED_SPOTS_COUNT = 25;
 const TRIP_BRUSH_DAYS = 366;
 const TRIP_BRUSH_APPLY_DELAY_MS = 2000;
 const PLANNER_COLLAPSE_DURATION_MS = 320;
-const PLANNER_REVEAL_MIN_DURATION_MS = 10_000;
-const PLANNER_REVEAL_EXIT_DURATION_MS = 420;
+const PLANNER_REVEAL_MIN_DURATION_MS = 300;
+const PLANNER_REVEAL_EXIT_DURATION_MS = 180;
 const PLACE_DETAIL_MATCH_RADIUS_KM = 1.25;
 const PLANNER_ITINERARY_STORAGE_KEY = "orcacast.planner.itinerary.v1";
 
-type FieldPickFilter = "top" | "shore" | "Ferry" | "Marina" | "Park";
+type FieldPickFilter = "top" | "Ferry" | "Marina" | "Park";
 type PlannerSidebarMode = "overview" | "location-details" | "itinerary";
 
 function formatViewingPotentialLabel(
@@ -576,10 +576,6 @@ export function PlannerPage() {
 
   const fieldPickPlaces = useMemo(() => {
     if (fieldPickFilter === "top") return displayedRecommendedPlaces;
-    if (fieldPickFilter === "shore")
-      return displayedRecommendedPlaces.filter(
-        (place) => place.type === "Other",
-      );
     return displayedRecommendedPlaces.filter(
       (place) => place.type === fieldPickFilter,
     );
@@ -1312,7 +1308,7 @@ export function PlannerPage() {
           <nav className="homeNav" aria-label="Planner navigation">
             <Link to="/watch">This week</Link>
             <Link to="/planner">Plan a trip</Link>
-            <Link to="/#explore">Explore</Link>
+            <Link to="/explore">Explore</Link>
           </nav>
         }
       />
@@ -2296,7 +2292,6 @@ export function PlannerPage() {
                           {(
                             [
                               ["top", "Top picks"],
-                              ["shore", "Shore"],
                               ["Ferry", "Ferry"],
                               ["Marina", "Marina"],
                               ["Park", "Park"],

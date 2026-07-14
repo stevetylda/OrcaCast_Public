@@ -197,7 +197,7 @@ export function AboutPage() {
           <nav className="aboutGuideNav" aria-label="About page navigation">
             <a href="/#this-week">This week</a>
             <Link to="/planner">Plan a trip</Link>
-            <a href="/#explore">Explore</a>
+            <Link to="/explore">Explore</Link>
           </nav>
         }
       />

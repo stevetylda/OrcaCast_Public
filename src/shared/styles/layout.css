@@ -45,6 +45,7 @@
   color: inherit;
   text-align: left;
   min-width: 0;
+  text-decoration: none;
 }
 
 .brandBtn--active {

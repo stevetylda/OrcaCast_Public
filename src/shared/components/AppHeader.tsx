@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 type Props = {
   title: string;
   subtitle: string;
   onOpenInfo: () => void;
   onOpenMenu: () => void;
-  onBrandClick?: () => void;
   rightSlot?: ReactNode;
   variant?: "default" | "home";
 };
@@ -15,7 +15,6 @@ export function AppHeader({
   subtitle,
   onOpenInfo,
   onOpenMenu,
-  onBrandClick,
   rightSlot,
   variant = "default",
 }: Props) {
@@ -34,17 +33,15 @@ export function AppHeader({
           <span className="material-symbols-rounded">menu</span>
         </button>
 
-        <button
-          type="button"
-          className={`brand brandBtn${onBrandClick ? " brandBtn--active" : ""}`}
-          onClick={onBrandClick}
-          aria-label={onBrandClick ? "Reset map" : undefined}
-          title={onBrandClick ? "Reset map" : undefined}
+        <Link
+          className="brand brandBtn brandBtn--active"
+          to="/"
+          aria-label="OrcaCast home"
         >
           <div className="brand__title">
             {title} <span className="brand__subtitle">– {subtitle}</span>
           </div>
-        </button>
+        </Link>
       </div>
 
       <div className="header__right">

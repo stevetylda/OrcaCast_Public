@@ -10,6 +10,7 @@ export type Period = {
   label: string;
   periodKey: string;
   fileId: string;
+  forecastAvailable?: boolean;
 };
 
 let cachedPeriods: Period[] | null = null;
@@ -77,7 +78,14 @@ export async function loadPeriods(): Promise<Period[]> {
       const label = p.label ?? `${range.start} → ${range.end}`;
       const periodKey = `${p.year}-${String(p.stat_week).padStart(2, "0")}`;
       const fileId = `${p.year}_${p.stat_week}`;
-      return { year: p.year, stat_week: p.stat_week, label, periodKey, fileId };
+      return {
+        year: p.year,
+        stat_week: p.stat_week,
+        label,
+        periodKey,
+        fileId,
+        forecastAvailable: true,
+      };
     })
     .sort((a, b) => a.year - b.year || a.stat_week - b.stat_week);
   return cachedPeriods;

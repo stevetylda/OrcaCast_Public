@@ -1,6 +1,7 @@
-import { useEffect, useId } from "react";
+import { useId, useRef } from "react";
 import { Link } from "react-router-dom";
 import { attribution, basemapSources } from "../config/attribution";
+import { useDialogFocus } from "./useDialogFocus";
 
 type Props = {
   open: boolean;
@@ -16,17 +17,9 @@ export function InfoModal({
   darkMode = true,
 }: Props) {
   const titleId = useId();
-
-  // Escape closes modal (tiny UX win)
-  useEffect(() => {
-    if (!open) return;
-
-    const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useDialogFocus({ open, dialogRef, initialFocusRef: closeButtonRef, onClose });
 
   if (!open) return null;
 
@@ -37,11 +30,13 @@ export function InfoModal({
       role="presentation"
     >
       <section
+        ref={dialogRef}
         className={`modal modal--info${darkMode ? "" : " modal--light"}`}
         onClick={(ev) => ev.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
       >
         <div className="modal__header modal__header--info">
           <div className="modal__title modal__title--info" id={titleId}>
@@ -67,6 +62,7 @@ export function InfoModal({
               Learn More
             </Link>
             <button
+              ref={closeButtonRef}
               className="info__close"
               onClick={onClose}
               aria-label="Close"

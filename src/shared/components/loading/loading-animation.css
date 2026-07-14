@@ -45,7 +45,7 @@
 }
 
 .loadingOverlay.isComplete {
-  animation: loadingOverlay__complete 420ms ease-in both;
+  animation: loadingOverlay__complete 180ms ease-in both;
 }
 
 .loadingAnimation {

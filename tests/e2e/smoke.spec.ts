@@ -1,7 +1,15 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-const routes = ["/", "/watch", "/planner", "/about", "/about/model"];
+const routes = [
+  "/",
+  "/watch",
+  "/planner",
+  "/explore",
+  "/about",
+  "/about/model",
+  "/route-that-does-not-exist",
+];
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -33,6 +41,20 @@ function monitorPage(page: Page, baseURL: string) {
   return { consoleErrors, firstPartyFailures };
 }
 
+test("metadata failure does not block metadata-independent pages", async ({
+  page,
+}) => {
+  await page.route(/\/data\/(meta|version)\.json(?:\?.*)?$/, (route) =>
+    route.fulfill({ status: 503, body: "temporarily unavailable" }),
+  );
+
+  await page.goto("/about", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+});
+
 for (const route of routes) {
   test(`${route} loads directly, refreshes, and has no serious accessibility violations`, async ({
     page,
@@ -51,24 +73,16 @@ for (const route of routes) {
     const accessibility = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
-    const contrastBacklog = accessibility.violations.filter(
-      (item) => item.id === "color-contrast",
-    );
-    if (contrastBacklog.length) {
-      test.info().annotations.push({
-        type: "accessibility-warning",
-        description: `${contrastBacklog.flatMap((item) => item.nodes).length} known contrast findings`,
-      });
-    }
     const blocking = accessibility.violations.filter(
-      (item) =>
-        item.id !== "color-contrast" &&
-        (item.impact === "critical" || item.impact === "serious"),
+      (item) => item.impact === "critical" || item.impact === "serious",
     );
     const summary = blocking.map((item) => ({
       id: item.id,
       impact: item.impact,
-      targets: item.nodes.flatMap((node) => node.target),
+      nodes: item.nodes.map((node) => ({
+        target: node.target,
+        failureSummary: node.failureSummary,
+      })),
     }));
     expect(blocking, JSON.stringify(summary, null, 2)).toEqual([]);
     const unhandledConsoleErrors = monitor.consoleErrors.filter(
@@ -147,6 +161,43 @@ test("mobile navigation opens and closes", async ({ page }, testInfo) => {
   await expect(
     page.getByRole("navigation", { name: "Primary navigation" }),
   ).toBeHidden();
+});
+
+test("mobile Planner keeps the complete form within reach", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "mobile-chromium",
+    "Mobile Planner regression test",
+  );
+  await page.setViewportSize({ width: 412, height: 839 });
+  await page.goto("/planner", { waitUntil: "domcontentloaded" });
+
+  const promptCard = page.locator(".plannerResultsPage__promptCard");
+  await expect(promptCard).toBeVisible();
+
+  const layout = await promptCard.evaluate((card) => {
+    const cardRect = card.getBoundingClientRect();
+    const submitRect = card
+      .querySelector(".plannerResultsPage__promptSubmit")
+      ?.getBoundingClientRect();
+    return {
+      cardBottom: cardRect.bottom,
+      cardTop: cardRect.top,
+      overflowY: getComputedStyle(card).overflowY,
+      position: getComputedStyle(card).position,
+      submitBottom: submitRect?.bottom ?? Number.POSITIVE_INFINITY,
+      submitTop: submitRect?.top ?? Number.NEGATIVE_INFINITY,
+      viewportHeight: window.innerHeight,
+    };
+  });
+
+  expect(layout.position).toBe("absolute");
+  expect(layout.overflowY).toBe("auto");
+  expect(layout.cardTop).toBeGreaterThanOrEqual(0);
+  expect(layout.cardBottom).toBeLessThanOrEqual(layout.viewportHeight);
+  expect(layout.submitTop).toBeGreaterThanOrEqual(layout.cardTop);
+  expect(layout.submitBottom).toBeLessThanOrEqual(layout.viewportHeight);
 });
 
 test("favicons, manifest, fonts, style, and CORS-enabled map resources respond", async ({

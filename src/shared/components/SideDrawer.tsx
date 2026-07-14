@@ -56,7 +56,9 @@
 //   );
 // }
 
+import { useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDialogFocus } from "./useDialogFocus";
 
 type NavItem = {
   label: string;
@@ -73,11 +75,15 @@ type Props = {
 export function SideDrawer({ open, onClose }: Props) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useDialogFocus({ open, dialogRef, initialFocusRef: closeButtonRef, onClose });
 
   const items: NavItem[] = [
     { label: "Home", path: "/", icon: "home" },
     { label: "This Week", path: "/watch", icon: "map_search" },
     { label: "Planner", path: "/planner", icon: "event_note" },
+    { label: "Explore", path: "/explore", icon: "explore" },
     { label: "About", path: "/about", icon: "info" },
   ];
 
@@ -90,9 +96,13 @@ export function SideDrawer({ open, onClose }: Props) {
       role="presentation"
     >
       <aside
+        ref={dialogRef}
         className="sideDrawer sideDrawer--editorial"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
         aria-label="Main menu"
+        tabIndex={-1}
       >
         <div className="sideDrawer__header">
           <div>
@@ -100,6 +110,7 @@ export function SideDrawer({ open, onClose }: Props) {
             <div className="sideDrawer__title">Explore the water</div>
           </div>
           <button
+            ref={closeButtonRef}
             className="iconBtn iconBtn--ghost"
             onClick={onClose}
             aria-label="Close menu"

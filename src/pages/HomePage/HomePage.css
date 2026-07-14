@@ -15,6 +15,7 @@
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
 }
 
+
 .header--home {
   height: 88px;
   padding: 0 clamp(20px, 3vw, 60px);
@@ -872,4 +873,23 @@
   .homeConditionsStrip__title strong { max-width: none; }
   .homeConditionsStrip__days { display: grid; }
   .homeConditionsStrip__days > span { padding: 7px 0; }
+}
+
+/* Accessible foregrounds for the saturated editorial palette. */
+.homeHero__title em,
+.homeSectionHeading em,
+.homeForecastCard h3 em {
+  color: #c83d36;
+}
+
+.homeHero__weekBadge,
+.homeFieldPass__stub,
+.homeFieldPass__fields p,
+.homeFieldPass__fields em,
+.homeExploreCard p {
+  color: var(--home-navy);
+}
+
+.homePlannerCta__copy .homeKicker {
+  color: #fffdf6;
 }

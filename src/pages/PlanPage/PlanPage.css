@@ -4938,7 +4938,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: rgba(83, 108, 147, 0.66);
+  color: #526c84;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: normal;
@@ -5583,7 +5583,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: rgba(83, 108, 147, 0.66);
+  color: #526c84;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: normal;
@@ -7112,9 +7112,44 @@
 }
 
 @media (max-width: 900px) {
+  .plannerResultsPage.isPrompting,
+  .plannerResultsPage.isEditing {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .plannerResultsPage.isPrompting .plannerResultsPage__main,
+  .plannerResultsPage.isEditing .plannerResultsPage__main {
+    display: block;
+    height: 100%;
+    min-height: 0;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .plannerResultsPage.isPrompting .plannerResultsPage__mapLayer,
+  .plannerResultsPage.isEditing .plannerResultsPage__mapLayer {
+    position: absolute;
+    inset: 12px;
+    min-height: 0;
+  }
+
   .plannerResultsPage.isPrompting .plannerResultsPage__promptCard,
-  .plannerResultsPage.isEditing .plannerResultsPage__promptCard { top: 20px; left: 12px; width: calc(100% - 24px); max-height: calc(100dvh - 104px); transform: none; }
-  .plannerResultsPage.isEditing .plannerResultsPage__promptCard { animation: none; }
+  .plannerResultsPage.isEditing .plannerResultsPage__promptCard {
+    position: absolute;
+    inset: 12px 12px auto;
+    width: auto;
+    max-height: calc(100% - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transform: none;
+  }
+
+  .plannerResultsPage.isEditing .plannerResultsPage__promptCard {
+    animation: none;
+  }
 }
 
 /* Field Pick card: compact metadata front and deliberate action-card flip. */

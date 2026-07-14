@@ -111,14 +111,19 @@ export async function loadDataMeta(): Promise<DataMeta> {
           message: "No metadata file found",
         })
       );
-    })().then((meta) => {
-      resolvedMeta = meta;
-      if (resolvedDataVersionToken === null) {
-        resolvedDataVersionToken =
-          meta.data_version || BUILD_VERSION || FALLBACK_DATA_VERSION;
-      }
-      return meta;
-    });
+    })()
+      .then((meta) => {
+        resolvedMeta = meta;
+        if (resolvedDataVersionToken === null) {
+          resolvedDataVersionToken =
+            meta.data_version || BUILD_VERSION || FALLBACK_DATA_VERSION;
+        }
+        return meta;
+      })
+      .catch((error: unknown) => {
+        cachedMetaPromise = null;
+        throw error;
+      });
   }
   return cachedMetaPromise;
 }

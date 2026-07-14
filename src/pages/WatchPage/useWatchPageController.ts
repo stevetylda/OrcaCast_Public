@@ -4,8 +4,10 @@ import type { GridCellExpandRequest } from "../../features/map/types";
 import { appConfig } from "../../shared/config/appConfig";
 import {
   buildPeriod,
+  periodRange,
   readForecastPeriodOverride,
   resolvePeriodsForSelection,
+  selectLatestPeriod,
 } from "../../shared/config/forecastPeriod";
 import {
   getForecastPathForPeriod,
@@ -221,10 +223,19 @@ export function useWatchPageController() {
     [resolution, selectedForecast],
   );
   const latestForecastPath = useMemo(() => {
-    if (periods.length === 0) return undefined;
-    const latest = periods[periods.length - 1];
+    const latest = selectLatestPeriod(
+      periods.filter((period) => period.forecastAvailable !== false),
+    );
+    if (!latest) return undefined;
     return getForecastPathForPeriod(resolution, latest.fileId);
   }, [periods, resolution]);
+  const latestAvailableForecastPeriod = useMemo(
+    () =>
+      selectLatestPeriod(
+        periods.filter((period) => period.forecastAvailable !== false),
+      ),
+    [periods],
+  );
 
   const {
     places: suggestedPlaces,
@@ -412,6 +423,11 @@ export function useWatchPageController() {
   }, [selectedPeriodHasForecast, selectedPeriodKeyForNotice]);
 
   const usingFallbackForecast = selectedPeriodHasForecast === false;
+  const selectedPeriodIsCurrentWeek =
+    selectedPeriodKeyForNotice === fallbackPeriod.periodKey;
+  const latestAvailableForecastRange = latestAvailableForecastPeriod
+    ? periodRange(latestAvailableForecastPeriod)
+    : null;
 
   const currentWeek = useMemo(
     () => selectedForecast?.stat_week ?? fallbackPeriod.stat_week,
@@ -580,6 +596,8 @@ export function useWatchPageController() {
     mapResetNonce,
     showNoForecastNotice,
     usingFallbackForecast,
+    selectedPeriodIsCurrentWeek,
+    latestAvailableForecastRange,
     forecastPath,
     latestForecastPath,
     expectedSummary,

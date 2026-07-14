@@ -4,6 +4,8 @@ import { SideDrawer } from "../shared/components/SideDrawer";
 import { PageErrorBoundary } from "../shared/components/PageErrorBoundary";
 import { MenuProvider, useMenu } from "../shared/state/MenuContext";
 import { MapStateProvider, useMapState } from "../shared/state/MapStateContext";
+import { HashScrollHandler } from "./HashScrollHandler";
+import { RouteMetadata } from "./RouteMetadata";
 import "../shared/styles/base.css";
 import "../shared/styles/layout.css";
 import "../shared/styles/map.css";
@@ -24,6 +26,12 @@ const HomePage = lazy(() =>
 const WatchPage = lazy(() =>
   import("../pages/WatchPage").then((m) => ({ default: m.WatchPage })),
 );
+const NotFoundPage = lazy(() =>
+  import("../pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
+);
+const ExplorePage = lazy(() =>
+  import("../pages/ExplorePage").then((m) => ({ default: m.ExplorePage })),
+);
 
 function withPageBoundary(pageName: string, page: ReactNode) {
   return <PageErrorBoundary pageName={pageName}>{page}</PageErrorBoundary>;
@@ -38,6 +46,8 @@ function AppFrame() {
       className={darkMode ? "app app--dark" : "app"}
       data-theme={darkMode ? "dark" : "light"}
     >
+      <HashScrollHandler />
+      <RouteMetadata />
       <Suspense
         fallback={
           <div className="routeLoadingState" role="status">
@@ -62,6 +72,14 @@ function AppFrame() {
           <Route
             path="/about/model"
             element={withPageBoundary("Model", <ModelPage />)}
+          />
+          <Route
+            path="/explore"
+            element={withPageBoundary("Explore", <ExplorePage />)}
+          />
+          <Route
+            path="*"
+            element={withPageBoundary("Not found", <NotFoundPage />)}
           />
         </Routes>
       </Suspense>

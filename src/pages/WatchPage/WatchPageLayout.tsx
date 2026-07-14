@@ -82,6 +82,9 @@ const TREND_PRESENTATION = {
   none: { icon: "waves", label: "Weekly outlook" },
 } as const;
 
+const WATCH_REVEAL_MIN_DURATION_MS = 300;
+const WATCH_REVEAL_EXIT_DURATION_MS = 180;
+
 export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   trackRender("WatchPageLayout");
   const [sidebarOffsetPx, setSidebarOffsetPx] = useState(0);
@@ -114,7 +117,6 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   const [itineraryMapViewActive, setItineraryMapViewActive] = useState(false);
   const [itineraryAddPulse, setItineraryAddPulse] = useState(false);
   const [thisWeekLoading, setThisWeekLoading] = useState(true);
-  const [thisWeekLoaderComplete, setThisWeekLoaderComplete] = useState(false);
   const [hydrophoneLocations, setHydrophoneLocations] = useState<
     OrcasoundHydrophone[]
   >([]);
@@ -125,6 +127,9 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
   const [camerasVisible, setCamerasVisible] = useState(false);
   const [hydrophonesVisible, setHydrophonesVisible] = useState(false);
+  const [watchRevealMinimumElapsed, setWatchRevealMinimumElapsed] =
+    useState(false);
+  const [renderedForecastLoadKey, setRenderedForecastLoadKey] = useState("");
   const {
     primaryMapRef,
     darkMode,
@@ -158,6 +163,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     currentWeekYear,
     showNoForecastNotice,
     usingFallbackForecast,
+    selectedPeriodIsCurrentWeek,
+    latestAvailableForecastRange,
     shareBusy,
     suggestedPlaces,
     suggestedPlacesLoading,
@@ -166,7 +173,6 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     setSelectedPlaceId,
     shareSnapshot,
     downloadSnapshotAction,
-    handleResetMap,
     setMenuOpen,
     pageLoadError,
     reportFatalDataError,
@@ -236,17 +242,30 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     return () => window.clearTimeout(timerId);
   }, [itineraryAddPulse]);
 
+  const forecastLoadKey = forecastPath ?? latestForecastPath ?? "";
+  const watchResourcesReady =
+    periods.length > 0 &&
+    forecastLoadKey.length > 0 &&
+    renderedForecastLoadKey === forecastLoadKey;
+  const thisWeekLoaderComplete =
+    watchRevealMinimumElapsed && watchResourcesReady;
+
   useEffect(() => {
-    const completeTimer = window.setTimeout(
-      () => setThisWeekLoaderComplete(true),
-      4_550,
+    const timerId = window.setTimeout(
+      () => setWatchRevealMinimumElapsed(true),
+      WATCH_REVEAL_MIN_DURATION_MS,
     );
-    const hideTimer = window.setTimeout(() => setThisWeekLoading(false), 5_000);
-    return () => {
-      window.clearTimeout(completeTimer);
-      window.clearTimeout(hideTimer);
-    };
+    return () => window.clearTimeout(timerId);
   }, []);
+
+  useEffect(() => {
+    if (!thisWeekLoaderComplete) return;
+    const timerId = window.setTimeout(
+      () => setThisWeekLoading(false),
+      WATCH_REVEAL_EXIT_DURATION_MS,
+    );
+    return () => window.clearTimeout(timerId);
+  }, [thisWeekLoaderComplete]);
 
   useEffect(() => {
     let cancelled = false;
@@ -379,14 +398,13 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     variant: "home" as const,
     onOpenInfo: () => controller.setInfoOpen(true),
     onOpenMenu: () => setMenuOpen(true),
-    onBrandClick: handleResetMap,
     rightSlot: (
       <nav className="homeNav" aria-label="This week navigation">
         <Link to="/watch" aria-current="page">
           This week
         </Link>
         <Link to="/planner">Plan a trip</Link>
-        <Link to="/#explore">Explore</Link>
+        <Link to="/explore">Explore</Link>
       </nav>
     ),
   };
@@ -519,6 +537,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                   selectedWeekYear: currentWeekYear,
                   forecastPath,
                   fallbackForecastPath: latestForecastPath,
+                  forecastOverlayLoadKey: forecastLoadKey,
+                  onForecastOverlayReady: setRenderedForecastLoadKey,
                 },
                 true,
               )}
@@ -881,8 +901,12 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                   info
                 </span>
                 <span>
-                  This period does not have a dedicated forecast yet. Showing
-                  the latest available forecast surface.
+                  {selectedPeriodIsCurrentWeek
+                    ? "A forecast for this week is not available. "
+                    : "This period does not have a dedicated forecast. "}
+                  {latestAvailableForecastRange
+                    ? `Showing the latest packaged forecast (${latestAvailableForecastRange.start} to ${latestAvailableForecastRange.end}).`
+                    : "Showing the latest available forecast surface."}
                 </span>
               </div>
             ) : null}
@@ -896,7 +920,11 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                 variant="orca"
                 complete={thisWeekLoaderComplete}
                 label="Preparing this week's forecast"
-                completeLabel="This week's forecast is ready"
+                completeLabel={
+                  usingFallbackForecast
+                    ? "Latest available forecast is ready"
+                    : "This week's forecast is ready"
+                }
               />
             </LoadingOverlay>
           ) : null}

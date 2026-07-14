@@ -37,6 +37,7 @@ export function buildPeriod(
     label: label ?? `${range.start} → ${range.end}`,
     periodKey: `${year}-${String(statWeek).padStart(2, "0")}`,
     fileId: `${year}_${statWeek}`,
+    forecastAvailable: false,
   };
 }
 
@@ -140,16 +141,25 @@ export function resolvePeriodsForSelection(
     }
   }
 
-  if (periods.length > 0) {
-    const latest = selectLatestPeriod(periods) ?? periods[periods.length - 1];
+  const currentPeriod = byKey.get(fallbackPeriod.periodKey);
+  if (currentPeriod) {
     return {
       periods,
-      selectedIndex: Math.max(
-        0,
-        periods.findIndex((period) => period.periodKey === latest.periodKey),
+      selectedIndex: periods.findIndex(
+        (period) => period.periodKey === currentPeriod.periodKey,
       ),
     };
   }
 
-  return { periods: [fallbackPeriod], selectedIndex: 0 };
+  byKey.set(fallbackPeriod.periodKey, {
+    ...fallbackPeriod,
+    forecastAvailable: false,
+  });
+  const merged = Array.from(byKey.values()).sort(comparePeriods);
+  return {
+    periods: merged,
+    selectedIndex: merged.findIndex(
+      (period) => period.periodKey === fallbackPeriod.periodKey,
+    ),
+  };
 }
