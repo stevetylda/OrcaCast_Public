@@ -1,6 +1,5 @@
 import { lazy, Suspense, useState } from "react";
 import { WelcomeModal } from "../../shared/components/WelcomeModal";
-import { startMapTour } from "../../shared/tour/startMapTour";
 import { WatchPageErrorBoundary } from "./WatchPageErrorBoundary";
 import { WatchPageLayout } from "./WatchPageLayout";
 import { useWatchPageController } from "./useWatchPageController";
@@ -12,6 +11,14 @@ const InfoModal = lazy(() =>
     default: m.InfoModal,
   })),
 );
+
+async function startWatchMapTour() {
+  const [{ startMapTour }] = await Promise.all([
+    import("../../shared/tour/startMapTour"),
+    import("driver.js/dist/driver.css"),
+  ]);
+  startMapTour();
+}
 
 export function WatchPage() {
   const [boundaryKey, setBoundaryKey] = useState(0);
@@ -28,7 +35,7 @@ export function WatchPage() {
             <WelcomeModal
               open={controller.welcomeOpen}
               onClose={() => controller.setWelcomeOpen(false)}
-              onStartTour={() => startMapTour()}
+              onStartTour={() => void startWatchMapTour()}
               onLearnMore={() => {
                 controller.setWelcomeOpen(false);
                 controller.setInfoOpen(true);
@@ -39,7 +46,7 @@ export function WatchPage() {
             <InfoModal
               open={controller.infoOpen}
               onClose={() => controller.setInfoOpen(false)}
-              onStartTour={() => startMapTour()}
+              onStartTour={() => void startWatchMapTour()}
               darkMode={controller.darkMode}
             />
           )}
