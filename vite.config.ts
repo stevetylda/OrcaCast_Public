@@ -27,6 +27,8 @@ export default defineConfig(() => ({
             return "plotly-vendor";
           if (id.includes("reactflow")) return "flow-vendor";
           if (id.includes("driver.js")) return "tour-vendor";
+          if (id.includes("zod")) return "validation-vendor";
+          if (id.includes("html-to-image")) return "export-vendor";
           return "vendor";
         },
       },

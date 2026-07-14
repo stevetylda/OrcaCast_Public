@@ -7,7 +7,6 @@ import {
   type DragEvent,
 } from "react";
 import { Link } from "react-router-dom";
-import { toBlob } from "html-to-image";
 import { AppFooter } from "../../shared/components/AppFooter";
 import { AppHeader } from "../../shared/components/AppHeader";
 import { trackRender } from "../../shared/debug/perf";
@@ -358,6 +357,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     try {
       const card = itineraryExportCardRef.current;
       if (!card) throw new Error("The itinerary card is not ready.");
+      const { toBlob } = await import("html-to-image");
       const blob = await toBlob(card, {
         backgroundColor: "#fff8e9",
         cacheBust: true,
