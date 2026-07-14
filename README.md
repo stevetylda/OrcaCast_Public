@@ -78,6 +78,23 @@ Key capabilities:
 - Details on observer bias, spatial context, ecological proxies, and uncertainty
 - Interpretation guidance for relative activity and viewing opportunity
 
+### Explore — `/explore`
+
+Explore is a dedicated, coming-soon field-guide experience. It previews practical content about Salish Sea whales, responsible whale watching, species identification, and other wildlife visitors may encounter, including porpoises, seals, sea lions, eagles, and seabirds.
+
+The route is available now so navigation, bookmarks, and sharing remain stable while the full guide is developed. Its construction treatment deliberately distinguishes preview content from finished guidance.
+
+Planned topics:
+
+- Orca, humpback, gray, and minke whale identification
+- Shore-first and responsible whale-watching practices
+- Seasonal and behavioral clues to look for
+- Porpoises, pinnipeds, seabirds, and other Salish Sea wildlife
+
+### Unknown routes
+
+Unknown URLs render a responsive OrcaCast 404 page rather than an empty application shell. The page provides links back to Home, Watch, Planner, Explore, About, and Model content. Static hosting must still serve `index.html` as the fallback so React Router can resolve direct requests.
+
 ## Local development
 
 ### Prerequisites
@@ -101,6 +118,7 @@ npm run typecheck
 npm run test
 npm run lint
 npm run build
+npm run test:e2e:chromium
 ```
 
 Use `npm run build:check` to create a production build and check the bundle budget. Use `npm run repo:check` or `npm run data:validate` to validate packaged artifacts.
@@ -110,7 +128,7 @@ Use `npm run build:check` to create a production build and check the bundle budg
 ```text
 src/
   app/                 Application shell and routing
-  pages/               Home, Watch, Planner, About, and Model pages
+  pages/               Home, Watch, Planner, Explore, About, Model, and 404 pages
   features/            Map, planner, watch, location, and analyst features
   shared/              Shared components, state, configuration, and data access
 public/
@@ -134,13 +152,34 @@ The public application reads packaged datasets from `public/data`, including act
 
 Forecast values should be interpreted as relative rankings across time and space. Reporting effort, access, weather, and sparse observations can all affect what is recorded and what can realistically be seen.
 
+Forecast metadata is primed asynchronously after React starts. A missing or invalid metadata file must not prevent metadata-independent routes such as Home, About, Explore, or the 404 page from rendering. Forecast-owning pages handle their data loading and recovery locally. Failed metadata loads are retryable rather than permanently cached as rejected promises.
+
+## Routing, navigation, and page metadata
+
+OrcaCast uses React Router for client-side navigation. The visible OrcaCast brand in the shared header always navigates to Home; map resets and other page actions belong to explicitly labelled controls.
+
+Each route sets a distinct document title, description, Open Graph title, and Open Graph description during both direct loads and client-side navigation. Add metadata to `src/app/RouteMetadata.tsx` whenever a new route is introduced. Unknown routes use dedicated not-found metadata.
+
+Hash navigation is handled after route transitions so links to an in-page target scroll after the destination has rendered. Prefer a dedicated route such as `/explore` when content is a first-class page rather than an anchor within Home.
+
+## Accessibility
+
+The shared information modal and navigation drawer provide initial focus, keyboard focus trapping, Escape dismissal, background inertness, and focus restoration. Serious and critical Axe violations—including color contrast—are blocking failures in the E2E smoke suite.
+
+When adding routes or major UI states:
+
+- Use semantic headings, landmarks, and labelled controls.
+- Preserve visible keyboard focus and WCAG AA contrast.
+- Add the route to `tests/e2e/smoke.spec.ts` so desktop and mobile direct-load, refresh, console, network, and Axe checks cover it.
+- Verify dialogs retain focus and restore it to the opener when dismissed.
+
 ## Production deployment
 
 ```bash
 npm run build
 ```
 
-Deploy the generated `dist/` directory to a static host. Because OrcaCast uses client-side routing, configure the host to serve `index.html` as the fallback for routes such as `/watch`, `/planner`, and `/about/model`.
+Deploy the generated `dist/` directory to a static host. Because OrcaCast uses client-side routing, configure the host to serve `index.html` as the fallback for routes such as `/watch`, `/planner`, `/explore`, and `/about/model`.
 
 For Cloudflare Pages:
 

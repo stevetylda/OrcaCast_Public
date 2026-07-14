@@ -68,6 +68,7 @@ export function NotFoundPage() {
           <span>Try a known heading</span>
           <Link to="/watch">Watch</Link>
           <Link to="/planner">Planner</Link>
+          <Link to="/explore">Explore</Link>
           <Link to="/about">About</Link>
           <Link to="/about/model">The model</Link>
         </nav>
