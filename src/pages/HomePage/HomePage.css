@@ -56,7 +56,7 @@
 .homeButton { display: inline-flex; align-items: center; justify-content: center; gap: 20px; min-height: 58px; padding: 0 28px; border: 3px solid var(--home-navy); border-radius: 999px; color: var(--home-navy); font-size: .85rem; font-weight: 900; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; transition: transform 160ms ease, box-shadow 160ms ease; }
 .homeButton:hover, .homeButton:focus-visible { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--home-navy); }
 .homeButton--teal { background: var(--home-teal); }.homeButton--cream { background: #fffdf6; }.homeButton--yellow { background: var(--home-yellow); }
-.homeHero__image { position: relative; min-height: 100%; border-left: 3px solid var(--home-navy); background: linear-gradient(180deg, rgba(255, 248, 233, .06), rgba(6, 29, 60, .16)), url("/images/home/orca_image.jpg") center / cover no-repeat; }
+.homeHero__image { position: relative; min-height: 100%; border-left: 3px solid var(--home-navy); background: linear-gradient(180deg, rgba(255, 248, 233, .06), rgba(6, 29, 60, .16)), url("/images/home/orca_image.jpg") center / cover no-repeat; background-image: linear-gradient(180deg, rgba(255, 248, 233, .06), rgba(6, 29, 60, .16)), image-set(url("/images/home/orca_image-960.webp") 1x, url("/images/home/orca_image-1600.webp") 2x); }
 .homeHero__image::after { position: absolute; inset: 26px; border: 3px solid rgba(255, 252, 243, .72); border-radius: 27px; content: ""; pointer-events: none; }
 .homeHero__activityBadge { position: absolute; z-index: 1; top: 54px; left: 58px; display: grid; place-items: center; width: 194px; height: 194px; padding: 20px; border: 3px solid var(--home-navy); border-radius: 50%; background: var(--home-yellow); box-shadow: 10px 10px 0 var(--home-navy); text-align: center; transform: rotate(-8deg); }.homeHero__activityBadge span, .homeHero__activityBadge small { font-size: .65rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }.homeHero__activityBadge strong { font-family: Georgia, serif; font-size: clamp(1.9rem, 3.1vw, 3.3rem); letter-spacing: -.08em; text-transform: uppercase; }.homeHero__spark { position: absolute; z-index: 1; top: 84px; right: 70px; display: grid; place-items: center; width: 88px; height: 88px; border: 3px solid var(--home-navy); border-radius: 21px; background: var(--home-pink); font-size: 42px; transform: rotate(12deg); }
 .homeHero__caption { position: absolute; z-index: 1; right: 44px; bottom: 34px; left: 44px; display: flex; justify-content: space-between; gap: 12px; padding: 15px 22px; border: 3px solid var(--home-navy); border-radius: 999px; background: var(--home-cream); font-size: .66rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
@@ -892,4 +892,15 @@
 
 .homePlannerCta__copy .homeKicker {
   color: #fffdf6;
+}
+
+/* Keep the weekly section connected to the ticker without crowding it. */
+.homeWeek {
+  padding-top: clamp(44px, 6vw, 88px);
+}
+
+@media (max-width: 520px) {
+  .homeWeek {
+    padding-top: 52px;
+  }
 }

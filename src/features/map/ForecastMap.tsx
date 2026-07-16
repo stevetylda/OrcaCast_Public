@@ -13,9 +13,11 @@ import maplibregl, {
 } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
+import "../../shared/styles/map.css";
 import type { Period } from "../../shared/data/periods";
 import {
   addGridOverlay,
+  addGeoTiffSurfaceOverlay,
   addSurfaceOverlay,
   setGridBaseVisibility,
   setGridCoreLayerVisibility,
@@ -105,6 +107,13 @@ function coerceExpectedActivityHotspotCellCount(
   return value === null || !Number.isFinite(value)
     ? null
     : Math.max(0, Math.round(value));
+}
+
+function mapMotionDuration(duration: number) {
+  return typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? 0
+    : duration;
 }
 
 // Whale pulse artwork is intentionally kept here for the future aggregate-bubble pass.
@@ -244,7 +253,7 @@ function createPlannerDomMarker(properties: PlannerLocationFeatureProperties) {
   const hasItineraryOrder =
     typeof properties.itineraryOrder === "number" &&
     properties.itineraryOrder > 0;
-  element.className = `plannerMapMarker plannerMapMarker--${properties.kind}${properties.selected ? " is-selected" : ""}${hasItineraryOrder ? " is-itinerary" : ""}`;
+  element.className = `plannerMapMarker plannerMapMarker--${properties.kind}${properties.selected ? " is-selected" : ""}${properties.selected && properties.pulseEnabled ? " is-pulsing" : ""}${hasItineraryOrder ? " is-itinerary" : ""}`;
   element.setAttribute(
     "aria-label",
     `${properties.name}, ${properties.markerType}`,
@@ -290,10 +299,6 @@ function getSuggestedPlacePopupHtml(place: SuggestedPlace) {
   return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(place.name)}</div><div class="poiPopup__meta">Recommended ${escapePopupHtml(formatSuggestedPlaceType(place.type))} · mean nearby score ${Number(place.score).toFixed(3)} · ${Number(place.latitude).toFixed(4)}, ${Number(place.longitude).toFixed(4)}</div></div>`;
 }
 
-function getPublicPoiPopupHtml(poi: PublicPoi) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(poi.name)}</div><div class="poiPopup__meta">${escapePopupHtml(formatSuggestedPlaceType(poi.type))} · ${Number(poi.latitude).toFixed(4)}, ${Number(poi.longitude).toFixed(4)}</div></div>`;
-}
-
 function getBaseLocationPopupHtml(baseLocation: {
   name: string;
   latitude: number;
@@ -324,6 +329,7 @@ function buildPlannerLocationCollection(args: {
   showHydrophones: boolean;
   poiItems: PublicPoi[];
   poiFilters: PoiFilters;
+  pulseSelectedPlaceMarker: boolean;
 }): FeatureCollection {
   const features: FeatureCollection["features"] = [];
   const baseCoords = args.baseLocation
@@ -376,6 +382,8 @@ function buildPlannerLocationCollection(args: {
           iconName: getPlannerLocationIconName("suggested", place.type),
           selected: place.id === args.selectedPlaceId,
           selectedPulseOn: place.id === args.selectedPlaceId,
+          pulseEnabled:
+            place.id === args.selectedPlaceId && args.pulseSelectedPlaceMarker,
           itineraryOrder: itineraryOrderById.get(place.id) ?? 0,
           score: place.score,
         } satisfies PlannerLocationFeatureProperties,
@@ -454,9 +462,11 @@ function buildPlannerLocationCollection(args: {
           kind: "poi",
           name: poi.name,
           markerType: poi.type,
-          iconName: getPlannerLocationIconName("poi", poi.type),
-          selected: false,
-          selectedPulseOn: false,
+          iconName: getPlannerLocationIconName("suggested", poi.type),
+          selected: id === args.selectedPlaceId,
+          selectedPulseOn: id === args.selectedPlaceId,
+          pulseEnabled:
+            id === args.selectedPlaceId && args.pulseSelectedPlaceMarker,
         } satisfies PlannerLocationFeatureProperties,
       });
     }
@@ -610,11 +620,11 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
   const palette =
     spec.variant === "suggested"
       ? {
-          fill: "#dbe7ff",
-          center: "#f2f6ff",
-          stroke: "#315ad9",
-          icon: "#183caa",
-          glow: "rgba(49,90,217,0.34)",
+          fill: "#fff7e8",
+          center: "#fff7e8",
+          stroke: "#173f62",
+          icon: "#061d3c",
+          glow: "rgba(7,49,68,0.26)",
         }
       : spec.variant === "base"
         ? {
@@ -626,26 +636,26 @@ async function buildPlannerPinImage(spec: PlannerPinSpec) {
           }
         : spec.variant === "camera"
           ? {
-              fill: "#ffffff",
-              center: "#fffdf6",
-              stroke: "#6f8d99",
+              fill: "#fff7e8",
+              center: "#fff7e8",
+              stroke: "#173f62",
               icon: "#061d3c",
-              glow: "rgba(53,87,99,0.18)",
+              glow: "rgba(7,49,68,0.26)",
             }
           : spec.variant === "hydrophone"
             ? {
-                fill: "#ffffff",
-                center: "#fffdf6",
-                stroke: "#6f8d99",
+                fill: "#fff7e8",
+                center: "#fff7e8",
+                stroke: "#173f62",
                 icon: "#061d3c",
-                glow: "rgba(53,87,99,0.18)",
+                glow: "rgba(7,49,68,0.26)",
               }
             : {
-                fill: "#ffffff",
-                center: "#fffdf6",
-                stroke: "#6f8d99",
+                fill: "#fff7e8",
+                center: "#fff7e8",
+                stroke: "#173f62",
                 icon: "#061d3c",
-                glow: "rgba(53,87,99,0.14)",
+                glow: "rgba(7,49,68,0.26)",
               };
   const symbol =
     spec.type === "Park"
@@ -761,10 +771,10 @@ async function ensurePlannerLocationLayers(
     console.warn("[POI] planner pin images failed to load", error);
   }
 
-  // Image generation is asynchronous. The style may have changed while it was
-  // running, so confirm the source still belongs to the active, loaded style.
-  if (!map.isStyleLoaded() || !map.getSource(PLANNER_LOCATION_SOURCE_ID))
-    return;
+  // Adding or updating a GeoJSON source temporarily makes isStyleLoaded() false
+  // while MapLibre processes its data. The source's continued presence is the
+  // reliable signal that the active style can receive the planner layers.
+  if (!map.getSource(PLANNER_LOCATION_SOURCE_ID)) return;
 
   if (!map.getLayer(PLANNER_LOCATION_HALO_LAYER_ID)) {
     map.addLayer({
@@ -776,18 +786,25 @@ async function ensurePlannerLocationLayers(
         "circle-radius": [
           "case",
           ["==", ["get", "selectedPulseOn"], true],
-          72,
-          52,
+          22,
+          17,
         ],
-        "circle-color": "rgba(255, 213, 79, 1)",
-        "circle-blur": 0.95,
-        "circle-opacity": [
+        "circle-color": "rgba(255, 213, 79, 0)",
+        "circle-opacity": 0,
+        "circle-stroke-width": [
           "case",
           ["==", ["get", "selectedPulseOn"], true],
-          0.76,
-          0.36,
+          4,
+          3,
         ],
-        "circle-translate": [0, -25],
+        "circle-stroke-color": "rgba(255, 213, 79, 1)",
+        "circle-stroke-opacity": [
+          "case",
+          ["==", ["get", "selectedPulseOn"], true],
+          0.9,
+          0.48,
+        ],
+        "circle-translate": [0, -20],
       },
     });
   }
@@ -812,34 +829,12 @@ async function ensurePlannerLocationLayers(
           11,
           10,
         ],
-        "circle-color": [
-          "match",
-          ["get", "kind"],
-          "base",
-          "#ffffff",
-          "suggested",
-          "#dbe7ff",
-          "camera",
-          "#ffffff",
-          "hydrophone",
-          "#ffffff",
-          "#ffffff",
-        ],
-        "circle-opacity": 0.96,
-        "circle-stroke-width": 2,
-        "circle-stroke-color": [
-          "match",
-          ["get", "kind"],
-          "base",
-          "#158fa2",
-          "suggested",
-          "#315ad9",
-          "camera",
-          "#6f8d99",
-          "hydrophone",
-          "#6f8d99",
-          "#6f8d99",
-        ],
+        // This transparent circle is the shared interaction target beneath the
+        // raster pin. Keeping it invisible avoids the extra blue disc that made
+        // bulk POIs look larger than the Top-25 HTML pins.
+        "circle-color": "rgba(0, 0, 0, 0)",
+        "circle-opacity": 0,
+        "circle-stroke-width": 0,
         "circle-translate": [0, -25],
       },
     });
@@ -855,14 +850,12 @@ async function ensurePlannerLocationLayers(
         "icon-size": [
           "case",
           ["==", ["get", "selected"], true],
-          0.78,
+          0.49,
           ["==", ["get", "kind"], "suggested"],
-          0.7,
+          0.43,
           ["==", ["get", "kind"], "base"],
           0.7,
-          ["==", ["get", "kind"], "hydrophone"],
-          0.68,
-          0.56,
+          0.43,
         ],
         "icon-anchor": "bottom",
         "icon-allow-overlap": true,
@@ -996,6 +989,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       enableGridInteraction = true,
       forecastPath,
       fallbackForecastPath,
+      smoothedForecastPath,
+      fallbackSmoothedForecastPath,
       colorScaleValues,
       useExternalColorScale = false,
       externalValues,
@@ -1013,6 +1008,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       selectedHydrophoneId = null,
       pulseSelectedPlaceMarker = false,
       onPlaceSelect,
+      onPoiSelect,
+      onLocationSelectionClear,
       showTripHotspotMarkers = false,
       forceDomSuggestedMarkers = false,
       baseLocation = null,
@@ -1108,6 +1105,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
     const mapReadyRef = useRef(false);
     const hotspotsOnlyRef = useRef(hotspotsEnabled);
     const lastGridLayerSignatureRef = useRef<string | null>(null);
+    const smoothedSurfaceRequestIdRef = useRef(0);
     const hoveredCellRef = useRef<string | null>(null);
     const periodsRef = useRef<Period[]>(periods);
     const modelIdRef = useRef(modelId);
@@ -1149,10 +1147,17 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           name: place.name,
           markerType: place.type,
           iconName: getPlannerLocationIconName("suggested", place.type),
-          selected: false,
-          selectedPulseOn: false,
+          selected: place.id === selectedPlaceId,
+          selectedPulseOn: place.id === selectedPlaceId,
+          pulseEnabled:
+            place.id === selectedPlaceId && pulseSelectedPlaceMarker,
           itineraryOrder: itineraryOrderById.get(place.id) ?? 0,
           score: place.score,
+        });
+        element.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onPlaceSelect?.(place);
         });
         return [
           new maplibregl.Marker({ element, anchor: "bottom" })
@@ -1166,12 +1171,45 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       forceDomSuggestedMarkers,
       itineraryPlaceIds,
       mapReady,
+      onPlaceSelect,
+      pulseSelectedPlaceMarker,
+      selectedPlaceId,
       suggestedPlaces,
     ]);
     const [poiItems, setPoiItems] = useState<PublicPoi[]>([]);
+    const [accessibleLocationAnnouncement, setAccessibleLocationAnnouncement] =
+      useState("");
 
     const hasForecastLegend = legendSpec !== null;
     const poiLayerActive = hasActivePoiFilter(poiFilters);
+    const accessiblePoiItems = useMemo(
+      () => (poiLayerActive ? filterPoisByType(poiItems, poiFilters) : []),
+      [poiItems, poiFilters, poiLayerActive],
+    );
+
+    const handleAccessiblePoiSelect = useCallback(
+      (featureId: string) => {
+        if (!featureId) return;
+        const poi = accessiblePoiItems.find(
+          (item) => getPublicPoiFeatureId(item) === featureId,
+        );
+        if (!poi) return;
+        setAccessibleLocationAnnouncement(
+          `${poi.name}, ${poi.type}, selected on the map.`,
+        );
+        if (onPoiSelect) {
+          onPoiSelect(poi);
+          return;
+        }
+        mapRef.current?.flyTo({
+          center: [poi.longitude, poi.latitude],
+          zoom: Math.max(mapRef.current.getZoom(), 11),
+          duration: mapMotionDuration(500),
+          essential: false,
+        });
+      },
+      [accessiblePoiItems, onPoiSelect],
+    );
 
     const resolveHotspotThreshold = useCallback(() => {
       const modeled =
@@ -1266,7 +1304,42 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           );
         }
 
-        addSurfaceOverlay(map, overlayRef.current, activePalette.colors, scale);
+        const smoothedSurfaceRequestId = ++smoothedSurfaceRequestIdRef.current;
+        if (surfaceMode === "surface" && smoothedForecastPath) {
+          void addGeoTiffSurfaceOverlay(
+            map,
+            smoothedForecastPath,
+            fallbackSmoothedForecastPath,
+            activePalette.colors,
+            () =>
+              smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current,
+          ).catch((error) => {
+            if (
+              smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current
+            )
+              return;
+            console.warn(
+              "[Forecast] smoothed GeoTIFF failed; using generated surface",
+              error,
+            );
+            if (overlayRef.current) {
+              addSurfaceOverlay(
+                map,
+                overlayRef.current,
+                activePalette.colors,
+                scale,
+              );
+              setSurfaceVisibility(map, true);
+            }
+          });
+        } else {
+          addSurfaceOverlay(
+            map,
+            overlayRef.current,
+            activePalette.colors,
+            scale,
+          );
+        }
 
         if (hotspots) {
           if (surfaceMode === "surface") {
@@ -1321,6 +1394,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         hotspotMode,
         resolution,
         resolveHotspotThreshold,
+        smoothedForecastPath,
+        fallbackSmoothedForecastPath,
         surfaceMode,
       ],
     );
@@ -1633,8 +1708,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           map.flyTo({
             center: locations[0],
             zoom: options?.maxZoom ?? 11.2,
-            essential: true,
-            duration: 900,
+            essential: false,
+            duration: mapMotionDuration(900),
             padding: options?.padding,
           });
           return;
@@ -1648,8 +1723,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         map.fitBounds(bounds, {
           padding: options?.padding ?? 88,
           maxZoom: options?.maxZoom ?? 10.8,
-          duration: 900,
-          essential: true,
+          duration: mapMotionDuration(900),
+          essential: false,
         });
       },
       [],
@@ -2035,6 +2110,12 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         closeButton: false,
         closeOnClick: false,
       });
+      const hoverPopup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: "plannerMapHoverPopup",
+        offset: 32,
+      });
 
       const baseData = buildPlannerLocationCollection({
         baseLocation,
@@ -2050,6 +2131,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         showHydrophones,
         poiItems,
         poiFilters,
+        pulseSelectedPlaceMarker,
       });
 
       const setupPlannerLocationLayer = async () => {
@@ -2080,25 +2162,86 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         }
         if (cancelled || mapRef.current !== map) return;
 
-        // DOM markers are the single visual marker renderer. The GeoJSON layers
-        // remain available as the data source, but hiding their visuals prevents
-        // a second pin from being drawn at the same coordinates.
+        const poiFeatureCount = baseData.features.filter(
+          (feature) => feature.properties?.kind === "poi",
+        ).length;
+        const gpuMarkerKinds: PlannerLocationKind[] = [
+          "poi",
+          "camera",
+          "hydrophone",
+        ];
+        const hasGpuMarkers = baseData.features.some((feature) =>
+          gpuMarkerKinds.includes(
+            feature.properties?.kind as PlannerLocationKind,
+          ),
+        );
+        const hasSelectedGpuMarker = baseData.features.some(
+          (feature) =>
+            feature.properties?.selected === true &&
+            gpuMarkerKinds.includes(
+              feature.properties?.kind as PlannerLocationKind,
+            ),
+        );
+        const gpuMarkerFilter = [
+          "match",
+          ["get", "kind"],
+          gpuMarkerKinds,
+          true,
+          false,
+        ] as maplibregl.FilterSpecification;
+
+        // Keep every supplemental POI in one GPU-rendered pin system. Besides
+        // keeping zoom smooth with "All POIs", this prevents cameras and
+        // hydrophones from looking or stacking differently from place markers.
         [
-          PLANNER_LOCATION_HALO_LAYER_ID,
-          PLANNER_LOCATION_CIRCLE_LAYER_ID,
-          PLANNER_LOCATION_SYMBOL_LAYER_ID,
           PLANNER_LOCATION_ITINERARY_BADGE_LAYER_ID,
           PLANNER_LOCATION_ITINERARY_TEXT_LAYER_ID,
         ].forEach((layerId) => {
           if (map.getLayer(layerId))
             map.setLayoutProperty(layerId, "visibility", "none");
         });
+        if (map.getLayer(PLANNER_LOCATION_HALO_LAYER_ID)) {
+          map.setFilter(PLANNER_LOCATION_HALO_LAYER_ID, [
+            "all",
+            ["match", ["get", "kind"], gpuMarkerKinds, true, false],
+            ["==", ["get", "selected"], true],
+          ] as maplibregl.FilterSpecification);
+          map.setLayoutProperty(
+            PLANNER_LOCATION_HALO_LAYER_ID,
+            "visibility",
+            hasSelectedGpuMarker && pulseSelectedPlaceMarker
+              ? "visible"
+              : "none",
+          );
+        }
+        [
+          PLANNER_LOCATION_CIRCLE_LAYER_ID,
+          PLANNER_LOCATION_SYMBOL_LAYER_ID,
+        ].forEach((layerId) => {
+          if (!map.getLayer(layerId)) return;
+          map.setFilter(layerId, gpuMarkerFilter);
+          map.setLayoutProperty(
+            layerId,
+            "visibility",
+            hasGpuMarkers ? "visible" : "none",
+          );
+        });
+        if (containerRef.current) {
+          containerRef.current.dataset.plannerPoiCount =
+            String(poiFeatureCount);
+          containerRef.current.dataset.plannerPulsingLocation =
+            baseData.features.find(
+              (feature) =>
+                feature.properties?.selected === true &&
+                feature.properties?.pulseEnabled === true,
+            )?.properties?.id ?? "";
+        }
 
-        if (
-          (selectedPlaceId && pulseSelectedPlaceMarker) ||
-          showCameras ||
-          showHydrophones
-        ) {
+        // Camera and hydrophone live indicators are already visible in their
+        // static pin artwork. Only rebuild the source while an explicitly
+        // selected place is pulsing; merely showing either layer must not
+        // trigger a full GeoJSON update every 900 ms.
+        if (selectedPlaceId && pulseSelectedPlaceMarker) {
           let pulseOn = true;
           const source = getGeoJsonSource(map, PLANNER_LOCATION_SOURCE_ID);
           source?.setData(withPlannerLocationPulse(baseData, pulseOn));
@@ -2136,7 +2279,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           if (id && kind === "camera" && camerasById.has(id))
             return getCameraPopupHtml(camerasById.get(id)!);
           if (id && kind === "poi" && poisById.has(id))
-            return getPublicPoiPopupHtml(poisById.get(id)!);
+            return `<span class="plannerMapHoverLabel">${escapePopupHtml(poisById.get(id)!.name)}</span>`;
           if (id && kind === "hydrophone" && hydrophonesById.has(id))
             return getHydrophonePopupHtml(hydrophonesById.get(id)!);
           if (kind === "base" && baseLocation)
@@ -2144,11 +2287,31 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           return "";
         };
 
+        const hoverHtmlForFeature = (
+          feature: NonNullable<MapLayerMouseEvent["features"]>[number],
+        ) => {
+          const name = feature.properties?.name;
+          return typeof name === "string" && name.trim()
+            ? `<span class="plannerMapHoverLabel">${escapePopupHtml(name)}</span>`
+            : "";
+        };
+
+        const bringHoverPopupToFront = () => {
+          const element = hoverPopup.getElement();
+          if (!element) return;
+          element.style.setProperty("z-index", "2147483647", "important");
+          // MapLibre appends markers and popups to the same map container. Moving
+          // the active title to the end makes it the final overlay even when a
+          // marker implementation creates its own stacking context.
+          map.getContainer().append(element);
+        };
+
         for (const feature of baseData.features) {
           if (feature.geometry?.type !== "Point" || !feature.properties)
             continue;
           const properties =
             feature.properties as PlannerLocationFeatureProperties;
+          if (gpuMarkerKinds.includes(properties.kind)) continue;
           if (forceDomSuggestedMarkers && properties.kind === "suggested")
             continue;
           const coordinates = feature.geometry.coordinates as [number, number];
@@ -2177,11 +2340,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
                   .addTo(map);
             } else if (properties.kind === "poi") {
               const poi = poisById.get(properties.id);
-              if (poi)
-                popup
-                  .setLngLat(coordinates)
-                  .setHTML(getPublicPoiPopupHtml(poi))
-                  .addTo(map);
+              if (poi) onPoiSelect?.(poi);
             } else if (properties.kind === "base" && baseLocation) {
               popup
                 .setLngLat(coordinates)
@@ -2204,9 +2363,15 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
               ? feature.properties.id
               : null;
           const place = id ? placesById.get(id) : null;
+          const poi = id ? poisById.get(id) : null;
           event.originalEvent.stopPropagation();
           if (place) {
             onPlaceSelect?.(place);
+            return;
+          }
+          if (poi) {
+            hoverPopup.remove();
+            onPoiSelect?.(poi);
             return;
           }
           const html = popupHtmlForFeature(feature);
@@ -2224,17 +2389,28 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         const handlePlannerLocationMouseMove = (event: MapLayerMouseEvent) => {
           const feature = event.features?.[0];
           if (!feature || feature.geometry?.type !== "Point") return;
-          const html = popupHtmlForFeature(feature);
+          const html = hoverHtmlForFeature(feature);
           if (!html) return;
-          popup
+          hoverPopup
             .setLngLat(feature.geometry.coordinates as [number, number])
             .setHTML(html)
             .addTo(map);
+          bringHoverPopupToFront();
         };
 
         const handlePlannerLocationMouseLeave = () => {
           map.getCanvas().style.cursor = "";
-          popup.remove();
+          hoverPopup.remove();
+        };
+
+        const handleMapBackgroundClick = (event: maplibregl.MapMouseEvent) => {
+          const clickedLocation = map.queryRenderedFeatures(event.point, {
+            layers: [
+              PLANNER_LOCATION_CIRCLE_LAYER_ID,
+              PLANNER_LOCATION_SYMBOL_LAYER_ID,
+            ],
+          }).length;
+          if (clickedLocation === 0) onLocationSelectionClear?.();
         };
 
         map.on(
@@ -2243,11 +2419,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           handlePlannerLocationClick,
         );
         map.on(
-          "click",
-          PLANNER_LOCATION_SYMBOL_LAYER_ID,
-          handlePlannerLocationClick,
-        );
-        map.on(
           "mouseenter",
           PLANNER_LOCATION_CIRCLE_LAYER_ID,
           handlePlannerLocationMouseEnter,
@@ -2262,21 +2433,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           PLANNER_LOCATION_CIRCLE_LAYER_ID,
           handlePlannerLocationMouseLeave,
         );
-        map.on(
-          "mouseenter",
-          PLANNER_LOCATION_SYMBOL_LAYER_ID,
-          handlePlannerLocationMouseEnter,
-        );
-        map.on(
-          "mousemove",
-          PLANNER_LOCATION_SYMBOL_LAYER_ID,
-          handlePlannerLocationMouseMove,
-        );
-        map.on(
-          "mouseleave",
-          PLANNER_LOCATION_SYMBOL_LAYER_ID,
-          handlePlannerLocationMouseLeave,
-        );
+        map.on("click", handleMapBackgroundClick);
 
         removeHandlers = () => {
           if (pulseIntervalId !== null) {
@@ -2289,11 +2446,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
             handlePlannerLocationClick,
           );
           map.off(
-            "click",
-            PLANNER_LOCATION_SYMBOL_LAYER_ID,
-            handlePlannerLocationClick,
-          );
-          map.off(
             "mouseenter",
             PLANNER_LOCATION_CIRCLE_LAYER_ID,
             handlePlannerLocationMouseEnter,
@@ -2308,23 +2460,10 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
             PLANNER_LOCATION_CIRCLE_LAYER_ID,
             handlePlannerLocationMouseLeave,
           );
-          map.off(
-            "mouseenter",
-            PLANNER_LOCATION_SYMBOL_LAYER_ID,
-            handlePlannerLocationMouseEnter,
-          );
-          map.off(
-            "mousemove",
-            PLANNER_LOCATION_SYMBOL_LAYER_ID,
-            handlePlannerLocationMouseMove,
-          );
-          map.off(
-            "mouseleave",
-            PLANNER_LOCATION_SYMBOL_LAYER_ID,
-            handlePlannerLocationMouseLeave,
-          );
+          map.off("click", handleMapBackgroundClick);
           domMarkers.forEach((marker) => marker.remove());
           popup.remove();
+          hoverPopup.remove();
         };
       };
 
@@ -2338,6 +2477,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         removeHandlers?.();
         domMarkers.forEach((marker) => marker.remove());
         popup.remove();
+        hoverPopup.remove();
       };
     }, [
       baseLocation,
@@ -2347,6 +2487,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       itineraryPlaceIds,
       mapReady,
       onPlaceSelect,
+      onPoiSelect,
+      onLocationSelectionClear,
       poiFilters,
       poiItems,
       pulseSelectedPlaceMarker,
@@ -2403,8 +2545,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       map.flyTo({
         center,
         zoom: Math.max(map.getZoom(), 11),
-        duration: 850,
-        essential: true,
+        duration: mapMotionDuration(850),
+        essential: false,
         padding: { top: 0, right: sidebarPaddingRight, bottom: 0, left: 0 },
       });
     }, [mapReady, selectedPlaceId, sidebarPaddingRight, suggestedPlaces]);
@@ -2434,6 +2576,32 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         data-map-ready={mapReady ? "true" : "false"}
       >
         <div ref={containerRef} className="map" data-tour="map-canvas" />
+        {accessiblePoiItems.length > 0 ? (
+          <label className="mapLocationPicker">
+            <span>Browse map locations</span>
+            <select
+              value=""
+              onChange={(event) =>
+                handleAccessiblePoiSelect(event.target.value)
+              }
+            >
+              <option value="">
+                Choose a location ({accessiblePoiItems.length})
+              </option>
+              {accessiblePoiItems.map((poi) => (
+                <option
+                  key={getPublicPoiFeatureId(poi)}
+                  value={getPublicPoiFeatureId(poi)}
+                >
+                  {poi.name} — {poi.type}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        <div className="visuallyHidden" role="status" aria-live="polite">
+          {accessibleLocationAnnouncement}
+        </div>
         {pulseAllGridCells && (
           <div className="mapStage__tripLoading" aria-live="polite">
             <span className="mapStage__tripLoadingIcon" aria-hidden="true">
@@ -2453,8 +2621,12 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
             legendOpen={showLegendControl && legendOpen}
             legendSpec={legendSpec}
             onLegendToggle={() => setLegendOpen((value) => !value)}
-            onZoomIn={() => mapRef.current?.zoomIn({ duration: 180 })}
-            onZoomOut={() => mapRef.current?.zoomOut({ duration: 180 })}
+            onZoomIn={() =>
+              mapRef.current?.zoomIn({ duration: mapMotionDuration(180) })
+            }
+            onZoomOut={() =>
+              mapRef.current?.zoomOut({ duration: mapMotionDuration(180) })
+            }
           />
         ) : null}
       </div>

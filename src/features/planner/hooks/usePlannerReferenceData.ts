@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { loadPoiData } from "../../locations/poiData";
+import { loadPoiData, type PublicPoi } from "../../locations/poiData";
 import type { ViewingLocation } from "../../locations/types";
 import {
   loadOrcasoundHydrophonePayload,
@@ -22,6 +22,7 @@ export function usePlannerReferenceData() {
   );
   const [baseLocations, setBaseLocations] = useState<PlannerBaseLocation[]>([]);
   const [cameraLocations, setCameraLocations] = useState<ViewingLocation[]>([]);
+  const [poiLocations, setPoiLocations] = useState<PublicPoi[]>([]);
   const [hydrophoneLocations, setHydrophoneLocations] = useState<
     OrcasoundHydrophone[]
   >([]);
@@ -49,6 +50,7 @@ export function usePlannerReferenceData() {
         setPhotoManifest(photoResult.value);
 
       if (poiResult.status === "fulfilled") {
+        setPoiLocations(poiResult.value);
         setCameraLocations(
           poiResult.value
             .filter(
@@ -90,6 +92,7 @@ export function usePlannerReferenceData() {
     baseLocations,
     photoManifest,
     cameraLocations,
+    poiLocations,
     hydrophoneLocations,
     hydrophoneListenUrl,
   };

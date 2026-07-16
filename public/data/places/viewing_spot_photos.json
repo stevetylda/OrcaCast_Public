@@ -1,105 +1,242 @@
 {
-  "lime-kiln-point-state-park": {
-    "spotId": "lime-kiln-point-state-park",
-    "imageSrc": "/spot-photos/lime-kiln-point-state-park.webp",
-    "alt": "Lime Kiln Lighthouse overlooking the water at Lime Kiln Point State Park",
-    "status": "approved",
-    "title": "Lime Kiln Lighthouse 01.jpg",
-    "creator": "Joe Mabel",
+  "1st-beach-overlook": {
+    "alt": "La Push_driftwood_beachlog_NPS_Photo",
+    "creator": "Olympic National Park",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/1st-beach-overlook-d0b4468d-360.webp",
+    "license": "public_domain",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
     "sourceName": "Wikimedia Commons",
-    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lime_Kiln_Lighthouse_01.jpg",
-    "license": "cc_by_sa_4_0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "focalPoint": "58% 50%"
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:La_Push_driftwood_beachlog_NPS_Photo_(17125861008).jpg",
+    "spotId": "1st-beach-overlook",
+    "status": "approved",
+    "title": "La Push driftwood beachlog NPS Photo (17125861008).jpg"
+  },
+  "28th-avenue-west-viewpoint": {
+    "alt": "Elliott Bay Marina",
+    "creator": "Dennis Bratland",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/28th-avenue-west-viewpoint-c522e1e4-360.webp",
+    "license": null,
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Elliott_Bay_Marina2.jpg",
+    "spotId": "28th-avenue-west-viewpoint",
+    "status": "approved",
+    "title": "Elliott Bay Marina2.jpg"
   },
   "alki-beach": {
-    "spotId": "alki-beach",
-    "status": "missing",
     "alt": "View from Alki Beach in Seattle",
-    "notes": "Need open-license photo. Prefer shoreline or Elliott Bay composition."
-  },
-  "edmonds": {
-    "spotId": "edmonds",
-    "status": "missing",
-    "alt": "Edmonds waterfront near the ferry terminal",
-    "notes": "Need open-license photo. Prefer ferry or waterfront composition."
-  },
-  "lime-kiln-point": {
-    "spotId": "lime-kiln-point",
-    "status": "missing",
-    "alt": "Waterfront view near Lime Kiln Point",
-    "notes": "May duplicate Lime Kiln Point State Park unless intentionally separate."
-  },
-  "fort-worden-state-park": {
-    "spotId": "fort-worden-state-park",
-    "status": "missing",
-    "alt": "Coastal view at Fort Worden State Park",
-    "notes": "Need open-license photo. Prefer Point Wilson, lighthouse, or water view."
-  },
-  "fort-flagler": {
-    "spotId": "fort-flagler",
-    "status": "missing",
-    "alt": "Coastal view at Fort Flagler",
-    "notes": "Need open-license photo. Prefer bluff, beach, or Admiralty Inlet view."
+    "notes": "Need open-license photo. Prefer shoreline or Elliott Bay composition.",
+    "spotId": "alki-beach",
+    "status": "missing"
   },
   "bainbridge-island": {
-    "spotId": "bainbridge-island",
-    "status": "missing",
     "alt": "Waterfront view from Bainbridge Island",
-    "notes": "Need open-license photo. Prefer ferry or shoreline composition."
+    "notes": "Need open-license photo. Prefer ferry or shoreline composition.",
+    "spotId": "bainbridge-island",
+    "status": "missing"
+  },
+  "beards-hollow-overlook": {
+    "alt": "Beard's Hollow from the overlook.",
+    "creator": "Chris Light",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/beards-hollow-overlook-8ff03116-360.webp",
+    "license": "cc_by_sa_4_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beard%27s_hollow_6648.jpg",
+    "spotId": "beards-hollow-overlook",
+    "status": "approved",
+    "title": "Beard's hollow 6648.jpg"
   },
   "blind-island": {
-    "spotId": "blind-island",
-    "status": "missing",
     "alt": "Shoreline view near Blind Island",
-    "notes": "Need open-license photo. Prefer shoreline and channel composition."
+    "notes": "Need open-license photo. Prefer shoreline and channel composition.",
+    "spotId": "blind-island",
+    "status": "missing"
+  },
+  "bluff-overlook": {
+    "alt": "View from the bluff at Ebey\u2019s Landing. Island County, Washington",
+    "creator": "NorthwestNative",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/bluff-overlook-69fc5437-360.webp",
+    "license": "cc_by_sa_4_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:View_from_the_bluff_at_Ebey%E2%80%99s_Landing_National_Historic_Reserve.jpg",
+    "spotId": "bluff-overlook",
+    "status": "approved",
+    "title": "View from the bluff at Ebey\u2019s Landing National Historic Reserve.jpg"
+  },
+  "burrows-channel-viewpoint": {
+    "alt": "Seaside Juniper, Burrows Pass and Burrows Island (behind)",
+    "creator": "Walter Siegmund (talk)",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/burrows-channel-viewpoint-60dea9ff-360.webp",
+    "license": null,
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Juniperus_maritima_5801.JPG",
+    "spotId": "burrows-channel-viewpoint",
+    "status": "approved",
+    "title": "Juniperus maritima 5801.JPG"
   },
   "bush-point": {
-    "spotId": "bush-point",
-    "status": "missing",
     "alt": "View from Bush Point on Whidbey Island",
-    "notes": "Need open-license photo. Prefer bluff or channel view."
+    "notes": "Need open-license photo. Prefer bluff or channel view.",
+    "spotId": "bush-point",
+    "status": "missing"
+  },
+  "cap-sante-park-viewpoint": {
+    "alt": "Cap Sante Park (Anacortes, Washington)",
+    "creator": "Nadine Pavlov",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/cap-sante-park-viewpoint-15c555e6-360.webp",
+    "license": "cc_by_sa_4_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:2024-08-10,_Cap_Sante_Park_(Anacortes,_Washington),_161530(N).jpg",
+    "spotId": "cap-sante-park-viewpoint",
+    "status": "approved",
+    "title": "2024-08-10, Cap Sante Park (Anacortes, Washington), 161530(N).jpg"
   },
   "coupeville": {
-    "spotId": "coupeville",
-    "status": "missing",
     "alt": "Coupeville waterfront near the ferry terminal",
-    "notes": "Need open-license photo. Prefer waterfront or ferry composition."
+    "notes": "Need open-license photo. Prefer waterfront or ferry composition.",
+    "spotId": "coupeville",
+    "status": "missing"
+  },
+  "edmonds": {
+    "alt": "Edmonds waterfront near the ferry terminal",
+    "notes": "Need open-license photo. Prefer ferry or waterfront composition.",
+    "spotId": "edmonds",
+    "status": "missing"
+  },
+  "fort-flagler": {
+    "alt": "Coastal view at Fort Flagler",
+    "notes": "Need open-license photo. Prefer bluff, beach, or Admiralty Inlet view.",
+    "spotId": "fort-flagler",
+    "status": "missing"
   },
   "fort-worden": {
-    "spotId": "fort-worden",
-    "status": "missing",
     "alt": "Coastal view near Fort Worden",
-    "notes": "Use only if this is intentionally separate from Fort Worden State Park."
+    "notes": "Use only if this is intentionally separate from Fort Worden State Park.",
+    "spotId": "fort-worden",
+    "status": "missing"
+  },
+  "fort-worden-state-park": {
+    "alt": "Coastal view at Fort Worden State Park",
+    "notes": "Need open-license photo. Prefer Point Wilson, lighthouse, or water view.",
+    "spotId": "fort-worden-state-park",
+    "status": "missing"
   },
   "friday-harbor": {
-    "spotId": "friday-harbor",
-    "status": "missing",
     "alt": "Friday Harbor waterfront near the ferry terminal",
-    "notes": "Need open-license photo. Prefer ferry terminal or marina composition."
+    "notes": "Need open-license photo. Prefer ferry terminal or marina composition.",
+    "spotId": "friday-harbor",
+    "status": "missing"
+  },
+  "grays-harbor-lighthouse-viewpoint": {
+    "alt": "Grays Harbor Lighthouse (Westport Lighthouse), Westport, Washington.",
+    "creator": "Steven Pavlov",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/grays-harbor-lighthouse-viewpoint-733c9f66-360.webp",
+    "license": "cc_by_sa_4_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:2023-05-27,_Grays_Harbor_Lighthouse,_001.jpg",
+    "spotId": "grays-harbor-lighthouse-viewpoint",
+    "status": "approved",
+    "title": "2023-05-27, Grays Harbor Lighthouse, 001.jpg"
+  },
+  "guemes-mountain-viewpoint": {
+    "alt": "Guemes Island WA, rural road",
+    "creator": "Rose_Braverman",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/guemes-mountain-viewpoint-678146e2-360.webp",
+    "license": "cc_by_3_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Guemes_Island_WA,_rural_road_-_panoramio.jpg",
+    "spotId": "guemes-mountain-viewpoint",
+    "status": "approved",
+    "title": "Guemes Island WA, rural road - panoramio.jpg"
+  },
+  "halliday-ridge-viewpoint": {
+    "alt": "Looking east down Horton Bay from Halliday Ridge, Mayne Island, Canada. The high island in the background is Saturna.",
+    "creator": "David Stanley from Nanaimo, Canada",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/halliday-ridge-viewpoint-954e5caa-360.webp",
+    "license": null,
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Halliday_Ridge_(7846569086).jpg",
+    "spotId": "halliday-ridge-viewpoint",
+    "status": "approved",
+    "title": "Halliday Ridge (7846569086).jpg"
+  },
+  "henry-m-jackson-viewpoint": {
+    "alt": "Disused administration building (building number 417) at Fort Lawton, Seattle, Washington seen from the Henry M. Jackson Viewpoint.\n\n\nFort Lawton is on the National Register of Historic Places.",
+    "creator": "Joe Mabel",
+    "focalPoint": "50% 50%",
+    "imageSrc": "/spot-images/places/henry-m-jackson-viewpoint-76423d45-360.webp",
+    "license": null,
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fort_Lawton_03.jpg",
+    "spotId": "henry-m-jackson-viewpoint",
+    "status": "approved",
+    "title": "Fort Lawton 03.jpg"
+  },
+  "lime-kiln-point": {
+    "alt": "Lime Kiln Lighthouse overlooking the water at Lime Kiln Point State Park",
+    "creator": "Joe Mabel",
+    "focalPoint": "58% 50%",
+    "imageSrc": "/spot-images/places/lime-kiln-point-6887c237-360.webp",
+    "license": "cc_by_sa_4_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lime_Kiln_Lighthouse_01.jpg",
+    "spotId": "lime-kiln-point",
+    "status": "approved",
+    "title": "Lime Kiln Lighthouse 01.jpg"
+  },
+  "lime-kiln-point-state-park": {
+    "alt": "Lime Kiln Lighthouse overlooking the water at Lime Kiln Point State Park",
+    "creator": "Joe Mabel",
+    "focalPoint": "58% 50%",
+    "imageSrc": "/spot-photos/lime-kiln-point-state-park.webp",
+    "license": "cc_by_sa_4_0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "sourceName": "Wikimedia Commons",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lime_Kiln_Lighthouse_01.jpg",
+    "spotId": "lime-kiln-point-state-park",
+    "status": "approved",
+    "title": "Lime Kiln Lighthouse 01.jpg"
   },
   "port-townsend": {
-    "spotId": "port-townsend",
-    "status": "missing",
     "alt": "Port Townsend waterfront and ferry terminal",
-    "notes": "Need open-license photo. Prefer ferry or waterfront composition."
+    "notes": "Need open-license photo. Prefer ferry or waterfront composition.",
+    "spotId": "port-townsend",
+    "status": "missing"
   },
   "posey-island": {
-    "spotId": "posey-island",
-    "status": "missing",
     "alt": "Coastal waters near Posey Island",
-    "notes": "Need open-license photo. Prefer channel or shoreline composition."
+    "notes": "Need open-license photo. Prefer channel or shoreline composition.",
+    "spotId": "posey-island",
+    "status": "missing"
   },
   "sidney": {
-    "spotId": "sidney",
-    "status": "missing",
     "alt": "Sidney waterfront near the ferry terminal",
-    "notes": "Need open-license photo. Prefer ferry or harbor composition."
+    "notes": "Need open-license photo. Prefer ferry or harbor composition.",
+    "spotId": "sidney",
+    "status": "missing"
   },
   "turn-island": {
-    "spotId": "turn-island",
-    "status": "missing",
     "alt": "View near Turn Island in the Salish Sea",
-    "notes": "Need open-license photo. Prefer shoreline or channel composition."
+    "notes": "Need open-license photo. Prefer shoreline or channel composition.",
+    "spotId": "turn-island",
+    "status": "missing"
   }
 }

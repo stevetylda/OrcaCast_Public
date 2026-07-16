@@ -25,14 +25,17 @@ export async function loadGrid(
   const cached = DISABLE_RUNTIME_DATA_CACHE
     ? undefined
     : gridCache.get(resolution);
-  if (cached) return structuredClone(cached);
+  if (cached) return cached;
   const url = GRID_PATH[resolution];
   const { data } = await fetchJson<FeatureCollection>(url, {
     cache: DISABLE_RUNTIME_DATA_CACHE ? "no-store" : "force-cache",
     cacheToken: getDataVersionToken(),
   });
   if (!DISABLE_RUNTIME_DATA_CACHE) gridCache.set(resolution, data);
-  return structuredClone(data);
+  // Grid consumers treat geometry as immutable and create new features when
+  // joining forecast values. Sharing this large object avoids repeated deep
+  // clones when the map, recommendations, and detail views request H6.
+  return data;
 }
 
 type ForecastPayloadRaw = {

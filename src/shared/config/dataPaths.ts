@@ -31,9 +31,28 @@ export const FORECAST_PATH_LATEST_WEEKLY: Record<H3Resolution, string> = {
 export function getForecastPathForPeriod(
   resolution: H3Resolution,
   periodFileId: string,
+  forecastDirectory = "forecasts/latest/weekly",
 ): string {
   return withForecastCacheBust(
-    withBase(`data/forecasts/latest/weekly/${periodFileId}_${resolution}.json`),
+    withBase(`data/${forecastDirectory}/${periodFileId}_${resolution}.json`),
+  );
+}
+
+export function getLatestForecastPath(
+  resolution: H3Resolution,
+  forecastDirectory: string,
+): string {
+  return withForecastCacheBust(
+    withBase(`data/${forecastDirectory}/${resolution}.json`),
+  );
+}
+
+export function getSmoothedForecastPath(
+  forecastDirectory: string,
+  periodStart = "latest",
+): string {
+  return withForecastCacheBust(
+    withBase(`data/${forecastDirectory}/smoothed/${periodStart}.tif`),
   );
 }
 

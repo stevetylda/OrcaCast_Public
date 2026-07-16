@@ -1,0 +1,170 @@
+/*
+ * Planner foundations used by This Week.
+ * Kept route-scoped so This Week does not download the full planner stylesheet.
+ */
+.iconBtn { width: var(--control-h); height: var(--control-h); color: var(--panel-text); cursor: pointer; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(25, 240, 215, 0.35); border-radius: 12px; place-items: center; padding: 0px; transition: transform 0.12s, background 0.12s, box-shadow 0.12s; display: grid; }
+.iconBtn .material-symbols-rounded { display: block; }
+.iconBtn--menu { width: var(--control-h); height: var(--control-h); }
+.material-symbols-rounded { letter-spacing: normal; text-transform: none; white-space: nowrap; overflow-wrap: normal; -webkit-font-smoothing: antialiased; text-rendering: optimizelegibility; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; direction: ltr; font-family: "Material Symbols Rounded"; font-size: 24px; font-style: normal; font-weight: 400; line-height: 1; display: inline-block; }
+@media (max-width: 1100px){.header__right, .pageHeader__right { flex-wrap: wrap; justify-content: flex-end; min-width: 0px; }}
+@media (max-width: 820px){.brand__title, .brand__subtitle { font-size: 16px; }}
+@media (max-width: 820px){.header__left { gap: 8px; }}
+@media (max-width: 820px){.brand__subtitle { display: none; }}
+@media (max-width: 640px){.header, .pageHeader { padding: 0px 10px; }}
+@media (max-width: 640px){.header__right { flex-wrap: nowrap; gap: 8px; }}
+@media (max-width: 640px){.brand__title { max-width: 24vw; font-size: 15px; }}
+@media (max-width: 640px){.app__footer { height: 44px; bottom: 0px; left: 0px; right: 0px; }}
+@media (max-width: 500px){.brandBtn { display: none; }}
+@media (max-width: 500px){.header__left { flex: 0 0 auto; }}
+@media (max-width: 500px){.header__right { gap: 6px; }}
+@media (max-width: 500px){.header__right > .iconBtn, .header__right .h3menu { display: none; }}
+:root { --callout-bg: #ffc10729; --callout-border: #ffc10773; --callout-fg: #141414eb; --callout-icon: #8c5f00f2; }
+.plannerResultsPage { background: linear-gradient(rgb(238, 245, 251) 0%, rgb(231, 240, 248) 100%); min-height: 100vh; }
+.plannerResultsPage__main { min-height: calc(-74px + 100vh); padding: 18px 22px 22px; position: relative; }
+.plannerResultsPage__mapLayer { border: 1px solid rgba(177, 208, 233, 0.42); border-radius: 30px; position: absolute; inset: 18px 22px 22px; overflow: hidden; box-shadow: rgba(44, 80, 116, 0.16) 0px 28px 80px; }
+.plannerResultsPage__mapLayer .mapStage { width: 100%; height: 100%; }
+@media (max-width: 1000px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard { top: 16px !important; right: 16px !important; }}
+.plannerResultsPage__summaryCard, .plannerResultsPage__legendCard, .plannerResultsPage__spotsCard, .plannerResultsPage__chartCard, .plannerResultsPage__insightsCard, .plannerResultsPage__quickAction, .plannerResultsPage__statusBanner { z-index: 4; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(182, 211, 234, 0.42); position: relative; box-shadow: rgba(42, 77, 112, 0.12) 0px 18px 48px, rgba(255, 255, 255, 0.82) 0px 1px inset; }
+.plannerResultsPage__legendCard { border-radius: 26px; gap: 18px; width: 252px; padding: 22px 22px 20px; display: grid; position: absolute; top: 278px; left: 28px; }
+.plannerResultsPage__spotCard { border-radius: 16px; grid-template-columns: 78px minmax(0px, 1fr); gap: 10px; min-height: 0px; padding: 8px 10px; }
+.plannerResultsPage__spotThumbWrap { background: rgba(12, 37, 58, 0.08); border-radius: 12px; width: 78px; height: 78px; position: relative; overflow: hidden; }
+.plannerResultsPage__spotThumb { object-fit: cover; filter: saturate(0.92) contrast(0.97); width: 100%; height: 100%; transition: transform 0.18s, filter 0.18s; display: block; transform: scale(1.01); }
+.plannerResultsPage__spotBody { align-content: start; gap: 2px; height: auto; min-height: 0px; }
+.plannerResultsPage__spotTopline { align-items: center; gap: 4px; }
+.plannerResultsPage__spotTopline h3 { margin: 0px; line-height: 1.05; }
+.plannerResultsPage__spotRegion { gap: 4px; margin: 0px; line-height: 1; }
+@media (max-width: 1100px){.plannerResultsPage__main { gap: 12px; padding: 12px; display: grid; }}
+@media (max-width: 1100px){.plannerResultsPage__mapLayer, .plannerResultsPage__summaryCard, .plannerResultsPage__legendCard, .plannerResultsPage__spotsCard, .plannerResultsPage__bottomPanel, .plannerResultsPage__quickActions, .plannerResultsPage__statusBanner { width: auto; position: relative; inset: auto; transform: none; }}
+@media (max-width: 1100px){.plannerResultsPage__mapLayer { min-height: 52vh; }}
+.app__footer { z-index: 35; justify-content: flex-end; width: auto; height: auto; bottom: 16px; left: auto; right: 18px; }
+.footerDock { pointer-events: auto; }
+.footerDock__stack { justify-items: end; gap: 10px; display: grid; }
+.footerDock__rail { align-items: center; gap: 10px; display: inline-flex; }
+.footerDock__button { color: rgba(17, 39, 69, 0.96); cursor: pointer; background: rgba(255, 255, 255, 0.94); border: 1px solid rgba(150, 193, 255, 0.18); border-radius: 18px; align-items: center; gap: 8px; min-height: 52px; padding: 0px 18px; font-size: 15px; font-weight: 800; transition: transform 0.14s, box-shadow 0.14s, border-color 0.14s, background 0.14s; display: inline-flex; box-shadow: rgba(19, 39, 66, 0.16) 0px 18px 34px, rgba(255, 255, 255, 0.9) 0px 1px inset; }
+.footerDock__button .material-symbols-rounded { font-size: 19px; }
+.footerDock__button--iconOnly { border-radius: 20px; justify-content: center; width: 58px; min-width: 58px; height: 58px; padding: 0px; }
+.footerDock__buttonCount { color: rgba(0, 82, 120, 0.92); background: rgba(0, 122, 163, 0.12); border-radius: 999px; place-items: center; min-width: 20px; height: 20px; padding: 0px 6px; font-size: 11px; font-weight: 900; display: inline-grid; }
+@media (max-width: 760px){.app__footer { width: auto; bottom: 0.75rem; left: 0.75rem; right: 0.75rem; }}
+@media (max-width: 760px){.footerDock__stack, .footerDock__rail { width: 100%; }}
+@media (max-width: 760px){.footerDock__rail { justify-content: stretch; }}
+@media (max-width: 760px){.footerDock__button { flex: 1 1 0px; justify-content: center; min-width: 0px; padding: 0px 12px; font-size: 13px; }}
+.plannerResultsPage { background: rgb(234, 245, 251); height: 100%; min-height: 0px; overflow: hidden; }
+.plannerResultsPage__main { height: 100%; min-height: 0px; padding: 0px; overflow: hidden; }
+.plannerResultsPage__mapLayer { box-shadow: none; border: 0px; border-radius: 0px; inset: 0px; }
+.plannerResultsPage__summaryCard, .plannerResultsPage__legendCard, .plannerResultsPage__spotsCard, .plannerResultsPage__chartCard, .plannerResultsPage__insightsCard, .plannerResultsPage__quickAction, .plannerResultsPage__statusBanner { background: rgba(255, 255, 255, 0.965); border-color: rgba(184, 211, 232, 0.64); box-shadow: rgba(36, 70, 108, 0.13) 0px 14px 40px, rgba(255, 255, 255, 0.92) 0px 1px inset; }
+.plannerResultsPage__legendCard { border-radius: 22px; gap: 16px; width: 240px; padding: 22px; top: 280px; left: 22px; }
+.plannerResultsPage__spotCard { perspective: 1200px; background: 0px 0px; border: 0px; min-height: 94px; padding: 0px; display: block; position: relative; transform: none; }
+.plannerResultsPage__spotCardInner { min-height: 94px; transform-style: preserve-3d; transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1) 0.125s; position: relative; }
+.plannerResultsPage__spotCardFace { backface-visibility: hidden; border-radius: 16px; position: absolute; inset: 0px; }
+.plannerResultsPage__spotCardFace--front { width: 100%; color: inherit; text-align: left; cursor: pointer; background: linear-gradient(rgba(255, 255, 255, 0.98), rgba(247, 251, 255, 0.94)); border: 1px solid rgba(184, 211, 232, 0.5); border-radius: 16px; grid-template-columns: 78px minmax(0px, 1fr); gap: 10px; padding: 8px 10px; display: grid; position: relative; box-shadow: rgba(36, 70, 108, 0.08) 0px 10px 26px; }
+.plannerResultsPage__spotCardFace--back { background: linear-gradient(155deg, rgba(241, 251, 252, 0.98), rgba(229, 244, 246, 0.96)), rgba(255, 255, 255, 0.94); border: 1px solid rgba(120, 195, 214, 0.34); place-items: center; padding: 12px; display: grid; transform: rotateY(180deg); box-shadow: rgba(36, 70, 108, 0.1) 0px 16px 30px, rgba(255, 255, 255, 0.94) 0px 1px inset; }
+.plannerResultsPage__spotCardActionWrap { align-content: center; gap: 10px; width: 100%; display: grid; }
+.plannerResultsPage__spotCardActionLabel { color: rgb(35, 64, 101); letter-spacing: 0.01em; text-align: center; font-size: 12px; font-weight: 900; }
+.plannerResultsPage__spotCardActions { grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: 8px; display: grid; }
+.plannerResultsPage__spotCardActionBtn { color: rgb(35, 64, 101); min-height: 52px; font-style: inherit; font-variant: inherit; font-stretch: inherit; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; font-language-override: inherit; text-align: center; cursor: pointer; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(120, 195, 214, 0.34); border-radius: 14px; align-content: center; justify-items: center; gap: 4px; padding: 8px 10px; font-size: 11px; font-weight: 850; transition: transform 0.14s, border-color 0.14s, box-shadow 0.14s, background 0.14s; display: grid; }
+.plannerResultsPage__spotCardActionBtn .material-symbols-rounded { font-size: 18px; }
+.plannerResultsPage__spotCardActionBtn--primary { color: rgb(28, 91, 107); background: linear-gradient(rgba(231, 248, 248, 0.98), rgba(213, 239, 242, 0.94)); border-color: rgba(77, 170, 184, 0.42); }
+.plannerResultsPage__spotTopline h3 { line-height: 1.05; }
+.plannerResultsPage { --planner-ink: #061d3c; --planner-paper: #fff8e9; --planner-aqua: #47d1ca; --planner-coral: #ff6458; --planner-yellow: #ffda4c; background: rgb(232, 240, 237); }
+.plannerResultsPage__summaryCard, .plannerResultsPage__legendCard, .plannerResultsPage__spotsCard, .plannerResultsPage__bottomPanel, .plannerResultsPage__quickAction { border: 3px solid var(--planner-ink) !important; background: var(--planner-paper) !important; box-shadow: 7px 8px 0 var(--planner-ink) !important; }
+.plannerResultsPage__legendCard { border-radius: 19px; width: 206px !important; padding: 15px 17px !important; top: 28px !important; left: auto !important; right: 504px !important; }
+.plannerResultsPage__legendRamp { border: 2px solid var(--planner-ink); border-radius: 999px; overflow: hidden; }
+.plannerResultsPage__spotCard, .plannerResultsPage__spotCardInner { min-height: 104px; }
+.plannerResultsPage__spotCardFace--front { border: 2px solid var(--planner-ink); min-height: 104px; box-shadow: none; background: rgb(255, 253, 246); border-radius: 16px; grid-template-columns: 92px minmax(0px, 1fr); gap: 12px; padding: 7px; }
+.plannerResultsPage__spotCardFace--back { display: none; }
+.plannerResultsPage__spotThumbWrap { border-radius: 10px; width: 92px; height: 90px; }
+.plannerResultsPage__spotTopline { grid-template-columns: auto minmax(0px, 1fr) auto; align-items: center; gap: 7px; display: grid; }
+.plannerResultsPage__spotRank { background: var(--planner-coral); color: rgb(255, 255, 255); border-radius: 50%; place-items: center; width: 34px; height: 34px; font-size: 0.75rem; font-weight: 900; display: grid; }
+.plannerResultsPage__spotTopline h3 { color: var(--planner-ink); font-size: 1rem; }
+.plannerResultsPage__spotDistance { color: rgb(8, 120, 124); letter-spacing: 0.04em; text-transform: uppercase; margin: 5px 0px 0px; font-size: 0.67rem; font-weight: 900; }
+@media (max-width: 1180px){.plannerResultsPage__legendCard { display: none; }}
+@media (max-width: 900px){.plannerResultsPage { overflow: auto; }}
+@media (max-width: 900px){.plannerResultsPage__main { min-height: calc(-72px + 100dvh); overflow: visible; }}
+@media (prefers-reduced-motion: reduce){.plannerResultsPage__spotCardInner { transition: none; }}
+.plannerResultsPage.hasPlan, .plannerResultsPage.isPrompting, .plannerResultsPage.isEditing { --planner-spots-panel-width: 448px; --planner-map-controls-right: calc(22px + var(--planner-spots-panel-width) + 16px); --planner-map-control-gap: 14px; --planner-legend-card-width: 168px; }
+@media (max-width: 1380px){.plannerResultsPage.hasPlan, .plannerResultsPage.isPrompting, .plannerResultsPage.isEditing { --planner-spots-panel-width: 398px; }}
+@media (max-width: 1100px){.plannerResultsPage__main { min-height: auto; padding: 12px; overflow: visible; }}
+@media (max-width: 1100px){.plannerResultsPage__mapLayer { border-radius: 26px; min-height: 56vh; }}
+.plannerResultsPage__legendCard { border-radius: 22px; gap: 12px; width: 214px; padding: 16px; }
+.plannerResultsPage__legendRamp { border: 1px solid rgba(188, 211, 232, 0.58); border-radius: 999px; grid-template-columns: repeat(5, 1fr); gap: 3px; min-height: 12px; display: grid; overflow: hidden; }
+.plannerResultsPage.hasPlan .plannerResultsPage__legendCard { top: 22px; right: var(--planner-map-controls-right); transform-origin: 100% 0px; transition: top 0.18s, right 0.18s, width 0.18s, padding 0.18s, box-shadow 0.18s; bottom: auto; left: auto; }
+.plannerResultsPage__legendRamp { direction: ltr; }
+@media (max-width: 1380px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard, .plannerResultsPage.hasPlan.isChartCollapsed .plannerResultsPage__legendCard { top: 22px; }}
+@media (max-width: 1100px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard, .plannerResultsPage.hasPlan.isChartCollapsed .plannerResultsPage__legendCard { transform-origin: 50% center; position: relative; inset: auto; }}
+.mapPageRoot .header--home { height: 88px; padding: 0px clamp(20px, 3vw, 60px); color: rgb(6, 29, 60) !important; box-shadow: none !important; background: rgb(255, 253, 246) !important; border-bottom: 3px solid rgb(6, 29, 60) !important; }
+.mapPageRoot .header--home .header__left { display: contents; }
+.mapPageRoot .header--home .iconBtn { color: rgb(6, 29, 60); width: 60px; height: 60px; box-shadow: none; background: rgb(255, 218, 76); border: 3px solid rgb(6, 29, 60); border-radius: 50%; }
+.mapPageRoot .header--home .header__right > .iconBtn { background: rgb(244, 138, 179); }
+.mapPageRoot .header--home .brandBtn { position: absolute; left: clamp(92px, 8.5vw, 150px); overflow: visible; transform: none; }
+.mapPageRoot .header--home .brand__title { letter-spacing: -0.06em; text-overflow: clip; max-width: none; text-shadow: none; font-size: clamp(1.55rem, 2.25vw, 2.15rem); font-weight: 900; overflow: visible; color: rgb(6, 29, 60) !important; }
+.mapPageRoot .header--home .brand__subtitle { letter-spacing: 0.11em; text-transform: uppercase; background: rgb(71, 209, 202); border: 2px solid rgb(6, 29, 60); border-radius: 999px; margin-left: 9px; padding: 6px 10px; font-size: 0.67rem; font-weight: 900; display: inline-block; transform: rotate(3deg); color: rgb(6, 29, 60) !important; }
+.mapPageRoot .header--home .homeNav { align-items: center; gap: clamp(14px, 2.4vw, 42px); margin-right: 20px; display: flex; }
+.mapPageRoot .header--home .homeNav a { color: rgb(6, 29, 60); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.84rem; font-weight: 900; text-decoration: none; }
+@media (max-width: 820px){.mapPageRoot .header--home { height: 72px; padding: 0px 14px; }}
+@media (max-width: 820px){.mapPageRoot .header--home .iconBtn { border-width: 2px; width: 48px; height: 48px; }}
+@media (max-width: 820px){.mapPageRoot .header--home .brandBtn { left: 76px; }}
+@media (max-width: 820px){.mapPageRoot .header--home .brand__subtitle, .mapPageRoot .header--home .homeNav { display: none; }}
+@media (max-width: 520px){.mapPageRoot .header--home .brand__title { max-width: none; font-size: 1.3rem; }}
+@media (max-width: 520px){.mapPageRoot .header--home .header__right > .iconBtn { display: grid; }}
+@media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotsList > div, .plannerResultsPage.hasPlan .plannerResultsPage__spotCard, .plannerResultsPage.hasPlan .plannerResultsPage__spotCardInner { height: 112px; min-height: 112px !important; }}
+@media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotCardFace--front { grid-template-columns: 106px minmax(0px, 1fr); gap: 10px; min-height: 112px; padding: 6px; }}
+@media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotThumbWrap { width: 106px; height: 98px; }}
+@media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotTopline h3 { font-size: 0.98rem; }}
+@media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotDistance { margin-top: 3px; font-size: 0.61rem; }}
+@media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotRank { width: 30px; height: 30px; font-size: 0.66rem; }}
+.plannerResultsPage__legendCard { gap: 7px; display: grid; }
+.plannerResultsPage__legendRamp { border: 2px solid rgb(6, 29, 60); border-radius: 999px; height: 16px; min-height: 16px; }
+.plannerResultsPage__legendRamp span { min-height: 12px; }
+@media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard { top: 28px !important; left: auto !important; right: 524px !important; }}
+.mapPageRoot .header--home { height: 78px; }
+.mapPageRoot .header--home .iconBtn { width: 52px; height: 52px; }
+.plannerResultsPage__legendCard { gap: 10px; display: grid; width: 250px !important; padding: 14px 16px !important; }
+.plannerResultsPage__legendTitle { color: rgb(6, 29, 60); letter-spacing: 0.1em; text-align: center; text-transform: uppercase; font-size: 0.72rem; font-weight: 900; }
+.plannerResultsPage__legendScale { color: rgb(6, 29, 60); letter-spacing: 0.08em; text-transform: uppercase; grid-template-columns: auto minmax(112px, 1fr) auto; align-items: center; gap: 9px; font-size: 0.64rem; font-weight: 900; display: grid; }
+.plannerResultsPage__legendScale .plannerResultsPage__legendRamp { height: 15px; min-height: 15px; }
+.plannerResultsPage.hasPlan:not(.isEditing) .plannerResultsPage__mapLayer { opacity: 1; transition: opacity 0.22s; }
+@media (prefers-reduced-motion: reduce){.plannerResultsPage.isPrompting .plannerResultsPage__mapLayer, .plannerResultsPage.isEditing .plannerResultsPage__mapLayer, .plannerResultsPage.hasPlan:not(.isEditing) .plannerResultsPage__mapLayer { transition: none; }}
+.plannerResultsPage { --planner-font-ui: "IBM Plex Sans", "Segoe UI", sans-serif; --planner-radius-major: 24px; --planner-radius-secondary: 16px; --planner-radius-control: 14px; --planner-border-major: 3px solid var(--planner-ink); --planner-border-control: 2px solid var(--planner-ink); --planner-shadow-major: 7px 8px 0 var(--planner-ink); --planner-shadow-compact: 5px 6px 0 var(--planner-ink); --planner-control-height: 42px; font-family: var(--planner-font-ui); }
+.plannerResultsPage__summaryCard, .plannerResultsPage__legendCard, .plannerResultsPage__spotsCard, .plannerResultsPage__bottomPanel { border-radius: var(--planner-radius-major); border: var(--planner-border-major) !important; box-shadow: var(--planner-shadow-major) !important; }
+.plannerResultsPage__spotCard, .plannerResultsPage__spotCardInner { min-height: 76px; }
+.plannerResultsPage__spotCardFace--front { min-height: 76px; box-shadow: none; background: 0px 0px; border: 0px; border-radius: 12px; grid-template-columns: 76px minmax(0px, 1fr); gap: 10px; padding: 5px 3px; transition: background 0.14s, box-shadow 0.14s, transform 0.14s; }
+.plannerResultsPage__spotThumbWrap { border-radius: 10px; width: 76px; height: 66px; box-shadow: rgba(6, 29, 60, 0.1) 0px 0px 0px 1px inset; }
+.plannerResultsPage__spotRank { z-index: 3; background: var(--planner-ink); color: rgb(255, 248, 233); letter-spacing: 0px; border: 2px solid rgb(255, 248, 233); border-radius: 50%; width: 22px; min-width: 22px; height: 22px; padding: 0px; font-size: 0.62rem; font-weight: 950; position: absolute; top: -7px; left: -7px; box-shadow: rgba(6, 29, 60, 0.24) 0px 2px 5px; }
+.plannerResultsPage__spotThumbWrap { overflow: visible; }
+.plannerResultsPage__spotThumb { border-radius: inherit; }
+.plannerResultsPage__spotTopline { grid-template-columns: minmax(0px, 1fr) auto; }
+.plannerResultsPage.hasPlan .plannerResultsPage__spotRank { width: 22px; height: 22px; font-size: 0.62rem; }
+.plannerResultsPage__spotTopline h3 { font-size: 0.96rem; line-height: 1.05; }
+.plannerResultsPage.hasPlan .plannerResultsPage__spotsList > .plannerResultsPage__spotRow, .plannerResultsPage.hasPlan .plannerResultsPage__spotCard, .plannerResultsPage.hasPlan .plannerResultsPage__spotCardInner { height: auto !important; min-height: 76px !important; }
+.plannerResultsPage.hasPlan .plannerResultsPage__spotCardFace--front { grid-template-columns: 76px minmax(0px, 1fr) !important; min-height: 76px !important; }
+.plannerResultsPage.hasPlan .plannerResultsPage__spotThumbWrap { width: 76px !important; height: 66px !important; }
+.plannerResultsPage .viewingPotentialBadge { box-shadow: none; border-width: 1px; }
+.plannerResultsPage .plannerMapMarker:not(.is-selected) { opacity: 0.94; border-width: 2px; width: 27px; height: 32px; box-shadow: rgba(7, 49, 68, 0.2) 0px 4px 10px, rgba(255, 255, 255, 0.58) 0px 0px 0px 2px; }
+.plannerResultsPage .plannerMapMarker:not(.is-selected) .material-symbols-rounded { font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" 18; font-size: 14px; }
+.plannerResultsPage__legendCard { user-select: none; overflow: visible; }
+.plannerResultsPage__legendPaletteTrigger { z-index: 1; border-radius: inherit; width: 100%; height: 100%; color: inherit; cursor: pointer; background: 0px 0px; border: 0px; padding: 0px; position: absolute; inset: 0px; }
+.plannerResultsPage.hasPlan .plannerResultsPage__legendCard { left: auto !important; right: 26px !important; }
+.plannerResultsPage.hasPlan .plannerResultsPage__legendCard, .plannerResultsPage.hasPlan.isChartCollapsed .plannerResultsPage__legendCard { top: 24px !important; left: auto !important; right: 456px !important; }
+@media (max-width: 1180px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard { display: none !important; }}
+.plannerResultsPage .plannerMapMarker__label { z-index: 6; border: 2px solid var(--planner-ink); max-width: 190px; color: var(--planner-ink); text-overflow: ellipsis; white-space: nowrap; box-shadow: 3px 4px 0 var(--planner-ink); opacity: 0; pointer-events: none; transform-origin: center bottom; background: rgb(255, 248, 233); border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 900; line-height: 1; transition: opacity 0.12s, transform 0.12s; position: absolute; bottom: calc(100% + 8px); left: 50%; overflow: hidden; transform: translate(-50%, 5px) scale(0.96); }
+.iconBtn:hover, .iconBtn:focus-visible { box-shadow: var(--teal-glow); background: rgba(255, 255, 255, 0.18); transform: translateY(-1px); }
+.iconBtn:disabled { cursor: not-allowed; box-shadow: none; transform: none; }
+.iconBtn:disabled:hover, .iconBtn:disabled:focus-visible { box-shadow: none; background: rgba(255, 255, 255, 0.12); transform: none; }
+.plannerResultsPage__mapLayer::after { content: ""; pointer-events: none; z-index: 1; background: radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.72), rgba(0, 0, 0, 0) 32%), linear-gradient(135deg, rgba(244, 250, 255, 0.76) 0%, rgba(244, 250, 255, 0.28) 38%, rgba(206, 229, 248, 0.08) 100%); position: absolute; inset: 0px; }
+.plannerResultsPage__spotThumbWrap::after { content: ""; pointer-events: none; border-radius: inherit; background: linear-gradient(135deg, rgba(9, 41, 72, 0.12), rgba(80, 210, 196, 0.1)); position: absolute; inset: 0px; box-shadow: rgba(8, 44, 70, 0.08) 0px 0px 0px 1px inset; }
+.plannerResultsPage__spotCard:hover .plannerResultsPage__spotThumb { filter: saturate() contrast(); transform: scale(1.045); }
+.footerDock__button:hover, .footerDock__button:focus-visible, .footerDock__button.isActive { border-color: rgba(88, 138, 206, 0.4); outline: none; transform: translateY(-1px); box-shadow: rgba(19, 39, 66, 0.2) 0px 20px 38px, rgba(88, 138, 206, 0.16) 0px 0px 0px 1px; }
+.plannerResultsPage__mapLayer::after { display: none; }
+.plannerResultsPage__spotCard:hover, .plannerResultsPage__spotCard:focus-visible { box-shadow: none; background: 0px 0px; border-color: rgba(0, 0, 0, 0); outline: none; transform: none; }
+.plannerResultsPage__spotCard.isSelected { transform: none; }
+.plannerResultsPage__spotCard:hover .plannerResultsPage__spotCardInner, .plannerResultsPage__spotCard:focus-within .plannerResultsPage__spotCardInner { transition-delay: 0s; transform: rotateY(180deg); }
+.plannerResultsPage__spotCard.isSelected .plannerResultsPage__spotCardFace--front { border-color: rgba(77, 170, 184, 0.52); box-shadow: rgba(77, 170, 184, 0.16) 0px 0px 0px 1px, rgba(36, 70, 108, 0.12) 0px 16px 32px; }
+.plannerResultsPage__spotCardActionBtn:hover, .plannerResultsPage__spotCardActionBtn:focus-visible { background: rgba(255, 255, 255, 0.98); border-color: rgba(30, 119, 136, 0.5); outline: none; transform: translateY(-1px); box-shadow: rgba(36, 70, 108, 0.12) 0px 10px 20px; }
+.plannerResultsPage__spotCard:hover .plannerResultsPage__spotCardInner, .plannerResultsPage__spotCard:focus-within .plannerResultsPage__spotCardInner { transform: none; }
+.plannerResultsPage__spotCard.isSelected .plannerResultsPage__spotCardFace--front { border-color: var(--planner-ink); box-shadow: 0 0 0 4px var(--planner-yellow); background: rgb(255, 244, 199); }
+.plannerResultsPage__spotCard:not(.isSelected) .plannerResultsPage__spotCardFace--front:hover, .plannerResultsPage__spotCard:not(.isSelected) .plannerResultsPage__spotCardFace--front:focus-visible { background: rgba(71, 209, 202, 0.1); outline: none; }
+.plannerResultsPage__spotCard.isSelected .plannerResultsPage__spotCardFace--front { border: var(--planner-border-control); border-radius: var(--planner-radius-secondary); box-shadow: 0 0 0 3px var(--planner-yellow); background: rgb(255, 244, 199); padding: 6px; }
+.plannerResultsPage__spotCard.isSelected .plannerResultsPage__spotThumbWrap { width: 74px; height: 64px; }
+.plannerResultsPage .plannerMapMarker.is-selected { opacity: 1; width: 29px; height: 34px; transform: scale(1.08); box-shadow: rgba(7, 49, 68, 0.3) 0px 6px 16px, rgba(255, 213, 79, 0.58) 0px 0px 0px 6px; }
+.plannerResultsPage__legendPaletteTrigger:focus-visible { outline-offset: 4px; outline: rgba(71, 209, 202, 0.72) solid 3px; }
+.plannerResultsPage .plannerMapMarker:hover .plannerMapMarker__label, .plannerResultsPage .plannerMapMarker:focus-visible .plannerMapMarker__label { opacity: 1; transform: translate(-50%) scale(1); }

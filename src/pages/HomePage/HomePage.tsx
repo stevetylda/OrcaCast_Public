@@ -1,10 +1,9 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
 import { ReturnToTopButton } from "../../shared/components/ReturnToTopButton";
 import { SiteFooter } from "../../shared/components/SiteFooter";
 import { useMenu } from "../../shared/state/MenuContext";
-import { useMapState } from "../../shared/state/MapStateContext";
 import {
   loadTripPlannerOccurrencePayload,
   type TripPlannerHistogramBin,
@@ -21,12 +20,6 @@ import {
   type WeatherDaySummary,
 } from "../../features/home/weather";
 import "./HomePage.css";
-
-const InfoModal = lazy(() =>
-  import("../../shared/components/InfoModal").then((m) => ({
-    default: m.InfoModal,
-  })),
-);
 
 type WeatherState =
   | { status: "loading" | "error"; week: WeatherDaySummary[] }
@@ -81,8 +74,6 @@ const HOME_REGIONS = [
 
 export function HomePage() {
   const { setMenuOpen } = useMenu();
-  const { darkMode } = useMapState();
-  const [infoOpen, setInfoOpen] = useState(false);
   const [activityState, setActivityState] = useState<ActivityState>({
     status: "loading",
     histogram: [],
@@ -171,18 +162,23 @@ export function HomePage() {
         title="OrcaCast"
         subtitle="Forecast Lab"
         variant="home"
-        onOpenInfo={() => setInfoOpen(true)}
         onOpenMenu={() => setMenuOpen(true)}
         rightSlot={
           <nav className="homeNav" aria-label="Homepage navigation">
-            <a href="#this-week">This week</a>
-            <Link to="/planner">Plan a trip</Link>
-            <Link to="/explore">Explore</Link>
+            <a href="#this-week" aria-label="This week">
+              This week
+            </a>
+            <Link to="/planner" aria-label="Plan a trip">
+              Plan a trip
+            </Link>
+            <Link to="/explore" aria-label="Explore">
+              Explore
+            </Link>
           </nav>
         }
       />
 
-      <main className="homeLanding">
+      <main id="main-content" className="homeLanding" tabIndex={-1}>
         <section className="homeHero" aria-labelledby="home-hero-title">
           <div className="homeHero__copy">
             <p className="homeKicker">Your summer, forecasted</p>
@@ -275,7 +271,11 @@ export function HomePage() {
               </div>
               <img
                 className="homePulseLighthouse"
-                src="/images/home/orcacast-lighthouse-hires.png"
+                src="/images/home/orcacast-lighthouse-480.webp"
+                width={446}
+                height={644}
+                loading="lazy"
+                decoding="async"
                 alt=""
                 aria-hidden="true"
               />
@@ -579,17 +579,6 @@ export function HomePage() {
       />
 
       <ReturnToTopButton className="homeReturnToTop" />
-
-      <Suspense fallback={null}>
-        {infoOpen && (
-          <InfoModal
-            open={infoOpen}
-            onClose={() => setInfoOpen(false)}
-            onStartTour={() => setInfoOpen(false)}
-            darkMode={darkMode}
-          />
-        )}
-      </Suspense>
     </div>
   );
 }

@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
 import { SiteFooter } from "../../shared/components/SiteFooter";
@@ -15,16 +8,9 @@ import {
   loadDataMeta,
   type DataMeta,
 } from "../../shared/data/meta";
-import { useMapState } from "../../shared/state/MapStateContext";
 import { useMenu } from "../../shared/state/MenuContext";
 import "../AboutPage/AboutPage.css";
 import "./ModelPage.css";
-
-const InfoModal = lazy(() =>
-  import("../../shared/components/InfoModal").then((module) => ({
-    default: module.InfoModal,
-  })),
-);
 
 type StageStatus = "current" | "integrating" | "planner";
 type StageSide = "left" | "right" | "center";
@@ -212,8 +198,6 @@ function buildRopePath(
 
 export function ModelPage() {
   const { setMenuOpen } = useMenu();
-  const { darkMode } = useMapState();
-  const [infoOpen, setInfoOpen] = useState(false);
   const [dataMeta, setDataMeta] = useState<DataMeta | null>(() =>
     getCachedDataMeta(),
   );
@@ -252,18 +236,23 @@ export function ModelPage() {
         title="OrcaCast"
         subtitle="Forecast Lab"
         variant="home"
-        onOpenInfo={() => setInfoOpen(true)}
         onOpenMenu={() => setMenuOpen(true)}
         rightSlot={
           <nav className="aboutGuideNav" aria-label="Model page navigation">
-            <Link to="/about">About</Link>
-            <a href="#model-journey">Model layers</a>
-            <Link to="/planner">Plan a trip</Link>
+            <Link to="/about" aria-label="About">
+              About
+            </Link>
+            <a href="#model-journey" aria-label="Model layers">
+              Model layers
+            </a>
+            <Link to="/planner" aria-label="Plan a trip">
+              Plan a trip
+            </Link>
           </nav>
         }
       />
 
-      <main className="modelStoryMain">
+      <main id="main-content" className="modelStoryMain" tabIndex={-1}>
         <section className="modelStoryHero" aria-labelledby="model-story-title">
           <div className="modelStoryHero__copy">
             <p className="aboutGuideKicker">Inside the forecast</p>
@@ -599,17 +588,6 @@ export function ModelPage() {
           { label: "This week", to: "/watch" },
         ]}
       />
-
-      <Suspense fallback={null}>
-        {infoOpen ? (
-          <InfoModal
-            open={infoOpen}
-            onClose={() => setInfoOpen(false)}
-            onStartTour={() => setInfoOpen(false)}
-            darkMode={darkMode}
-          />
-        ) : null}
-      </Suspense>
     </div>
   );
 }

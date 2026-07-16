@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
 import { ReturnToTopButton } from "../../shared/components/ReturnToTopButton";
@@ -9,15 +9,8 @@ import {
   loadDataMeta,
   type DataMeta,
 } from "../../shared/data/meta";
-import { useMapState } from "../../shared/state/MapStateContext";
 import { useMenu } from "../../shared/state/MenuContext";
 import "./AboutPage.css";
-
-const InfoModal = lazy(() =>
-  import("../../shared/components/InfoModal").then((module) => ({
-    default: module.InfoModal,
-  })),
-);
 
 const responsibleViewingLinks = [
   {
@@ -164,8 +157,6 @@ const regionLabels = [
 
 export function AboutPage() {
   const { setMenuOpen } = useMenu();
-  const { darkMode } = useMapState();
-  const [infoOpen, setInfoOpen] = useState(false);
   const [dataMeta, setDataMeta] = useState<DataMeta | null>(() =>
     getCachedDataMeta(),
   );
@@ -191,18 +182,23 @@ export function AboutPage() {
         title="OrcaCast"
         subtitle="Forecast Lab"
         variant="home"
-        onOpenInfo={() => setInfoOpen(true)}
         onOpenMenu={() => setMenuOpen(true)}
         rightSlot={
           <nav className="aboutGuideNav" aria-label="About page navigation">
-            <a href="/#this-week">This week</a>
-            <Link to="/planner">Plan a trip</Link>
-            <Link to="/explore">Explore</Link>
+            <a href="/#this-week" aria-label="This week">
+              This week
+            </a>
+            <Link to="/planner" aria-label="Plan a trip">
+              Plan a trip
+            </Link>
+            <Link to="/explore" aria-label="Explore">
+              Explore
+            </Link>
           </nav>
         }
       />
 
-      <main className="aboutGuideMain">
+      <main id="main-content" className="aboutGuideMain" tabIndex={-1}>
         <section className="aboutGuideHero" aria-labelledby="about-guide-title">
           <div className="aboutGuideHero__copy">
             <p className="aboutGuideKicker">About OrcaCast</p>
@@ -553,6 +549,42 @@ export function AboutPage() {
               </div>
             </div>
           </details>
+          <details className="aboutGuideTechnical" id="privacy">
+            <summary>
+              Privacy & local storage{" "}
+              <span className="material-symbols-rounded" aria-hidden="true">
+                expand_more
+              </span>
+            </summary>
+            <div className="aboutGuideTechnical__grid">
+              <div>
+                <span>Tracking</span>
+                <strong>No accounts, analytics, ads, or cookies</strong>
+                <small>
+                  OrcaCast does not build advertising profiles. Display
+                  preferences and dismissed introductions remain in local
+                  storage until you clear this site’s browser data.
+                </small>
+              </div>
+              <div>
+                <span>Your trip</span>
+                <strong>Saved only in this browser session</strong>
+                <small>
+                  Base location, dates, travel range, and itinerary stay in
+                  session storage and are not submitted to an OrcaCast server.
+                </small>
+              </div>
+              <div>
+                <span>External services</span>
+                <strong>Maps, fonts, and weather</strong>
+                <small>
+                  Google Fonts, MET Norway, OpenFreeMap, and Stadia Maps receive
+                  ordinary web request information such as IP address and user
+                  agent when their resources are loaded.
+                </small>
+              </div>
+            </div>
+          </details>
         </section>
 
         <section
@@ -679,6 +711,7 @@ export function AboutPage() {
             external: true,
           },
           { label: "Methodology", to: "#methodology", external: true },
+          { label: "Privacy", to: "#privacy", external: true },
           { label: "Learn how the model works", to: "/about/model" },
           { label: "Plan a trip", to: "/planner" },
           {
@@ -694,17 +727,6 @@ export function AboutPage() {
       />
 
       <ReturnToTopButton className="aboutReturnToTop" />
-
-      <Suspense fallback={null}>
-        {infoOpen ? (
-          <InfoModal
-            open={infoOpen}
-            onClose={() => setInfoOpen(false)}
-            onStartTour={() => setInfoOpen(false)}
-            darkMode={darkMode}
-          />
-        ) : null}
-      </Suspense>
     </div>
   );
 }

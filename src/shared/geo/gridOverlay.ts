@@ -16,6 +16,7 @@ import type {
 import { H3_CELL_ID_KEYS } from "../data/h3";
 import type { HeatScale } from "./colorScale";
 import SurfaceRasterWorker from "./surfaceRasterWorker?worker";
+import { fromArrayBuffer } from "geotiff";
 
 const DEFAULT_SOURCE_ID = "grid";
 const DEFAULT_FILL_ID = "grid-fill";
@@ -294,6 +295,112 @@ let pendingSurfaceRasterRequest: {
   bounds: SurfaceBounds;
   requestId: number;
 } | null = null;
+const geoTiffSurfaceCache = new Map<string, Promise<SurfaceRaster>>();
+
+function webMercatorToLngLat(x: number, y: number): [number, number] {
+  const longitude = (x / 20037508.34) * 180;
+  const latitudeRadians =
+    2 * Math.atan(Math.exp((y / 6378137) * 1)) - Math.PI / 2;
+  return [longitude, latitudeRadians * RAD_TO_DEG];
+}
+
+async function fetchGeoTiff(path: string, fallbackPath?: string) {
+  const load = async (url: string) => {
+    const response = await fetch(url, { cache: "force-cache" });
+    if (!response.ok) {
+      throw new Error(`GeoTIFF request failed (${response.status}) for ${url}`);
+    }
+    return response.arrayBuffer();
+  };
+  try {
+    return await load(path);
+  } catch (error) {
+    if (!fallbackPath || fallbackPath === path) throw error;
+    return load(fallbackPath);
+  }
+}
+
+async function buildGeoTiffSurfaceRaster(
+  path: string,
+  fallbackPath: string | undefined,
+  paletteColors: string[],
+): Promise<SurfaceRaster> {
+  const cacheKey = `${path}|${fallbackPath ?? ""}|${paletteColors.join(",")}`;
+  const cached = geoTiffSurfaceCache.get(cacheKey);
+  if (cached) return cached;
+
+  const task = (async () => {
+    const tiff = await fromArrayBuffer(await fetchGeoTiff(path, fallbackPath));
+    const image = await tiff.getImage();
+    const sourceWidth = image.getWidth();
+    const sourceHeight = image.getHeight();
+    const scale = Math.min(1, 1800 / Math.max(sourceWidth, sourceHeight));
+    const width = Math.max(1, Math.round(sourceWidth * scale));
+    const height = Math.max(1, Math.round(sourceHeight * scale));
+    const raster = (await image.readRasters({
+      interleave: true,
+      width,
+      height,
+    })) as unknown as ArrayLike<number>;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context)
+      throw new Error("Canvas is unavailable for GeoTIFF rendering");
+    const imageData = context.createImageData(width, height);
+    const colors =
+      paletteColors.length > 0
+        ? paletteColors.map(parseCssColor)
+        : [parseCssColor("#ffffff")];
+    const stops = colors.map((_, index) =>
+      colors.length === 1 ? 0 : index / (colors.length - 1),
+    );
+
+    for (let index = 0; index < width * height; index += 1) {
+      const value = Number(raster[index] ?? 0);
+      if (!Number.isFinite(value) || value <= 0) continue;
+      const [r, g, b, a] = sampleColor(
+        clamp(value, 0, 1),
+        stops,
+        colors,
+        [0, 0, 0, 0],
+      );
+      const pixelIndex = index * 4;
+      imageData.data[pixelIndex] = Math.round(clamp(r, 0, 255));
+      imageData.data[pixelIndex + 1] = Math.round(clamp(g, 0, 255));
+      imageData.data[pixelIndex + 2] = Math.round(clamp(b, 0, 255));
+      imageData.data[pixelIndex + 3] = Math.round(clamp(a, 0, 1) * 255);
+    }
+    context.putImageData(imageData, 0, 0);
+
+    const blob = await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob(
+        (value) =>
+          value ? resolve(value) : reject(new Error("GeoTIFF render failed")),
+        "image/png",
+      ),
+    );
+    const [minX, minY, maxX, maxY] = image.getBoundingBox();
+    const [west, north] = webMercatorToLngLat(minX, maxY);
+    const [east, south] = webMercatorToLngLat(maxX, minY);
+    const coordinates: SurfaceRaster["coordinates"] = [
+      [west, north],
+      [east, north],
+      [east, south],
+      [west, south],
+    ];
+    return {
+      url: URL.createObjectURL(blob),
+      coordinates,
+    };
+  })();
+
+  geoTiffSurfaceCache.set(cacheKey, task);
+  task.catch(() => geoTiffSurfaceCache.delete(cacheKey));
+  return task;
+}
 
 function buildSurfaceSamples(fc: FeatureCollection): SurfaceInput | null {
   const cached = surfaceInputCache.get(fc);
@@ -1510,6 +1617,23 @@ export function addSurfaceOverlay(
     scale,
   };
   worker.postMessage(request);
+}
+
+export async function addGeoTiffSurfaceOverlay(
+  map: MapLibreMap,
+  path: string,
+  fallbackPath: string | undefined,
+  paletteColors: string[],
+  isCancelled: () => boolean = () => false,
+) {
+  const raster = await buildGeoTiffSurfaceRaster(
+    path,
+    fallbackPath,
+    paletteColors,
+  );
+  if (isCancelled()) return;
+  updateSurfaceSource(map, raster);
+  setSurfaceVisibility(map, true);
 }
 
 export function setGridBaseVisibility(

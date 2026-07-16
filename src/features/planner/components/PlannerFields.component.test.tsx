@@ -31,9 +31,13 @@ describe("PlannerLocationField", () => {
       </div>,
     );
 
-    await user.click(
-      screen.getByRole("button", { name: /Starting location Friday Harbor/ }),
-    );
+    const trigger = screen.getByRole("button", {
+      name: /Starting location Friday Harbor/,
+    });
+    expect(trigger).not.toHaveAttribute("aria-controls");
+
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute("aria-controls");
     expect(
       screen.getByRole("listbox", { name: "Base location options" }),
     ).toBeVisible();

@@ -37,7 +37,17 @@ export function SiteFooter({
   return (
     <footer className="appSiteFooter">
       <Link className="appSiteFooter__brand" to="/" aria-label="OrcaCast home">
-        <img src="/images/OrcaCast-Icon.png" alt="" aria-hidden="true" />
+        <img
+          src="/images/OrcaCast-Icon-128.webp"
+          srcSet="/images/OrcaCast-Icon-128.webp 128w, /images/OrcaCast-Icon-256.webp 256w"
+          sizes="44px"
+          width={128}
+          height={128}
+          loading="lazy"
+          decoding="async"
+          alt=""
+          aria-hidden="true"
+        />
         <span>OrcaCast</span>
       </Link>
       <span className="appSiteFooter__tagline">{tagline}</span>

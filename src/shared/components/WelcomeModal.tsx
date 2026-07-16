@@ -1,4 +1,5 @@
-import { useEffect, useId } from "react";
+import { useId, useRef } from "react";
+import { useDialogFocus } from "./useDialogFocus";
 
 type Props = {
   open: boolean;
@@ -14,15 +15,9 @@ export function WelcomeModal({
   onLearnMore,
 }: Props) {
   const titleId = useId();
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  useDialogFocus({ open, dialogRef, initialFocusRef: closeButtonRef, onClose });
 
   if (!open) return null;
 
@@ -33,16 +28,23 @@ export function WelcomeModal({
       role="presentation"
     >
       <section
+        ref={dialogRef}
         className="modal modal--welcome"
         onClick={(ev) => ev.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
       >
         <div className="modal__header welcome__header">
           <div className="welcome__titleWrap">
             <img
-              src="/images/OrcaCast-Icon.png"
+              src="/images/OrcaCast-Icon-128.webp"
+              srcSet="/images/OrcaCast-Icon-128.webp 128w, /images/OrcaCast-Icon-256.webp 256w"
+              sizes="72px"
+              width={128}
+              height={128}
+              decoding="async"
               alt="OrcaCast logo"
               className="welcome__logo"
             />
@@ -51,6 +53,7 @@ export function WelcomeModal({
             </div>
           </div>
           <button
+            ref={closeButtonRef}
             className="welcome__close"
             onClick={onClose}
             aria-label="Close"

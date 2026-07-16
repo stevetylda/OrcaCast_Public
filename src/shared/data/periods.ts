@@ -13,28 +13,32 @@ export type Period = {
   forecastAvailable?: boolean;
 };
 
-let cachedPeriods: Period[] | null = null;
-const cachedPeriodsByResolution = new Map<H3Resolution, Period[]>();
+const cachedPeriods = new Map<string, Period[]>();
+const cachedPeriodsByResolution = new Map<string, Period[]>();
 
-export function buildPeriodsUrl(): string {
+export function buildPeriodsUrl(forecastDirectory?: string): string {
   const base = import.meta.env.BASE_URL || "/";
   const cleanBase = base.endsWith("/") ? base : `${base}/`;
   return new URL(
-    `${cleanBase}data/periods.json`,
+    forecastDirectory
+      ? `${cleanBase}data/${forecastDirectory}/periods.json`
+      : `${cleanBase}data/periods.json`,
     window.location.origin,
   ).toString();
 }
 
 export function resetPeriodsCache(): void {
-  cachedPeriods = null;
+  cachedPeriods.clear();
   cachedPeriodsByResolution.clear();
 }
 
-export function buildManifestUrl(): string {
+export function buildManifestUrl(forecastDirectory?: string): string {
   const base = import.meta.env.BASE_URL || "/";
   const cleanBase = base.endsWith("/") ? base : `${base}/`;
   return new URL(
-    `${cleanBase}data/manifest.json`,
+    forecastDirectory
+      ? `${cleanBase}data/${forecastDirectory}/manifest.json`
+      : `${cleanBase}data/manifest.json`,
     window.location.origin,
   ).toString();
 }
@@ -43,12 +47,17 @@ type PublicDataManifest = {
   files?: string[];
 };
 
-async function loadManifestFileSet(): Promise<Set<string> | null> {
+async function loadManifestFileSet(
+  forecastDirectory?: string,
+): Promise<Set<string> | null> {
   try {
-    const { data } = await fetchJson<PublicDataManifest>(buildManifestUrl(), {
-      cache: "force-cache",
-      cacheToken: getDataVersionToken(),
-    });
+    const { data } = await fetchJson<PublicDataManifest>(
+      buildManifestUrl(forecastDirectory),
+      {
+        cache: "force-cache",
+        cacheToken: getDataVersionToken(),
+      },
+    );
     if (!Array.isArray(data.files)) return null;
     return new Set(data.files.map((file) => String(file).replace(/^\/+/, "")));
   } catch {
@@ -56,10 +65,14 @@ async function loadManifestFileSet(): Promise<Set<string> | null> {
   }
 }
 
-export async function loadPeriods(): Promise<Period[]> {
-  if (cachedPeriods) return cachedPeriods;
+export async function loadPeriods(
+  forecastDirectory?: string,
+): Promise<Period[]> {
+  const cacheKey = forecastDirectory ?? "__legacy__";
+  const cached = cachedPeriods.get(cacheKey);
+  if (cached) return cached;
   const { url, data: parsedJson } = await fetchJson<unknown>(
-    buildPeriodsUrl(),
+    buildPeriodsUrl(forecastDirectory),
     {
       cache: "force-cache",
       cacheToken: getDataVersionToken(),
@@ -71,7 +84,7 @@ export async function loadPeriods(): Promise<Period[]> {
     url,
     "periods.json",
   );
-  cachedPeriods = data
+  const periods = data
     .filter((p) => Number.isFinite(p.year) && Number.isFinite(p.stat_week))
     .map((p) => {
       const range = isoWeekToDateRange(p.year, p.stat_week);
@@ -88,26 +101,33 @@ export async function loadPeriods(): Promise<Period[]> {
       };
     })
     .sort((a, b) => a.year - b.year || a.stat_week - b.stat_week);
-  return cachedPeriods;
+  cachedPeriods.set(cacheKey, periods);
+  return periods;
 }
 
 export async function loadPeriodsForResolution(
   resolution: H3Resolution,
+  forecastDirectory?: string,
 ): Promise<Period[]> {
-  const cached = cachedPeriodsByResolution.get(resolution);
+  const cacheKey = `${forecastDirectory ?? "__legacy__"}|${resolution}`;
+  const cached = cachedPeriodsByResolution.get(cacheKey);
   if (cached) return cached;
-  const periods = await loadPeriods();
-  const manifestFiles = await loadManifestFileSet();
+  const periods = await loadPeriods(forecastDirectory);
+  const manifestFiles = await loadManifestFileSet(forecastDirectory);
   if (!manifestFiles) {
-    cachedPeriodsByResolution.set(resolution, periods);
+    cachedPeriodsByResolution.set(cacheKey, periods);
     return periods;
   }
-  const filtered = periods.filter((period) =>
-    manifestFiles.has(
-      `forecasts/latest/weekly/${period.fileId}_${resolution}.json`,
-    ),
-  );
+  const filtered = periods.filter((period) => {
+    const fileName = `${period.fileId}_${resolution}.json`;
+    return (
+      manifestFiles.has(fileName) ||
+      (forecastDirectory
+        ? manifestFiles.has(`${forecastDirectory}/${fileName}`)
+        : manifestFiles.has(`forecasts/latest/weekly/${fileName}`))
+    );
+  });
   const resolved = filtered.length > 0 ? filtered : periods;
-  cachedPeriodsByResolution.set(resolution, resolved);
+  cachedPeriodsByResolution.set(cacheKey, resolved);
   return resolved;
 }

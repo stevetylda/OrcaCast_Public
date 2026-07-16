@@ -3,6 +3,11 @@ import { PALETTES, type PaletteId } from "../geo/palettes";
 import type { SuggestedPlace } from "../../features/locations/types";
 import type { OrcasoundHydrophone } from "../data/orcasoundHydrophones";
 import type { UnitsMode } from "../state/MapStateContext";
+import type {
+  ForecastEcotypeId,
+  ForecastEcotypeOption,
+  ForecastModelOption,
+} from "../config/forecastModels";
 
 type Props = {
   onShareSnapshot?: () => void;
@@ -25,6 +30,14 @@ type Props = {
   selectedPaletteId: PaletteId;
   onPaletteChange: (paletteId: PaletteId) => void;
   showPalette?: boolean;
+  forecastEcotypeId?: ForecastEcotypeId;
+  forecastEcotypes?: ForecastEcotypeOption[];
+  onForecastEcotypeChange?: (ecotypeId: ForecastEcotypeId) => void;
+  forecastModelId?: string;
+  forecastModels?: ForecastModelOption[];
+  onForecastModelChange?: (modelId: string) => void;
+  onSettingsOpenChange?: (open: boolean) => void;
+  settingsEyebrow?: string;
 };
 
 type DockPanelId = "live-cams" | "hydrophones" | "settings" | null;
@@ -55,6 +68,14 @@ export function AppFooter({
   selectedPaletteId,
   onPaletteChange,
   showPalette = true,
+  forecastEcotypeId,
+  forecastEcotypes = [],
+  onForecastEcotypeChange,
+  forecastModelId,
+  forecastModels = [],
+  onForecastModelChange,
+  onSettingsOpenChange,
+  settingsEyebrow,
 }: Props) {
   const [activePanel, setActivePanel] = useState<DockPanelId>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -75,6 +96,10 @@ export function AppFooter({
     [places],
   );
   const poiActive = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
+
+  useEffect(() => {
+    onSettingsOpenChange?.(activePanel === "settings");
+  }, [activePanel, onSettingsOpenChange]);
 
   useEffect(() => {
     if (!activePanel) return;
@@ -211,7 +236,14 @@ export function AppFooter({
           >
             <div className="footerDock__panelHeader footerDock__panelHeader--settings">
               <div className="footerDock__titleRow" data-tour="theme-toggle">
-                <span className="footerDock__title">Settings</span>
+                <div>
+                  {settingsEyebrow ? (
+                    <div className="footerDock__sectionLabel">
+                      {settingsEyebrow}
+                    </div>
+                  ) : null}
+                  <span className="footerDock__title">Settings</span>
+                </div>
               </div>
               <div className="footerDock__headerActions">
                 <button
@@ -251,6 +283,64 @@ export function AppFooter({
                 </button>
               </div>
             </div>
+
+            {forecastEcotypeId && forecastModelId ? (
+              <section className="footerDock__section footerDock__section--settings">
+                <div className="footerDock__sectionLabel">Forecast</div>
+                <label className="footerDock__settingRow footerDock__settingRow--select">
+                  <span className="footerDock__settingLabel">Ecotype</span>
+                  <span className="footerDock__selectWrap">
+                    <select
+                      className="select select--footer"
+                      value={forecastEcotypeId}
+                      onChange={(event) =>
+                        onForecastEcotypeChange?.(
+                          event.target.value as ForecastEcotypeId,
+                        )
+                      }
+                      aria-label="Forecast ecotype"
+                    >
+                      {forecastEcotypes.map((ecotype) => (
+                        <option key={ecotype.id} value={ecotype.id}>
+                          {ecotype.label}
+                        </option>
+                      ))}
+                    </select>
+                    <span
+                      className="material-symbols-rounded footerDock__selectChevron"
+                      aria-hidden="true"
+                    >
+                      expand_more
+                    </span>
+                  </span>
+                </label>
+                <label className="footerDock__settingRow footerDock__settingRow--select">
+                  <span className="footerDock__settingLabel">Model</span>
+                  <span className="footerDock__selectWrap">
+                    <select
+                      className="select select--footer"
+                      value={forecastModelId}
+                      onChange={(event) =>
+                        onForecastModelChange?.(event.target.value)
+                      }
+                      aria-label="Forecast model"
+                    >
+                      {forecastModels.map((model) => (
+                        <option key={model.id} value={model.id}>
+                          {model.label}
+                        </option>
+                      ))}
+                    </select>
+                    <span
+                      className="material-symbols-rounded footerDock__selectChevron"
+                      aria-hidden="true"
+                    >
+                      expand_more
+                    </span>
+                  </span>
+                </label>
+              </section>
+            ) : null}
 
             <section className="footerDock__section footerDock__section--settings">
               <div className="footerDock__sectionLabel">Display</div>

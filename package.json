@@ -28,6 +28,7 @@
     "@duckdb/duckdb-wasm": "^1.33.1-dev57.0",
     "d3-shape": "^3.2.0",
     "driver.js": "^1.4.0",
+    "geotiff": "^3.0.5",
     "html-to-image": "^1.11.13",
     "leaflet": "^1.9.4",
     "maplibre-gl": "^5.17.0",

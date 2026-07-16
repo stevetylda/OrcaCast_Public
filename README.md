@@ -186,6 +186,7 @@ For Cloudflare Pages:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Node.js version: 18 or newer
+- Production URL: `https://orcacast-public.pages.dev`
 
 ### CI/CD deployment ownership
 

@@ -8730,6 +8730,36 @@
   transform: translate(-50%, 0) scale(1);
 }
 
+.plannerMapHoverPopup .maplibregl-popup-content {
+  max-width: 190px;
+  padding: 6px 10px;
+  overflow: hidden;
+  border: 2px solid var(--planner-ink);
+  border-radius: 999px;
+  background: #fff8e9;
+  color: var(--planner-ink);
+  box-shadow: 3px 4px 0 var(--planner-ink);
+}
+
+.plannerMapHoverPopup {
+  z-index: 2147483647 !important;
+  pointer-events: none;
+}
+
+.plannerMapHoverPopup .maplibregl-popup-tip {
+  display: none;
+}
+
+.plannerMapHoverLabel {
+  display: block;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .plannerResultsPage .plannerMapMarker__itineraryBadge {
   top: 50% !important;
   right: auto !important;

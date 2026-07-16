@@ -35,17 +35,25 @@ export function ExplorePage() {
         <button
           type="button"
           className="exploreSoonHeader__menu"
-          aria-label="Open menu"
+          aria-label="Open main menu"
           onClick={() => setMenuOpen(true)}
         >
           <span className="material-symbols-rounded" aria-hidden="true">
             menu
           </span>
         </button>
-        <Link className="exploreSoonHeader__brand" to="/">
+        <Link
+          className="exploreSoonHeader__brand"
+          to="/"
+          aria-label="OrcaCast home"
+        >
           OrcaCast <span>Explore</span>
         </Link>
-        <Link className="exploreSoonHeader__watch" to="/watch">
+        <Link
+          className="exploreSoonHeader__watch"
+          to="/watch"
+          aria-label="This week"
+        >
           This week
           <span className="material-symbols-rounded" aria-hidden="true">
             arrow_forward
@@ -53,7 +61,7 @@ export function ExplorePage() {
         </Link>
       </header>
 
-      <main className="exploreSoonMain">
+      <main id="main-content" className="exploreSoonMain" tabIndex={-1}>
         <section className="exploreSoonHero" aria-labelledby="explore-title">
           <div className="exploreSoonHero__copy">
             <p className="exploreSoonKicker">Field guide under construction</p>

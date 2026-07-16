@@ -41,7 +41,7 @@ export function PageShell({
           <button
             className="iconBtn iconBtn--menu"
             onClick={() => setMenuOpen(true)}
-            aria-label="Menu"
+            aria-label="Open main menu"
             type="button"
           >
             <span className="material-symbols-rounded" aria-hidden="true">

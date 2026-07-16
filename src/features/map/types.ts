@@ -6,6 +6,7 @@ import type { Period } from "../../shared/data/periods";
 import type { PlannerBaseLocation } from "../../shared/data/plannerBaseLocations";
 import type { PaletteId } from "../../shared/geo/palettes";
 import type { SuggestedPlace, ViewingLocation } from "../locations/types";
+import type { PublicPoi } from "../locations/poiData";
 
 export type FillColorSpec = DataDrivenPropertyValueSpecification<string>;
 export type LngLat = [number, number];
@@ -46,6 +47,8 @@ export type ForecastMapProps = {
   enableGridInteraction?: boolean;
   forecastPath?: string;
   fallbackForecastPath?: string;
+  smoothedForecastPath?: string;
+  fallbackSmoothedForecastPath?: string;
   colorScaleValues?: Record<string, number>;
   useExternalColorScale?: boolean;
   externalValues?: Record<string, number>;
@@ -63,6 +66,8 @@ export type ForecastMapProps = {
   selectedHydrophoneId?: string | null;
   pulseSelectedPlaceMarker?: boolean;
   onPlaceSelect?: (place: SuggestedPlace) => void;
+  onPoiSelect?: (place: PublicPoi) => void;
+  onLocationSelectionClear?: () => void;
   showTripHotspotMarkers?: boolean;
   forceDomSuggestedMarkers?: boolean;
   baseLocation?: PlannerBaseLocation | null;

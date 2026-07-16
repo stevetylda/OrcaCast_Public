@@ -183,10 +183,80 @@ body {
   min-height: 0;
 }
 
+.skipLink {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 2147483647;
+  padding: 10px 14px;
+  border: 3px solid #061d3c;
+  border-radius: 10px;
+  background: #ffd54f;
+  color: #061d3c;
+  font-weight: 900;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-150%);
+}
+
+.skipLink:focus {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
 .mapStage {
   position: relative;
   flex: 1 1 auto;
   min-height: 420px;
+}
+
+.visuallyHidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.mapLocationPicker {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 50;
+  display: grid;
+  gap: 5px;
+  min-width: min(280px, calc(100% - 24px));
+  padding: 10px;
+  border: 2px solid #173f62;
+  border-radius: 12px;
+  background: #fff7e8;
+  color: #061d3c;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 4px 5px 0 #173f62;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(calc(-100% - 20px));
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.mapLocationPicker:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.mapLocationPicker select {
+  min-height: 44px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  background: #fffdf6;
+  color: inherit;
+  font: inherit;
 }
 
 .poiMarker {
@@ -254,6 +324,11 @@ body {
 
 .maplibregl-marker {
   z-index: 2;
+}
+
+.plannerMapMarker.maplibregl-marker:hover,
+.plannerMapMarker.maplibregl-marker:focus-visible {
+  z-index: 2147483647;
 }
 
 .plannerMapMarker {
@@ -340,6 +415,36 @@ body {
 .plannerMapMarker.is-selected {
   transform: scale(1.14);
   box-shadow: 0 6px 18px rgba(7, 49, 68, 0.36), 0 0 0 6px rgba(255, 213, 79, 0.52);
+}
+
+.plannerMapMarker.is-selected.is-pulsing {
+  animation: plannerSelectedLocationPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes plannerSelectedLocationPulse {
+  0%,
+  100% {
+    box-shadow: 0 6px 16px rgba(7, 49, 68, 0.3),
+      0 0 0 4px rgba(255, 213, 79, 0.42);
+  }
+
+  50% {
+    box-shadow: 0 6px 18px rgba(7, 49, 68, 0.34),
+      0 0 0 9px rgba(255, 213, 79, 0.78);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plannerMapMarker.is-selected.is-pulsing,
+  .poiMarker__clusterCore,
+  .mapStage__tripLoadingIcon span {
+    animation: none !important;
+  }
+
+  .mapLocationPicker,
+  .skipLink {
+    transition: none !important;
+  }
 }
 
 .poiPopup {

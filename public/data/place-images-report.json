@@ -1,0 +1,15 @@
+{
+  "aliases": 0,
+  "approved_photographs": 11,
+  "exact_duplicate_groups": 0,
+  "generated_manifest_entries": 11,
+  "perceptual_hash_count": 11,
+  "pois_processed": 747,
+  "skipped_or_fallback": 9,
+  "statuses": [
+    "approved",
+    "needs_review",
+    "skipped"
+  ],
+  "unreviewed": 727
+}

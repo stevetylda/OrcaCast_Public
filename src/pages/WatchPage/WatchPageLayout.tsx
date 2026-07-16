@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -31,6 +32,7 @@ import {
 } from "../../shared/data/orcasoundHydrophones";
 import { loadPoiData } from "../../features/locations/poiData";
 import type { ViewingLocation } from "../../features/locations/types";
+import { useDialogFocus } from "../../shared/components/useDialogFocus";
 
 function pickLegendColors(colors: string[], colorNoData = false) {
   const source = colorNoData ? colors.slice(1) : colors;
@@ -88,6 +90,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   trackRender("WatchPageLayout");
   const [sidebarOffsetPx, setSidebarOffsetPx] = useState(0);
   const [recommendedPanelOpen, setRecommendedPanelOpen] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [itineraryPlaceIds, setItineraryPlaceIds] = useState<string[]>(() => {
     try {
@@ -107,12 +110,23 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   const [itineraryExportMapReady, setItineraryExportMapReady] = useState(false);
   const itineraryExportMapRef = useRef<ForecastMapHandle | null>(null);
   const itineraryExportCardRef = useRef<HTMLElement | null>(null);
+  const closeItineraryExportDialog = useCallback(
+    () => setItineraryExportOpen(false),
+    [],
+  );
+  useDialogFocus({
+    open: itineraryExportOpen,
+    dialogRef: itineraryExportCardRef,
+    onClose: closeItineraryExportDialog,
+  });
   const [draggingItineraryPlaceId, setDraggingItineraryPlaceId] = useState<
     string | null
   >(null);
   const [itineraryDropTargetId, setItineraryDropTargetId] = useState<
     string | null
   >(null);
+  const [itineraryReorderAnnouncement, setItineraryReorderAnnouncement] =
+    useState("");
   const [itineraryMapViewActive, setItineraryMapViewActive] = useState(false);
   const [itineraryAddPulse, setItineraryAddPulse] = useState(false);
   const [thisWeekLoading, setThisWeekLoading] = useState(true);
@@ -138,6 +152,11 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     setSurfaceMode,
     resolution,
     modelId,
+    setModelId,
+    forecastEcotypeId,
+    setForecastEcotype,
+    forecastEcotypes,
+    forecastModels,
     forecastIndex,
     setForecastIndex,
     forecastPlaybackPlaying,
@@ -157,6 +176,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     mapResetNonce,
     forecastPath,
     latestForecastPath,
+    smoothedForecastPath,
+    latestSmoothedForecastPath,
     expectedSummary,
     currentWeek,
     currentWeekYear,
@@ -346,6 +367,25 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     setItineraryDropTargetId(null);
   };
 
+  const handleItineraryKeyboardMove = (placeId: string, offset: -1 | 1) => {
+    setItineraryPlaceIds((current) => {
+      const sourceIndex = current.indexOf(placeId);
+      const targetIndex = sourceIndex + offset;
+      if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= current.length)
+        return current;
+      const next = [...current];
+      const [moved] = next.splice(sourceIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      const placeName =
+        suggestedPlaces.find((place) => place.id === placeId)?.name ??
+        "Location";
+      setItineraryReorderAnnouncement(
+        `${placeName} moved to position ${targetIndex + 1} of ${next.length}.`,
+      );
+      return next;
+    });
+  };
+
   const downloadItineraryExport = async () => {
     if (
       itineraryExportBusy ||
@@ -396,15 +436,18 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     title: "OrcaCast",
     subtitle: "Forecast Lab",
     variant: "home" as const,
-    onOpenInfo: () => controller.setInfoOpen(true),
     onOpenMenu: () => setMenuOpen(true),
     rightSlot: (
       <nav className="homeNav" aria-label="This week navigation">
-        <Link to="/watch" aria-current="page">
+        <Link to="/watch" aria-label="This week" aria-current="page">
           This week
         </Link>
-        <Link to="/planner">Plan a trip</Link>
-        <Link to="/explore">Explore</Link>
+        <Link to="/planner" aria-label="Plan a trip">
+          Plan a trip
+        </Link>
+        <Link to="/explore" aria-label="Explore">
+          Explore
+        </Link>
       </nav>
     ),
   };
@@ -431,6 +474,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     suggestedPlaces: mapSuggestedPlaces,
     selectedPlaceId,
     onPlaceSelect: (place) => setSelectedPlaceId(place.id),
+    pulseSelectedPlaceMarker: selectedPlaceId !== null,
+    onLocationSelectionClear: () => setSelectedPlaceId(null),
     sidebarOffsetPx,
     mapModeLabel: "Loading this week’s forecast…",
     itineraryPlaceIds,
@@ -465,6 +510,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     | "suggestedPlaces"
     | "selectedPlaceId"
     | "onPlaceSelect"
+    | "pulseSelectedPlaceMarker"
+    | "onLocationSelectionClear"
     | "sidebarOffsetPx"
     | "mapModeLabel"
     | "itineraryPlaceIds"
@@ -499,7 +546,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     return (
       <div className="mapPageRoot mapPageRoot--thisWeek">
         <AppHeader {...commonHeaderProps} />
-        <main className="app__main">
+        <main id="main-content" className="app__main" tabIndex={-1}>
           <WatchPageFailureState
             title="Data failed to load"
             message="The map could not start because a required data file was unavailable."
@@ -517,13 +564,19 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     <div className="mapPageRoot mapPageRoot--thisWeek">
       <AppHeader {...commonHeaderProps} />
 
-      <main className="app__main">
+      <main id="main-content" className="app__main" tabIndex={-1}>
+        <div className="thisWeekMobileHeading" role="heading" aria-level={1}>
+          This week’s orca forecast, {weekRangeLabel}
+        </div>
+        <div className="visuallyHidden" role="status" aria-live="polite">
+          {itineraryReorderAnnouncement}
+        </div>
         <div
           className={`plannerResultsPage hasPlan thisWeekResultsPage${
             recommendedPanelOpen
               ? " isRecommendedOpen"
               : " isRecommendedCollapsed"
-          }`}
+          }${settingsOpen ? " isSettingsOpen" : ""}`}
           style={pageStyle}
         >
           <div className="plannerResultsPage__main thisWeekResultsPage__main">
@@ -537,6 +590,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                   selectedWeekYear: currentWeekYear,
                   forecastPath,
                   fallbackForecastPath: latestForecastPath,
+                  smoothedForecastPath,
+                  fallbackSmoothedForecastPath: latestSmoothedForecastPath,
                   forecastOverlayLoadKey: forecastLoadKey,
                   onForecastOverlayReady: setRenderedForecastLoadKey,
                 },
@@ -781,7 +836,20 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                               handleItineraryDragStart(id, event)
                             }
                             onDragEnd={handleItineraryDragEnd}
-                            aria-label={`Drag ${place.name}`}
+                            onKeyDown={(event) => {
+                              if (
+                                event.key !== "ArrowUp" &&
+                                event.key !== "ArrowDown"
+                              )
+                                return;
+                              event.preventDefault();
+                              handleItineraryKeyboardMove(
+                                id,
+                                event.key === "ArrowUp" ? -1 : 1,
+                              );
+                            }}
+                            aria-keyshortcuts="ArrowUp ArrowDown"
+                            aria-label={`Reorder ${place.name}. Use Up and Down arrow keys`}
                           >
                             ⠿
                           </button>
@@ -967,15 +1035,29 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             onTogglePoiAll={() =>
               setPoiFilters((prev) => {
                 const allOn = prev.Park && prev.Marina && prev.Ferry;
+                if (allOn) setSelectedPlaceId(null);
                 return { Park: !allOn, Marina: !allOn, Ferry: !allOn };
               })
             }
             onTogglePoiType={(type) =>
-              setPoiFilters((prev) => ({ ...prev, [type]: !prev[type] }))
+              setPoiFilters((prev) => {
+                const next = { ...prev, [type]: !prev[type] };
+                if (!next.Park && !next.Marina && !next.Ferry)
+                  setSelectedPlaceId(null);
+                return next;
+              })
             }
             selectedPaletteId={selectedPaletteId}
             onPaletteChange={setSelectedPaletteId}
             showPalette={false}
+            forecastEcotypeId={forecastEcotypeId}
+            forecastEcotypes={forecastEcotypes}
+            onForecastEcotypeChange={setForecastEcotype}
+            forecastModelId={modelId}
+            forecastModels={forecastModels}
+            onForecastModelChange={setModelId}
+            onSettingsOpenChange={setSettingsOpen}
+            settingsEyebrow="This week settings"
           />
         </div>
       </main>
@@ -992,6 +1074,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="this-week-itinerary-export-title"
+            tabIndex={-1}
             onMouseDown={(event) => event.stopPropagation()}
           >
             <header className="thisWeekItineraryExport__header">

@@ -11,17 +11,21 @@ export function NotFoundPage() {
         <button
           type="button"
           className="notFoundHeader__menu"
-          aria-label="Open menu"
+          aria-label="Open main menu"
           onClick={() => setMenuOpen(true)}
         >
           <span className="material-symbols-rounded" aria-hidden="true">
             menu
           </span>
         </button>
-        <Link className="notFoundHeader__brand" to="/">
+        <Link
+          className="notFoundHeader__brand"
+          to="/"
+          aria-label="OrcaCast home"
+        >
           OrcaCast <span>Forecast Lab</span>
         </Link>
-        <Link className="notFoundHeader__home" to="/">
+        <Link className="notFoundHeader__home" to="/" aria-label="Home">
           Home
           <span className="material-symbols-rounded" aria-hidden="true">
             arrow_forward
@@ -29,7 +33,7 @@ export function NotFoundPage() {
         </Link>
       </header>
 
-      <main className="notFoundMain">
+      <main id="main-content" className="notFoundMain" tabIndex={-1}>
         <section className="notFoundCard" aria-labelledby="not-found-title">
           <div className="notFoundCard__copy">
             <p className="notFoundKicker">404 · Off the chart</p>

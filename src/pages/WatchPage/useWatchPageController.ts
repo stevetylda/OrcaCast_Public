@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ForecastMapHandle } from "../../features/map";
 import type { GridCellExpandRequest } from "../../features/map/types";
-import { appConfig } from "../../shared/config/appConfig";
 import {
   buildPeriod,
   periodRange,
@@ -11,8 +10,17 @@ import {
 } from "../../shared/config/forecastPeriod";
 import {
   getForecastPathForPeriod,
+  getSmoothedForecastPath,
   type H3Resolution,
 } from "../../shared/config/dataPaths";
+import {
+  DEFAULT_FORECAST_ECOTYPE_ID,
+  DEFAULT_FORECAST_MODEL_ID,
+  FORECAST_ECOTYPES,
+  getForecastDirectory,
+  getForecastModelsForEcotype,
+  type ForecastEcotypeId,
+} from "../../shared/config/forecastModels";
 import {
   isoWeekFromDate,
   isoWeekToDateRange,
@@ -50,8 +58,6 @@ export function useWatchPageController() {
     setSurfaceMode,
     resolution,
     setResolution,
-    modelId,
-    setModelId,
     forecastIndex,
     setForecastIndex,
     forecastPlaybackPlaying,
@@ -71,6 +77,10 @@ export function useWatchPageController() {
   const { setMenuOpen } = useMenu();
 
   const [infoOpen, setInfoOpen] = useState(false);
+  const [forecastEcotypeId, setForecastEcotypeId] = useState<ForecastEcotypeId>(
+    DEFAULT_FORECAST_ECOTYPE_ID,
+  );
+  const [modelId, setModelId] = useState(DEFAULT_FORECAST_MODEL_ID);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [gridDetailOpen, setGridDetailOpen] = useState(false);
   const [gridDetailCellId, setGridDetailCellId] = useState<string | null>(null);
@@ -143,6 +153,21 @@ export function useWatchPageController() {
     const now = new Date();
     return buildPeriod(isoWeekYearFromDate(now), isoWeekFromDate(now));
   }, []);
+  const forecastModels = useMemo(
+    () => getForecastModelsForEcotype(forecastEcotypeId),
+    [forecastEcotypeId],
+  );
+  const forecastDirectory = useMemo(
+    () => getForecastDirectory(forecastEcotypeId, modelId),
+    [forecastEcotypeId, modelId],
+  );
+
+  const setForecastEcotype = (ecotypeId: ForecastEcotypeId) => {
+    const firstModel = getForecastModelsForEcotype(ecotypeId)[0];
+    setForecastPlaybackPlaying(false);
+    setForecastEcotypeId(ecotypeId);
+    if (firstModel) setModelId(firstModel.id);
+  };
 
   const shiftIsoWeek = (year: number, statWeek: number, weekOffset: number) => {
     const start = isoWeekToDateRange(year, statWeek).start;
@@ -166,7 +191,7 @@ export function useWatchPageController() {
     let active = true;
     const override = readForecastPeriodOverride();
     setPageLoadError(null);
-    loadPeriodsForResolution(resolution)
+    loadPeriodsForResolution(resolution, forecastDirectory)
       .then((list) => {
         if (!active) return;
         const resolved = resolvePeriodsForSelection(
@@ -188,13 +213,21 @@ export function useWatchPageController() {
       .catch((error) => {
         if (!active) return;
         setPeriods([]);
-        setPageLoadError(normalizeDataLoadError(error, buildPeriodsUrl()));
+        setPageLoadError(
+          normalizeDataLoadError(error, buildPeriodsUrl(forecastDirectory)),
+        );
       });
 
     return () => {
       active = false;
     };
-  }, [fallbackPeriod, reloadToken, resolution, setForecastIndex]);
+  }, [
+    fallbackPeriod,
+    forecastDirectory,
+    reloadToken,
+    resolution,
+    setForecastIndex,
+  ]);
 
   useEffect(() => {
     if (periods.length === 0) return;
@@ -218,17 +251,37 @@ export function useWatchPageController() {
   const forecastPath = useMemo(
     () =>
       selectedForecast
-        ? getForecastPathForPeriod(resolution, selectedForecast.fileId)
+        ? getForecastPathForPeriod(
+            resolution,
+            selectedForecast.fileId,
+            forecastDirectory,
+          )
         : undefined,
-    [resolution, selectedForecast],
+    [forecastDirectory, resolution, selectedForecast],
   );
   const latestForecastPath = useMemo(() => {
     const latest = selectLatestPeriod(
       periods.filter((period) => period.forecastAvailable !== false),
     );
     if (!latest) return undefined;
-    return getForecastPathForPeriod(resolution, latest.fileId);
-  }, [periods, resolution]);
+    return getForecastPathForPeriod(
+      resolution,
+      latest.fileId,
+      forecastDirectory,
+    );
+  }, [forecastDirectory, periods, resolution]);
+  const smoothedForecastPath = useMemo(() => {
+    if (!selectedForecast) return undefined;
+    const periodStart = isoWeekToDateRange(
+      selectedForecast.year,
+      selectedForecast.stat_week,
+    ).start;
+    return getSmoothedForecastPath(forecastDirectory, periodStart);
+  }, [forecastDirectory, selectedForecast]);
+  const latestSmoothedForecastPath = useMemo(
+    () => getSmoothedForecastPath(forecastDirectory),
+    [forecastDirectory],
+  );
   const latestAvailableForecastPeriod = useMemo(
     () =>
       selectLatestPeriod(
@@ -364,7 +417,7 @@ export function useWatchPageController() {
             await loadForecast(resolution, {
               kind: "explicit",
               explicitPath: forecastPath,
-              modelId: appConfig.compositeModelId,
+              modelId,
             });
             hasForecastForSelectedPeriod = true;
           } catch {
@@ -380,15 +433,12 @@ export function useWatchPageController() {
           await loadForecast(resolution, {
             kind: "explicit",
             explicitPath: latestForecastPath,
-            modelId: appConfig.compositeModelId,
+            modelId,
           }).catch(() => undefined);
         }
 
         if (!active) return;
         setSelectedPeriodHasForecast(hasForecastForSelectedPeriod);
-        if (modelId !== appConfig.compositeModelId) {
-          setModelId(appConfig.compositeModelId);
-        }
       } catch {
         if (!active) return;
         setSelectedPeriodHasForecast(false);
@@ -399,7 +449,7 @@ export function useWatchPageController() {
     return () => {
       active = false;
     };
-  }, [forecastPath, latestForecastPath, modelId, resolution, setModelId]);
+  }, [forecastPath, latestForecastPath, modelId, resolution]);
 
   useEffect(() => {
     if (selectedPeriodHasForecast === true) {
@@ -445,7 +495,8 @@ export function useWatchPageController() {
     setGridDetailSelectedWeek(null);
     setGridDetailSelectedWeekYear(null);
     setResolution("H6");
-    setModelId(appConfig.compositeModelId);
+    setForecastEcotypeId(DEFAULT_FORECAST_ECOTYPE_ID);
+    setModelId(DEFAULT_FORECAST_MODEL_ID);
     setHotspotsEnabled(false);
     setHotspotMode("modeled");
     setHotspotPercentile(1);
@@ -561,6 +612,10 @@ export function useWatchPageController() {
     setResolution,
     modelId,
     setModelId,
+    forecastEcotypeId,
+    setForecastEcotype,
+    forecastEcotypes: FORECAST_ECOTYPES,
+    forecastModels,
     forecastIndex,
     setForecastIndex,
     forecastPlaybackPlaying,
@@ -600,6 +655,8 @@ export function useWatchPageController() {
     latestAvailableForecastRange,
     forecastPath,
     latestForecastPath,
+    smoothedForecastPath,
+    latestSmoothedForecastPath,
     expectedSummary,
     currentWeek,
     currentWeekYear,

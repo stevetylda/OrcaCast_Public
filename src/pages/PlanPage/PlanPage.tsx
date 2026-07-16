@@ -1,7 +1,5 @@
 import {
   Fragment,
-  lazy,
-  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -21,6 +19,7 @@ import {
 import { appConfig } from "../../shared/config/appConfig";
 import { DEFAULT_RECOMMENDATION_RADIUS_MILES } from "../../shared/config/planner";
 import { AppHeader } from "../../shared/components/AppHeader";
+import { useDialogFocus } from "../../shared/components/useDialogFocus";
 import { AmbientSwimmingOrca } from "../../shared/components/AmbientSwimmingOrca";
 import {
   LoadingAnimation,
@@ -34,6 +33,11 @@ import {
 } from "../../shared/state/MapStateContext";
 import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlaces";
 import type { SuggestedPlace } from "../../features/locations/types";
+import {
+  filterPoisByType,
+  hasActivePoiFilter,
+  type PublicPoi,
+} from "../../features/locations/poiData";
 import {
   isoWeekFromDate,
   isoWeekYearFromDate,
@@ -89,12 +93,6 @@ import {
   rasterizeSvgToPngBlob,
 } from "../../features/planner/exports/itineraryExport";
 import "./PlanPage.css";
-
-const InfoModal = lazy(() =>
-  import("../../shared/components/InfoModal").then((m) => ({
-    default: m.InfoModal,
-  })),
-);
 
 const DEFAULT_RECOMMENDED_SPOTS_COUNT = 25;
 const TRIP_BRUSH_DAYS = 366;
@@ -250,7 +248,6 @@ export function PlannerPage() {
     () => new URLSearchParams(location.search).get("resume") === "1",
     [location.search],
   );
-  const [infoOpen, setInfoOpen] = useState(false);
   const storedSelection = useMemo(
     () => (resumeStoredPlan ? readStoredPlannerSelection() : null),
     [resumeStoredPlan],
@@ -297,11 +294,15 @@ export function PlannerPage() {
     baseLocations,
     photoManifest,
     cameraLocations,
+    poiLocations,
     hydrophoneLocations,
     hydrophoneListenUrl,
   } = usePlannerReferenceData();
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [detailPlaceId, setDetailPlaceId] = useState<string | null>(null);
+  const [supplementalPlaces, setSupplementalPlaces] = useState<
+    SuggestedPlace[]
+  >([]);
   const [fieldPickFilter, setFieldPickFilter] =
     useState<FieldPickFilter>("top");
   const [chartCollapsed, setChartCollapsed] = useState(true);
@@ -332,6 +333,8 @@ export function PlannerPage() {
   const [itineraryDropTargetId, setItineraryDropTargetId] = useState<
     string | null
   >(null);
+  const [itineraryReorderAnnouncement, setItineraryReorderAnnouncement] =
+    useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [placesMenuOpen, setPlacesMenuOpen] = useState(false);
   const [topPlacesVisible, setTopPlacesVisible] = useState(true);
@@ -355,9 +358,15 @@ export function PlannerPage() {
   );
   const [chartZoomMode, setChartZoomMode] = useState<ChartZoomMode>("weekly");
   const primaryMapRef = useRef<ForecastMapHandle | null>(null);
+  const mapLayerRef = useRef<HTMLDivElement | null>(null);
+  const summaryCardRef = useRef<HTMLElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
+  const bottomPanelRef = useRef<HTMLElement | null>(null);
   const settingsRef = useRef<HTMLDivElement | null>(null);
   const legendPaletteRef = useRef<HTMLElement | null>(null);
+  const legendPaletteTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const itineraryUtilityDialogRef = useRef<HTMLDivElement | null>(null);
+  const itineraryExportDialogRef = useRef<HTMLElement | null>(null);
   const chartPlotRef = useRef<HTMLDivElement | null>(null);
   const tripBrushDragRef = useRef<TripBrushDragState | null>(null);
   const tripBrushApplyTimerRef = useRef<number | null>(null);
@@ -365,6 +374,24 @@ export function PlannerPage() {
   const plannerCollapseTimerRef = useRef<number | null>(null);
   const plannerEditTimerRef = useRef<number | null>(null);
   const previousUnitsModeRef = useRef<UnitsMode>(unitsMode);
+  const closeItineraryUtilityDialog = useCallback(
+    () => setItineraryShareMenuOpen(false),
+    [],
+  );
+  const closeItineraryExportDialog = useCallback(
+    () => setItineraryExportOpen(false),
+    [],
+  );
+  useDialogFocus({
+    open: itineraryShareMenuOpen,
+    dialogRef: itineraryUtilityDialogRef,
+    onClose: closeItineraryUtilityDialog,
+  });
+  useDialogFocus({
+    open: itineraryExportOpen,
+    dialogRef: itineraryExportDialogRef,
+    onClose: closeItineraryExportDialog,
+  });
   const handlePlannerMapFatalError = useCallback(
     () => setPlannerMapLoadFailed(true),
     [],
@@ -582,18 +609,26 @@ export function PlannerPage() {
   }, [displayedRecommendedPlaces, fieldPickFilter]);
   const chartLoading =
     appliedPlannerSubmitted && tripLoading && !tripOccurrence;
+  const availablePlannerPlaces = useMemo(() => {
+    const recommendedIds = new Set(
+      displayedRecommendedPlaces.map((place) => place.id),
+    );
+    return [
+      ...displayedRecommendedPlaces,
+      ...supplementalPlaces.filter((place) => !recommendedIds.has(place.id)),
+    ];
+  }, [displayedRecommendedPlaces, supplementalPlaces]);
   const selectedPlace = useMemo(
     () =>
-      displayedRecommendedPlaces.find(
-        (place) => place.id === selectedPlaceId,
-      ) ?? null,
-    [displayedRecommendedPlaces, selectedPlaceId],
+      availablePlannerPlaces.find((place) => place.id === selectedPlaceId) ??
+      null,
+    [availablePlannerPlaces, selectedPlaceId],
   );
   const detailPlace = useMemo(
     () =>
-      displayedRecommendedPlaces.find((place) => place.id === detailPlaceId) ??
+      availablePlannerPlaces.find((place) => place.id === detailPlaceId) ??
       null,
-    [detailPlaceId, displayedRecommendedPlaces],
+    [availablePlannerPlaces, detailPlaceId],
   );
   const detailPlaceCameras = useMemo(() => {
     if (!detailPlace) return [];
@@ -618,11 +653,9 @@ export function PlannerPage() {
   const itineraryPlaces = useMemo(
     () =>
       itineraryPlaceIds
-        .map((id) =>
-          displayedRecommendedPlaces.find((place) => place.id === id),
-        )
+        .map((id) => availablePlannerPlaces.find((place) => place.id === id))
         .filter(Boolean) as SuggestedPlace[],
-    [displayedRecommendedPlaces, itineraryPlaceIds],
+    [availablePlannerPlaces, itineraryPlaceIds],
   );
   const mapSuggestedPlaces = useMemo(
     () =>
@@ -654,6 +687,11 @@ export function PlannerPage() {
               [hydrophone.longitude, hydrophone.latitude] as [number, number],
           )
         : []),
+      ...(hasActivePoiFilter(poiFilters)
+        ? filterPoisByType(poiLocations, poiFilters).map(
+            (poi) => [poi.longitude, poi.latitude] as [number, number],
+          )
+        : []),
     ],
     [
       cameraLocations,
@@ -661,6 +699,8 @@ export function PlannerPage() {
       hydrophoneLocations,
       hydrophonesVisible,
       mapSuggestedPlaces,
+      poiFilters,
+      poiLocations,
     ],
   );
   const visiblePlannerMapLocationsSignature = useMemo(
@@ -673,7 +713,85 @@ export function PlannerPage() {
         .join("|"),
     [visiblePlannerMapLocations],
   );
-  const lastPlannerMarkerViewportRef = useRef<string | null>(null);
+  const getPlannerMapFitPadding = useCallback(() => {
+    const mapRect = mapLayerRef.current?.getBoundingClientRect();
+    if (!mapRect || mapRect.width <= 0 || mapRect.height <= 0) return 64;
+
+    // Leave extra breathing room around the complete marker set so edge
+    // markers and their hover labels do not feel pinned to panels or controls.
+    const edgeGap = 44;
+    const padding = { top: 68, right: 68, bottom: 68, left: 68 };
+    const intersectsMap = (rect: DOMRect) =>
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.right > mapRect.left &&
+      rect.left < mapRect.right &&
+      rect.bottom > mapRect.top &&
+      rect.top < mapRect.bottom;
+    const visibleRect = (element: HTMLElement | null) => {
+      if (!element) return null;
+      const style = window.getComputedStyle(element);
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        Number(style.opacity) === 0
+      )
+        return null;
+      const rect = element.getBoundingClientRect();
+      return intersectsMap(rect) ? rect : null;
+    };
+
+    for (const element of [summaryCardRef.current, legendPaletteRef.current]) {
+      const rect = visibleRect(element);
+      if (rect) {
+        padding.top = Math.max(
+          padding.top,
+          Math.ceil(rect.bottom - mapRect.top + edgeGap),
+        );
+      }
+    }
+
+    const sidebarRect = visibleRect(sidebarRef.current);
+    if (sidebarRect) {
+      if (
+        sidebarRect.left + sidebarRect.width / 2 >
+        mapRect.left + mapRect.width / 2
+      ) {
+        padding.right = Math.max(
+          padding.right,
+          Math.ceil(mapRect.right - sidebarRect.left + edgeGap),
+        );
+      } else {
+        padding.left = Math.max(
+          padding.left,
+          Math.ceil(sidebarRect.right - mapRect.left + edgeGap),
+        );
+      }
+    }
+
+    const bottomRect = visibleRect(bottomPanelRef.current);
+    if (bottomRect) {
+      padding.bottom = Math.max(
+        padding.bottom,
+        Math.ceil(mapRect.bottom - bottomRect.top + edgeGap),
+      );
+    }
+
+    // MapLibre requires a positive viewable rectangle. Keep a useful center
+    // area even when panels occupy most of a smaller viewport.
+    const minimumViewableWidth = Math.min(260, mapRect.width * 0.35);
+    const minimumViewableHeight = Math.min(220, mapRect.height * 0.35);
+    padding.right = Math.min(
+      padding.right,
+      Math.max(24, mapRect.width - padding.left - minimumViewableWidth),
+    );
+    padding.bottom = Math.min(
+      padding.bottom,
+      Math.max(24, mapRect.height - padding.top - minimumViewableHeight),
+    );
+
+    return padding;
+  }, []);
 
   useEffect(() => {
     if (
@@ -682,21 +800,40 @@ export function PlannerPage() {
       visiblePlannerMapLocations.length === 0
     )
       return;
-    if (
-      lastPlannerMarkerViewportRef.current ===
-      visiblePlannerMapLocationsSignature
-    )
-      return;
+    let animationFrame = 0;
+    const fitVisibleLocations = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        primaryMapRef.current?.fitLocations(visiblePlannerMapLocations, {
+          padding: getPlannerMapFitPadding(),
+          maxZoom: 10,
+        });
+      });
+    };
 
-    lastPlannerMarkerViewportRef.current = visiblePlannerMapLocationsSignature;
-    primaryMapRef.current?.fitLocations(visiblePlannerMapLocations, {
-      // The planner is a map-first composition with panels around the edges.
-      // Reserve their space so the active location markers land in the visible map window.
-      padding: { top: 112, right: 120, bottom: 300, left: 470 },
-      maxZoom: 10,
-    });
+    fitVisibleLocations();
+    const resizeObserver = new ResizeObserver(fitVisibleLocations);
+    for (const element of [
+      mapLayerRef.current,
+      summaryCardRef.current,
+      legendPaletteRef.current,
+      sidebarRef.current,
+      bottomPanelRef.current,
+    ]) {
+      if (element) resizeObserver.observe(element);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver.disconnect();
+    };
   }, [
+    chartCollapsed,
+    getPlannerMapFitPadding,
     plannerSubmitted,
+    plannerOpen,
+    sidebarMode,
+    spotsCollapsed,
     tripLoading,
     visiblePlannerMapLocations,
     visiblePlannerMapLocationsSignature,
@@ -732,6 +869,51 @@ export function PlannerPage() {
       maxZoom: 11.5,
     });
   };
+
+  const handleOpenPoiDetails = (poi: PublicPoi) => {
+    const normalizedName =
+      poi.name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") || "place";
+    const place: SuggestedPlace = {
+      id: `poi-${normalizedName}-${poi.latitude.toFixed(4)}-${poi.longitude.toFixed(4)}`,
+      spotId: normalizedName,
+      name: poi.name,
+      region: poi.region,
+      type: poi.type,
+      latitude: poi.latitude,
+      longitude: poi.longitude,
+      viewingPotential: "medium",
+      score: 0,
+      reason:
+        poi.reason ??
+        `${poi.name} is a mapped ${poi.type.toLowerCase()} in the Salish Sea region.`,
+      distanceKm: activeBaseLocation
+        ? haversineKm(
+            [activeBaseLocation.longitude, activeBaseLocation.latitude],
+            [poi.longitude, poi.latitude],
+          )
+        : undefined,
+      imageUrl: poi.imageUrl,
+      hasLiveFeed: poi.hasLiveFeed,
+      liveCameraUrl: poi.liveCameraUrl,
+      hasHydrophone: poi.hasHydrophone,
+      isRankedRecommendation: false,
+    };
+    setSupplementalPlaces((current) => [
+      ...current.filter((item) => item.id !== place.id),
+      place,
+    ]);
+    handleOpenPlaceDetails(place);
+  };
+
+  const clearMapLocationSelection = useCallback(() => {
+    setSelectedPlaceId(null);
+    setPulseSelectedPlaceMarker(false);
+  }, []);
 
   const handleSelectItineraryPlace = (place: SuggestedPlace) => {
     setPulseSelectedPlaceMarker(false);
@@ -799,10 +981,30 @@ export function PlannerPage() {
     setItineraryDropTargetId(null);
   };
 
+  const handleItineraryKeyboardMove = (placeId: string, offset: -1 | 1) => {
+    setItineraryPlaceIds((current) => {
+      const sourceIndex = current.indexOf(placeId);
+      const targetIndex = sourceIndex + offset;
+      if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= current.length)
+        return current;
+      const next = [...current];
+      const [moved] = next.splice(sourceIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      const placeName =
+        availablePlannerPlaces.find((place) => place.id === placeId)?.name ??
+        "Location";
+      setItineraryReorderAnnouncement(
+        `${placeName} moved to position ${targetIndex + 1} of ${next.length}.`,
+      );
+      return next;
+    });
+  };
+
   useEffect(() => {
     if (!plannerSubmitted) {
       setSelectedPlaceId(null);
       setDetailPlaceId(null);
+      setSupplementalPlaces((current) => (current.length > 0 ? [] : current));
       setItineraryPlaceIds([]);
       setSidebarMode("overview");
       setItineraryMapViewActive(false);
@@ -814,25 +1016,25 @@ export function PlannerPage() {
 
     if (
       selectedPlaceId &&
-      !displayedRecommendedPlaces.some((place) => place.id === selectedPlaceId)
+      !availablePlannerPlaces.some((place) => place.id === selectedPlaceId)
     ) {
       setSelectedPlaceId(null);
       setPulseSelectedPlaceMarker(false);
     }
     if (
       detailPlaceId &&
-      !displayedRecommendedPlaces.some((place) => place.id === detailPlaceId)
+      !availablePlannerPlaces.some((place) => place.id === detailPlaceId)
     ) {
       setDetailPlaceId(null);
     }
     setItineraryPlaceIds((current) =>
       current.filter((id) =>
-        displayedRecommendedPlaces.some((place) => place.id === id),
+        availablePlannerPlaces.some((place) => place.id === id),
       ),
     );
   }, [
     detailPlaceId,
-    displayedRecommendedPlaces,
+    availablePlannerPlaces,
     plannerSubmitted,
     selectedPlaceId,
   ]);
@@ -924,7 +1126,10 @@ export function PlannerPage() {
       setPaletteOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setPaletteOpen(false);
+      if (event.key === "Escape") {
+        setPaletteOpen(false);
+        legendPaletteTriggerRef.current?.focus();
+      }
     };
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -1287,6 +1492,8 @@ export function PlannerPage() {
     onPlaceSelect: (place: SuggestedPlace) => {
       handleOpenPlaceDetails(place);
     },
+    onPoiSelect: handleOpenPoiDetails,
+    onLocationSelectionClear: clearMapLocationSelection,
     baseLocation: activeBaseLocation,
     maxTravelDistanceMiles: activeMaxTravelDistanceMiles,
     showCameras: plannerSubmitted && camerasVisible,
@@ -1302,24 +1509,32 @@ export function PlannerPage() {
         title="OrcaCast"
         subtitle="Forecast Lab"
         variant="home"
-        onOpenInfo={() => setInfoOpen(true)}
         onOpenMenu={() => setMenuOpen(true)}
         rightSlot={
           <nav className="homeNav" aria-label="Planner navigation">
-            <Link to="/watch">This week</Link>
-            <Link to="/planner">Plan a trip</Link>
-            <Link to="/explore">Explore</Link>
+            <Link to="/watch" aria-label="This week">
+              This week
+            </Link>
+            <Link to="/planner" aria-label="Plan a trip" aria-current="page">
+              Plan a trip
+            </Link>
+            <Link to="/explore" aria-label="Explore">
+              Explore
+            </Link>
           </nav>
         }
       />
 
-      <main className="app__main">
+      <main id="main-content" className="app__main" tabIndex={-1}>
+        <div className="visuallyHidden" role="status" aria-live="polite">
+          {itineraryReorderAnnouncement}
+        </div>
         <div
           className={`plannerResultsPage${plannerSubmitted ? " hasPlan" : " isPrompting"}${plannerOpen ? " isPlannerOpen" : ""}${plannerSubmitted && plannerOpen ? " isEditing" : ""}${plannerEditingTransition ? " isPoppingPanels" : ""}${plannerCollapsing ? " isCollapsing" : ""}${chartCollapsed ? " isChartCollapsed" : ""}${spotsCollapsed ? " isSpotsCollapsed" : ""}${tripLoading ? " isLoading" : ""}${tripRevealPending ? " isRevealing" : ""}${settingsOpen ? " isSettingsOpen" : ""}`}
           aria-busy={tripRevealPending || tripLoading}
         >
           <div className="plannerResultsPage__main">
-            <div className="plannerResultsPage__mapLayer">
+            <div ref={mapLayerRef} className="plannerResultsPage__mapLayer">
               <ForecastMap {...mapProps} ref={primaryMapRef} />
             </div>
 
@@ -1480,7 +1695,10 @@ export function PlannerPage() {
 
             {plannerSubmitted &&
             (!isEditingTrip || plannerEditingTransition) ? (
-              <section className="plannerResultsPage__summaryCard">
+              <section
+                ref={summaryCardRef}
+                className="plannerResultsPage__summaryCard"
+              >
                 <div className="plannerResultsPage__summaryIcon">
                   <span className="material-symbols-rounded" aria-hidden="true">
                     calendar_month
@@ -1661,10 +1879,12 @@ export function PlannerPage() {
 
             {itineraryShareMenuOpen ? (
               <div
+                ref={itineraryUtilityDialogRef}
                 className="plannerResultsPage__itineraryUtilityModal"
                 role="dialog"
                 aria-modal="true"
                 aria-label="Download itinerary details"
+                tabIndex={-1}
                 onClick={() => setItineraryShareMenuOpen(false)}
               >
                 <div
@@ -1889,7 +2109,20 @@ export function PlannerPage() {
                               handleItineraryDragStart(place.id, event)
                             }
                             onDragEnd={handleItineraryDragEnd}
-                            aria-label={`Drag ${place.name}`}
+                            onKeyDown={(event) => {
+                              if (
+                                event.key !== "ArrowUp" &&
+                                event.key !== "ArrowDown"
+                              )
+                                return;
+                              event.preventDefault();
+                              handleItineraryKeyboardMove(
+                                place.id,
+                                event.key === "ArrowUp" ? -1 : 1,
+                              );
+                            }}
+                            aria-keyshortcuts="ArrowUp ArrowDown"
+                            aria-label={`Reorder ${place.name}. Use Up and Down arrow keys`}
                           >
                             <span aria-hidden="true">⠿</span>
                           </button>
@@ -1936,12 +2169,22 @@ export function PlannerPage() {
                 aria-label="Typical orca activity legend, low to high"
               >
                 <button
+                  ref={legendPaletteTriggerRef}
                   type="button"
                   className="plannerResultsPage__legendPaletteTrigger"
                   aria-label="Typical activity color scale"
                   aria-haspopup="listbox"
                   aria-expanded={paletteOpen}
-                  onClick={() => setPaletteOpen((value) => !value)}
+                  onClick={() => {
+                    setPaletteOpen((value) => !value);
+                    window.requestAnimationFrame(() =>
+                      legendPaletteRef.current
+                        ?.querySelector<HTMLElement>(
+                          '[role="option"][aria-selected="true"], [role="option"]',
+                        )
+                        ?.focus(),
+                    );
+                  }}
                 />
                 <strong className="plannerResultsPage__legendTitle">
                   Typical activity
@@ -1967,7 +2210,28 @@ export function PlannerPage() {
                     role="listbox"
                     aria-label="Color scale palettes"
                     onClick={(event) => event.stopPropagation()}
-                    onKeyDown={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => {
+                      event.stopPropagation();
+                      const options = Array.from(
+                        event.currentTarget.querySelectorAll<HTMLElement>(
+                          '[role="option"]',
+                        ),
+                      );
+                      const currentIndex = options.indexOf(
+                        document.activeElement as HTMLElement,
+                      );
+                      let nextIndex = currentIndex;
+                      if (event.key === "ArrowDown") nextIndex += 1;
+                      else if (event.key === "ArrowUp") nextIndex -= 1;
+                      else if (event.key === "Home") nextIndex = 0;
+                      else if (event.key === "End")
+                        nextIndex = options.length - 1;
+                      else return;
+                      event.preventDefault();
+                      options[
+                        Math.max(0, Math.min(options.length - 1, nextIndex))
+                      ]?.focus();
+                    }}
                   >
                     {paletteEntries.map((palette) => {
                       const selected = palette.id === selectedPaletteId;
@@ -1977,6 +2241,7 @@ export function PlannerPage() {
                           type="button"
                           role="option"
                           aria-selected={selected}
+                          tabIndex={selected ? 0 : -1}
                           className={`plannerResultsPage__legendPaletteRow${selected ? " isSelected" : ""}`}
                           onClick={(event) => {
                             event.preventDefault();
@@ -2157,7 +2422,20 @@ export function PlannerPage() {
                                     handleItineraryDragStart(place.id, event)
                                   }
                                   onDragEnd={handleItineraryDragEnd}
-                                  aria-label={`Drag ${place.name}`}
+                                  onKeyDown={(event) => {
+                                    if (
+                                      event.key !== "ArrowUp" &&
+                                      event.key !== "ArrowDown"
+                                    )
+                                      return;
+                                    event.preventDefault();
+                                    handleItineraryKeyboardMove(
+                                      place.id,
+                                      event.key === "ArrowUp" ? -1 : 1,
+                                    );
+                                  }}
+                                  aria-keyshortcuts="ArrowUp ArrowDown"
+                                  aria-label={`Reorder ${place.name}. Use Up and Down arrow keys`}
                                 >
                                   <span aria-hidden="true">⠿</span>
                                 </button>
@@ -2444,7 +2722,10 @@ export function PlannerPage() {
             ) : null}
 
             {showExpandedChart ? (
-              <section className="plannerResultsPage__bottomPanel">
+              <section
+                ref={bottomPanelRef}
+                className="plannerResultsPage__bottomPanel"
+              >
                 <div
                   className={`plannerResultsPage__chartCard${chartZoomedToDays ? " isDailyZoom" : ""}`}
                 >
@@ -2722,6 +3003,7 @@ export function PlannerPage() {
                             aria-pressed={active}
                             onClick={() => {
                               if (filter === "top") {
+                                clearMapLocationSelection();
                                 setTopPlacesVisible(true);
                                 setPoiFilters({
                                   Park: false,
@@ -2908,7 +3190,17 @@ export function PlannerPage() {
             ) : null}
 
             {(tripLoading || tripError || recommendedPlacesData.error) && (
-              <div className="plannerResultsPage__statusBanner">
+              <div
+                className="plannerResultsPage__statusBanner"
+                role={
+                  tripError || recommendedPlacesData.error ? "alert" : "status"
+                }
+                aria-live={
+                  tripError || recommendedPlacesData.error
+                    ? "assertive"
+                    : "polite"
+                }
+              >
                 {tripLoading
                   ? "Loading historical sightings and trip recommendations…"
                   : tripError ||
@@ -2924,10 +3216,12 @@ export function PlannerPage() {
                 onMouseDown={() => setItineraryExportOpen(false)}
               >
                 <section
+                  ref={itineraryExportDialogRef}
                   className="plannerResultsPage__itineraryExportDialog"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="planner-itinerary-export-title"
+                  tabIndex={-1}
                   onMouseDown={(event) => event.stopPropagation()}
                 >
                   <div className="plannerResultsPage__itineraryExportHeader">
@@ -2977,17 +3271,6 @@ export function PlannerPage() {
                 </section>
               </div>
             ) : null}
-
-            <Suspense fallback={null}>
-              {infoOpen && (
-                <InfoModal
-                  open={infoOpen}
-                  onClose={() => setInfoOpen(false)}
-                  onStartTour={() => setInfoOpen(false)}
-                  darkMode={false}
-                />
-              )}
-            </Suspense>
           </div>
         </div>
       </main>

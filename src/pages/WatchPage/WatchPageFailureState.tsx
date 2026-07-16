@@ -57,7 +57,7 @@ export function WatchPageFailureState({
     <div className="mapFailureState" role="alert" aria-live="polite">
       <div className="mapFailureState__card">
         <p className="mapFailureState__eyebrow">Map unavailable</p>
-        <h2 className="mapFailureState__title">{title}</h2>
+        <h1 className="mapFailureState__title">{title}</h1>
         <p className="mapFailureState__message">{message}</p>
         {failingPath ? (
           <div className="mapFailureState__pathRow">

@@ -11,6 +11,8 @@ import {
 } from "../../../shared/data/viewingSpotPhotos";
 
 const PLACE_IMAGE_PLACEHOLDER_SRC = `${(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}spot-images/generic.webp`;
+const LOCAL_PLACE_IMAGE_PATTERN =
+  /^\/(?:images|spot-images|spot-photos)\/[A-Za-z0-9_./-]+$/;
 
 const potentialLabel: Record<ViewingPotential, string> = {
   "very-high": "Very High",
@@ -36,12 +38,14 @@ function getPlacePresentation(
   photoManifest: ViewingSpotPhotoManifest,
 ) {
   const photo = getViewingSpotPhoto(place.spotId, photoManifest);
-  const showApprovedPhoto = hasApprovedSpotPhoto(photo);
-  const showPlaceImage = !showApprovedPhoto && Boolean(place.imageUrl);
+  const approvedPhotoSrc = safePlaceImageSrc(photo?.imageSrc);
+  const placeImageSrc = safePlaceImageSrc(place.imageUrl);
+  const showApprovedPhoto = hasApprovedSpotPhoto(photo) && approvedPhotoSrc;
+  const showPlaceImage = !showApprovedPhoto && Boolean(placeImageSrc);
   return {
     imageSrc: showApprovedPhoto
-      ? (photo?.imageSrc ?? PLACE_IMAGE_PLACEHOLDER_SRC)
-      : (place.imageUrl ?? PLACE_IMAGE_PLACEHOLDER_SRC),
+      ? approvedPhotoSrc
+      : (placeImageSrc ?? PLACE_IMAGE_PLACEHOLDER_SRC),
     imageAlt: showApprovedPhoto
       ? (photo?.alt ?? place.name)
       : showPlaceImage
@@ -53,13 +57,16 @@ function getPlacePresentation(
   };
 }
 
+function safePlaceImageSrc(value: string | undefined) {
+  if (!value || !LOCAL_PLACE_IMAGE_PATTERN.test(value)) return null;
+  return value;
+}
+
 function safeExternalHref(value: string | undefined) {
   if (!value) return null;
   try {
-    const url = new URL(value, "https://orcacast.app");
-    return url.protocol === "https:" || url.protocol === "http:"
-      ? url.href
-      : null;
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.href : null;
   } catch {
     return null;
   }
@@ -329,7 +336,11 @@ export function PlannerPlaceDetailView({
         <div className="plannerResultsPage__spotDetailSummaryGrid">
           <div>
             <span>Outlook</span>
-            <strong>{potentialLabel[place.viewingPotential]}</strong>
+            <strong>
+              {place.isRankedRecommendation === false
+                ? "Not ranked"
+                : potentialLabel[place.viewingPotential]}
+            </strong>
           </div>
           <div>
             <span>Best for</span>
@@ -427,11 +438,15 @@ export function PlannerPlaceDetailView({
         ) : null}
 
         <div className="plannerResultsPage__spotDetailRecommendation">
-          <h4>Why it is recommended</h4>
+          <h4>
+            {place.isRankedRecommendation === false
+              ? "About this location"
+              : "Why it is recommended"}
+          </h4>
           <p>
-            This location overlaps higher-probability forecast waters for your
-            selected window and keeps the trip anchored around accessible Salish
-            Sea viewing points.
+            {place.isRankedRecommendation === false
+              ? place.reason
+              : "This location overlaps higher-probability forecast waters for your selected window and keeps the trip anchored around accessible Salish Sea viewing points."}
           </p>
         </div>
 

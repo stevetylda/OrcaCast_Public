@@ -7,7 +7,8 @@ const failures = [];
 const references = new Set();
 const sourceExtensions = new Set([".ts", ".tsx", ".css", ".html"]);
 const referencePattern =
-  /(?:src|href)=["'`]\/?([^"'`?#]+)|url\(["']?\/?([^"')?#]+)|["'`](\/(?:images|spot-images|spot-photos)\/[^"'`?#]+)["'`]/g;
+  /(?:src|href)=["'`]\/?([^"'`?#]+)|url\(["']?\/?([^"')?#]+)|["'`](\/(?:images|spot-images|spot-photos)\/[^"'`?#,\s]+)["'`]/g;
+const sourceSetPattern = /srcSet=["'`]([^"'`]+)["'`]/g;
 
 async function walk(directory) {
   const files = [];
@@ -45,6 +46,13 @@ for (const file of await walk(path.resolve("src"))) {
     )
       continue;
     references.add(value.replace(/^\//, ""));
+  }
+  for (const match of content.matchAll(sourceSetPattern)) {
+    for (const candidate of match[1].split(",")) {
+      const value = candidate.trim().split(/\s+/, 1)[0];
+      if (value && !/^(?:data:|https?:)/.test(value))
+        references.add(value.replace(/^\//, ""));
+    }
   }
 }
 const indexContent = await readFile(path.resolve("index.html"), "utf8");

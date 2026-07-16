@@ -3,7 +3,7 @@ description: Install the locked OrcaCast dependency graph on Node 22
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
         node-version: 22
         cache: npm

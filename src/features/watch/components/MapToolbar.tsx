@@ -46,6 +46,9 @@ export function MapToolbar({
   const poiRef = useRef<HTMLDivElement | null>(null);
   const hotspotRef = useRef<HTMLDivElement | null>(null);
   const paletteRef = useRef<HTMLDivElement | null>(null);
+  const poiTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const hotspotTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const paletteTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [poiOpen, setPoiOpen] = useState(false);
   const [hotspotOpen, setHotspotOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -62,6 +65,7 @@ export function MapToolbar({
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       setPoiOpen(false);
+      window.requestAnimationFrame(() => poiTriggerRef.current?.focus());
     };
     document.addEventListener("mousedown", onDocClick);
     document.addEventListener("keydown", onKey);
@@ -81,6 +85,7 @@ export function MapToolbar({
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       setHotspotOpen(false);
+      window.requestAnimationFrame(() => hotspotTriggerRef.current?.focus());
     };
     document.addEventListener("mousedown", onDocClick);
     document.addEventListener("keydown", onKey);
@@ -100,6 +105,7 @@ export function MapToolbar({
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       setPaletteOpen(false);
+      window.requestAnimationFrame(() => paletteTriggerRef.current?.focus());
     };
     document.addEventListener("mousedown", onDocClick);
     document.addEventListener("keydown", onKey);
@@ -143,13 +149,21 @@ export function MapToolbar({
         className={`toolMenu${poiOpen ? " toolMenu--open" : ""}`}
       >
         <button
+          ref={poiTriggerRef}
           className={`toolBtn${poiActive ? " toolBtn--active" : ""}`}
           onClick={() => {
             onTogglePoiAll();
             setPoiOpen(true);
+            window.requestAnimationFrame(() =>
+              poiRef.current
+                ?.querySelector<HTMLButtonElement>('[role="menuitemcheckbox"]')
+                ?.focus(),
+            );
           }}
           title="POI filters"
           aria-label="POI filters"
+          aria-haspopup="menu"
+          aria-expanded={poiOpen}
           data-tour="poi"
         >
           <span className="material-symbols-rounded">pin_drop</span>
@@ -159,12 +173,35 @@ export function MapToolbar({
             className="toolMenu__popover"
             role="menu"
             aria-label="Points of interest"
+            onKeyDown={(event) => {
+              const items = Array.from(
+                event.currentTarget.querySelectorAll<HTMLButtonElement>(
+                  '[role="menuitemcheckbox"]',
+                ),
+              );
+              const currentIndex = items.indexOf(
+                document.activeElement as HTMLButtonElement,
+              );
+              let nextIndex = currentIndex;
+              if (event.key === "ArrowDown") nextIndex += 1;
+              else if (event.key === "ArrowUp") nextIndex -= 1;
+              else if (event.key === "Home") nextIndex = 0;
+              else if (event.key === "End") nextIndex = items.length - 1;
+              else return;
+              event.preventDefault();
+              items[
+                Math.max(0, Math.min(items.length - 1, nextIndex))
+              ]?.focus();
+            }}
           >
             <button
               className={`toolMenu__option${poiFilters.Park ? " toolMenu__option--active" : ""}`}
               onClick={() => onTogglePoiType("Park")}
               title="Parks"
               aria-label="Parks"
+              role="menuitemcheckbox"
+              aria-checked={poiFilters.Park}
+              tabIndex={0}
             >
               <span className="material-symbols-rounded">park</span>
             </button>
@@ -173,6 +210,9 @@ export function MapToolbar({
               onClick={() => onTogglePoiType("Marina")}
               title="Marinas"
               aria-label="Marinas"
+              role="menuitemcheckbox"
+              aria-checked={poiFilters.Marina}
+              tabIndex={-1}
             >
               <span className="material-symbols-rounded">sailing</span>
             </button>
@@ -181,6 +221,9 @@ export function MapToolbar({
               onClick={() => onTogglePoiType("Ferry")}
               title="Ferries"
               aria-label="Ferries"
+              role="menuitemcheckbox"
+              aria-checked={poiFilters.Ferry}
+              tabIndex={-1}
             >
               <span className="material-symbols-rounded">directions_boat</span>
             </button>
@@ -192,10 +235,13 @@ export function MapToolbar({
         className={`toolMenu${hotspotOpen ? " toolMenu--open" : ""}`}
       >
         <button
+          ref={hotspotTriggerRef}
           className={`toolBtn${hotspotsEnabled ? " toolBtn--active" : ""}`}
           onClick={() => setHotspotOpen((v) => !v)}
           title="Hotspot threshold"
           aria-label="Hotspot threshold"
+          aria-haspopup="dialog"
+          aria-expanded={hotspotOpen}
           data-tour="tools-hotspots"
         >
           <span className="toolBtn__iconStack" aria-hidden="true">
@@ -231,9 +277,21 @@ export function MapToolbar({
         className={`toolMenu toolDrawer__paletteMenu${paletteOpen ? " toolMenu--open" : ""}`}
       >
         <button
+          ref={paletteTriggerRef}
           className="toolBtn toolDrawer__paletteToggle"
-          onClick={() => setPaletteOpen((v) => !v)}
+          onClick={() => {
+            setPaletteOpen((value) => !value);
+            window.requestAnimationFrame(() =>
+              paletteRef.current
+                ?.querySelector<HTMLButtonElement>(
+                  '[role="menuitemradio"][aria-checked="true"], [role="menuitemradio"]',
+                )
+                ?.focus(),
+            );
+          }}
           aria-label="Color palette"
+          aria-haspopup="menu"
+          aria-expanded={paletteOpen}
           title="Color palette"
           data-tour="palette-picker"
         >
@@ -255,6 +313,26 @@ export function MapToolbar({
             role="menu"
             aria-label="Sighting outlook palettes"
             onWheel={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              const items = Array.from(
+                event.currentTarget.querySelectorAll<HTMLButtonElement>(
+                  '[role="menuitemradio"]',
+                ),
+              );
+              const currentIndex = items.indexOf(
+                document.activeElement as HTMLButtonElement,
+              );
+              let nextIndex = currentIndex;
+              if (event.key === "ArrowDown") nextIndex += 1;
+              else if (event.key === "ArrowUp") nextIndex -= 1;
+              else if (event.key === "Home") nextIndex = 0;
+              else if (event.key === "End") nextIndex = items.length - 1;
+              else return;
+              event.preventDefault();
+              items[
+                Math.max(0, Math.min(items.length - 1, nextIndex))
+              ]?.focus();
+            }}
           >
             {Object.values(PALETTES).map((palette) => {
               const selected = palette.id === selectedPaletteId;
@@ -269,6 +347,7 @@ export function MapToolbar({
                   }}
                   role="menuitemradio"
                   aria-checked={selected}
+                  tabIndex={selected ? 0 : -1}
                 >
                   <span className="toolDrawer__paletteChips" aria-hidden="true">
                     {palette.colors.map((color, idx) => (

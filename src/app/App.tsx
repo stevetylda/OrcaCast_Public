@@ -8,7 +8,6 @@ import { HashScrollHandler } from "./HashScrollHandler";
 import { RouteMetadata } from "./RouteMetadata";
 import "../shared/styles/base.css";
 import "../shared/styles/layout.css";
-import "../shared/styles/map.css";
 import "../shared/styles/components.css";
 
 const AboutPage = lazy(() =>
@@ -48,6 +47,9 @@ function AppFrame() {
     >
       <HashScrollHandler />
       <RouteMetadata />
+      <a className="skipLink" href="#main-content">
+        Skip to main content
+      </a>
       <Suspense
         fallback={
           <div className="routeLoadingState" role="status">

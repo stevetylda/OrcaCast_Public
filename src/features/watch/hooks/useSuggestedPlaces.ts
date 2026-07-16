@@ -428,6 +428,7 @@ function rankPoiAgainstForecast(
         hasLiveFeed: poi.hasLiveFeed,
         liveCameraUrl: poi.liveCameraUrl,
         hasHydrophone: poi.hasHydrophone,
+        isRankedRecommendation: true,
       } satisfies SuggestedPlace;
     });
 }

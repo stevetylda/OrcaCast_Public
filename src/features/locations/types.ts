@@ -30,4 +30,5 @@ export type SuggestedPlace = {
   hasLiveFeed?: boolean;
   liveCameraUrl?: string;
   hasHydrophone?: boolean;
+  isRankedRecommendation?: boolean;
 };

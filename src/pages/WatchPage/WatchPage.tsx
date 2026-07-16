@@ -3,7 +3,7 @@ import { WelcomeModal } from "../../shared/components/WelcomeModal";
 import { WatchPageErrorBoundary } from "./WatchPageErrorBoundary";
 import { WatchPageLayout } from "./WatchPageLayout";
 import { useWatchPageController } from "./useWatchPageController";
-import "../PlanPage/PlanPage.css";
+import "./WatchPlannerShared.css";
 import "./WatchPage.css";
 
 const InfoModal = lazy(() =>

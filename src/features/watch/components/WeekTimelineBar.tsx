@@ -133,8 +133,39 @@ export function WeekTimelineBar({
                 type="button"
                 className={`weekTimeline__week${isSelected ? " isSelected" : ""}`}
                 onClick={() => onChangeIndex(index)}
+                onKeyDown={(event) => {
+                  const currentPosition = visiblePeriods.findIndex(
+                    (item) => item.index === index,
+                  );
+                  let nextPosition = currentPosition;
+                  if (event.key === "ArrowLeft") nextPosition -= 1;
+                  else if (event.key === "ArrowRight") nextPosition += 1;
+                  else if (event.key === "Home") nextPosition = 0;
+                  else if (event.key === "End")
+                    nextPosition = visiblePeriods.length - 1;
+                  else return;
+                  event.preventDefault();
+                  const next =
+                    visiblePeriods[
+                      Math.max(
+                        0,
+                        Math.min(visiblePeriods.length - 1, nextPosition),
+                      )
+                    ];
+                  if (!next) return;
+                  onChangeIndex(next.index);
+                  window.requestAnimationFrame(() =>
+                    document
+                      .querySelector<HTMLElement>(
+                        `[data-forecast-period-index="${next.index}"]`,
+                      )
+                      ?.focus(),
+                  );
+                }}
                 role="tab"
                 aria-selected={isSelected}
+                tabIndex={isSelected ? 0 : -1}
+                data-forecast-period-index={index}
               >
                 <span className="weekTimeline__weekLabel">
                   Week {period.stat_week}

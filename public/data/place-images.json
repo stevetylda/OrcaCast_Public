@@ -1,0 +1,332 @@
+{
+  "osm:node/13800006387": {
+    "alt": "Disused administration building (building number 417) at Fort Lawton, Seattle, Washington seen from the Henry M. Jackson Viewpoint.\n\n\nFort Lawton is on the National Register of Historic Places.",
+    "attribution": {
+      "author": "Joe Mabel",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Fort_Lawton_03.jpg",
+      "title": "Fort Lawton 03.jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/13800006387",
+    "outputs": {
+      "360": {
+        "sha256": "0afe93c4240ac69f305fbd9a04a141bd678756bd730dc4356b4809e04dbf9177",
+        "src": "/spot-images/places/henry-m-jackson-viewpoint-76423d45-360.webp"
+      },
+      "720": {
+        "sha256": "1f2800d58994dbe6e633dde3d5b757e335ccf56081588e5d760ce1eceabe53d3",
+        "src": "/spot-images/places/henry-m-jackson-viewpoint-76423d45-720.webp"
+      }
+    },
+    "perceptualHash": "6cfce0ebf2f4f470",
+    "placeId": "osm:node/13800006387",
+    "sourceSha256": "2b884ea47e503d4eb734399ddc1721f3692a6ae283b36f3c5f52caabae561416",
+    "src": "/spot-images/places/henry-m-jackson-viewpoint-76423d45-360.webp",
+    "srcSet": "/spot-images/places/henry-m-jackson-viewpoint-76423d45-360.webp 1x, /spot-images/places/henry-m-jackson-viewpoint-76423d45-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/2293308910": {
+    "alt": "La Push_driftwood_beachlog_NPS_Photo",
+    "attribution": {
+      "author": "Olympic National Park",
+      "license": "Public domain",
+      "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:La_Push_driftwood_beachlog_NPS_Photo_(17125861008).jpg",
+      "title": "La Push driftwood beachlog NPS Photo (17125861008).jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/2293308910",
+    "outputs": {
+      "360": {
+        "sha256": "559340f1dc6564ee84eefaa0e9e20de96f9ba6da8e427d9d9b411d2d87b064fc",
+        "src": "/spot-images/places/1st-beach-overlook-d0b4468d-360.webp"
+      },
+      "720": {
+        "sha256": "42473db300dcb11bd49b3a62344223382a86d6af8a187d23a4b434da38a09535",
+        "src": "/spot-images/places/1st-beach-overlook-d0b4468d-720.webp"
+      }
+    },
+    "perceptualHash": "d2b03074d8bcbc9c",
+    "placeId": "osm:node/2293308910",
+    "sourceSha256": "1f2b3011d9340411a62e65ffbadd6975aac89fcd71ccb48979675380a70bffd6",
+    "src": "/spot-images/places/1st-beach-overlook-d0b4468d-360.webp",
+    "srcSet": "/spot-images/places/1st-beach-overlook-d0b4468d-360.webp 1x, /spot-images/places/1st-beach-overlook-d0b4468d-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/2759967035": {
+    "alt": "Cap Sante Park (Anacortes, Washington)",
+    "attribution": {
+      "author": "Nadine Pavlov",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:2024-08-10,_Cap_Sante_Park_(Anacortes,_Washington),_161530(N).jpg",
+      "title": "2024-08-10, Cap Sante Park (Anacortes, Washington), 161530(N).jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/2759967035",
+    "outputs": {
+      "360": {
+        "sha256": "62eeb1b6bf83536c3db59bf2cc25dec12edafa3e0369c4eb3309d8393e5e97e8",
+        "src": "/spot-images/places/cap-sante-park-viewpoint-15c555e6-360.webp"
+      },
+      "720": {
+        "sha256": "157cd1263ded469becb01d196578d0263d4aedf2e994fd37748a2018ba8f8891",
+        "src": "/spot-images/places/cap-sante-park-viewpoint-15c555e6-720.webp"
+      }
+    },
+    "perceptualHash": "9bd6d82e0a26740b",
+    "placeId": "osm:node/2759967035",
+    "sourceSha256": "bd71b722e63220d449e003b7e66e722f3955b3063aced65b786b9cc172b30e2d",
+    "src": "/spot-images/places/cap-sante-park-viewpoint-15c555e6-360.webp",
+    "srcSet": "/spot-images/places/cap-sante-park-viewpoint-15c555e6-360.webp 1x, /spot-images/places/cap-sante-park-viewpoint-15c555e6-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/2922455632": {
+    "alt": "Elliott Bay Marina",
+    "attribution": {
+      "author": "Dennis Bratland",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Elliott_Bay_Marina2.jpg",
+      "title": "Elliott Bay Marina2.jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/2922455632",
+    "outputs": {
+      "360": {
+        "sha256": "3e471eab762a1df0ee0017c058d382dc9d398fb830e99678c38da4ee8e02e096",
+        "src": "/spot-images/places/28th-avenue-west-viewpoint-c522e1e4-360.webp"
+      },
+      "720": {
+        "sha256": "c2a75098122a68930b52b2ca3e7be36b9ea6e3552279e6cf4a19cbead71df07d",
+        "src": "/spot-images/places/28th-avenue-west-viewpoint-c522e1e4-720.webp"
+      }
+    },
+    "perceptualHash": "6079d958314a625c",
+    "placeId": "osm:node/2922455632",
+    "sourceSha256": "dbc04b7eca9178bcb407da1975f29d760df942b7f3280e765eedc7c72b10f88e",
+    "src": "/spot-images/places/28th-avenue-west-viewpoint-c522e1e4-360.webp",
+    "srcSet": "/spot-images/places/28th-avenue-west-viewpoint-c522e1e4-360.webp 1x, /spot-images/places/28th-avenue-west-viewpoint-c522e1e4-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/4253071240": {
+    "alt": "Guemes Island WA, rural road",
+    "attribution": {
+      "author": "Rose_Braverman",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Guemes_Island_WA,_rural_road_-_panoramio.jpg",
+      "title": "Guemes Island WA, rural road - panoramio.jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/4253071240",
+    "outputs": {
+      "360": {
+        "sha256": "e831543527bcf34836e3896c9ae46177ae550ff2e824f87ba39fa96a074dc2a0",
+        "src": "/spot-images/places/guemes-mountain-viewpoint-678146e2-360.webp"
+      },
+      "720": {
+        "sha256": "d5d1985ca1eaa7810f5e287fc6bd663189321cb4275f6e88618d0fa27f6650bf",
+        "src": "/spot-images/places/guemes-mountain-viewpoint-678146e2-720.webp"
+      }
+    },
+    "perceptualHash": "f8303169612190d0",
+    "placeId": "osm:node/4253071240",
+    "sourceSha256": "d32be078357304d859e328ebd884ec0edfe40bad859e26165445497dc0680973",
+    "src": "/spot-images/places/guemes-mountain-viewpoint-678146e2-360.webp",
+    "srcSet": "/spot-images/places/guemes-mountain-viewpoint-678146e2-360.webp 1x, /spot-images/places/guemes-mountain-viewpoint-678146e2-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/469313696": {
+    "alt": "Looking east down Horton Bay from Halliday Ridge, Mayne Island, Canada. The high island in the background is Saturna.",
+    "attribution": {
+      "author": "David Stanley from Nanaimo, Canada",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Halliday_Ridge_(7846569086).jpg",
+      "title": "Halliday Ridge (7846569086).jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/469313696",
+    "outputs": {
+      "360": {
+        "sha256": "5d64d95511644d74e1f8d4b51d2e55f8a6c072e85d1e80ca0800aa3a87fb3fcd",
+        "src": "/spot-images/places/halliday-ridge-viewpoint-954e5caa-360.webp"
+      },
+      "720": {
+        "sha256": "265a69e5c2c88d5475aae2e1acdeead781ce7f8488861719efc50911152deaaf",
+        "src": "/spot-images/places/halliday-ridge-viewpoint-954e5caa-720.webp"
+      }
+    },
+    "perceptualHash": "991c5cc272f03836",
+    "placeId": "osm:node/469313696",
+    "sourceSha256": "31e33e4780d64f88a9cb48686e593edd1f4b22954c4d1baa679085612ddfd0ff",
+    "src": "/spot-images/places/halliday-ridge-viewpoint-954e5caa-360.webp",
+    "srcSet": "/spot-images/places/halliday-ridge-viewpoint-954e5caa-360.webp 1x, /spot-images/places/halliday-ridge-viewpoint-954e5caa-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/5140438021": {
+    "alt": "Beard's Hollow from the overlook.",
+    "attribution": {
+      "author": "Chris Light",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Beard%27s_hollow_6648.jpg",
+      "title": "Beard's hollow 6648.jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/5140438021",
+    "outputs": {
+      "360": {
+        "sha256": "d56cd4ae16389e23d825fdee3f1ce73ccf142edc4005ab9c1924391b8341ed91",
+        "src": "/spot-images/places/beards-hollow-overlook-8ff03116-360.webp"
+      },
+      "720": {
+        "sha256": "3f64dcd8fc68228b97e73935670725a25debfc5f1fa67b811a6a4e95fcc57929",
+        "src": "/spot-images/places/beards-hollow-overlook-8ff03116-720.webp"
+      }
+    },
+    "perceptualHash": "e76d6661c0c0b0d2",
+    "placeId": "osm:node/5140438021",
+    "sourceSha256": "d5d737d42151f27bba04c1d3177ed8986c774ed3002bd978916dfa0b002a428c",
+    "src": "/spot-images/places/beards-hollow-overlook-8ff03116-360.webp",
+    "srcSet": "/spot-images/places/beards-hollow-overlook-8ff03116-360.webp 1x, /spot-images/places/beards-hollow-overlook-8ff03116-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/5397827810": {
+    "alt": "Grays Harbor Lighthouse (Westport Lighthouse), Westport, Washington.",
+    "attribution": {
+      "author": "Steven Pavlov",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:2023-05-27,_Grays_Harbor_Lighthouse,_001.jpg",
+      "title": "2023-05-27, Grays Harbor Lighthouse, 001.jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/5397827810",
+    "outputs": {
+      "360": {
+        "sha256": "3c45a4d5c007a559adca5a9b4d70f1bcb438c02715511c174b49a75c72925354",
+        "src": "/spot-images/places/grays-harbor-lighthouse-viewpoint-733c9f66-360.webp"
+      },
+      "720": {
+        "sha256": "c763afcf51052897cb036677ebb1f7e24b8286cd01f687095cc53818c5792010",
+        "src": "/spot-images/places/grays-harbor-lighthouse-viewpoint-733c9f66-720.webp"
+      }
+    },
+    "perceptualHash": "3ee8e020d89463f0",
+    "placeId": "osm:node/5397827810",
+    "sourceSha256": "8ff5e9954087538cbcc11a937c098a5846541ff1c52f2e2adf6033c5e9f00625",
+    "src": "/spot-images/places/grays-harbor-lighthouse-viewpoint-733c9f66-360.webp",
+    "srcSet": "/spot-images/places/grays-harbor-lighthouse-viewpoint-733c9f66-360.webp 1x, /spot-images/places/grays-harbor-lighthouse-viewpoint-733c9f66-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/8662979644": {
+    "alt": "View from the bluff at Ebey\u2019s Landing. Island County, Washington",
+    "attribution": {
+      "author": "NorthwestNative",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:View_from_the_bluff_at_Ebey%E2%80%99s_Landing_National_Historic_Reserve.jpg",
+      "title": "View from the bluff at Ebey\u2019s Landing National Historic Reserve.jpg"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/8662979644",
+    "outputs": {
+      "360": {
+        "sha256": "3be733facdc4546dba48ebc61789ae3ff2fa5a7b34fd439c9e66c3cf8403328d",
+        "src": "/spot-images/places/bluff-overlook-69fc5437-360.webp"
+      },
+      "720": {
+        "sha256": "6ec5e27c1a3837bfe6d719068ca2b9d10561008d1ef9cb9aaa7e32b501934529",
+        "src": "/spot-images/places/bluff-overlook-69fc5437-720.webp"
+      }
+    },
+    "perceptualHash": "331b878400808000",
+    "placeId": "osm:node/8662979644",
+    "sourceSha256": "aac0cbdd22aae295a16fd4823fa331c37c8f0c0416b2e0a56ccad4a667c411c6",
+    "src": "/spot-images/places/bluff-overlook-69fc5437-360.webp",
+    "srcSet": "/spot-images/places/bluff-overlook-69fc5437-360.webp 1x, /spot-images/places/bluff-overlook-69fc5437-720.webp 2x",
+    "width": 360
+  },
+  "osm:node/944770320": {
+    "alt": "Seaside Juniper, Burrows Pass and Burrows Island (behind)",
+    "attribution": {
+      "author": "Walter Siegmund (talk)",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Juniperus_maritima_5801.JPG",
+      "title": "Juniperus maritima 5801.JPG"
+    },
+    "focalPoint": "50% 50%",
+    "height": 300,
+    "locationId": "osm:node/944770320",
+    "outputs": {
+      "360": {
+        "sha256": "4eb6079ffffac436fb621f4fd3a540130fb7c92a50955060f00e9081bedce796",
+        "src": "/spot-images/places/burrows-channel-viewpoint-60dea9ff-360.webp"
+      },
+      "720": {
+        "sha256": "69aa77559f2b2d85af4eff2ca9db36ea08b18a7c3f94eb4a71a356d67d215f56",
+        "src": "/spot-images/places/burrows-channel-viewpoint-60dea9ff-720.webp"
+      }
+    },
+    "perceptualHash": "ec463e70e0606420",
+    "placeId": "osm:node/944770320",
+    "sourceSha256": "0cd00f779071b087a790323e5b5e8e3927be9b6cfa8c696ecf70e8e2893486b1",
+    "src": "/spot-images/places/burrows-channel-viewpoint-60dea9ff-360.webp",
+    "srcSet": "/spot-images/places/burrows-channel-viewpoint-60dea9ff-360.webp 1x, /spot-images/places/burrows-channel-viewpoint-60dea9ff-720.webp 2x",
+    "width": 360
+  },
+  "wa-state-parks:61": {
+    "alt": "Lime Kiln Lighthouse overlooking the water at Lime Kiln Point State Park",
+    "attribution": {
+      "author": "Joe Mabel",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sourceName": "Wikimedia Commons",
+      "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Lime_Kiln_Lighthouse_01.jpg",
+      "title": "Lime Kiln Lighthouse 01.jpg"
+    },
+    "focalPoint": "58% 50%",
+    "height": 300,
+    "locationId": "wa-state-parks:61",
+    "outputs": {
+      "360": {
+        "sha256": "03893dd21251b5b0cfeef4844ee3a68d1cfe3581732efa7699b2343c32c5cce9",
+        "src": "/spot-images/places/lime-kiln-point-6887c237-360.webp"
+      },
+      "720": {
+        "sha256": "cdbbd7a8338964652fbd452bf912b59a7565ff2ee70741507e05483e7ed43b7e",
+        "src": "/spot-images/places/lime-kiln-point-6887c237-720.webp"
+      }
+    },
+    "perceptualHash": "d3df626c7070f8d8",
+    "placeId": "wa-state-parks:61",
+    "sourceSha256": "be5a8648795d6ba1c3003d95a09e57e127915b93ab2ffb2489deafdf1dc6923a",
+    "src": "/spot-images/places/lime-kiln-point-6887c237-360.webp",
+    "srcSet": "/spot-images/places/lime-kiln-point-6887c237-360.webp 1x, /spot-images/places/lime-kiln-point-6887c237-720.webp 2x",
+    "width": 360
+  }
+}

@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -7,6 +8,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import type { PlannerBaseLocation } from "../../../shared/data/plannerBaseLocations";
+import { useDialogFocus } from "../../../shared/components/useDialogFocus";
 
 type PlannerDateRangeFieldProps = {
   arrivalDate: string;
@@ -222,7 +224,7 @@ export function PlannerLocationField({
           }
         }}
         aria-haspopup="listbox"
-        aria-controls={listboxId}
+        aria-controls={open ? listboxId : undefined}
         aria-expanded={open}
         aria-labelledby={`${labelledBy} ${valueId}`}
       >
@@ -305,6 +307,8 @@ export function PlannerDateRangeField({
     [arrivalDate],
   );
   const [visibleMonthOffset, setVisibleMonthOffset] = useState(0);
+  const closeCalendar = useCallback(() => setOpen(false), []);
+  useDialogFocus({ open, dialogRef: calendarRef, onClose: closeCalendar });
 
   useEffect(() => {
     if (!open) return;
@@ -410,6 +414,7 @@ export function PlannerDateRangeField({
                 role="dialog"
                 aria-modal="true"
                 aria-label="Choose trip dates"
+                tabIndex={-1}
               >
                 <div className="plannerResultsPage__dateRangePopoverHead">
                   <div className="plannerResultsPage__dateRangeHeadline">

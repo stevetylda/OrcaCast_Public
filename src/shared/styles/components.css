@@ -2798,9 +2798,30 @@
   --teal-glow-soft: 0 0 12px rgba(0, 194, 255, 0.08);
 }
 
+/* Shared header controls must not depend on the map stylesheet. */
+.header .iconBtn {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.header .iconBtn .material-symbols-rounded {
+  display: block;
+  line-height: 1;
+}
+
 /* Editorial navigation drawer shared by every page. */
 .overlay--editorial {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: stretch;
   justify-content: flex-start;
+  overflow: hidden;
   background: rgba(6, 29, 60, 0.32);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -2808,8 +2829,16 @@
 
 .app .sideDrawer--editorial,
 .app:not(.app--dark) .sideDrawer--editorial {
+  position: absolute;
+  inset: 0 auto 0 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   width: min(340px, calc(100vw - 28px));
   padding: 28px 22px;
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 3px solid #061d3c;
   border-top: 0;
   border-bottom: 0;
@@ -2821,9 +2850,16 @@
 }
 
 .sideDrawer--editorial .sideDrawer__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
+  gap: 16px;
   padding: 0 2px 24px;
   border-bottom: 3px solid #061d3c;
+}
+
+.sideDrawer--editorial .sideDrawer__header > div {
+  min-width: 0;
 }
 
 .sideDrawer--editorial .sideDrawer__eyebrow {
@@ -2855,12 +2891,17 @@
 }
 
 .sideDrawer--editorial .sideDrawer__nav {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+  width: 100%;
   padding-top: 8px;
 }
 
 .app .sideDrawer--editorial .sideDrawer__item,
 .app:not(.app--dark) .sideDrawer--editorial .sideDrawer__item {
+  width: 100%;
+  flex: 0 0 auto;
   min-height: 66px;
   padding: 13px 16px;
   border: 3px solid #061d3c;
