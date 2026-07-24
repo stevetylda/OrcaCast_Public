@@ -65,4 +65,59 @@ describe("SuggestedPlacesPanel", () => {
     await user.click(screen.getByRole("button", { name: "Add to itinerary" }));
     expect(onAddToItinerary).toHaveBeenCalledWith(place);
   });
+
+  it("shows watch locations nearest the modeled area first and can return to recommendations", async () => {
+    const user = userEvent.setup();
+    const onShowRecommendedPlaces = vi.fn();
+    render(
+      <SuggestedPlacesPanel
+        places={[place]}
+        selectedPlaceId={null}
+        viewMode="watch"
+        webcams={[
+          {
+            id: "far-camera",
+            name: "Far webcam",
+            region: "North Coast",
+            locality: "Far Away",
+            waterbody: "Pacific Ocean",
+            latitude: 51,
+            longitude: -128,
+            coordinateQuality: "Approximate",
+            priorityScore: 80,
+            feeds: [],
+          },
+          {
+            id: "near-camera",
+            name: "Near webcam",
+            region: "San Juan Island",
+            locality: "Friday Harbor",
+            waterbody: "Haro Strait",
+            latitude: 48.52,
+            longitude: -123.15,
+            coordinateQuality: "Approximate",
+            priorityScore: 90,
+            feeds: [],
+          },
+        ]}
+        mapRef={createRef<ForecastMapHandle>()}
+        open
+        onOpen={vi.fn()}
+        onClose={vi.fn()}
+        onSelectPlace={vi.fn()}
+        onShowRecommendedPlaces={onShowRecommendedPlaces}
+      />,
+    );
+
+    const locationButtons = screen.getAllByRole("button").filter((button) =>
+      button.classList.contains("suggestedPlacesPanel__mediaCard"),
+    );
+    expect(locationButtons[0]).toHaveTextContent("Near webcam");
+    expect(locationButtons[1]).toHaveTextContent("Far webcam");
+
+    await user.click(
+      screen.getByRole("button", { name: "Back to recommended places" }),
+    );
+    expect(onShowRecommendedPlaces).toHaveBeenCalledTimes(1);
+  });
 });

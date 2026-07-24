@@ -16,7 +16,10 @@ import {
   type ForecastMapHandle,
   type ForecastMapProps,
 } from "../../features/map";
-import { SuggestedPlacesPanel } from "../../features/watch/components/SuggestedPlacesPanel";
+import {
+  SuggestedPlacesPanel,
+  type SuggestedPlacesPanelView,
+} from "../../features/watch/components/SuggestedPlacesPanel";
 import { WeekTimelineBar } from "../../features/watch/components/WeekTimelineBar";
 import { isoWeekToDateRange } from "../../shared/time/forecastPeriodToIsoWeek";
 import { WatchPageFailureState } from "./WatchPageFailureState";
@@ -94,6 +97,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   trackRender("WatchPageLayout");
   const [sidebarOffsetPx, setSidebarOffsetPx] = useState(0);
   const [recommendedPanelOpen, setRecommendedPanelOpen] = useState(true);
+  const [locationPanelView, setLocationPanelView] =
+    useState<SuggestedPlacesPanelView>("places");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [itineraryPlaceIds, setItineraryPlaceIds] = useState<string[]>(() => {
@@ -923,9 +928,12 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             ) : null}
 
             <SuggestedPlacesPanel
-              places={forecastPlaybackPlaying ? [] : suggestedPlaces}
+              places={suggestedPlaces}
               selectedPlaceId={forecastPlaybackPlaying ? null : selectedPlaceId}
               isPlaybackActive={forecastPlaybackPlaying}
+              viewMode={locationPanelView}
+              webcams={cameraLocations}
+              hydrophones={hydrophoneLocations}
               selectedWebcam={selectedCamera}
               selectedHydrophone={selectedHydrophone}
               hydrophoneListenUrl={hydrophoneListenUrl}
@@ -944,6 +952,41 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
               onClearMediaSelection={() => {
                 setSelectedCameraId(null);
                 setSelectedHydrophoneId(null);
+              }}
+              onShowRecommendedPlaces={() => {
+                setLocationPanelView("places");
+                setSelectedCameraId(null);
+                setSelectedHydrophoneId(null);
+                setCamerasVisible(false);
+                setHydrophonesVisible(false);
+              }}
+              onSelectWebcam={(camera) => {
+                setSelectedPlaceId(null);
+                setSelectedHydrophoneId(null);
+                setCamerasVisible(true);
+                setHydrophonesVisible(false);
+                setSelectedCameraId(camera.id);
+                primaryMapRef.current?.fitLocations(
+                  [[camera.longitude, camera.latitude]],
+                  {
+                    padding: { top: 110, right: 480, bottom: 160, left: 70 },
+                    maxZoom: 11,
+                  },
+                );
+              }}
+              onSelectHydrophone={(hydrophone) => {
+                setSelectedPlaceId(null);
+                setSelectedCameraId(null);
+                setCamerasVisible(false);
+                setHydrophonesVisible(true);
+                setSelectedHydrophoneId(hydrophone.id);
+                primaryMapRef.current?.fitLocations(
+                  [[hydrophone.longitude, hydrophone.latitude]],
+                  {
+                    padding: { top: 110, right: 480, bottom: 160, left: 70 },
+                    maxZoom: 11,
+                  },
+                );
               }}
               isItineraryMapView={itineraryMapViewActive}
               onShowTopPlaces={() => {
@@ -1036,47 +1079,28 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             onShareSnapshot={shareSnapshot}
             onDownloadSnapshot={downloadSnapshotAction}
             shareBusy={shareBusy}
-            webcams={cameraLocations}
-            selectedCameraId={selectedCameraId}
-            onSelectCamera={(camera) => {
-              setSelectedPlaceId(null);
-              setSelectedHydrophoneId(null);
-              setCamerasVisible(true);
-              setSelectedCameraId(camera.id);
+            webcamCount={cameraLocations.length}
+            hydrophoneCount={hydrophoneLocations.length}
+            activeLocationView={
+              locationPanelView === "places" ? null : locationPanelView
+            }
+            onOpenWatchLocations={() => {
               setRecommendedPanelOpen(true);
-              primaryMapRef.current?.fitLocations(
-                [[camera.longitude, camera.latitude]],
-                {
-                  padding: { top: 110, right: 480, bottom: 160, left: 70 },
-                  maxZoom: 11,
-                },
-              );
-            }}
-            hydrophones={hydrophoneLocations}
-            selectedHydrophoneId={selectedHydrophoneId}
-            onToggleLiveCameras={(visible) => {
-              setCamerasVisible(visible);
-              if (!visible) setSelectedCameraId(null);
-            }}
-            camerasVisible={camerasVisible}
-            onToggleHydrophones={(visible) => {
-              setHydrophonesVisible(visible);
-              if (!visible) setSelectedHydrophoneId(null);
-            }}
-            hydrophonesVisible={hydrophonesVisible}
-            onSelectHydrophone={(hydrophone) => {
+              setLocationPanelView("watch");
               setSelectedPlaceId(null);
               setSelectedCameraId(null);
-              setHydrophonesVisible(true);
-              setSelectedHydrophoneId(hydrophone.id);
+              setSelectedHydrophoneId(null);
+              setHydrophonesVisible(false);
+              setCamerasVisible(true);
+            }}
+            onOpenListenLocations={() => {
               setRecommendedPanelOpen(true);
-              primaryMapRef.current?.fitLocations(
-                [[hydrophone.longitude, hydrophone.latitude]],
-                {
-                  padding: { top: 110, right: 480, bottom: 160, left: 70 },
-                  maxZoom: 11,
-                },
-              );
+              setLocationPanelView("listen");
+              setSelectedPlaceId(null);
+              setSelectedCameraId(null);
+              setSelectedHydrophoneId(null);
+              setCamerasVisible(false);
+              setHydrophonesVisible(true);
             }}
             unitsMode={unitsMode}
             onUnitsModeChange={setUnitsMode}

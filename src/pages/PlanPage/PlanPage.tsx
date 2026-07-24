@@ -245,7 +245,7 @@ export function PlannerPage() {
     selectedPaletteId,
     setSelectedPaletteId,
   } = useMapState();
-  const [surfaceMode, setSurfaceMode] = useState<"grid" | "surface">("surface");
+  const [surfaceMode, setSurfaceMode] = useState<"grid" | "surface">("grid");
   const resumeStoredPlan = useMemo(
     () => new URLSearchParams(location.search).get("resume") === "1",
     [location.search],
@@ -364,7 +364,8 @@ export function PlannerPage() {
   const summaryCardRef = useRef<HTMLElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const bottomPanelRef = useRef<HTMLElement | null>(null);
-  const settingsRef = useRef<HTMLDivElement | null>(null);
+  const settingsRef = useRef<HTMLElement | null>(null);
+  const settingsButtonRef = useRef<HTMLButtonElement | null>(null);
   const legendPaletteRef = useRef<HTMLElement | null>(null);
   const itineraryUtilityDialogRef = useRef<HTMLDivElement | null>(null);
   const itineraryExportDialogRef = useRef<HTMLElement | null>(null);
@@ -827,6 +828,7 @@ export function PlannerPage() {
         primaryMapRef.current?.fitLocations(visiblePlannerMapLocations, {
           padding: getPlannerMapFitPadding(),
           maxZoom: 10,
+          zoomOffset: 1,
         });
       });
     };
@@ -1148,7 +1150,11 @@ export function PlannerPage() {
   useEffect(() => {
     if (!settingsOpen) return;
     const onPointerDown = (event: MouseEvent) => {
-      if (!settingsRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        !settingsRef.current?.contains(target) &&
+        !settingsButtonRef.current?.contains(target)
+      ) {
         setSettingsOpen(false);
       }
     };
@@ -2628,13 +2634,108 @@ export function PlannerPage() {
               </aside>
             ) : null}
 
+            {showPlannerChrome && settingsOpen ? (
+              <section
+                ref={settingsRef}
+                className="footerDock__panel footerDock__panel--settings plannerResultsPage__settingsPanel"
+                role="dialog"
+                aria-modal="false"
+              >
+                <div className="footerDock__panelHeader footerDock__panelHeader--settings">
+                  <div className="footerDock__titleRow">
+                    <div>
+                      <div className="footerDock__sectionLabel">
+                        Planner settings
+                      </div>
+                      <div className="footerDock__title">Settings</div>
+                    </div>
+                  </div>
+                  <div className="footerDock__headerActions">
+                    <button
+                      type="button"
+                      className="footerDock__closeButton"
+                      onClick={() => setSettingsOpen(false)}
+                      aria-label="Close settings"
+                    >
+                      <span
+                        className="material-symbols-rounded"
+                        aria-hidden="true"
+                      >
+                        close
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <section className="footerDock__section footerDock__section--settings">
+                  <div className="footerDock__sectionLabel">Display</div>
+                  <label className="footerDock__settingRow footerDock__settingRow--select">
+                    <span className="footerDock__settingLabel">Units</span>
+                    <span className="footerDock__selectWrap">
+                      <select
+                        className="select select--footer"
+                        value={unitsMode}
+                        onChange={(event) =>
+                          setUnitsMode(
+                            event.target.value as "imperial" | "metric",
+                          )
+                        }
+                        aria-label="Units"
+                      >
+                        <option value="imperial">Imperial</option>
+                        <option value="metric">Metric</option>
+                      </select>
+                      <span
+                        className="material-symbols-rounded footerDock__selectChevron"
+                        aria-hidden="true"
+                      >
+                        expand_more
+                      </span>
+                    </span>
+                  </label>
+                </section>
+
+                <section className="footerDock__section footerDock__section--settings">
+                  <div className="footerDock__sectionLabel">Map layers</div>
+                  <label className="footerDock__settingRow footerDock__settingRow--select">
+                    <span className="footerDock__settingLabel">
+                      Surface view
+                    </span>
+                    <span className="footerDock__settingControls footerDock__settingControls--layers">
+                      <span className="footerDock__selectWrap">
+                        <select
+                          className="select select--footer"
+                          value={surfaceMode}
+                          onChange={(event) =>
+                            setSurfaceMode(
+                              event.target.value as "grid" | "surface",
+                            )
+                          }
+                          aria-label="Surface view"
+                        >
+                          <option value="grid">Hex grid</option>
+                          <option value="surface">Smooth</option>
+                        </select>
+                        <span
+                          className="material-symbols-rounded footerDock__selectChevron"
+                          aria-hidden="true"
+                        >
+                          expand_more
+                        </span>
+                      </span>
+                    </span>
+                  </label>
+                </section>
+              </section>
+            ) : null}
+
             {showPlannerChrome && chartCollapsed ? (
               <button
                 type="button"
                 className="plannerResultsPage__chartCollapsedButton"
                 onClick={() => setChartCollapsed(false)}
                 aria-expanded="false"
-                aria-label="Expand Your Trip Window"
+                aria-label="Expand Your Trip"
               >
                 <span className="plannerResultsPage__chartIcon">
                   <span className="material-symbols-rounded" aria-hidden="true">
@@ -2642,12 +2743,7 @@ export function PlannerPage() {
                   </span>
                 </span>
                 <span className="plannerResultsPage__chartCollapsedCopy">
-                  <strong>Your Trip Window</strong>
-                  <small>
-                    {plannerSubmitted
-                      ? `${tripLabel} · ${activityLabel} · ${topWatersLabel}`
-                      : "Seasonal activity for your selected dates"}
-                  </small>
+                  <strong>Your Trip</strong>
                 </span>
                 <span
                   className="plannerResultsPage__chartCollapsedToggle"
@@ -3006,109 +3102,9 @@ export function PlannerPage() {
                     </button>
                   </div>
                 ) : null}
-                <div
-                  ref={settingsRef}
-                  className="plannerResultsPage__settingsDock"
-                >
-                  {settingsOpen && (
-                    <section
-                      className="footerDock__panel footerDock__panel--settings plannerResultsPage__settingsPanel"
-                      role="dialog"
-                      aria-modal="false"
-                    >
-                      <div className="footerDock__panelHeader footerDock__panelHeader--settings">
-                        <div className="footerDock__titleRow">
-                          <div>
-                            <div className="footerDock__sectionLabel">
-                              Planner settings
-                            </div>
-                            <div className="footerDock__title">Settings</div>
-                          </div>
-                        </div>
-                        <div className="footerDock__headerActions">
-                          <button
-                            type="button"
-                            className="footerDock__closeButton"
-                            onClick={() => setSettingsOpen(false)}
-                            aria-label="Close settings"
-                          >
-                            <span
-                              className="material-symbols-rounded"
-                              aria-hidden="true"
-                            >
-                              close
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <section className="footerDock__section footerDock__section--settings">
-                        <div className="footerDock__sectionLabel">Display</div>
-                        <label className="footerDock__settingRow footerDock__settingRow--select">
-                          <span className="footerDock__settingLabel">
-                            Units
-                          </span>
-                          <span className="footerDock__selectWrap">
-                            <select
-                              className="select select--footer"
-                              value={unitsMode}
-                              onChange={(event) =>
-                                setUnitsMode(
-                                  event.target.value as "imperial" | "metric",
-                                )
-                              }
-                              aria-label="Units"
-                            >
-                              <option value="imperial">Imperial</option>
-                              <option value="metric">Metric</option>
-                            </select>
-                            <span
-                              className="material-symbols-rounded footerDock__selectChevron"
-                              aria-hidden="true"
-                            >
-                              expand_more
-                            </span>
-                          </span>
-                        </label>
-                      </section>
-
-                      <section className="footerDock__section footerDock__section--settings">
-                        <div className="footerDock__sectionLabel">
-                          Map layers
-                        </div>
-                        <label className="footerDock__settingRow footerDock__settingRow--select">
-                          <span className="footerDock__settingLabel">
-                            Surface view
-                          </span>
-                          <span className="footerDock__settingControls footerDock__settingControls--layers">
-                            <span className="footerDock__selectWrap">
-                              <select
-                                className="select select--footer"
-                                value={surfaceMode}
-                                onChange={(event) =>
-                                  setSurfaceMode(
-                                    event.target.value as "grid" | "surface",
-                                  )
-                                }
-                                aria-label="Surface view"
-                              >
-                                <option value="grid">Hex grid</option>
-                                <option value="surface">Smooth</option>
-                              </select>
-                              <span
-                                className="material-symbols-rounded footerDock__selectChevron"
-                                aria-hidden="true"
-                              >
-                                expand_more
-                              </span>
-                            </span>
-                          </span>
-                        </label>
-                      </section>
-                    </section>
-                  )}
-
+                <div className="plannerResultsPage__settingsDock">
                   <button
+                    ref={settingsButtonRef}
                     type="button"
                     className={`plannerResultsPage__quickAction plannerResultsPage__quickAction--settings${settingsOpen ? " isActive" : ""}`}
                     onClick={() => setSettingsOpen((open) => !open)}

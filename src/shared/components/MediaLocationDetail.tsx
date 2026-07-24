@@ -88,6 +88,7 @@ export function MediaLocationDetail({
   webcam,
   hydrophone,
   hydrophoneListenUrl,
+  backLabel = "Back to field picks",
   onBack,
   onCenterMap,
   onClose,
@@ -95,6 +96,7 @@ export function MediaLocationDetail({
   webcam?: WebcamSite | null;
   hydrophone?: OrcasoundHydrophone | null;
   hydrophoneListenUrl?: string;
+  backLabel?: string;
   onBack: () => void;
   onCenterMap?: () => void;
   onClose?: () => void;
@@ -109,7 +111,7 @@ export function MediaLocationDetail({
           <span className="material-symbols-rounded" aria-hidden="true">
             arrow_back
           </span>
-          Back to field picks
+          {backLabel}
         </button>
         {onClose ? (
           <button

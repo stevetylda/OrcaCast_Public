@@ -46,10 +46,11 @@
   left: 24px;
   display: grid;
   grid-template-areas: "week outlook";
-  grid-template-columns: 1.05fr 1.7fr;
+  grid-template-columns: repeat(2, minmax(0, max-content));
   gap: 0;
   align-items: stretch;
-  width: min(650px, calc(100% - var(--this-week-panel-offset, 0px) - 64px));
+  width: fit-content;
+  max-width: calc(100% - var(--this-week-panel-offset, 0px) - 64px);
   min-height: 100px;
   overflow: visible;
   border: 3px solid var(--planner-ink);
@@ -217,11 +218,13 @@
 
 .thisWeekResultsPage__summaryBody h1 {
   margin: 3px 0 0;
+  overflow: hidden;
   color: var(--planner-ink);
   font-size: clamp(1.7rem, 2.45vw, 2.4rem);
   font-weight: 950;
   letter-spacing: -.065em;
   line-height: .98;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -623,6 +626,11 @@
   object-fit: contain;
 }
 
+.suggestedPlacesPanel__headerIcon > .material-symbols-rounded {
+  font-size: 27px;
+  font-variation-settings: "FILL" 0, "wght" 750, "GRAD" 0, "opsz" 32;
+}
+
 .thisWeekResultsPage .suggestedPlacesPanel__titleGroup {
   display: block;
   min-width: 0;
@@ -737,6 +745,36 @@
   outline: none;
 }
 
+.suggestedPlacesPanel__backToPlaces {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  margin: 1px 1px 9px;
+  padding: 0 11px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 999px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+  font: inherit;
+  font-size: .65rem;
+  font-weight: 950;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.suggestedPlacesPanel__backToPlaces:hover,
+.suggestedPlacesPanel__backToPlaces:focus-visible {
+  background: var(--planner-yellow);
+  outline: none;
+}
+
+.suggestedPlacesPanel__backToPlaces .material-symbols-rounded {
+  font-size: 18px;
+}
+
 .thisWeekResultsPage .suggestedPlacesPanel__content {
   display: block;
   min-height: 110px;
@@ -826,6 +864,99 @@
 .thisWeekResultsPage .suggestedPlacesPanel__list {
   display: grid;
   gap: 9px;
+}
+
+.suggestedPlacesPanel__mediaList {
+  counter-reset: media-location;
+}
+
+.suggestedPlacesPanel__mediaCard {
+  display: grid;
+  width: 100%;
+  min-height: 82px;
+  grid-template-columns: 28px 52px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  border: 2px solid var(--planner-ink);
+  border-radius: 14px;
+  background: #fffdf6;
+  color: var(--planner-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.suggestedPlacesPanel__mediaCard:hover,
+.suggestedPlacesPanel__mediaCard:focus-visible,
+.suggestedPlacesPanel__mediaCard.isSelected {
+  background: #d9f4ef;
+  outline: none;
+  transform: translateY(-1px);
+  box-shadow: 3px 4px 0 var(--planner-ink);
+}
+
+.suggestedPlacesPanel__mediaRank {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 2px solid var(--planner-ink);
+  border-radius: 50%;
+  background: var(--planner-coral);
+  color: #fffdf6;
+  font-size: .65rem;
+  font-weight: 950;
+}
+
+.suggestedPlacesPanel__mediaIcon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 2px solid var(--planner-ink);
+  border-radius: 11px;
+  background: var(--planner-aqua);
+  font-size: 25px;
+}
+
+.suggestedPlacesPanel__mediaCopy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.suggestedPlacesPanel__mediaCopy strong,
+.suggestedPlacesPanel__mediaCopy small,
+.suggestedPlacesPanel__mediaCopy em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestedPlacesPanel__mediaCopy strong {
+  font-size: .78rem;
+  font-weight: 950;
+}
+
+.suggestedPlacesPanel__mediaCopy small {
+  color: #526c84;
+  font-size: .65rem;
+  font-weight: 750;
+}
+
+.suggestedPlacesPanel__mediaCopy em {
+  color: #08787c;
+  font-size: .59rem;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.suggestedPlacesPanel__mediaChevron {
+  font-size: 21px;
 }
 
 .thisWeekPlaceCard {
@@ -1413,10 +1544,10 @@
 .thisWeekResultsPage__statusBanner {
   position: absolute;
   z-index: 8;
-  bottom: 184px;
-  left: 24px;
+  bottom: 16px;
+  left: 308px;
   display: inline-flex;
-  max-width: min(540px, calc(100% - 510px));
+  max-width: min(540px, calc(100% - var(--this-week-panel-offset, 0px) - 332px));
   align-items: center;
   gap: 8px;
   padding: 9px 12px;
@@ -1472,9 +1603,11 @@
   max-height: min(76vh, 760px);
   overflow-y: auto;
   box-sizing: border-box;
-  padding: 20px 18px 18px;
+  padding: 14px 18px;
   display: grid;
-  gap: 17px;
+  gap: 11px;
+  align-content: start;
+  grid-auto-rows: max-content;
   border: 3px solid var(--planner-ink);
   border-radius: 28px;
   background: var(--planner-paper);
@@ -1515,7 +1648,7 @@
 .mapPageRoot--thisWeek .footerDock__panelHeader--settings {
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 2px solid rgba(6, 29, 60, 0.15);
 }
 
@@ -1560,13 +1693,13 @@
 
 .mapPageRoot--thisWeek .footerDock__section {
   display: grid;
-  gap: 12px;
+  gap: 9px;
 }
 
 .mapPageRoot--thisWeek
   .footerDock__section--settings
   + .footerDock__section--settings {
-  padding-top: 16px;
+  padding-top: 10px;
   border-top: 2px solid rgba(6, 29, 60, 0.12);
 }
 
@@ -1582,8 +1715,8 @@
   display: grid;
   grid-template-columns: minmax(120px, 0.75fr) minmax(220px, 1.25fr);
   align-items: center;
-  gap: 16px;
-  min-height: 46px;
+  gap: 12px;
+  min-height: 44px;
 }
 
 .mapPageRoot--thisWeek .footerDock__settingLabel,
@@ -1625,13 +1758,13 @@
 
 .mapPageRoot--thisWeek .footerDock__settingBlock {
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
 
 .mapPageRoot--thisWeek .footerDock__toggleGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px;
 }
 
 .mapPageRoot--thisWeek .footerDock__chip {
@@ -1782,9 +1915,10 @@
     right: auto;
     left: 14px;
     grid-template-areas: "week outlook";
-    grid-template-columns: 1.05fr 1.7fr;
+    grid-template-columns: repeat(2, minmax(0, max-content));
     gap: 0;
-    width: min(650px, calc(100% - 28px));
+    width: fit-content;
+    max-width: calc(100% - 28px);
     min-height: 102px;
     border-radius: 21px;
     box-shadow: 5px 6px 0 var(--planner-ink);
@@ -1877,7 +2011,7 @@
     grid-template-areas:
       "week"
       "outlook";
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, max-content);
   }
 
   .thisWeekResultsPage__outlookSummary {
@@ -1998,6 +2132,8 @@
     top: 10px;
     right: 10px;
     left: 10px;
+    width: auto;
+    max-width: none;
     gap: 0;
     border-width: 2px;
     border-radius: 17px;

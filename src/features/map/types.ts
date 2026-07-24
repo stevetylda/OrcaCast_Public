@@ -96,6 +96,10 @@ export type ForecastMapHandle = {
   }) => Promise<Blob | null>;
   fitLocations: (
     locations: LngLat[],
-    options?: { padding?: MapViewportPadding; maxZoom?: number },
+    options?: {
+      padding?: MapViewportPadding;
+      maxZoom?: number;
+      zoomOffset?: number;
+    },
   ) => void;
 };

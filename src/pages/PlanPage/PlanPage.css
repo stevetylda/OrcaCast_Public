@@ -7624,14 +7624,18 @@
 
 .plannerResultsPage__settingsPanel,
 .app--dark .plannerResultsPage__settingsPanel {
-  right: 0;
-  bottom: calc(100% + 16px);
-  width: 452px;
-  height: calc(100dvh - 200px);
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  bottom: calc(22px + 58px + 12px);
+  width: 450px;
+  height: auto;
   max-height: none;
   box-sizing: border-box;
-  padding: 20px 18px 18px;
-  gap: 17px;
+  padding: 14px 18px 14px;
+  gap: 12px;
+  align-content: start;
+  grid-auto-rows: max-content;
   overflow-y: auto;
   overscroll-behavior: contain;
   border: var(--planner-border-major);
@@ -7641,9 +7645,46 @@
   box-shadow: var(--planner-shadow-major);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  isolation: isolate;
   scrollbar-color: var(--planner-ink) #e4eee9;
   scrollbar-width: thin;
   animation: plannerSettingsCardIn 190ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.plannerResultsPage__settingsPanel::after,
+.app--dark .plannerResultsPage__settingsPanel::after {
+  position: absolute;
+  z-index: -1;
+  top: 52%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-top: 3px solid var(--planner-ink);
+  background:
+    linear-gradient(
+      180deg,
+      var(--planner-yellow) 0 7px,
+      var(--planner-ink) 7px 10px,
+      transparent 10px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, .34) 0 10px,
+      rgba(188, 220, 231, .12) 10px 20px
+    ),
+    linear-gradient(145deg, #e9f8fa, #dbeff7);
+  content: "";
+  pointer-events: none;
+}
+
+@media (min-width: 1181px) {
+  .plannerResultsPage__settingsPanel,
+  .app--dark .plannerResultsPage__settingsPanel {
+    top: 28px;
+    right: 28px;
+    bottom: 98px;
+    width: 478px;
+  }
 }
 
 .plannerResultsPage__settingsPanel::-webkit-scrollbar {
@@ -7662,13 +7703,17 @@
 }
 
 .plannerResultsPage__settingsPanel .footerDock__panelHeader--settings {
-  padding-bottom: 15px;
+  padding-bottom: 10px;
   border-bottom: 2px solid rgba(6, 29, 60, .14);
 }
 
 .plannerResultsPage__settingsPanel .footerDock__section--settings + .footerDock__section--settings {
-  padding-top: 16px;
+  padding-top: 12px;
   border-top: 2px solid rgba(6, 29, 60, .12);
+}
+
+.plannerResultsPage__settingsPanel .footerDock__section {
+  gap: 12px;
 }
 
 .plannerResultsPage__settingsPanel .footerDock__sectionLabel,
@@ -7690,8 +7735,8 @@
 
 .plannerResultsPage__settingsPanel .footerDock__settingRow {
   grid-template-columns: minmax(0, 1fr) minmax(188px, 218px);
-  gap: 16px;
-  min-height: 48px;
+  gap: 12px;
+  min-height: 44px;
   color: var(--planner-ink);
   font-size: .92rem;
 }
@@ -8090,10 +8135,10 @@
 
   .plannerResultsPage__settingsPanel,
   .app--dark .plannerResultsPage__settingsPanel {
-    position: fixed;
-    inset: 96px 12px 82px;
+    position: absolute;
+    inset: auto 12px 12px;
     width: auto;
-    height: auto;
+    height: min(58dvh, 580px);
   }
 }
 
@@ -8110,7 +8155,8 @@
   left: 28px;
   bottom: 24px;
   z-index: 3;
-  width: min(520px, calc(100% - 600px));
+  width: 75%;
+  max-width: 520px;
   min-width: 390px;
   min-height: 88px;
   display: grid;
@@ -8218,7 +8264,8 @@
 @media (max-width: 1180px) {
   .plannerResultsPage__chartCollapsedButton,
   .app--dark .plannerResultsPage__chartCollapsedButton {
-    width: min(470px, calc(100% - 500px));
+    width: 75%;
+    max-width: 470px;
     min-width: 350px;
   }
 }
@@ -8540,6 +8587,36 @@
     right: 14px !important;
     bottom: 18px !important;
     gap: 10px !important;
+  }
+}
+
+/* Settings occupies the Recommended Places card slot while it is open. */
+.plannerResultsPage.hasPlan .plannerResultsPage__settingsPanel {
+  top: 24px !important;
+  right: 24px !important;
+  bottom: 116px !important;
+  left: auto !important;
+  width: 410px !important;
+  height: auto !important;
+  min-height: 430px;
+  border-radius: 28px;
+}
+
+@media (max-width: 1180px) {
+  .plannerResultsPage.hasPlan .plannerResultsPage__settingsPanel {
+    width: 370px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .plannerResultsPage.hasPlan .plannerResultsPage__settingsPanel {
+    top: auto !important;
+    right: 14px !important;
+    bottom: 98px !important;
+    left: 14px !important;
+    width: auto !important;
+    height: 48dvh !important;
+    min-height: 320px;
   }
 }
 

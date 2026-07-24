@@ -1766,15 +1766,23 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
     const fitLocations = useCallback(
       (
         locations: LngLat[],
-        options?: { padding?: MapViewportPadding; maxZoom?: number },
+        options?: {
+          padding?: MapViewportPadding;
+          maxZoom?: number;
+          zoomOffset?: number;
+        },
       ) => {
         const map = mapRef.current;
         if (!map || locations.length === 0) return;
+        const zoomOffset = options?.zoomOffset ?? 0;
 
         if (locations.length === 1) {
           map.flyTo({
             center: locations[0],
-            zoom: options?.maxZoom ?? 11.2,
+            zoom: Math.max(
+              map.getMinZoom(),
+              (options?.maxZoom ?? 11.2) - zoomOffset,
+            ),
             essential: false,
             duration: mapMotionDuration(900),
             padding: options?.padding,
@@ -1786,6 +1794,23 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           (acc, location) => acc.extend(location),
           new maplibregl.LngLatBounds(locations[0], locations[0]),
         );
+
+        if (zoomOffset > 0) {
+          const camera = map.cameraForBounds(bounds, {
+            padding: options?.padding ?? 88,
+            maxZoom: options?.maxZoom ?? 10.8,
+          });
+          if (!camera) return;
+          const fittedZoom = camera.zoom ?? map.getZoom();
+          map.flyTo({
+            ...camera,
+            zoom: Math.max(map.getMinZoom(), fittedZoom - zoomOffset),
+            padding: options?.padding,
+            duration: mapMotionDuration(900),
+            essential: false,
+          });
+          return;
+        }
 
         map.fitBounds(bounds, {
           padding: options?.padding ?? 88,

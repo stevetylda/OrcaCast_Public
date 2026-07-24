@@ -16,6 +16,7 @@ import {
 } from "../../../shared/data/viewingSpotPhotos";
 
 type PlaceFilter = "top" | "shore" | "Park" | "Marina" | "Ferry";
+export type SuggestedPlacesPanelView = "places" | "watch" | "listen";
 
 type SuggestedPlacesPanelProps = {
   places: SuggestedPlace[];
@@ -23,6 +24,9 @@ type SuggestedPlacesPanelProps = {
   selectedWebcam?: WebcamSite | null;
   selectedHydrophone?: OrcasoundHydrophone | null;
   hydrophoneListenUrl?: string;
+  viewMode?: SuggestedPlacesPanelView;
+  webcams?: WebcamSite[];
+  hydrophones?: OrcasoundHydrophone[];
   isLoading?: boolean;
   isPlaybackActive?: boolean;
   error?: string | null;
@@ -33,6 +37,9 @@ type SuggestedPlacesPanelProps = {
   onSelectPlace: (place: SuggestedPlace) => void;
   onClearSelection?: () => void;
   onClearMediaSelection?: () => void;
+  onShowRecommendedPlaces?: () => void;
+  onSelectWebcam?: (webcam: WebcamSite) => void;
+  onSelectHydrophone?: (hydrophone: OrcasoundHydrophone) => void;
   itineraryPlaceIds?: string[];
   onAddToItinerary?: (place: SuggestedPlace) => void;
   onRemoveFromItinerary?: (place: SuggestedPlace) => void;
@@ -60,6 +67,57 @@ const FILTERS: ReadonlyArray<{ id: PlaceFilter; label: string }> = [
 function formatPlaceType(type: SuggestedPlace["type"]) {
   if (type === "Ferry") return "Ferry terminal";
   return type;
+}
+
+function haversineKm(
+  a: { latitude: number; longitude: number },
+  b: { latitude: number; longitude: number },
+) {
+  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const latitudeDelta = toRadians(b.latitude - a.latitude);
+  const longitudeDelta = toRadians(b.longitude - a.longitude);
+  const latitudeA = toRadians(a.latitude);
+  const latitudeB = toRadians(b.latitude);
+  const chord =
+    Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(latitudeA) *
+      Math.cos(latitudeB) *
+      Math.sin(longitudeDelta / 2) ** 2;
+  return 2 * earthRadiusKm * Math.asin(Math.sqrt(chord));
+}
+
+function sortByForecastProximity<
+  T extends { id: string; latitude: number; longitude: number },
+>(locations: T[], places: SuggestedPlace[]) {
+  const highLikelihoodPlaces = places.filter((place) =>
+    ["very-high", "high"].includes(place.viewingPotential),
+  );
+  const modeledAnchors = (
+    highLikelihoodPlaces.length > 0 ? highLikelihoodPlaces : places
+  ).slice(0, 10);
+
+  return locations
+    .map((location) => ({
+      location,
+      distanceKm:
+        modeledAnchors.length > 0
+          ? Math.min(
+              ...modeledAnchors.map((place) => haversineKm(location, place)),
+            )
+          : Number.POSITIVE_INFINITY,
+    }))
+    .sort(
+      (a, b) =>
+        a.distanceKm - b.distanceKm ||
+        a.location.id.localeCompare(b.location.id),
+    );
+}
+
+function formatForecastDistance(distanceKm: number) {
+  if (!Number.isFinite(distanceKm)) return "Forecast proximity unavailable";
+  const miles = distanceKm / 1.609344;
+  return `${miles < 10 ? miles.toFixed(1) : Math.round(miles)} mi from forecast area`;
 }
 
 function buildPreviewUrlMap(
@@ -95,6 +153,9 @@ export function SuggestedPlacesPanel({
   selectedWebcam = null,
   selectedHydrophone = null,
   hydrophoneListenUrl,
+  viewMode = "places",
+  webcams = [],
+  hydrophones = [],
   isLoading = false,
   isPlaybackActive = false,
   error = null,
@@ -105,6 +166,9 @@ export function SuggestedPlacesPanel({
   onSelectPlace,
   onClearSelection,
   onClearMediaSelection,
+  onShowRecommendedPlaces,
+  onSelectWebcam,
+  onSelectHydrophone,
   itineraryPlaceIds = [],
   onAddToItinerary,
   onRemoveFromItinerary,
@@ -137,6 +201,16 @@ export function SuggestedPlacesPanel({
     () => places.find((place) => place.id === selectedPlaceId) ?? null,
     [places, selectedPlaceId],
   );
+  const rankedWebcams = useMemo(
+    () => sortByForecastProximity(webcams, places),
+    [places, webcams],
+  );
+  const rankedHydrophones = useMemo(
+    () => sortByForecastProximity(hydrophones, places),
+    [hydrophones, places],
+  );
+  const mediaCount =
+    viewMode === "watch" ? rankedWebcams.length : rankedHydrophones.length;
   const showingDetail =
     selectedPlace !== null ||
     selectedWebcam !== null ||
@@ -239,7 +313,7 @@ export function SuggestedPlacesPanel({
       ".suggestedPlacesPanel__content",
     );
     if (content) content.scrollTop = 0;
-  }, [activeFilter, showingDetail]);
+  }, [activeFilter, showingDetail, viewMode]);
 
   if (!open) {
     return (
@@ -279,29 +353,51 @@ export function SuggestedPlacesPanel({
               className="suggestedPlacesPanel__headerIcon"
               aria-hidden="true"
             >
-              <img src="/images/icons/binoculars_recreated.svg" alt="" />
+              {viewMode === "places" ? (
+                <img src="/images/icons/binoculars_recreated.svg" alt="" />
+              ) : (
+                <span className="material-symbols-rounded">
+                  {viewMode === "watch" ? "videocam" : "graphic_eq"}
+                </span>
+              )}
             </div>
             <div className="suggestedPlacesPanel__titleGroup">
               <p className="suggestedPlacesPanel__eyebrow">
-                Recommended places
+                {viewMode === "places"
+                  ? "Recommended places"
+                  : "Near modeled activity"}
               </p>
               <h2 className="suggestedPlacesPanel__title">
-                Field Picks <span>{places.length}</span>
+                {viewMode === "places"
+                  ? "Field Picks"
+                  : viewMode === "watch"
+                    ? "Watch locations"
+                    : "Listen locations"}{" "}
+                <span>{viewMode === "places" ? places.length : mediaCount}</span>
               </h2>
-              <p className="suggestedPlacesPanel__subtle">{countLabel}</p>
+              <p className="suggestedPlacesPanel__subtle">
+                {viewMode === "places"
+                  ? countLabel
+                  : `Sorted by proximity to this week's likelihood area`}
+              </p>
             </div>
             <div className="suggestedPlacesPanel__headerActions">
-              <button
-                type="button"
-                className={`suggestedPlacesPanel__iconBtn${isItineraryMapView ? " isMapFilterActive" : ""}`}
-                onClick={onShowTopPlaces}
-                aria-label="Show top 25 field picks on map"
-                title="Show Top 25 on map"
-              >
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  visibility
-                </span>
-              </button>
+              {viewMode === "places" ? (
+                <button
+                  type="button"
+                  className={`suggestedPlacesPanel__iconBtn${isItineraryMapView ? " isMapFilterActive" : ""}`}
+                  onClick={onShowTopPlaces}
+                  aria-label="Show top 25 field picks on map"
+                  title="Show Top 25 on map"
+                >
+                  <span
+                    className="material-symbols-rounded"
+                    aria-hidden="true"
+                  >
+                    visibility
+                  </span>
+                </button>
+              ) : null}
               <button
                 type="button"
                 className="suggestedPlacesPanel__iconBtn"
@@ -316,7 +412,18 @@ export function SuggestedPlacesPanel({
             </div>
           </header>
 
-          {!isPlaybackActive ? (
+          {viewMode !== "places" ? (
+            <button
+              type="button"
+              className="suggestedPlacesPanel__backToPlaces"
+              onClick={onShowRecommendedPlaces}
+            >
+              <span className="material-symbols-rounded" aria-hidden="true">
+                arrow_back
+              </span>
+              Back to recommended places
+            </button>
+          ) : !isPlaybackActive ? (
             <div
               className="suggestedPlacesPanel__filters"
               role="group"
@@ -342,7 +449,83 @@ export function SuggestedPlacesPanel({
             aria-label="Recommended places"
             tabIndex={0}
           >
-            {isPlaybackActive ? (
+            {viewMode === "watch" ? (
+              rankedWebcams.length === 0 ? (
+                <div className="suggestedPlacesPanel__status">
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    videocam_off
+                  </span>
+                  <span>
+                    <strong>No watch locations are available.</strong>
+                    <small>Try again after the location feed refreshes.</small>
+                  </span>
+                </div>
+              ) : (
+                <div className="suggestedPlacesPanel__list suggestedPlacesPanel__mediaList">
+                  {rankedWebcams.map(({ location, distanceKm }, index) => (
+                    <button
+                      key={location.id}
+                      type="button"
+                      className={`suggestedPlacesPanel__mediaCard${location.id === selectedWebcam?.id ? " isSelected" : ""}`}
+                      onClick={() => onSelectWebcam?.(location)}
+                    >
+                      <span className="suggestedPlacesPanel__mediaRank">
+                        {index + 1}
+                      </span>
+                      <span className="suggestedPlacesPanel__mediaIcon material-symbols-rounded" aria-hidden="true">
+                        videocam
+                      </span>
+                      <span className="suggestedPlacesPanel__mediaCopy">
+                        <strong>{location.name}</strong>
+                        <small>{location.waterbody} · {location.locality}</small>
+                        <em>{formatForecastDistance(distanceKm)}</em>
+                      </span>
+                      <span className="material-symbols-rounded suggestedPlacesPanel__mediaChevron" aria-hidden="true">
+                        chevron_right
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )
+            ) : viewMode === "listen" ? (
+              rankedHydrophones.length === 0 ? (
+                <div className="suggestedPlacesPanel__status">
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    graphic_eq
+                  </span>
+                  <span>
+                    <strong>No listen locations are available.</strong>
+                    <small>Try again after the Orcasound feed refreshes.</small>
+                  </span>
+                </div>
+              ) : (
+                <div className="suggestedPlacesPanel__list suggestedPlacesPanel__mediaList">
+                  {rankedHydrophones.map(({ location, distanceKm }, index) => (
+                    <button
+                      key={location.id}
+                      type="button"
+                      className={`suggestedPlacesPanel__mediaCard${location.id === selectedHydrophone?.id ? " isSelected" : ""}`}
+                      onClick={() => onSelectHydrophone?.(location)}
+                    >
+                      <span className="suggestedPlacesPanel__mediaRank">
+                        {index + 1}
+                      </span>
+                      <span className="suggestedPlacesPanel__mediaIcon material-symbols-rounded" aria-hidden="true">
+                        graphic_eq
+                      </span>
+                      <span className="suggestedPlacesPanel__mediaCopy">
+                        <strong>{location.name}</strong>
+                        <small>{location.region}</small>
+                        <em>{formatForecastDistance(distanceKm)}</em>
+                      </span>
+                      <span className="material-symbols-rounded suggestedPlacesPanel__mediaChevron" aria-hidden="true">
+                        chevron_right
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )
+            ) : isPlaybackActive ? (
               <div
                 className="suggestedPlacesPanel__playbackSpinner"
                 role="status"
@@ -557,6 +740,7 @@ export function SuggestedPlacesPanel({
               webcam={selectedWebcam}
               hydrophone={selectedHydrophone}
               hydrophoneListenUrl={hydrophoneListenUrl}
+              backLabel={`Back to ${viewMode === "watch" ? "watch locations" : "listen locations"}`}
               onBack={() => onClearMediaSelection?.()}
               onClose={onClose}
               onCenterMap={() => {
