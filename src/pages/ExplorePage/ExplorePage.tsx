@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ForecastLabHeader } from "../../shared/components/ForecastLabHeader";
 import { useMenu } from "../../shared/state/MenuContext";
 import "./ExplorePage.css";
 
@@ -30,36 +31,8 @@ export function ExplorePage() {
   const { setMenuOpen } = useMenu();
 
   return (
-    <div className="exploreSoonPage">
-      <header className="exploreSoonHeader">
-        <button
-          type="button"
-          className="exploreSoonHeader__menu"
-          aria-label="Open main menu"
-          onClick={() => setMenuOpen(true)}
-        >
-          <span className="material-symbols-rounded" aria-hidden="true">
-            menu
-          </span>
-        </button>
-        <Link
-          className="exploreSoonHeader__brand"
-          to="/"
-          aria-label="OrcaCast home"
-        >
-          OrcaCast <span>Explore</span>
-        </Link>
-        <Link
-          className="exploreSoonHeader__watch"
-          to="/watch"
-          aria-label="This week"
-        >
-          This week
-          <span className="material-symbols-rounded" aria-hidden="true">
-            arrow_forward
-          </span>
-        </Link>
-      </header>
+    <div className="mapPageRoot exploreSoonPage">
+      <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
 
       <main id="main-content" className="exploreSoonMain" tabIndex={-1}>
         <section className="exploreSoonHero" aria-labelledby="explore-title">

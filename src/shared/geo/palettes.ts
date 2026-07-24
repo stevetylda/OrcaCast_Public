@@ -1,17 +1,11 @@
 export type PaletteId =
-  | "orcacast_classic"
-  | "amethyst"
   | "rose_noir"
   | "basalt_fire"
   | "cividis_safe"
-  | "forest_greens"
   | "mediterranean_atlas"
-  | "red_atlas"
   | "northern_lights"
   | "forecast_lab"
-  | "forecast_lab_glow"
-  | "orca_cobalt"
-  | "salish_postcard";
+  | "forecast_lab_glow";
 
 export type ViewabilityOnlyPaletteId = "relief_atlas";
 
@@ -27,36 +21,6 @@ export type PaletteDef<TId extends string = PaletteId> = {
 export const DEFAULT_PALETTE_ID: PaletteId = "mediterranean_atlas";
 
 export const PALETTES: Record<PaletteId, PaletteDef> = {
-  orcacast_classic: {
-    id: "orcacast_classic",
-    name: "OrcaCast Classic",
-    colors: [
-      "#002BFB",
-      "#0466FF",
-      "#049FFF",
-      "#00CEFD",
-      "#00E1EB",
-      "#00EBB6",
-      "#00EBDD",
-      "#C1FFFA",
-    ],
-    dominant: "#00E1EB",
-  },
-  amethyst: {
-    id: "amethyst",
-    name: "Amethyst",
-    colors: [
-      "#10002B",
-      "#240046",
-      "#3C096C",
-      "#5A189A",
-      "#7B2CBF",
-      "#9D4EDD",
-      "#C77DFF",
-      "#E0AAFF",
-    ],
-    dominant: "#9D4EDD",
-  },
   rose_noir: {
     id: "rose_noir",
     name: "Rose Noir",
@@ -102,21 +66,6 @@ export const PALETTES: Record<PaletteId, PaletteDef> = {
     ],
     dominant: "#8FA56B",
   },
-  forest_greens: {
-    id: "forest_greens",
-    name: "Forest Greens",
-    colors: [
-      "#081C15",
-      "#1B4332",
-      "#2D6A4F",
-      "#3C7A5E",
-      "#4F936D",
-      "#74A57F",
-      "#95BC8F",
-      "#B7D8A6",
-    ],
-    dominant: "#4F936D",
-  },
   mediterranean_atlas: {
     id: "mediterranean_atlas",
     name: "Mediterranean Atlas",
@@ -131,21 +80,6 @@ export const PALETTES: Record<PaletteId, PaletteDef> = {
       "#08364F",
     ],
     dominant: "#0B718D",
-  },
-  red_atlas: {
-    id: "red_atlas",
-    name: "Red Atlas",
-    colors: [
-      "#E5DAD6",
-      "#D6BBB3",
-      "#C89589",
-      "#B86F62",
-      "#A74E45",
-      "#8F332F",
-      "#6D2427",
-      "#451A22",
-    ],
-    dominant: "#A74E45",
   },
   northern_lights: {
     id: "northern_lights",
@@ -174,18 +108,6 @@ export const PALETTES: Record<PaletteId, PaletteDef> = {
     colors: ["#0C1C3A", "#288E99", "#76CFCA", "#B9DCB6", "#F8D769", "#FFF4C8"],
     dominant: "#76CFCA",
   },
-  orca_cobalt: {
-    id: "orca_cobalt",
-    name: "Orca Cobalt",
-    colors: ["#EEF1FF", "#CDD7FF", "#93A8F2", "#5F78DC", "#455FC6", "#182E72"],
-    dominant: "#5F78DC",
-  },
-  salish_postcard: {
-    id: "salish_postcard",
-    name: "Salish Postcard",
-    colors: ["#FEF8EB", "#F8D769", "#F2AE76", "#EE7465", "#4A9DA1", "#0C1C3A"],
-    dominant: "#EE7465",
-  },
 };
 
 export const VIEWABILITY_ONLY_PALETTES: Record<
@@ -210,9 +132,7 @@ export const VIEWABILITY_ONLY_PALETTES: Record<
 };
 
 export const VIEWABILITY_PALETTE_OPTIONS: PaletteDef<ViewabilityPaletteId>[] = [
-  ...Object.values(PALETTES).filter(
-    (palette) => palette.id !== "orcacast_classic",
-  ),
+  ...Object.values(PALETTES),
   ...Object.values(VIEWABILITY_ONLY_PALETTES),
 ];
 

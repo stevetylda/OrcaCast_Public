@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PALETTES, type PaletteId } from "../geo/palettes";
-import type { SuggestedPlace } from "../../features/locations/types";
+import type { WebcamSite } from "../../features/locations/types";
 import type { OrcasoundHydrophone } from "../data/orcasoundHydrophones";
 import type { UnitsMode } from "../state/MapStateContext";
 import type {
@@ -8,18 +8,22 @@ import type {
   ForecastEcotypeOption,
   ForecastModelOption,
 } from "../config/forecastModels";
+import "./AppFooter.css";
 
 type Props = {
   onShareSnapshot?: () => void;
   onDownloadSnapshot?: () => void;
   shareBusy?: boolean;
-  places: SuggestedPlace[];
-  selectedPlaceId: string | null;
-  onSelectPlace: (place: SuggestedPlace) => void;
+  webcams?: WebcamSite[];
+  selectedCameraId?: string | null;
+  onSelectCamera?: (camera: WebcamSite) => void;
   hydrophones?: OrcasoundHydrophone[];
+  selectedHydrophoneId?: string | null;
   onSelectHydrophone?: (hydrophone: OrcasoundHydrophone) => void;
   onToggleLiveCameras?: (visible: boolean) => void;
   onToggleHydrophones?: (visible: boolean) => void;
+  camerasVisible?: boolean;
+  hydrophonesVisible?: boolean;
   unitsMode: UnitsMode;
   onUnitsModeChange: (mode: UnitsMode) => void;
   surfaceMode: "grid" | "surface";
@@ -42,22 +46,20 @@ type Props = {
 
 type DockPanelId = "live-cams" | "hydrophones" | "settings" | null;
 
-function formatPlaceType(type: SuggestedPlace["type"]) {
-  if (type === "Ferry") return "Ferry terminal";
-  return type;
-}
-
 export function AppFooter({
   onShareSnapshot,
   onDownloadSnapshot,
   shareBusy = false,
-  places,
-  selectedPlaceId,
-  onSelectPlace,
+  webcams = [],
+  selectedCameraId = null,
+  onSelectCamera,
   hydrophones = [],
+  selectedHydrophoneId = null,
   onSelectHydrophone,
   onToggleLiveCameras,
   onToggleHydrophones,
+  camerasVisible = false,
+  hydrophonesVisible = false,
   unitsMode,
   onUnitsModeChange,
   surfaceMode,
@@ -91,10 +93,6 @@ export function AppFooter({
     });
   };
 
-  const liveCamPlaces = useMemo(
-    () => places.filter((place) => place.hasLiveFeed),
-    [places],
-  );
   const poiActive = poiFilters.Park || poiFilters.Marina || poiFilters.Ferry;
 
   useEffect(() => {
@@ -121,57 +119,6 @@ export function AppFooter({
 
   const activePalette = PALETTES[selectedPaletteId];
 
-  const renderPlacesPanel = (
-    items: SuggestedPlace[],
-    emptyLabel: string,
-    ctaLabel: string,
-  ) => (
-    <div
-      className="footerDock__panel footerDock__panel--places"
-      role="dialog"
-      aria-modal="false"
-    >
-      <div className="footerDock__panelHeader">
-        <div>
-          <div className="footerDock__eyebrow">Watch tools</div>
-          <div className="footerDock__title">{ctaLabel}</div>
-        </div>
-        <span className="footerDock__count">{items.length}</span>
-      </div>
-      {items.length === 0 ? (
-        <div className="footerDock__empty">{emptyLabel}</div>
-      ) : (
-        <div className="footerDock__placeList">
-          {items.map((place) => {
-            const selected = place.id === selectedPlaceId;
-            return (
-              <button
-                key={place.id}
-                type="button"
-                className={`footerDock__placeItem${selected ? " isSelected" : ""}`}
-                onClick={() => onSelectPlace(place)}
-              >
-                <span className="footerDock__placeText">
-                  <span className="footerDock__placeName">{place.name}</span>
-                  <span className="footerDock__placeMeta">
-                    <span>{formatPlaceType(place.type)}</span>
-                    {place.region && <span>{place.region}</span>}
-                  </span>
-                </span>
-                <span className="footerDock__placeAction">
-                  Show
-                  <span className="material-symbols-rounded" aria-hidden="true">
-                    place
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-
   const renderHydrophonesPanel = () => (
     <div
       className="footerDock__panel footerDock__panel--places"
@@ -195,8 +142,11 @@ export function AppFooter({
             <button
               key={hydrophone.id}
               type="button"
-              className="footerDock__placeItem"
-              onClick={() => onSelectHydrophone?.(hydrophone)}
+              className={`footerDock__placeItem${hydrophone.id === selectedHydrophoneId ? " isSelected" : ""}`}
+              onClick={() => {
+                onSelectHydrophone?.(hydrophone);
+                setDockPanel(null);
+              }}
             >
               <span className="footerDock__placeText">
                 <span className="footerDock__placeName">{hydrophone.name}</span>
@@ -218,15 +168,62 @@ export function AppFooter({
     </div>
   );
 
+  const renderWebcamsPanel = () => (
+    <div
+      className="footerDock__panel footerDock__panel--places"
+      role="dialog"
+      aria-modal="false"
+    >
+      <div className="footerDock__panelHeader">
+        <div>
+          <div className="footerDock__eyebrow">Water-view cameras</div>
+          <div className="footerDock__title">Webcams</div>
+        </div>
+        <span className="footerDock__count">{webcams.length}</span>
+      </div>
+      {webcams.length === 0 ? (
+        <div className="footerDock__empty">
+          No webcam locations are available right now.
+        </div>
+      ) : (
+        <div className="footerDock__placeList">
+          {webcams.map((camera) => (
+            <button
+              key={camera.id}
+              type="button"
+              className={`footerDock__placeItem${camera.id === selectedCameraId ? " isSelected" : ""}`}
+              onClick={() => {
+                onSelectCamera?.(camera);
+                setDockPanel(null);
+              }}
+            >
+              <span className="footerDock__placeText">
+                <span className="footerDock__placeName">{camera.name}</span>
+                <span className="footerDock__placeMeta">
+                  <span>{camera.waterbody}</span>
+                  <span>
+                    {camera.feeds.length}{" "}
+                    {camera.feeds.length === 1 ? "view" : "views"}
+                  </span>
+                </span>
+              </span>
+              <span className="footerDock__placeAction">
+                Show
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  place
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="footerDock" ref={dockRef}>
       <div className="footerDock__stack">
-        {activePanel === "live-cams" &&
-          renderPlacesPanel(
-            liveCamPlaces,
-            "No currently suggested places have live cameras attached.",
-            "Cameras",
-          )}
+        {activePanel === "live-cams" && renderWebcamsPanel()}
         {activePanel === "hydrophones" && renderHydrophonesPanel()}
         {activePanel === "settings" && (
           <div
@@ -572,7 +569,7 @@ export function AppFooter({
               id: "live-cams" as const,
               icon: "videocam",
               label: "Watch",
-              count: liveCamPlaces.length,
+              count: webcams.length,
             },
             {
               id: "hydrophones" as const,
@@ -587,13 +584,20 @@ export function AppFooter({
             },
           ].map((item) => {
             const open = activePanel === item.id;
+            const layerActive =
+              item.id === "live-cams"
+                ? camerasVisible
+                : item.id === "hydrophones"
+                  ? hydrophonesVisible
+                  : open;
             return (
               <button
                 key={item.id}
                 type="button"
-                className={`footerDock__button${item.id === "settings" ? " footerDock__button--iconOnly" : ""}${open ? " isActive" : ""}`}
+                className={`footerDock__button${item.id === "settings" ? " footerDock__button--iconOnly" : ""}${layerActive ? " isActive" : ""}`}
                 onClick={() => {
-                  const nextOpen = !open;
+                  const nextOpen =
+                    item.id === "settings" ? !open : !layerActive;
                   if (item.id === "live-cams") onToggleLiveCameras?.(nextOpen);
                   if (item.id === "hydrophones")
                     onToggleHydrophones?.(nextOpen);

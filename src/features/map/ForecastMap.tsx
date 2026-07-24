@@ -18,6 +18,8 @@ import type { Period } from "../../shared/data/periods";
 import {
   addGridOverlay,
   addGeoTiffSurfaceOverlay,
+  addRasterTileSurfaceOverlay,
+  addWeightedGeoTiffSurfaceOverlay,
   addSurfaceOverlay,
   setGridBaseVisibility,
   setGridCoreLayerVisibility,
@@ -64,7 +66,7 @@ import {
   type PoiFilters,
   type PublicPoi,
 } from "../locations/poiData";
-import type { SuggestedPlace, ViewingLocation } from "../locations/types";
+import type { SuggestedPlace, WebcamSite } from "../locations/types";
 import type { OrcasoundHydrophone } from "../../shared/data/orcasoundHydrophones";
 
 function waitForMapRender(map: MapLibreMap, timeoutMs = 2500) {
@@ -307,20 +309,12 @@ function getBaseLocationPopupHtml(baseLocation: {
   return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(baseLocation.name)}</div><div class="poiPopup__meta">Base location · ${Number(baseLocation.latitude).toFixed(4)}, ${Number(baseLocation.longitude).toFixed(4)}</div></div>`;
 }
 
-function getHydrophonePopupHtml(hydrophone: OrcasoundHydrophone) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(hydrophone.name)}</div><div class="poiPopup__meta">Orcasound hydrophone · ${escapePopupHtml(hydrophone.region)} · ${Number(hydrophone.latitude).toFixed(4)}, ${Number(hydrophone.longitude).toFixed(4)}</div></div>`;
-}
-
-function getCameraPopupHtml(camera: ViewingLocation) {
-  return `<div class="poiPopup"><div class="poiPopup__title">${escapePopupHtml(camera.name)}</div><div class="poiPopup__meta">Live camera · ${escapePopupHtml(camera.region ?? "Viewing location")} · ${Number(camera.latitude).toFixed(4)}, ${Number(camera.longitude).toFixed(4)}</div></div>`;
-}
-
 function buildPlannerLocationCollection(args: {
   baseLocation: { name: string; latitude: number; longitude: number } | null;
   suggestedPlaces: SuggestedPlace[];
   itineraryPlaceIds: string[];
   selectedPlaceId: string | null;
-  cameraLocations: ViewingLocation[];
+  cameraLocations: WebcamSite[];
   selectedCameraId: string | null;
   selectedHydrophoneId: string | null;
   showSuggestedPlaces: boolean;
@@ -991,6 +985,9 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       fallbackForecastPath,
       smoothedForecastPath,
       fallbackSmoothedForecastPath,
+      smoothedForecastTilePath,
+      fallbackSmoothedForecastTilePath,
+      weightedSmoothedForecastSources,
       colorScaleValues,
       useExternalColorScale = false,
       externalValues,
@@ -1008,6 +1005,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       selectedHydrophoneId = null,
       pulseSelectedPlaceMarker = false,
       onPlaceSelect,
+      onCameraSelect,
+      onHydrophoneSelect,
       onPoiSelect,
       onLocationSelectionClear,
       showTripHotspotMarkers = false,
@@ -1050,23 +1049,10 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       [paletteId],
     );
     const gridBorderColor = useMemo(
-      () =>
-        activePalette.id === "red_atlas"
-          ? darkMode
-            ? "rgba(92,32,42,0.28)"
-            : "rgba(116,42,48,0.2)"
-          : darkMode
-            ? "rgba(8,18,44,0.22)"
-            : "rgba(20,42,78,0.16)",
-      [activePalette.id, darkMode],
+      () => (darkMode ? "rgba(8,18,44,0.22)" : "rgba(20,42,78,0.16)"),
+      [darkMode],
     );
-    const gridLineAccentColor = useMemo(
-      () =>
-        activePalette.id === "red_atlas"
-          ? "rgba(176,72,66,0.38)"
-          : "rgba(96,186,200,0.34)",
-      [activePalette.id],
-    );
+    const gridLineAccentColor = "rgba(96,186,200,0.34)";
     const gridVisualStyle = useMemo<GridVisualStyle>(
       () =>
         gridPresentation === "quiet"
@@ -1305,7 +1291,85 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         }
 
         const smoothedSurfaceRequestId = ++smoothedSurfaceRequestIdRef.current;
-        if (surfaceMode === "surface" && smoothedForecastPath) {
+        if (weightedSmoothedForecastSources !== undefined) {
+          if (
+            surfaceMode === "surface" &&
+            weightedSmoothedForecastSources.length > 0
+          ) {
+            void addWeightedGeoTiffSurfaceOverlay(
+              map,
+              weightedSmoothedForecastSources,
+              activePalette.colors,
+              () =>
+                smoothedSurfaceRequestId !==
+                smoothedSurfaceRequestIdRef.current,
+            ).catch((error) => {
+              if (
+                smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current
+              )
+                return;
+              // A weighted-source prop is an exclusive raster contract. Keep
+              // the last valid TIFF frame (or the basemap on first load)
+              // instead of substituting the generated H3 smoothing surface.
+              console.warn(
+                "[Forecast] weighted smoothed GeoTIFFs failed; retaining the previous raster",
+                error,
+              );
+            });
+          }
+        } else if (surfaceMode === "surface" && smoothedForecastTilePath) {
+          void addRasterTileSurfaceOverlay(
+            map,
+            smoothedForecastTilePath,
+            fallbackSmoothedForecastTilePath,
+            activePalette.colors,
+            () =>
+              smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current,
+          ).catch((tileError) => {
+            if (
+              smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current
+            )
+              return;
+            if (!smoothedForecastPath) {
+              console.warn(
+                "[Forecast] smoothed raster tiles failed and no GeoTIFF fallback is available",
+                tileError,
+              );
+              return;
+            }
+            console.warn(
+              "[Forecast] smoothed raster tiles failed; using GeoTIFF fallback",
+              tileError,
+            );
+            void addGeoTiffSurfaceOverlay(
+              map,
+              smoothedForecastPath,
+              fallbackSmoothedForecastPath,
+              activePalette.colors,
+              () =>
+                smoothedSurfaceRequestId !==
+                smoothedSurfaceRequestIdRef.current,
+            ).catch((error) => {
+              if (
+                smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current
+              )
+                return;
+              console.warn(
+                "[Forecast] smoothed GeoTIFF fallback failed; using generated surface",
+                error,
+              );
+              if (overlayRef.current) {
+                addSurfaceOverlay(
+                  map,
+                  overlayRef.current,
+                  activePalette.colors,
+                  scale,
+                );
+                setSurfaceVisibility(map, true);
+              }
+            });
+          });
+        } else if (surfaceMode === "surface" && smoothedForecastPath) {
           void addGeoTiffSurfaceOverlay(
             map,
             smoothedForecastPath,
@@ -1396,6 +1460,9 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         resolveHotspotThreshold,
         smoothedForecastPath,
         fallbackSmoothedForecastPath,
+        smoothedForecastTilePath,
+        fallbackSmoothedForecastTilePath,
+        weightedSmoothedForecastSources,
         surfaceMode,
       ],
     );
@@ -2039,6 +2106,25 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           expectedActivityHotspotCellCount,
         ) === 0;
 
+      // Forecast playback updates the legend before the next GeoTIFF has
+      // finished decoding. Keep the current smooth frame visible during that
+      // gap instead of briefly restoring the newly updated hex layer.
+      if (surfaceMode === "surface") {
+        setGridBaseVisibility(
+          map,
+          false,
+          undefined,
+          undefined,
+          gridVisualStyle,
+        );
+        setSurfaceVisibility(map, true);
+        setHotspotVisibility(
+          map,
+          hasForecastLegend && hotspotsEnabled && !zeroModeledHotspots,
+        );
+        return;
+      }
+
       if (!hasForecastLegend) {
         setGridCoreLayerVisibility(map, true);
         setGridVisibility(map, true, undefined, undefined, gridVisualStyle);
@@ -2068,6 +2154,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       hotspotMode,
       hotspotsEnabled,
       mapReady,
+      surfaceMode,
     ]);
 
     useEffect(() => {
@@ -2165,6 +2252,9 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         const poiFeatureCount = baseData.features.filter(
           (feature) => feature.properties?.kind === "poi",
         ).length;
+        const cameraFeatureCount = baseData.features.filter(
+          (feature) => feature.properties?.kind === "camera",
+        ).length;
         const gpuMarkerKinds: PlannerLocationKind[] = [
           "poi",
           "camera",
@@ -2229,6 +2319,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         if (containerRef.current) {
           containerRef.current.dataset.plannerPoiCount =
             String(poiFeatureCount);
+          containerRef.current.dataset.plannerCameraCount =
+            String(cameraFeatureCount);
           containerRef.current.dataset.plannerPulsingLocation =
             baseData.features.find(
               (feature) =>
@@ -2276,12 +2368,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
             typeof properties.kind === "string" ? properties.kind : null;
           if (id && placesById.has(id))
             return getSuggestedPlacePopupHtml(placesById.get(id)!);
-          if (id && kind === "camera" && camerasById.has(id))
-            return getCameraPopupHtml(camerasById.get(id)!);
           if (id && kind === "poi" && poisById.has(id))
             return `<span class="plannerMapHoverLabel">${escapePopupHtml(poisById.get(id)!.name)}</span>`;
-          if (id && kind === "hydrophone" && hydrophonesById.has(id))
-            return getHydrophonePopupHtml(hydrophonesById.get(id)!);
           if (kind === "base" && baseLocation)
             return getBaseLocationPopupHtml(baseLocation);
           return "";
@@ -2326,18 +2414,10 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
             }
             if (properties.kind === "camera") {
               const camera = camerasById.get(properties.id);
-              if (camera)
-                popup
-                  .setLngLat(coordinates)
-                  .setHTML(getCameraPopupHtml(camera))
-                  .addTo(map);
+              if (camera) onCameraSelect?.(camera);
             } else if (properties.kind === "hydrophone") {
               const hydrophone = hydrophonesById.get(properties.id);
-              if (hydrophone)
-                popup
-                  .setLngLat(coordinates)
-                  .setHTML(getHydrophonePopupHtml(hydrophone))
-                  .addTo(map);
+              if (hydrophone) onHydrophoneSelect?.(hydrophone);
             } else if (properties.kind === "poi") {
               const poi = poisById.get(properties.id);
               if (poi) onPoiSelect?.(poi);
@@ -2367,6 +2447,18 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           event.originalEvent.stopPropagation();
           if (place) {
             onPlaceSelect?.(place);
+            return;
+          }
+          const camera = id ? camerasById.get(id) : null;
+          if (camera) {
+            hoverPopup.remove();
+            onCameraSelect?.(camera);
+            return;
+          }
+          const hydrophone = id ? hydrophonesById.get(id) : null;
+          if (hydrophone) {
+            hoverPopup.remove();
+            onHydrophoneSelect?.(hydrophone);
             return;
           }
           if (poi) {
@@ -2487,6 +2579,8 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       itineraryPlaceIds,
       mapReady,
       onPlaceSelect,
+      onCameraSelect,
+      onHydrophoneSelect,
       onPoiSelect,
       onLocationSelectionClear,
       poiFilters,

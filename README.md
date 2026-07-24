@@ -148,7 +148,7 @@ Important configuration lives in:
 
 ## Runtime data
 
-The public application reads packaged datasets from `public/data`, including activity summaries, expected counts, forecasts, forecast grids, recent sightings, population context, periods, metadata, and places of interest. Keep temporal periods, H3 resolutions, model identifiers, and GeoJSON coordinate order consistent when refreshing these artifacts.
+The public application reads packaged datasets from `public/data`, including activity summaries, expected counts, forecasts, forecast grids, recent sightings, population context, periods, metadata, places of interest, the grouped webcam inventory, and week-of-year historical smooth rasters used by the Planner. Keep temporal periods, H3 resolutions, model identifiers, and GeoJSON coordinate order consistent when refreshing these artifacts.
 
 Forecast values should be interpreted as relative rankings across time and space. Reporting effort, access, weather, and sparse observations can all affect what is recorded and what can realistically be seen.
 

@@ -1,0 +1,6188 @@
+{
+  "week_of_year": 1,
+  "ecotype": "SRKW",
+  "h3_resolution": 6,
+  "years_available": 46,
+  "values": {
+    "8628c0487ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c0497ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c049fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c04a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c04b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c0587ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c0597ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c059fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c05b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2167ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c216fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c222fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2247ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c224fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2257ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c225fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2267ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c226fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2277ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c229fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c22cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c22efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c232fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2347ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c234fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2357ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c235fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2367ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c236fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2377ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2487ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c248fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2497ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c249fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c24c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c24cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c24d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c24dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c24f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2607ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c260fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2617ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c261fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2627ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c262fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2637ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2647ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c264fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2657ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c265fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2667ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c266fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2677ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2687ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c268fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2697ffffff": {
+      "mean_sightings_per_year": 0.06521739130434782,
+      "total_sightings": 3,
+      "years_with_sightings": 2
+    },
+    "8628c269fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c26f7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628c271fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2757ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c275fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2787ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c278fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2797ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c279fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c27a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c27afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c27b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2807ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c280fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2827ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c282fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2847ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c284fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2857ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c285fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2867ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c286fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2877ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c28c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c28cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c28e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c28efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2907ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c290fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c291fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2927ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c292fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2937ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2947ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c294fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2957ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c295fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2967ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c296fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2977ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2a8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2aa7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2aafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2ab7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2ac7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2acfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2ad7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2adfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2ae7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2aefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2af7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2b9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2ba7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2bafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c2bb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3407ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c340fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3417ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c341fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3427ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c342fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3437ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3487ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c348fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3497ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c349fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c34f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3507ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c350fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3517ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c351fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3527ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c352fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3537ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3557ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3577ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3587ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c358fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3597ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c359fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c35a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c35afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c35b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3607ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c360fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3617ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c361fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3637ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c364fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3657ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c365fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3687ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c368fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3697ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c369fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c36f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3787ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c378fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3797ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c379fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c37afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c37b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3c17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3c87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3c8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3c97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3c9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3ca7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3cafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3cb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3cd7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3cf7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3d87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3d8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3d97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3d9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3da7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3dafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c3db7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6007ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c600fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6017ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c601fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6027ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c602fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6037ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6047ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c604fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6057ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c605fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6067ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c606fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6077ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6087ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c60f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c614fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c615fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c618fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c619fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6207ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c620fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6217ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c621fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6227ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6237ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6287ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c628fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6297ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c629fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c62f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6307ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6317ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c631fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6327ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6337ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6387ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c638fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6397ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c639fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c63a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c63afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c63b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c654fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c666fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c674fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c676fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6a87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6a97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628c6a9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0a0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0a2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0a47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0a4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0a67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0a6fffffff": {
+      "mean_sightings_per_year": 0.043478260869565216,
+      "total_sightings": 2,
+      "years_with_sightings": 2
+    },
+    "8628d0a77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0b47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0b4fffffff": {
+      "mean_sightings_per_year": 0.17391304347826086,
+      "total_sightings": 8,
+      "years_with_sightings": 3
+    },
+    "8628d0b5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0b67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d0b6fffffff": {
+      "mean_sightings_per_year": 0.41304347826086957,
+      "total_sightings": 19,
+      "years_with_sightings": 5
+    },
+    "8628d1007ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d100fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1017ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d101fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1027ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d102fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1037ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d104fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1057ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d105fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1067ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d106fffffff": {
+      "mean_sightings_per_year": 0.06521739130434782,
+      "total_sightings": 3,
+      "years_with_sightings": 2
+    },
+    "8628d1077ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1087ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d108fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1097ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d109fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10c7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d10cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d10efffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d10f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1107ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d110fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1117ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d111fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1127ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d112fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1137ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1147ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d114fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1157ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d115fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1167ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d116fffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d1177ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1187ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d118fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1197ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d119fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d11a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d11afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d11b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1207ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d120fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1217ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d121fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1227ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d122fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1237ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1247ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d124fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1257ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d125fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1267ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d126fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1277ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1287ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d128fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1297ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d129fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d12a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d12afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d12b7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d12c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d12cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d12d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d12dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d12e7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d12efffffff": {
+      "mean_sightings_per_year": 0.043478260869565216,
+      "total_sightings": 2,
+      "years_with_sightings": 2
+    },
+    "8628d12f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1307ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d130fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1317ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d131fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1327ffffff": {
+      "mean_sightings_per_year": 0.06521739130434782,
+      "total_sightings": 3,
+      "years_with_sightings": 2
+    },
+    "8628d132fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1337ffffff": {
+      "mean_sightings_per_year": 0.391304347826087,
+      "total_sightings": 18,
+      "years_with_sightings": 5
+    },
+    "8628d1347ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d134fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1357ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d135fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1367ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d136fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1377ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1387ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d138fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1397ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d139fffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d13a7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d13afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d13b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d142fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1447ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d144fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d145fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1467ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d146fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1477ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1547ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d154fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1557ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d155fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1567ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d156fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1577ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1607ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d160fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d161fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1627ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d162fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1637ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1647ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d164fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1657ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d165fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1667ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d166fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1677ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d16c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d16cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d16e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d16efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d16f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1707ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d170fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1717ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d171fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1727ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d172fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1737ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1747ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d174fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1757ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d175fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1767ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d176fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1777ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d17a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d17afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d17b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1807ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d180fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1817ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d181fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1827ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d182fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1837ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1847ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d184fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1857ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d185fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1867ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d186fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1877ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1887ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d188fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1897ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d189fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d18f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1917ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d191fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d194fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d195fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1987ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d198fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1997ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d199fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d19a7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d19afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d19b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a07ffffff": {
+      "mean_sightings_per_year": 0.043478260869565216,
+      "total_sightings": 2,
+      "years_with_sightings": 2
+    },
+    "8628d1a0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a17ffffff": {
+      "mean_sightings_per_year": 0.13043478260869565,
+      "total_sightings": 6,
+      "years_with_sightings": 4
+    },
+    "8628d1a1fffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d1a27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1a97ffffff": {
+      "mean_sightings_per_year": 0.5,
+      "total_sightings": 23,
+      "years_with_sightings": 6
+    },
+    "8628d1a9fffffff": {
+      "mean_sightings_per_year": 0.043478260869565216,
+      "total_sightings": 2,
+      "years_with_sightings": 1
+    },
+    "8628d1aa7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d1aafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1ab7ffffff": {
+      "mean_sightings_per_year": 0.10869565217391304,
+      "total_sightings": 5,
+      "years_with_sightings": 3
+    },
+    "8628d1acfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1ad7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1adfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1ae7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1aefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1af7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b6fffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d1b77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b8fffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d1b97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1b9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1ba7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1bafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1bb7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d1c07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1c8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1ca7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1cafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1cc7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1ccfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1cdfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1ce7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1cefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1cf7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d07ffffff": {
+      "mean_sightings_per_year": 0.08695652173913043,
+      "total_sightings": 4,
+      "years_with_sightings": 2
+    },
+    "8628d1d0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d37ffffff": {
+      "mean_sightings_per_year": 0.15217391304347827,
+      "total_sightings": 7,
+      "years_with_sightings": 3
+    },
+    "8628d1d47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d57ffffff": {
+      "mean_sightings_per_year": 0.043478260869565216,
+      "total_sightings": 2,
+      "years_with_sightings": 1
+    },
+    "8628d1d5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1d67ffffff": {
+      "mean_sightings_per_year": 0.34782608695652173,
+      "total_sightings": 16,
+      "years_with_sightings": 5
+    },
+    "8628d1d6fffffff": {
+      "mean_sightings_per_year": 0.17391304347826086,
+      "total_sightings": 8,
+      "years_with_sightings": 4
+    },
+    "8628d1d77ffffff": {
+      "mean_sightings_per_year": 0.08695652173913043,
+      "total_sightings": 4,
+      "years_with_sightings": 2
+    },
+    "8628d1d8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d1dafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5047ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5057ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d505fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5067ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5077ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5087ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d508fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5097ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d509fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d50f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5107ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d510fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5127ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d512fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5137ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d514fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5167ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d516fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5177ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d518fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5197ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d519fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d51a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d51b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5407ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d540fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5417ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d541fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5427ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d542fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5437ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5447ffffff": {
+      "mean_sightings_per_year": 0.32608695652173914,
+      "total_sightings": 15,
+      "years_with_sightings": 8
+    },
+    "8628d544fffffff": {
+      "mean_sightings_per_year": 0.043478260869565216,
+      "total_sightings": 2,
+      "years_with_sightings": 2
+    },
+    "8628d5457ffffff": {
+      "mean_sightings_per_year": 0.08695652173913043,
+      "total_sightings": 4,
+      "years_with_sightings": 3
+    },
+    "8628d545fffffff": {
+      "mean_sightings_per_year": 0.32608695652173914,
+      "total_sightings": 15,
+      "years_with_sightings": 5
+    },
+    "8628d5467ffffff": {
+      "mean_sightings_per_year": 0.43478260869565216,
+      "total_sightings": 20,
+      "years_with_sightings": 8
+    },
+    "8628d546fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5477ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d54cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d54e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d54efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5507ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d550fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5517ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d551fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d552fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5547ffffff": {
+      "mean_sightings_per_year": 0.43478260869565216,
+      "total_sightings": 20,
+      "years_with_sightings": 5
+    },
+    "8628d554fffffff": {
+      "mean_sightings_per_year": 0.10869565217391304,
+      "total_sightings": 5,
+      "years_with_sightings": 3
+    },
+    "8628d5557ffffff": {
+      "mean_sightings_per_year": 0.13043478260869565,
+      "total_sightings": 6,
+      "years_with_sightings": 4
+    },
+    "8628d555fffffff": {
+      "mean_sightings_per_year": 0.30434782608695654,
+      "total_sightings": 14,
+      "years_with_sightings": 7
+    },
+    "8628d5567ffffff": {
+      "mean_sightings_per_year": 0.21739130434782608,
+      "total_sightings": 10,
+      "years_with_sightings": 2
+    },
+    "8628d556fffffff": {
+      "mean_sightings_per_year": 0.10869565217391304,
+      "total_sightings": 5,
+      "years_with_sightings": 3
+    },
+    "8628d5577ffffff": {
+      "mean_sightings_per_year": 0.5,
+      "total_sightings": 23,
+      "years_with_sightings": 10
+    },
+    "8628d5607ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d560fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5617ffffff": {
+      "mean_sightings_per_year": 0.06521739130434782,
+      "total_sightings": 3,
+      "years_with_sightings": 2
+    },
+    "8628d561fffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d5627ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5637ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d564fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d565fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5687ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d568fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5697ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d569fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d56a7ffffff": {
+      "mean_sightings_per_year": 0.2391304347826087,
+      "total_sightings": 11,
+      "years_with_sightings": 2
+    },
+    "8628d56afffffff": {
+      "mean_sightings_per_year": 0.30434782608695654,
+      "total_sightings": 14,
+      "years_with_sightings": 3
+    },
+    "8628d56b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d56c7ffffff": {
+      "mean_sightings_per_year": 0.2391304347826087,
+      "total_sightings": 11,
+      "years_with_sightings": 4
+    },
+    "8628d56cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d56d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d56dfffffff": {
+      "mean_sightings_per_year": 0.15217391304347827,
+      "total_sightings": 7,
+      "years_with_sightings": 2
+    },
+    "8628d56e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d56efffffff": {
+      "mean_sightings_per_year": 0.10869565217391304,
+      "total_sightings": 5,
+      "years_with_sightings": 2
+    },
+    "8628d56f7ffffff": {
+      "mean_sightings_per_year": 0.2608695652173913,
+      "total_sightings": 12,
+      "years_with_sightings": 4
+    },
+    "8628d5707ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d570fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5717ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d571fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5727ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d572fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5737ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d5747ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5757ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d575fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5767ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5777ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5787ffffff": {
+      "mean_sightings_per_year": 0.7608695652173914,
+      "total_sightings": 35,
+      "years_with_sightings": 2
+    },
+    "8628d578fffffff": {
+      "mean_sightings_per_year": 0.10869565217391304,
+      "total_sightings": 5,
+      "years_with_sightings": 2
+    },
+    "8628d5797ffffff": {
+      "mean_sightings_per_year": 0.21739130434782608,
+      "total_sightings": 10,
+      "years_with_sightings": 2
+    },
+    "8628d579fffffff": {
+      "mean_sightings_per_year": 0.32608695652173914,
+      "total_sightings": 15,
+      "years_with_sightings": 4
+    },
+    "8628d57a7ffffff": {
+      "mean_sightings_per_year": 0.1956521739130435,
+      "total_sightings": 9,
+      "years_with_sightings": 3
+    },
+    "8628d57afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d57b7ffffff": {
+      "mean_sightings_per_year": 0.41304347826086957,
+      "total_sightings": 19,
+      "years_with_sightings": 4
+    },
+    "8628d5807ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d580fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5817ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d581fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5827ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d582fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5837ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5857ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5887ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d588fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5897ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d589fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d58f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d590fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5917ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d591fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5957ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5987ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d598fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5997ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d599fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d59afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d59b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5ab7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5b87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5b97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5b9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5bb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5c07ffffff": {
+      "mean_sightings_per_year": 0.08695652173913043,
+      "total_sightings": 4,
+      "years_with_sightings": 2
+    },
+    "8628d5c0fffffff": {
+      "mean_sightings_per_year": 0.4782608695652174,
+      "total_sightings": 22,
+      "years_with_sightings": 10
+    },
+    "8628d5c1fffffff": {
+      "mean_sightings_per_year": 0.08695652173913043,
+      "total_sightings": 4,
+      "years_with_sightings": 3
+    },
+    "8628d5c2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5c47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5c4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5c57ffffff": {
+      "mean_sightings_per_year": 0.06521739130434782,
+      "total_sightings": 3,
+      "years_with_sightings": 3
+    },
+    "8628d5c5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5c67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5c6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5c77ffffff": {
+      "mean_sightings_per_year": 0.2826086956521739,
+      "total_sightings": 13,
+      "years_with_sightings": 6
+    },
+    "8628d5c8fffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d5cafffffff": {
+      "mean_sightings_per_year": 0.3695652173913043,
+      "total_sightings": 17,
+      "years_with_sightings": 7
+    },
+    "8628d5cc7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d5ccfffffff": {
+      "mean_sightings_per_year": 0.08695652173913043,
+      "total_sightings": 4,
+      "years_with_sightings": 3
+    },
+    "8628d5cd7ffffff": {
+      "mean_sightings_per_year": 0.17391304347826086,
+      "total_sightings": 8,
+      "years_with_sightings": 6
+    },
+    "8628d5cdfffffff": {
+      "mean_sightings_per_year": 0.21739130434782608,
+      "total_sightings": 10,
+      "years_with_sightings": 5
+    },
+    "8628d5ce7ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628d5cefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5cf7ffffff": {
+      "mean_sightings_per_year": 0.17391304347826086,
+      "total_sightings": 8,
+      "years_with_sightings": 4
+    },
+    "8628d5d47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5d4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5d5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5d67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d5d6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8007ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8027ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d802fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8037ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8047ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d804fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8057ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d805fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8067ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d806fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8077ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8107ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d810fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8117ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d811fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8127ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d812fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8137ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8147ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d814fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8157ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d815fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8167ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d816fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8177ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8187ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d818fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8197ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d819fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d81a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d81afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d81b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8227ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8237ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8307ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d830fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8317ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d831fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8327ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d832fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8337ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8347ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d834fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8357ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d835fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8367ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d836fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8377ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8387ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d83a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d83afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8407ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d840fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8427ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d842fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8457ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8467ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8477ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d850fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8517ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d852fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8537ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8547ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d854fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8557ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d855fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8567ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d856fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8577ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8807ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d880fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8817ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d881fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8827ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d882fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8837ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8847ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d884fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8857ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d885fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8867ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d886fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8877ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8887ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d888fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8897ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d889fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d88f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d891fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8987ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d898fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8997ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d899fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d89a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d89afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d89b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8a9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8aa7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8aafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ab7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ac7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8acfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ad7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8adfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ae7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8aefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8af7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8b17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8b1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8b37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8b87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8b8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8b97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8b9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ba7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8bafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8bb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8c9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ca7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8cafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8cb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ccfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8cd7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8cdfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8ce7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8cefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8cf7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8d9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8da7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d8dafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d9c87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d9ca7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d9cb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d9d97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628d9d9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc257ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc25fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc267ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc277ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc2efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc347ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc35fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc36fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc407ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc40fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc417ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc41fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc427ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc42fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc437ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc457ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc477ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc487ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc48fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc497ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc49fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc4f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc517ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc51fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc537ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc587ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc58fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc597ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628dc59fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc5a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc5afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc5b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc60fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc617ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc61fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc657ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc65fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc687ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc68fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc697ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc69fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6c7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc6f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc787ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc78fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc797ffffff": {
+      "mean_sightings_per_year": 0.021739130434782608,
+      "total_sightings": 1,
+      "years_with_sightings": 1
+    },
+    "8628dc79fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc7b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc807ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc80fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc817ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc81fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc827ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc82fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc837ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc847ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc84fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc857ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc85fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc867ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc86fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc877ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc8a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc8e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc8f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc907ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc90fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc917ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc91fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc927ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc92fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc937ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc947ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc94fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc957ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc95fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc96fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc977ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc987ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc98fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc997ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc99fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc9a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc9afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dc9b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dca27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dca2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dca4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dca67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dca6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dca77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcb77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcc97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dcc9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd007ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd00fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd017ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd01fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd027ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd02fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd057ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd077ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd0e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd10fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd127ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd12fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd137ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd157ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd177ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd397ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd5b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd817ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd81fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd837ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd887ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd88fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd897ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd89fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd8a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd8afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd8b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd8d7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd8dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd8f7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd917ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd91fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd987ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd98fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd997ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd99fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd9a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd9afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dd9b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddc8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddca7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddcafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddcb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddcd7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddce7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddcefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddcf7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddd9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628ddda7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dddafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de017ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de037ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de04fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de067ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de06fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de107ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de117ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de127ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de12fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de137ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de14fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de167ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de16fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de177ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de18fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de1afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de267ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de277ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de307ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de317ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de327ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de32fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de337ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de34fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de35fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de387ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de38fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de39fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de3a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de3afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de807ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de80fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de827ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de82fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de837ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de847ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de84fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de857ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de85fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de867ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de86fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de877ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de8cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de8dfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de8e7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de8efffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de907ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de90fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de917ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de91fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de927ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de92fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de937ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de947ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de94fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de957ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de95fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de967ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de96fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de977ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de987ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de98fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de997ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de99fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de9a7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de9afffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628de9b7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dea9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deaa7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deaafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deab7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dead7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deadfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deae7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deaefffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deaf7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb07ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb0fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb17ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb1fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb27ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb2fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb37ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb47ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb57ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb5fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb67ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb77ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb87ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb8fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb97ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deb9fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628deba7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628debafffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628debb7ffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dec4fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628dec6fffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    },
+    "8628f36cfffffff": {
+      "mean_sightings_per_year": 0.0,
+      "total_sightings": 0,
+      "years_with_sightings": 0
+    }
+  }
+}

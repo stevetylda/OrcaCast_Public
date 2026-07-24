@@ -7,9 +7,9 @@ import {
   type CSSProperties,
   type DragEvent,
 } from "react";
-import { Link } from "react-router-dom";
 import { AppFooter } from "../../shared/components/AppFooter";
-import { AppHeader } from "../../shared/components/AppHeader";
+import { ActivityLegend } from "../../shared/components/ActivityLegend";
+import { ForecastLabHeader } from "../../shared/components/ForecastLabHeader";
 import { trackRender } from "../../shared/debug/perf";
 import {
   ForecastMap,
@@ -27,11 +27,15 @@ import {
   LoadingOverlay,
 } from "../../shared/components/loading";
 import {
-  loadOrcasoundHydrophones,
+  loadOrcasoundHydrophonePayload,
   type OrcasoundHydrophone,
 } from "../../shared/data/orcasoundHydrophones";
 import { loadPoiData } from "../../features/locations/poiData";
-import type { ViewingLocation } from "../../features/locations/types";
+import type { WebcamSite } from "../../features/locations/types";
+import {
+  loadWebcamSites,
+  mergePoiCamerasIntoWebcamSites,
+} from "../../shared/data/webcams";
 import { useDialogFocus } from "../../shared/components/useDialogFocus";
 
 function pickLegendColors(colors: string[], colorNoData = false) {
@@ -129,14 +133,22 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     useState("");
   const [itineraryMapViewActive, setItineraryMapViewActive] = useState(false);
   const [itineraryAddPulse, setItineraryAddPulse] = useState(false);
+  const [forecastWindowOpen, setForecastWindowOpen] = useState(false);
+  const [forecastWindowHeight, setForecastWindowHeight] = useState(102);
+  const forecastWindowRef = useRef<HTMLElement | null>(null);
+  const [summaryStripHeight, setSummaryStripHeight] = useState(98);
+  const summaryStripRef = useRef<HTMLDivElement | null>(null);
   const [thisWeekLoading, setThisWeekLoading] = useState(true);
   const [hydrophoneLocations, setHydrophoneLocations] = useState<
     OrcasoundHydrophone[]
   >([]);
+  const [hydrophoneListenUrl, setHydrophoneListenUrl] = useState(
+    "https://live.orcasound.net/",
+  );
   const [selectedHydrophoneId, setSelectedHydrophoneId] = useState<
     string | null
   >(null);
-  const [cameraLocations, setCameraLocations] = useState<ViewingLocation[]>([]);
+  const [cameraLocations, setCameraLocations] = useState<WebcamSite[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
   const [camerasVisible, setCamerasVisible] = useState(false);
   const [hydrophonesVisible, setHydrophonesVisible] = useState(false);
@@ -161,8 +173,6 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     setForecastIndex,
     forecastPlaybackPlaying,
     setForecastPlaybackPlaying,
-    forecastPlaybackDirection,
-    setForecastPlaybackDirection,
     periods,
     hotspotsEnabled,
     setHotspotsEnabled,
@@ -177,8 +187,11 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     forecastPath,
     latestForecastPath,
     smoothedForecastPath,
+    smoothedForecastTilePath,
+    latestSmoothedForecastTilePath,
     latestSmoothedForecastPath,
     expectedSummary,
+    forecastPattern,
     currentWeek,
     currentWeekYear,
     showNoForecastNotice,
@@ -205,6 +218,30 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     [currentWeek, currentWeekYear],
   );
   const trendPresentation = TREND_PRESENTATION[expectedSummary.trend];
+  const orcaOutlookLabel = useMemo(() => {
+    const current = expectedSummary.current;
+    const baseline = expectedSummary.vs12WeekAvg;
+    if (!Number.isFinite(current ?? NaN)) {
+      const topPlacePotential = suggestedPlaces[0]?.viewingPotential;
+      if (topPlacePotential === "very-high") return "Strong";
+      if (topPlacePotential === "high") return "Likely";
+      if (topPlacePotential === "medium") return "Possible";
+      if (topPlacePotential === "low") return "Lower";
+      if (topPlacePotential === "very-low") return "Very low";
+      return "Awaiting data";
+    }
+    if (!Number.isFinite(baseline ?? NaN) || (baseline ?? 0) <= 0)
+      return trendPresentation.label;
+    const ratio = (current as number) / (baseline as number);
+    if (ratio >= 1.25) return "Strong";
+    if (ratio >= 0.8) return "Likely";
+    if (ratio >= 0.55) return "Possible";
+    return "Lower";
+  }, [expectedSummary, suggestedPlaces, trendPresentation.label]);
+  const orcaOutlookDisplayLabel = useMemo(
+    () => orcaOutlookLabel.replace(/\b\w/g, (letter) => letter.toUpperCase()),
+    [orcaOutlookLabel],
+  );
   const paletteEntries = useMemo(() => Object.values(PALETTES), []);
   const legendColors = useMemo(
     () => pickLegendColors(PALETTES[selectedPaletteId].colors, true),
@@ -217,9 +254,11 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
         .filter((place): place is NonNullable<typeof place> => Boolean(place)),
     [itineraryPlaceIds, suggestedPlaces],
   );
-  const mapSuggestedPlaces = itineraryMapViewActive
-    ? itineraryPlaces
-    : suggestedPlaces;
+  const mapSuggestedPlaces = forecastPlaybackPlaying
+    ? []
+    : itineraryMapViewActive
+      ? itineraryPlaces
+      : suggestedPlaces;
 
   useEffect(() => {
     if (!itineraryExportOpen) return;
@@ -289,26 +328,10 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
 
   useEffect(() => {
     let cancelled = false;
-    void loadPoiData()
-      .then((items) => {
+    void Promise.all([loadWebcamSites(), loadPoiData()])
+      .then(([webcamSites, items]) => {
         if (cancelled) return;
-        setCameraLocations(
-          items
-            .filter(
-              (item) =>
-                item.hasLiveFeed &&
-                typeof item.liveCameraUrl === "string" &&
-                item.liveCameraUrl.length > 0,
-            )
-            .map((item, index) => ({
-              id: `camera-${index}-${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-              name: item.name,
-              region: item.region ?? "Viewing location",
-              latitude: item.latitude,
-              longitude: item.longitude,
-              liveCameraUrl: item.liveCameraUrl,
-            })),
-        );
+        setCameraLocations(mergePoiCamerasIntoWebcamSites(webcamSites, items));
       })
       .catch((error) =>
         console.warn("[This Week] failed to load live camera locations", error),
@@ -320,9 +343,12 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
 
   useEffect(() => {
     let cancelled = false;
-    void loadOrcasoundHydrophones()
-      .then((items) => {
-        if (!cancelled) setHydrophoneLocations(items);
+    void loadOrcasoundHydrophonePayload()
+      .then((payload) => {
+        if (!cancelled) {
+          setHydrophoneLocations(payload.items);
+          setHydrophoneListenUrl(payload.listenUrl);
+        }
       })
       .catch((error) =>
         console.warn("[This Week] failed to load Orcasound hydrophones", error),
@@ -331,6 +357,52 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
       cancelled = true;
     };
   }, []);
+
+  const selectedCamera = useMemo(
+    () =>
+      cameraLocations.find((camera) => camera.id === selectedCameraId) ?? null,
+    [cameraLocations, selectedCameraId],
+  );
+  const selectedHydrophone = useMemo(
+    () =>
+      hydrophoneLocations.find(
+        (hydrophone) => hydrophone.id === selectedHydrophoneId,
+      ) ?? null,
+    [hydrophoneLocations, selectedHydrophoneId],
+  );
+
+  useEffect(() => {
+    if (!forecastWindowOpen || !forecastWindowRef.current) return;
+    const forecastWindow = forecastWindowRef.current;
+    const updateHeight = () =>
+      setForecastWindowHeight(
+        Math.ceil(forecastWindow.getBoundingClientRect().height),
+      );
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(forecastWindow);
+    return () => observer.disconnect();
+  }, [forecastWindowOpen]);
+
+  useEffect(() => {
+    if (!summaryStripRef.current) return;
+    const summaryStrip = summaryStripRef.current;
+    const updateHeight = () =>
+      setSummaryStripHeight(
+        Math.ceil(summaryStrip.getBoundingClientRect().height),
+      );
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(summaryStrip);
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleForecastWindow = () => {
+    setForecastWindowOpen((open) => {
+      if (open) setForecastPlaybackPlaying(false);
+      return !open;
+    });
+  };
 
   const addPlaceToItinerary = (place: (typeof suggestedPlaces)[number]) => {
     if (itineraryPlaceIds.includes(place.id)) return;
@@ -428,29 +500,11 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     () =>
       ({
         "--this-week-panel-offset": `${Math.max(0, sidebarOffsetPx)}px`,
+        "--this-week-forecast-window-height": `${forecastWindowHeight}px`,
+        "--this-week-summary-strip-height": `${summaryStripHeight}px`,
       }) as CSSProperties,
-    [sidebarOffsetPx],
+    [forecastWindowHeight, sidebarOffsetPx, summaryStripHeight],
   );
-
-  const commonHeaderProps = {
-    title: "OrcaCast",
-    subtitle: "Forecast Lab",
-    variant: "home" as const,
-    onOpenMenu: () => setMenuOpen(true),
-    rightSlot: (
-      <nav className="homeNav" aria-label="This week navigation">
-        <Link to="/watch" aria-label="This week" aria-current="page">
-          This week
-        </Link>
-        <Link to="/planner" aria-label="Plan a trip">
-          Plan a trip
-        </Link>
-        <Link to="/explore" aria-label="Explore">
-          Explore
-        </Link>
-      </nav>
-    ),
-  };
 
   const commonMapProps = {
     darkMode,
@@ -474,8 +528,24 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     suggestedPlaces: mapSuggestedPlaces,
     selectedPlaceId,
     onPlaceSelect: (place) => setSelectedPlaceId(place.id),
+    onCameraSelect: (camera) => {
+      setSelectedPlaceId(null);
+      setSelectedHydrophoneId(null);
+      setSelectedCameraId(camera.id);
+      setRecommendedPanelOpen(true);
+    },
+    onHydrophoneSelect: (hydrophone) => {
+      setSelectedPlaceId(null);
+      setSelectedCameraId(null);
+      setSelectedHydrophoneId(hydrophone.id);
+      setRecommendedPanelOpen(true);
+    },
     pulseSelectedPlaceMarker: selectedPlaceId !== null,
-    onLocationSelectionClear: () => setSelectedPlaceId(null),
+    onLocationSelectionClear: () => {
+      setSelectedPlaceId(null);
+      setSelectedCameraId(null);
+      setSelectedHydrophoneId(null);
+    },
     sidebarOffsetPx,
     mapModeLabel: "Loading this week’s forecast…",
     itineraryPlaceIds,
@@ -510,6 +580,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     | "suggestedPlaces"
     | "selectedPlaceId"
     | "onPlaceSelect"
+    | "onCameraSelect"
+    | "onHydrophoneSelect"
     | "pulseSelectedPlaceMarker"
     | "onLocationSelectionClear"
     | "sidebarOffsetPx"
@@ -545,7 +617,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   if (pageLoadError) {
     return (
       <div className="mapPageRoot mapPageRoot--thisWeek">
-        <AppHeader {...commonHeaderProps} />
+        <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
         <main id="main-content" className="app__main" tabIndex={-1}>
           <WatchPageFailureState
             title="Data failed to load"
@@ -562,7 +634,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
 
   return (
     <div className="mapPageRoot mapPageRoot--thisWeek">
-      <AppHeader {...commonHeaderProps} />
+      <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
 
       <main id="main-content" className="app__main" tabIndex={-1}>
         <div className="thisWeekMobileHeading" role="heading" aria-level={1}>
@@ -576,7 +648,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             recommendedPanelOpen
               ? " isRecommendedOpen"
               : " isRecommendedCollapsed"
-          }${settingsOpen ? " isSettingsOpen" : ""}`}
+          }${settingsOpen ? " isSettingsOpen" : ""}${forecastWindowOpen ? " isForecastWindowOpen" : ""}`}
           style={pageStyle}
         >
           <div className="plannerResultsPage__main thisWeekResultsPage__main">
@@ -592,6 +664,9 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                   fallbackForecastPath: latestForecastPath,
                   smoothedForecastPath,
                   fallbackSmoothedForecastPath: latestSmoothedForecastPath,
+                  smoothedForecastTilePath,
+                  fallbackSmoothedForecastTilePath:
+                    latestSmoothedForecastTilePath,
                   forecastOverlayLoadKey: forecastLoadKey,
                   onForecastOverlayReady: setRenderedForecastLoadKey,
                 },
@@ -599,105 +674,59 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
               )}
             </div>
 
-            <aside
-              className={`plannerResultsPage__legendCard${paletteOpen ? " isPaletteOpen" : ""}`}
-              aria-label="Typical orca activity legend, low to high"
+            <div
+              ref={summaryStripRef}
+              className="thisWeekResultsPage__summaryStrip"
+              aria-label="This week forecast summary"
             >
-              <button
-                type="button"
-                className="plannerResultsPage__legendPaletteTrigger"
-                aria-label="Typical activity color scale"
-                aria-haspopup="listbox"
-                aria-expanded={paletteOpen}
-                onClick={() => setPaletteOpen((open) => !open)}
-              />
-              <strong className="plannerResultsPage__legendTitle">
-                Activity likelihood
-              </strong>
-              <div className="plannerResultsPage__legendScale">
-                <span>Lower</span>
+              <section
+                className="thisWeekResultsPage__summaryCard"
+                aria-labelledby="thisWeekSummaryTitle"
+              >
+                <button
+                  type="button"
+                  className="thisWeekResultsPage__summaryToggle"
+                  onClick={toggleForecastWindow}
+                  aria-expanded={forecastWindowOpen}
+                  aria-controls="this-week-forecast-window"
+                  aria-label={`${forecastWindowOpen ? "Close" : "Open"} forecast window and week selector for ${weekRangeLabel}`}
+                />
                 <div
-                  className="plannerResultsPage__legendRamp"
+                  className="thisWeekResultsPage__summaryIcon"
                   aria-hidden="true"
                 >
-                  {legendColors.map((color, index) => (
-                    <span
-                      key={`${color}-${index}`}
-                      style={{ background: color }}
-                    />
-                  ))}
+                  <span className="material-symbols-rounded">waves</span>
                 </div>
-                <span>Higher</span>
-              </div>
-              {paletteOpen ? (
-                <div
-                  className="plannerResultsPage__legendPaletteList"
-                  role="listbox"
-                  aria-label="Color scale palettes"
-                >
-                  {paletteEntries.map((palette) => {
-                    const selected = palette.id === selectedPaletteId;
-                    return (
-                      <button
-                        key={palette.id}
-                        type="button"
-                        role="option"
-                        aria-selected={selected}
-                        className={`plannerResultsPage__legendPaletteRow${selected ? " isSelected" : ""}`}
-                        onClick={() => {
-                          setSelectedPaletteId(palette.id);
-                          setPaletteOpen(false);
-                        }}
-                      >
-                        <span
-                          className="plannerResultsPage__legendPaletteSwatches"
-                          aria-hidden="true"
-                        >
-                          {palette.colors.slice(0, 6).map((color, index) => (
-                            <span
-                              key={`${palette.id}-${index}`}
-                              style={{ backgroundColor: color }}
-                            />
-                          ))}
-                        </span>
-                        <span>{palette.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </aside>
-
-            <section
-              className="thisWeekResultsPage__summaryCard"
-              aria-labelledby="thisWeekSummaryTitle"
-            >
-              <div
-                className="thisWeekResultsPage__summaryIcon"
-                aria-hidden="true"
-              >
-                <span className="material-symbols-rounded">waves</span>
-              </div>
-              <div className="thisWeekResultsPage__summaryBody">
-                <p className="thisWeekResultsPage__eyebrow">
-                  This week’s outlook
-                </p>
-                <div className="thisWeekResultsPage__summaryLine">
-                  <h1 id="thisWeekSummaryTitle">{weekRangeLabel}</h1>
-                  <div className="thisWeekResultsPage__summaryMeta">
-                    <span>
-                      <span
-                        className="material-symbols-rounded"
-                        aria-hidden="true"
-                      >
-                        {trendPresentation.icon}
-                      </span>
-                      {trendPresentation.label}
-                    </span>
+                <div className="thisWeekResultsPage__summaryBody">
+                  <p className="thisWeekResultsPage__eyebrow">This week</p>
+                  <div className="thisWeekResultsPage__summaryLine">
+                    <h1 id="thisWeekSummaryTitle">{weekRangeLabel}</h1>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
+
+              <section className="thisWeekResultsPage__outlookSummary">
+                <img src="/images/icons/whale-tail.png" alt="" />
+                <div>
+                  <p className="thisWeekResultsPage__eyebrow">Orca outlook</p>
+                  <strong className="thisWeekResultsPage__outlookReading">
+                    <span>{orcaOutlookDisplayLabel}</span>
+                    <b aria-hidden="true">|</b>
+                    <span>{forecastPattern}</span>
+                  </strong>
+                </div>
+              </section>
+            </div>
+
+            <ActivityLegend
+              className="thisWeekResultsPage__floatingLegend"
+              colors={legendColors}
+              open={paletteOpen}
+              onOpenChange={setPaletteOpen}
+              onPaletteSelect={setSelectedPaletteId}
+              palettes={paletteEntries}
+              selectedPaletteId={selectedPaletteId}
+            />
 
             {itineraryPlaceIds.length > 0 ? (
               <aside
@@ -894,16 +923,28 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             ) : null}
 
             <SuggestedPlacesPanel
-              places={suggestedPlaces}
-              selectedPlaceId={selectedPlaceId}
+              places={forecastPlaybackPlaying ? [] : suggestedPlaces}
+              selectedPlaceId={forecastPlaybackPlaying ? null : selectedPlaceId}
+              isPlaybackActive={forecastPlaybackPlaying}
+              selectedWebcam={selectedCamera}
+              selectedHydrophone={selectedHydrophone}
+              hydrophoneListenUrl={hydrophoneListenUrl}
               isLoading={suggestedPlacesLoading}
               error={suggestedPlacesError}
               mapRef={primaryMapRef}
               open={recommendedPanelOpen}
               onOpen={() => setRecommendedPanelOpen(true)}
               onClose={() => setRecommendedPanelOpen(false)}
-              onSelectPlace={(place) => setSelectedPlaceId(place.id)}
+              onSelectPlace={(place) => {
+                setSelectedCameraId(null);
+                setSelectedHydrophoneId(null);
+                setSelectedPlaceId(place.id);
+              }}
               onClearSelection={() => setSelectedPlaceId(null)}
+              onClearMediaSelection={() => {
+                setSelectedCameraId(null);
+                setSelectedHydrophoneId(null);
+              }}
               isItineraryMapView={itineraryMapViewActive}
               onShowTopPlaces={() => {
                 setItineraryMapViewActive(false);
@@ -929,35 +970,27 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
               onLayoutChange={setSidebarOffsetPx}
             />
 
-            <section
-              className="thisWeekResultsPage__timelineCard"
-              aria-label="Weekly forecast timeline"
-            >
-              <div className="thisWeekResultsPage__timelineHeading">
-                <div
-                  className="thisWeekResultsPage__timelineIcon"
-                  aria-hidden="true"
-                >
-                  <span className="material-symbols-rounded">date_range</span>
-                </div>
-                <div>
+            {forecastWindowOpen ? (
+              <section
+                ref={forecastWindowRef}
+                id="this-week-forecast-window"
+                className="thisWeekResultsPage__timelineCard"
+                aria-label="Weekly forecast timeline"
+              >
+                <div className="thisWeekResultsPage__timelineHeading">
                   <p className="thisWeekResultsPage__eyebrow">
                     Forecast window
                   </p>
-                  <h2>Browse the weekly outlook</h2>
                 </div>
-              </div>
-              <WeekTimelineBar
-                periods={periods}
-                selectedIndex={Math.max(0, forecastIndex)}
-                onChangeIndex={setForecastIndex}
-                isPlaying={forecastPlaybackPlaying}
-                onPlayingChange={setForecastPlaybackPlaying}
-                playDir={forecastPlaybackDirection}
-                onPlayDirChange={setForecastPlaybackDirection}
-                rightInsetPx={sidebarOffsetPx}
-              />
-            </section>
+                <WeekTimelineBar
+                  periods={periods}
+                  selectedIndex={Math.max(0, forecastIndex)}
+                  onChangeIndex={setForecastIndex}
+                  isPlaying={forecastPlaybackPlaying}
+                  onPlayingChange={setForecastPlaybackPlaying}
+                />
+              </section>
+            ) : null}
 
             {showNoForecastNotice || usingFallbackForecast ? (
               <div
@@ -1003,22 +1036,40 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             onShareSnapshot={shareSnapshot}
             onDownloadSnapshot={downloadSnapshotAction}
             shareBusy={shareBusy}
-            places={suggestedPlaces}
-            selectedPlaceId={selectedPlaceId}
-            onSelectPlace={(place) => setSelectedPlaceId(place.id)}
+            webcams={cameraLocations}
+            selectedCameraId={selectedCameraId}
+            onSelectCamera={(camera) => {
+              setSelectedPlaceId(null);
+              setSelectedHydrophoneId(null);
+              setCamerasVisible(true);
+              setSelectedCameraId(camera.id);
+              setRecommendedPanelOpen(true);
+              primaryMapRef.current?.fitLocations(
+                [[camera.longitude, camera.latitude]],
+                {
+                  padding: { top: 110, right: 480, bottom: 160, left: 70 },
+                  maxZoom: 11,
+                },
+              );
+            }}
             hydrophones={hydrophoneLocations}
+            selectedHydrophoneId={selectedHydrophoneId}
             onToggleLiveCameras={(visible) => {
               setCamerasVisible(visible);
               if (!visible) setSelectedCameraId(null);
             }}
+            camerasVisible={camerasVisible}
             onToggleHydrophones={(visible) => {
               setHydrophonesVisible(visible);
               if (!visible) setSelectedHydrophoneId(null);
             }}
+            hydrophonesVisible={hydrophonesVisible}
             onSelectHydrophone={(hydrophone) => {
               setSelectedPlaceId(null);
+              setSelectedCameraId(null);
               setHydrophonesVisible(true);
               setSelectedHydrophoneId(hydrophone.id);
+              setRecommendedPanelOpen(true);
               primaryMapRef.current?.fitLocations(
                 [[hydrophone.longitude, hydrophone.latitude]],
                 {

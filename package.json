@@ -22,7 +22,8 @@
     "data:validate": "npm run validate:data",
     "validate:data": "node scripts/validate-data.mjs",
     "validate:assets": "node scripts/validate-assets.mjs",
-    "validate:build-secrets": "node scripts/check-build-secrets.mjs"
+    "validate:build-secrets": "node scripts/check-build-secrets.mjs",
+    "tiles:generate:this-week": "python3 scripts/generate_raster_tiles.py --clean"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.33.1-dev57.0",

@@ -1,0 +1,164 @@
+.mapPageRoot .plannerResultsPage__legendCard.activityLegend {
+  position: absolute;
+  display: grid;
+  box-sizing: border-box;
+  width: 268px !important;
+  gap: 10px;
+  padding: 14px 24px !important;
+  overflow: visible;
+  border: 3px solid #061d3c !important;
+  border-radius: 24px;
+  background: #fff8e9 !important;
+  color: #061d3c;
+  box-shadow: 7px 8px 0 #061d3c !important;
+  user-select: none;
+}
+
+.activityLegend__trigger {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.activityLegend__trigger:focus-visible {
+  outline: 3px solid rgba(71, 209, 202, 0.72);
+  outline-offset: 4px;
+}
+
+.activityLegend__title {
+  color: #061d3c;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.activityLegend__summary {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.activityLegend__summary > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.activityLegend__summary .activityLegend__title {
+  text-align: left;
+}
+
+.activityLegend__icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 2px solid #061d3c;
+  border-radius: 50%;
+  background: #d9eff3;
+  font-size: 25px;
+}
+
+.activityLegend__iconImage {
+  box-sizing: border-box;
+  border: 0;
+  object-fit: cover;
+}
+
+.activityLegend__value {
+  color: #061d3c;
+  font-size: 1.2rem;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.activityLegend__scale {
+  display: grid;
+  grid-template-columns: max-content minmax(112px, 1fr) max-content;
+  align-items: center;
+  gap: 8px;
+  color: #061d3c;
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.activityLegend__scale > span {
+  text-align: center;
+}
+
+.activityLegend__ramp {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: 15px;
+  min-height: 15px;
+  overflow: hidden;
+  border: 2px solid #061d3c;
+  border-radius: 999px;
+}
+
+.activityLegend__paletteList {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 12;
+  display: grid;
+  width: min(250px, calc(100vw - 28px));
+  gap: 6px;
+  padding: 9px;
+  border: 3px solid #061d3c;
+  border-radius: 16px;
+  background: #fff8e9;
+  box-shadow: 6px 7px 0 #061d3c;
+}
+
+.activityLegend__paletteRow {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-height: 34px;
+  padding: 5px 7px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #061d3c;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+}
+
+.activityLegend__paletteRow:hover,
+.activityLegend__paletteRow:focus-visible,
+.activityLegend__paletteRow.isSelected {
+  border-color: #061d3c;
+  background: #fffdf6;
+  outline: none;
+}
+
+.activityLegend__paletteRow.isSelected {
+  background: #ffda4c;
+}
+
+.activityLegend__paletteSwatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  height: 18px;
+  overflow: hidden;
+  border: 2px solid #061d3c;
+  border-radius: 999px;
+}

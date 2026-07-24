@@ -56,6 +56,17 @@ export function getSmoothedForecastPath(
   );
 }
 
+export function getSmoothedForecastTilePath(
+  forecastDirectory: string,
+  periodStart = "latest",
+): string {
+  return withForecastCacheBust(
+    withBase(
+      `data/${forecastDirectory}/smoothed/tiles/${periodStart}/tilejson.json`,
+    ),
+  );
+}
+
 export function getActualsPathForPeriod(
   resolution: H3Resolution,
   periodFileId: string,

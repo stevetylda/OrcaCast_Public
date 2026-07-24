@@ -2,6 +2,7 @@
  * Planner foundations used by This Week.
  * Kept route-scoped so This Week does not download the full planner stylesheet.
  */
+.mapPageRoot--thisWeek {
 .iconBtn { width: var(--control-h); height: var(--control-h); color: var(--panel-text); cursor: pointer; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(25, 240, 215, 0.35); border-radius: 12px; place-items: center; padding: 0px; transition: transform 0.12s, background 0.12s, box-shadow 0.12s; display: grid; }
 .iconBtn .material-symbols-rounded { display: block; }
 .iconBtn--menu { width: var(--control-h); height: var(--control-h); }
@@ -18,7 +19,7 @@
 @media (max-width: 500px){.header__left { flex: 0 0 auto; }}
 @media (max-width: 500px){.header__right { gap: 6px; }}
 @media (max-width: 500px){.header__right > .iconBtn, .header__right .h3menu { display: none; }}
-:root { --callout-bg: #ffc10729; --callout-border: #ffc10773; --callout-fg: #141414eb; --callout-icon: #8c5f00f2; }
+& { --callout-bg: #ffc10729; --callout-border: #ffc10773; --callout-fg: #141414eb; --callout-icon: #8c5f00f2; }
 .plannerResultsPage { background: linear-gradient(rgb(238, 245, 251) 0%, rgb(231, 240, 248) 100%); min-height: 100vh; }
 .plannerResultsPage__main { min-height: calc(-74px + 100vh); padding: 18px 22px 22px; position: relative; }
 .plannerResultsPage__mapLayer { border: 1px solid rgba(177, 208, 233, 0.42); border-radius: 30px; position: absolute; inset: 18px 22px 22px; overflow: hidden; box-shadow: rgba(44, 80, 116, 0.16) 0px 28px 80px; }
@@ -91,21 +92,21 @@
 .plannerResultsPage__legendRamp { direction: ltr; }
 @media (max-width: 1380px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard, .plannerResultsPage.hasPlan.isChartCollapsed .plannerResultsPage__legendCard { top: 22px; }}
 @media (max-width: 1100px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard, .plannerResultsPage.hasPlan.isChartCollapsed .plannerResultsPage__legendCard { transform-origin: 50% center; position: relative; inset: auto; }}
-.mapPageRoot .header--home { height: 88px; padding: 0px clamp(20px, 3vw, 60px); color: rgb(6, 29, 60) !important; box-shadow: none !important; background: rgb(255, 253, 246) !important; border-bottom: 3px solid rgb(6, 29, 60) !important; }
-.mapPageRoot .header--home .header__left { display: contents; }
-.mapPageRoot .header--home .iconBtn { color: rgb(6, 29, 60); width: 60px; height: 60px; box-shadow: none; background: rgb(255, 218, 76); border: 3px solid rgb(6, 29, 60); border-radius: 50%; }
-.mapPageRoot .header--home .header__right > .iconBtn { background: rgb(244, 138, 179); }
-.mapPageRoot .header--home .brandBtn { position: absolute; left: clamp(92px, 8.5vw, 150px); overflow: visible; transform: none; }
-.mapPageRoot .header--home .brand__title { letter-spacing: -0.06em; text-overflow: clip; max-width: none; text-shadow: none; font-size: clamp(1.55rem, 2.25vw, 2.15rem); font-weight: 900; overflow: visible; color: rgb(6, 29, 60) !important; }
-.mapPageRoot .header--home .brand__subtitle { letter-spacing: 0.11em; text-transform: uppercase; background: rgb(71, 209, 202); border: 2px solid rgb(6, 29, 60); border-radius: 999px; margin-left: 9px; padding: 6px 10px; font-size: 0.67rem; font-weight: 900; display: inline-block; transform: rotate(3deg); color: rgb(6, 29, 60) !important; }
-.mapPageRoot .header--home .homeNav { align-items: center; gap: clamp(14px, 2.4vw, 42px); margin-right: 20px; display: flex; }
-.mapPageRoot .header--home .homeNav a { color: rgb(6, 29, 60); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.84rem; font-weight: 900; text-decoration: none; }
-@media (max-width: 820px){.mapPageRoot .header--home { height: 72px; padding: 0px 14px; }}
-@media (max-width: 820px){.mapPageRoot .header--home .iconBtn { border-width: 2px; width: 48px; height: 48px; }}
-@media (max-width: 820px){.mapPageRoot .header--home .brandBtn { left: 76px; }}
-@media (max-width: 820px){.mapPageRoot .header--home .brand__subtitle, .mapPageRoot .header--home .homeNav { display: none; }}
-@media (max-width: 520px){.mapPageRoot .header--home .brand__title { max-width: none; font-size: 1.3rem; }}
-@media (max-width: 520px){.mapPageRoot .header--home .header__right > .iconBtn { display: grid; }}
+& .header--home { height: 88px; padding: 0px clamp(20px, 3vw, 60px); color: rgb(6, 29, 60) !important; box-shadow: none !important; background: rgb(255, 253, 246) !important; border-bottom: 3px solid rgb(6, 29, 60) !important; }
+& .header--home .header__left { display: contents; }
+& .header--home .iconBtn { color: rgb(6, 29, 60); width: 60px; height: 60px; box-shadow: none; background: rgb(255, 218, 76); border: 3px solid rgb(6, 29, 60); border-radius: 50%; }
+& .header--home .header__right > .iconBtn { background: rgb(244, 138, 179); }
+& .header--home .brandBtn { position: absolute; left: clamp(92px, 8.5vw, 150px); overflow: visible; transform: none; }
+& .header--home .brand__title { letter-spacing: -0.06em; text-overflow: clip; max-width: none; text-shadow: none; font-size: clamp(1.55rem, 2.25vw, 2.15rem); font-weight: 900; overflow: visible; color: rgb(6, 29, 60) !important; }
+& .header--home .brand__subtitle { letter-spacing: 0.11em; text-transform: uppercase; background: rgb(71, 209, 202); border: 2px solid rgb(6, 29, 60); border-radius: 999px; margin-left: 9px; padding: 6px 10px; font-size: 0.67rem; font-weight: 900; display: inline-block; transform: rotate(3deg); color: rgb(6, 29, 60) !important; }
+& .header--home .homeNav { align-items: center; gap: clamp(14px, 2.4vw, 42px); margin-right: 20px; display: flex; }
+& .header--home .homeNav a { color: rgb(6, 29, 60); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.84rem; font-weight: 900; text-decoration: none; }
+@media (max-width: 820px){& .header--home { height: 72px; padding: 0px 14px; }}
+@media (max-width: 820px){& .header--home .iconBtn { border-width: 2px; width: 48px; height: 48px; }}
+@media (max-width: 820px){& .header--home .brandBtn { left: 76px; }}
+@media (max-width: 820px){& .header--home .brand__subtitle, & .header--home .homeNav { display: none; }}
+@media (max-width: 520px){& .header--home .brand__title { max-width: none; font-size: 1.3rem; }}
+@media (max-width: 520px){& .header--home .header__right > .iconBtn { display: grid; }}
 @media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotsList > div, .plannerResultsPage.hasPlan .plannerResultsPage__spotCard, .plannerResultsPage.hasPlan .plannerResultsPage__spotCardInner { height: 112px; min-height: 112px !important; }}
 @media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotCardFace--front { grid-template-columns: 106px minmax(0px, 1fr); gap: 10px; min-height: 112px; padding: 6px; }}
 @media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__spotThumbWrap { width: 106px; height: 98px; }}
@@ -116,8 +117,8 @@
 .plannerResultsPage__legendRamp { border: 2px solid rgb(6, 29, 60); border-radius: 999px; height: 16px; min-height: 16px; }
 .plannerResultsPage__legendRamp span { min-height: 12px; }
 @media (min-width: 1181px){.plannerResultsPage.hasPlan .plannerResultsPage__legendCard { top: 28px !important; left: auto !important; right: 524px !important; }}
-.mapPageRoot .header--home { height: 78px; }
-.mapPageRoot .header--home .iconBtn { width: 52px; height: 52px; }
+& .header--home { height: 78px; }
+& .header--home .iconBtn { width: 52px; height: 52px; }
 .plannerResultsPage__legendCard { gap: 10px; display: grid; width: 250px !important; padding: 14px 16px !important; }
 .plannerResultsPage__legendTitle { color: rgb(6, 29, 60); letter-spacing: 0.1em; text-align: center; text-transform: uppercase; font-size: 0.72rem; font-weight: 900; }
 .plannerResultsPage__legendScale { color: rgb(6, 29, 60); letter-spacing: 0.08em; text-transform: uppercase; grid-template-columns: auto minmax(112px, 1fr) auto; align-items: center; gap: 9px; font-size: 0.64rem; font-weight: 900; display: grid; }
@@ -168,3 +169,4 @@
 .plannerResultsPage .plannerMapMarker.is-selected { opacity: 1; width: 29px; height: 34px; transform: scale(1.08); box-shadow: rgba(7, 49, 68, 0.3) 0px 6px 16px, rgba(255, 213, 79, 0.58) 0px 0px 0px 6px; }
 .plannerResultsPage__legendPaletteTrigger:focus-visible { outline-offset: 4px; outline: rgba(71, 209, 202, 0.72) solid 3px; }
 .plannerResultsPage .plannerMapMarker:hover .plannerMapMarker__label, .plannerResultsPage .plannerMapMarker:focus-visible .plannerMapMarker__label { opacity: 1; transform: translate(-50%) scale(1); }
+}

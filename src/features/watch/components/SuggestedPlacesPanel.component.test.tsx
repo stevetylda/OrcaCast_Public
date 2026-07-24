@@ -19,6 +19,29 @@ const place = {
 };
 
 describe("SuggestedPlacesPanel", () => {
+  it("shows only a playback spinner instead of field picks while playing", () => {
+    render(
+      <SuggestedPlacesPanel
+        places={[]}
+        selectedPlaceId={null}
+        isPlaybackActive
+        mapRef={createRef<ForecastMapHandle>()}
+        open
+        onOpen={vi.fn()}
+        onClose={vi.fn()}
+        onSelectPlace={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("status", { name: "Playing weekly forecast" }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("group", { name: "Filter recommended places" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("article")).not.toBeInTheDocument();
+  });
+
   it("opens details and adds a recommended place to the itinerary", async () => {
     const user = userEvent.setup();
     const onSelectPlace = vi.fn();

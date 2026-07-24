@@ -12,11 +12,17 @@ import type {
   DataDrivenPropertyValueSpecification,
   FillLayerSpecification,
   ImageSource,
+  SourceSpecification,
 } from "maplibre-gl";
 import { H3_CELL_ID_KEYS } from "../data/h3";
 import type { HeatScale } from "./colorScale";
 import SurfaceRasterWorker from "./surfaceRasterWorker?worker";
 import { fromArrayBuffer } from "geotiff";
+import {
+  accumulateWeightedRaster,
+  fitRasterDimensionsToBudget,
+  isRasterNoData,
+} from "./weightedRaster";
 
 const DEFAULT_SOURCE_ID = "grid";
 const DEFAULT_FILL_ID = "grid-fill";
@@ -38,10 +44,23 @@ const HOVER_GLOW_ID = "grid-hover-glow";
 const HOVER_CORE_ID = "grid-hover-core";
 const SURFACE_SOURCE_ID = "grid-surface";
 const SURFACE_LAYER_ID = "grid-surface-raster";
+const SURFACE_FRAME_FADE_MS = 360;
+const SURFACE_TILE_SOURCE_IDS = [
+  "grid-surface-tiles-a",
+  "grid-surface-tiles-b",
+] as const;
+const SURFACE_TILE_LAYER_IDS = [
+  "grid-surface-tiles-color-a",
+  "grid-surface-tiles-color-b",
+] as const;
+const SURFACE_TILE_NODATA_VALUE = -1 / 254;
+const DEFAULT_GEOTIFF_NODATA = -9999;
 const GRID_SUBTLE_BORDER = "rgba(8,18,44,0.22)";
 const SURFACE_MAX_SIDE = 1800;
 const SURFACE_MIN_SIDE = 720;
-const SURFACE_MAX_PIXELS = 1_850_000;
+const SURFACE_MAX_PIXELS = 3_200_000;
+const HISTORICAL_SMOOTH_MAX_SIDE_DESKTOP = 1800;
+const HISTORICAL_SMOOTH_MAX_SIDE_MOBILE = 900;
 const SURFACE_VIEWPORT_PADDING_FRACTION = 0.14;
 const SURFACE_CACHE_REUSE_AREA_RATIO = 1.6;
 const SURFACE_BOUNDS_ROUNDING = 100_000;
@@ -99,6 +118,26 @@ type SurfaceRaster = {
     [number, number],
   ];
 };
+
+type SurfaceTileJson = {
+  manifestUrl: string;
+  tiles: string[];
+  minzoom?: number;
+  maxzoom?: number;
+  bounds?: [number, number, number, number];
+  scheme?: "xyz" | "tms";
+  tileSize?: number;
+};
+
+type SurfaceTileState = {
+  activeSlot: 0 | 1 | null;
+  activePath: string | null;
+  generation: number;
+};
+
+const surfaceTileState = new WeakMap<MapLibreMap, SurfaceTileState>();
+const surfaceRenderer = new WeakMap<MapLibreMap, "image" | "tiles">();
+const surfaceTileJsonCache = new Map<string, Promise<SurfaceTileJson>>();
 
 type SurfaceRasterWorkerRequest = {
   id: number;
@@ -297,6 +336,15 @@ let pendingSurfaceRasterRequest: {
 } | null = null;
 const geoTiffSurfaceCache = new Map<string, Promise<SurfaceRaster>>();
 
+export type WeightedGeoTiffSource = { path: string; weight: number };
+
+function historicalSmoothMaxDimension() {
+  if (typeof window === "undefined") return HISTORICAL_SMOOTH_MAX_SIDE_DESKTOP;
+  return window.innerWidth < 600
+    ? HISTORICAL_SMOOTH_MAX_SIDE_MOBILE
+    : HISTORICAL_SMOOTH_MAX_SIDE_DESKTOP;
+}
+
 function webMercatorToLngLat(x: number, y: number): [number, number] {
   const longitude = (x / 20037508.34) * 180;
   const latitudeRadians =
@@ -306,7 +354,7 @@ function webMercatorToLngLat(x: number, y: number): [number, number] {
 
 async function fetchGeoTiff(path: string, fallbackPath?: string) {
   const load = async (url: string) => {
-    const response = await fetch(url, { cache: "force-cache" });
+    const response = await fetch(url, { cache: "no-cache" });
     if (!response.ok) {
       throw new Error(`GeoTIFF request failed (${response.status}) for ${url}`);
     }
@@ -318,6 +366,68 @@ async function fetchGeoTiff(path: string, fallbackPath?: string) {
     if (!fallbackPath || fallbackPath === path) throw error;
     return load(fallbackPath);
   }
+}
+
+async function renderGeoTiffSurfaceRaster(
+  raster: ArrayLike<number>,
+  width: number,
+  height: number,
+  boundingBox: [number, number, number, number],
+  paletteColors: string[],
+  nodataValue?: number | null,
+): Promise<SurfaceRaster> {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable for GeoTIFF rendering");
+  const imageData = context.createImageData(width, height);
+  const colors =
+    paletteColors.length > 0
+      ? paletteColors.map(parseCssColor)
+      : [parseCssColor("#ffffff")];
+  const stops = colors.map((_, index) =>
+    colors.length === 1 ? 0 : index / (colors.length - 1),
+  );
+
+  for (let index = 0; index < width * height; index += 1) {
+    const value = Number(raster[index] ?? 0);
+    if (isRasterNoData(value, nodataValue)) continue;
+    const normalizedValue = clamp(value, 0, 1);
+    // Zero is a valid value in GeoTIFF products. The generic surface color
+    // sampler intentionally makes zero transparent, so bypass that behavior
+    // here and assign the palette's lowest color directly.
+    const [r, g, b, a] =
+      normalizedValue === 0
+        ? colors[0]
+        : sampleColor(normalizedValue, stops, colors, [0, 0, 0, 0]);
+    const pixelIndex = index * 4;
+    imageData.data[pixelIndex] = Math.round(clamp(r, 0, 255));
+    imageData.data[pixelIndex + 1] = Math.round(clamp(g, 0, 255));
+    imageData.data[pixelIndex + 2] = Math.round(clamp(b, 0, 255));
+    imageData.data[pixelIndex + 3] = Math.round(clamp(a, 0, 1) * 255);
+  }
+  context.putImageData(imageData, 0, 0);
+
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob(
+      (value) =>
+        value ? resolve(value) : reject(new Error("GeoTIFF render failed")),
+      "image/png",
+    ),
+  );
+  const [minX, minY, maxX, maxY] = boundingBox;
+  const [west, north] = webMercatorToLngLat(minX, maxY);
+  const [east, south] = webMercatorToLngLat(maxX, minY);
+  return {
+    url: URL.createObjectURL(blob),
+    coordinates: [
+      [west, north],
+      [east, north],
+      [east, south],
+      [west, south],
+    ],
+  };
 }
 
 async function buildGeoTiffSurfaceRaster(
@@ -334,67 +444,126 @@ async function buildGeoTiffSurfaceRaster(
     const image = await tiff.getImage();
     const sourceWidth = image.getWidth();
     const sourceHeight = image.getHeight();
-    const scale = Math.min(1, 1800 / Math.max(sourceWidth, sourceHeight));
-    const width = Math.max(1, Math.round(sourceWidth * scale));
-    const height = Math.max(1, Math.round(sourceHeight * scale));
+    const { width, height } = fitRasterDimensionsToBudget(
+      sourceWidth,
+      sourceHeight,
+      SURFACE_MAX_SIDE,
+      SURFACE_MAX_PIXELS,
+    );
     const raster = (await image.readRasters({
       interleave: true,
       width,
       height,
     })) as unknown as ArrayLike<number>;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d");
-    if (!context)
-      throw new Error("Canvas is unavailable for GeoTIFF rendering");
-    const imageData = context.createImageData(width, height);
-    const colors =
-      paletteColors.length > 0
-        ? paletteColors.map(parseCssColor)
-        : [parseCssColor("#ffffff")];
-    const stops = colors.map((_, index) =>
-      colors.length === 1 ? 0 : index / (colors.length - 1),
+    return renderGeoTiffSurfaceRaster(
+      raster,
+      width,
+      height,
+      image.getBoundingBox() as [number, number, number, number],
+      paletteColors,
+      image.getGDALNoData() ?? DEFAULT_GEOTIFF_NODATA,
     );
+  })();
 
-    for (let index = 0; index < width * height; index += 1) {
-      const value = Number(raster[index] ?? 0);
-      if (!Number.isFinite(value) || value <= 0) continue;
-      const [r, g, b, a] = sampleColor(
-        clamp(value, 0, 1),
-        stops,
-        colors,
-        [0, 0, 0, 0],
+  geoTiffSurfaceCache.set(cacheKey, task);
+  task.catch(() => geoTiffSurfaceCache.delete(cacheKey));
+  return task;
+}
+
+async function buildWeightedGeoTiffSurfaceRaster(
+  sources: WeightedGeoTiffSource[],
+  paletteColors: string[],
+): Promise<SurfaceRaster> {
+  const validSources = sources.filter(
+    (source) =>
+      source.path && Number.isFinite(source.weight) && source.weight > 0,
+  );
+  const weightTotal = validSources.reduce(
+    (total, source) => total + source.weight,
+    0,
+  );
+  if (validSources.length === 0 || weightTotal <= 0) {
+    throw new Error("No weighted GeoTIFF sources were provided");
+  }
+
+  const maxDimension = historicalSmoothMaxDimension();
+  const cacheKey = `weighted:${validSources
+    .map((source) => `${source.path}@${source.weight.toFixed(8)}`)
+    .join("|")}|${maxDimension}|${paletteColors.join(",")}`;
+  const cached = geoTiffSurfaceCache.get(cacheKey);
+  if (cached) return cached;
+
+  const task = (async () => {
+    let width = 0;
+    let height = 0;
+    let boundingBox: [number, number, number, number] | null = null;
+    let combined: Float32Array | null = null;
+    let validMask: Uint8Array | null = null;
+
+    for (const source of validSources) {
+      const tiff = await fromArrayBuffer(await fetchGeoTiff(source.path));
+      const image = await tiff.getImage();
+      if (!combined) {
+        const sourceWidth = image.getWidth();
+        const sourceHeight = image.getHeight();
+        const dimensions = fitRasterDimensionsToBudget(
+          sourceWidth,
+          sourceHeight,
+          maxDimension,
+          SURFACE_MAX_PIXELS,
+        );
+        width = dimensions.width;
+        height = dimensions.height;
+        boundingBox = image.getBoundingBox() as [
+          number,
+          number,
+          number,
+          number,
+        ];
+        combined = new Float32Array(width * height);
+        validMask = new Uint8Array(width * height);
+      } else if (
+        image.getWidth() <= 0 ||
+        image.getHeight() <= 0 ||
+        JSON.stringify(image.getBoundingBox()) !== JSON.stringify(boundingBox)
+      ) {
+        throw new Error("Historical smooth GeoTIFF grids do not align");
+      }
+
+      const raster = (await image.readRasters({
+        interleave: true,
+        width,
+        height,
+      })) as unknown as ArrayLike<number>;
+      const normalizedWeight = source.weight / weightTotal;
+      if (!validMask) {
+        throw new Error("Historical smooth validity mask was not initialized");
+      }
+      accumulateWeightedRaster(
+        combined,
+        raster,
+        normalizedWeight,
+        image.getGDALNoData() ?? DEFAULT_GEOTIFF_NODATA,
+        validMask,
       );
-      const pixelIndex = index * 4;
-      imageData.data[pixelIndex] = Math.round(clamp(r, 0, 255));
-      imageData.data[pixelIndex + 1] = Math.round(clamp(g, 0, 255));
-      imageData.data[pixelIndex + 2] = Math.round(clamp(b, 0, 255));
-      imageData.data[pixelIndex + 3] = Math.round(clamp(a, 0, 1) * 255);
     }
-    context.putImageData(imageData, 0, 0);
 
-    const blob = await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob(
-        (value) =>
-          value ? resolve(value) : reject(new Error("GeoTIFF render failed")),
-        "image/png",
-      ),
+    if (!combined || !validMask || !boundingBox) {
+      throw new Error("Historical smooth GeoTIFF aggregation failed");
+    }
+    const outputNodata = DEFAULT_GEOTIFF_NODATA;
+    for (let index = 0; index < combined.length; index += 1) {
+      if (validMask[index] === 0) combined[index] = outputNodata;
+    }
+    return renderGeoTiffSurfaceRaster(
+      combined,
+      width,
+      height,
+      boundingBox,
+      paletteColors,
+      outputNodata,
     );
-    const [minX, minY, maxX, maxY] = image.getBoundingBox();
-    const [west, north] = webMercatorToLngLat(minX, maxY);
-    const [east, south] = webMercatorToLngLat(maxX, minY);
-    const coordinates: SurfaceRaster["coordinates"] = [
-      [west, north],
-      [east, north],
-      [east, south],
-      [west, south],
-    ];
-    return {
-      url: URL.createObjectURL(blob),
-      coordinates,
-    };
   })();
 
   geoTiffSurfaceCache.set(cacheKey, task);
@@ -792,7 +961,258 @@ function revokeSurfaceRasterUrl(url: string) {
   URL.revokeObjectURL(url);
 }
 
+function resolveTileTemplate(template: string, manifestUrl: string) {
+  const tokens = ["z", "x", "y"] as const;
+  let protectedTemplate = template;
+  tokens.forEach((token) => {
+    protectedTemplate = protectedTemplate.replace(
+      `{${token}}`,
+      `__ORCACAST_${token.toUpperCase()}__`,
+    );
+  });
+  let resolved = new URL(protectedTemplate, manifestUrl).toString();
+  tokens.forEach((token) => {
+    resolved = resolved.replace(
+      `__ORCACAST_${token.toUpperCase()}__`,
+      `{${token}}`,
+    );
+  });
+  return resolved;
+}
+
+async function fetchSurfaceTileJson(path: string, fallbackPath?: string) {
+  const cacheKey = `${path}|${fallbackPath ?? ""}`;
+  const cached = surfaceTileJsonCache.get(cacheKey);
+  if (cached) return cached;
+
+  const task = (async () => {
+    const load = async (url: string) => {
+      const response = await fetch(url, { cache: "no-cache" });
+      if (!response.ok) {
+        throw new Error(
+          `Raster tile manifest request failed (${response.status}) for ${url}`,
+        );
+      }
+      const payload = (await response.json()) as Partial<SurfaceTileJson>;
+      if (!Array.isArray(payload.tiles) || payload.tiles.length === 0) {
+        throw new Error(`Raster tile manifest has no tile templates: ${url}`);
+      }
+      return {
+        ...payload,
+        manifestUrl: response.url || url,
+        tiles: payload.tiles.map((tile) =>
+          resolveTileTemplate(tile, response.url || url),
+        ),
+      } as SurfaceTileJson;
+    };
+
+    try {
+      return await load(path);
+    } catch (error) {
+      if (!fallbackPath || fallbackPath === path) throw error;
+      return load(fallbackPath);
+    }
+  })();
+
+  surfaceTileJsonCache.set(cacheKey, task);
+  task.catch(() => surfaceTileJsonCache.delete(cacheKey));
+  return task;
+}
+
+function removeSurfaceTileSlot(map: MapLibreMap, slot: 0 | 1) {
+  removeLayerIfExists(map, SURFACE_TILE_LAYER_IDS[slot]);
+  removeSourceIfExists(map, SURFACE_TILE_SOURCE_IDS[slot]);
+}
+
+function setSurfaceTileVisibility(map: MapLibreMap, visible: boolean) {
+  const state = surfaceTileState.get(map);
+  SURFACE_TILE_LAYER_IDS.forEach((layerId, slot) => {
+    if (!map.getLayer(layerId)) return;
+    const isActive = state?.activeSlot === slot;
+    map.setLayoutProperty(
+      layerId,
+      "visibility",
+      visible && isActive ? "visible" : "none",
+    );
+  });
+}
+
+function buildSurfaceTileColorExpression(
+  paletteColors: string[],
+): ExpressionSpecification {
+  const colors = paletteColors.length > 0 ? paletteColors : ["#000000"];
+  const expression: unknown[] = [
+    "interpolate",
+    ["linear"],
+    ["elevation"],
+    SURFACE_TILE_NODATA_VALUE,
+    "rgba(0,0,0,0)",
+    -0.0001,
+    "rgba(0,0,0,0)",
+  ];
+  colors.forEach((color, index) => {
+    expression.push(
+      colors.length === 1 ? 0 : index / (colors.length - 1),
+      color,
+    );
+  });
+  return expression as ExpressionSpecification;
+}
+
+function getSurfaceTileBeforeLayerId(map: MapLibreMap) {
+  // Keep the activity field above the basemap geometry while preserving all
+  // labels and map-native point symbols. DOM markers remain above the canvas.
+  return map.getStyle().layers?.find((layer) => layer.type === "symbol")?.id;
+}
+
+function waitForSurfaceTileSource(map: MapLibreMap, sourceId: string) {
+  if (map.isSourceLoaded(sourceId)) return Promise.resolve();
+  return new Promise<void>((resolve, reject) => {
+    let timeoutId: number | null = null;
+    const cleanup = () => {
+      map.off("sourcedata", handleSourceData);
+      map.off("error", handleError);
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+    };
+    const handleSourceData = (event: { sourceId?: string }) => {
+      // The first source-data event means MapLibre has accepted the source and
+      // begun decoding visible tiles. Waiting for `isSourceLoaded` can stall
+      // indefinitely while the camera is moving or overzooming.
+      if (event.sourceId !== sourceId) return;
+      cleanup();
+      resolve();
+    };
+    const handleError = (event: { sourceId?: string; error?: unknown }) => {
+      if (event.sourceId !== sourceId) return;
+      cleanup();
+      reject(
+        event.error instanceof Error
+          ? event.error
+          : new Error(`Raster tile source failed: ${sourceId}`),
+      );
+    };
+    map.on("sourcedata", handleSourceData);
+    map.on("error", handleError);
+    timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error(`Raster tile source timed out: ${sourceId}`));
+    }, 8_000);
+  });
+}
+
+export async function addRasterTileSurfaceOverlay(
+  map: MapLibreMap,
+  path: string,
+  fallbackPath: string | undefined,
+  paletteColors: string[],
+  isCancelled: () => boolean = () => false,
+) {
+  const tileJson = await fetchSurfaceTileJson(path, fallbackPath);
+  if (isCancelled()) return;
+
+  const state = surfaceTileState.get(map) ?? {
+    activeSlot: null,
+    activePath: null,
+    generation: 0,
+  };
+  surfaceTileState.set(map, state);
+  if (state.activeSlot !== null && state.activePath === tileJson.manifestUrl) {
+    const activeLayerId = SURFACE_TILE_LAYER_IDS[state.activeSlot];
+    if (map.getLayer(activeLayerId)) {
+      map.setPaintProperty(
+        activeLayerId,
+        "color-relief-color",
+        buildSurfaceTileColorExpression(paletteColors),
+      );
+      map.setPaintProperty(activeLayerId, "color-relief-opacity", 1);
+      surfaceRenderer.set(map, "tiles");
+      if (map.getLayer(SURFACE_LAYER_ID)) {
+        map.setLayoutProperty(SURFACE_LAYER_ID, "visibility", "none");
+      }
+      setSurfaceTileVisibility(map, true);
+      return;
+    }
+  }
+
+  const nextSlot: 0 | 1 = state.activeSlot === 0 ? 1 : 0;
+  const sourceId = SURFACE_TILE_SOURCE_IDS[nextSlot];
+  const layerId = SURFACE_TILE_LAYER_IDS[nextSlot];
+  const generation = state.generation + 1;
+  state.generation = generation;
+  removeSurfaceTileSlot(map, nextSlot);
+
+  map.addSource(sourceId, {
+    type: "raster-dem",
+    tiles: tileJson.tiles,
+    tileSize: tileJson.tileSize ?? 256,
+    minzoom: tileJson.minzoom ?? 0,
+    maxzoom: tileJson.maxzoom ?? 22,
+    bounds: tileJson.bounds,
+    scheme: tileJson.scheme ?? "xyz",
+    encoding: "custom",
+    redFactor: 1 / 254,
+    // MapLibre uses the smallest factor to pack color-relief stops, so the
+    // unused channels still need progressively smaller non-zero factors.
+    greenFactor: 1 / (254 * 256),
+    blueFactor: 1 / (254 * 256 * 256),
+    baseShift: 1 / 254,
+  } as SourceSpecification);
+  map.addLayer(
+    {
+      id: layerId,
+      type: "color-relief",
+      source: sourceId,
+      paint: {
+        "color-relief-color": buildSurfaceTileColorExpression(paletteColors),
+        "color-relief-opacity": 1,
+        "color-relief-opacity-transition": {
+          duration: SURFACE_FRAME_FADE_MS,
+          delay: 0,
+        },
+      },
+      layout: { visibility: "visible" },
+    },
+    getSurfaceTileBeforeLayerId(map),
+  );
+
+  try {
+    await waitForSurfaceTileSource(map, sourceId);
+  } catch (error) {
+    if (state.generation === generation) {
+      removeSurfaceTileSlot(map, nextSlot);
+    }
+    throw error;
+  }
+  if (state.generation !== generation) return;
+  if (isCancelled()) {
+    removeSurfaceTileSlot(map, nextSlot);
+    return;
+  }
+
+  const previousSlot = state.activeSlot;
+  state.activeSlot = nextSlot;
+  state.activePath = tileJson.manifestUrl;
+  map.getContainer().dataset.orcacastSurfaceRenderer = "tiles";
+  surfaceRenderer.set(map, "tiles");
+  if (map.getLayer(SURFACE_LAYER_ID)) {
+    map.setLayoutProperty(SURFACE_LAYER_ID, "visibility", "none");
+  }
+  if (previousSlot !== null) {
+    const previousLayerId = SURFACE_TILE_LAYER_IDS[previousSlot];
+    if (map.getLayer(previousLayerId)) {
+      map.setPaintProperty(previousLayerId, "color-relief-opacity", 0);
+    }
+    window.setTimeout(() => {
+      const currentState = surfaceTileState.get(map);
+      if (currentState?.activeSlot !== nextSlot) return;
+      removeSurfaceTileSlot(map, previousSlot);
+    }, SURFACE_FRAME_FADE_MS + 40);
+  }
+}
+
 function updateSurfaceSource(map: MapLibreMap, raster: SurfaceRaster) {
+  surfaceRenderer.set(map, "image");
+  setSurfaceTileVisibility(map, false);
   const source = map.getSource(SURFACE_SOURCE_ID) as ImageSource | undefined;
   if (source && typeof source.updateImage === "function") {
     source.updateImage({
@@ -811,7 +1231,11 @@ function updateSurfaceSource(map: MapLibreMap, raster: SurfaceRaster) {
 
   if (map.getLayer(SURFACE_LAYER_ID)) {
     map.setPaintProperty(SURFACE_LAYER_ID, "raster-opacity", 1);
-    map.setPaintProperty(SURFACE_LAYER_ID, "raster-fade-duration", 180);
+    map.setPaintProperty(
+      SURFACE_LAYER_ID,
+      "raster-fade-duration",
+      SURFACE_FRAME_FADE_MS,
+    );
     return;
   }
 
@@ -822,7 +1246,7 @@ function updateSurfaceSource(map: MapLibreMap, raster: SurfaceRaster) {
       source: SURFACE_SOURCE_ID,
       paint: {
         "raster-opacity": 1,
-        "raster-fade-duration": 180,
+        "raster-fade-duration": SURFACE_FRAME_FADE_MS,
         "raster-resampling": "linear",
       },
       layout: {
@@ -1636,6 +2060,21 @@ export async function addGeoTiffSurfaceOverlay(
   setSurfaceVisibility(map, true);
 }
 
+export async function addWeightedGeoTiffSurfaceOverlay(
+  map: MapLibreMap,
+  sources: WeightedGeoTiffSource[],
+  paletteColors: string[],
+  isCancelled: () => boolean = () => false,
+) {
+  const raster = await buildWeightedGeoTiffSurfaceRaster(
+    sources,
+    paletteColors,
+  );
+  if (isCancelled()) return;
+  updateSurfaceSource(map, raster);
+  setSurfaceVisibility(map, true);
+}
+
 export function setGridBaseVisibility(
   map: MapLibreMap,
   visible: boolean,
@@ -1722,13 +2161,15 @@ export function setGridCoreLayerVisibility(
 }
 
 export function setSurfaceVisibility(map: MapLibreMap, visible: boolean) {
+  const renderer = surfaceRenderer.get(map);
   if (map.getLayer(SURFACE_LAYER_ID)) {
     map.setLayoutProperty(
       SURFACE_LAYER_ID,
       "visibility",
-      visible ? "visible" : "none",
+      visible && renderer !== "tiles" ? "visible" : "none",
     );
   }
+  setSurfaceTileVisibility(map, visible && renderer === "tiles");
 }
 
 export function removeGridOverlay(
@@ -1753,10 +2194,14 @@ export function removeGridOverlay(
   removeLayerIfExists(map, HOT_SPARKLE_ID);
   removeLayerIfExists(map, HOT_BASE_ID);
   removeLayerIfExists(map, SURFACE_LAYER_ID);
+  removeSurfaceTileSlot(map, 0);
+  removeSurfaceTileSlot(map, 1);
   removeLayerIfExists(map, lineId);
   removeLayerIfExists(map, fillId);
   removeSourceIfExists(map, SURFACE_SOURCE_ID);
   removeSourceIfExists(map, sourceId);
+  surfaceTileState.delete(map);
+  surfaceRenderer.delete(map);
 }
 
 export function setHotspotVisibility(map: MapLibreMap, visible: boolean) {

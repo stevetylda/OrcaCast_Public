@@ -12,6 +12,40 @@ export type ViewingLocation = {
   hydrophoneUrl?: string;
 };
 
+export type WebcamStatus =
+  | "verified-current"
+  | "current-frame-verified"
+  | "landing-verified"
+  | "directory-current"
+  | "seasonal"
+  | "listed";
+
+export type WebcamFeed = {
+  id: string;
+  name: string;
+  operator: string;
+  accessUrl: string;
+  feedFormat: string;
+  status: WebcamStatus;
+  statusEvidence?: string;
+  verifiedAt?: string;
+  tier?: 1 | 2;
+  priorityScore: number;
+  targetSpecies?: string;
+  seasonality?: string;
+  caveat?: string;
+  appMode?: string;
+  evidenceUrl?: string;
+};
+
+export type WebcamSite = ViewingLocation & {
+  locality: string;
+  waterbody: string;
+  coordinateQuality: string;
+  priorityScore: number;
+  feeds: WebcamFeed[];
+};
+
 export type PoiType = "Park" | "Marina" | "Ferry" | "Other";
 
 export type SuggestedPlace = {

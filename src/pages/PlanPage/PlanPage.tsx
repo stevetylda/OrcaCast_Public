@@ -10,7 +10,7 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ForecastMap,
   type ForecastMapHandle,
@@ -18,7 +18,9 @@ import {
 } from "../../features/map";
 import { appConfig } from "../../shared/config/appConfig";
 import { DEFAULT_RECOMMENDATION_RADIUS_MILES } from "../../shared/config/planner";
-import { AppHeader } from "../../shared/components/AppHeader";
+import { ActivityLegend } from "../../shared/components/ActivityLegend";
+import { ForecastLabHeader } from "../../shared/components/ForecastLabHeader";
+import { MediaLocationDetail } from "../../shared/components/MediaLocationDetail";
 import { useDialogFocus } from "../../shared/components/useDialogFocus";
 import { AmbientSwimmingOrca } from "../../shared/components/AmbientSwimmingOrca";
 import {
@@ -69,6 +71,7 @@ import {
 import { usePlannerPersistence } from "../../features/planner/hooks/usePlannerPersistence";
 import { usePlannerReferenceData } from "../../features/planner/hooks/usePlannerReferenceData";
 import { useTripOccurrence } from "../../features/planner/hooks/useTripOccurrence";
+import { buildHistoricalSmoothSources } from "../../features/planner/model/historicalSmooth";
 import {
   applyTripBrushDelta,
   buildChartWindowStyle,
@@ -238,12 +241,11 @@ export function PlannerPage() {
   const {
     unitsMode,
     setUnitsMode,
-    surfaceMode,
-    setSurfaceMode,
     resolution,
     selectedPaletteId,
     setSelectedPaletteId,
   } = useMapState();
+  const [surfaceMode, setSurfaceMode] = useState<"grid" | "surface">("surface");
   const resumeStoredPlan = useMemo(
     () => new URLSearchParams(location.search).get("resume") === "1",
     [location.search],
@@ -364,7 +366,6 @@ export function PlannerPage() {
   const bottomPanelRef = useRef<HTMLElement | null>(null);
   const settingsRef = useRef<HTMLDivElement | null>(null);
   const legendPaletteRef = useRef<HTMLElement | null>(null);
-  const legendPaletteTriggerRef = useRef<HTMLButtonElement | null>(null);
   const itineraryUtilityDialogRef = useRef<HTMLDivElement | null>(null);
   const itineraryExportDialogRef = useRef<HTMLElement | null>(null);
   const chartPlotRef = useRef<HTMLDivElement | null>(null);
@@ -468,6 +469,13 @@ export function PlannerPage() {
   );
   const appliedPlannerSubmitted =
     !!appliedPlannerSelection && !!appliedTripRange;
+  const plannerHistoricalSmoothSources = useMemo(
+    () =>
+      appliedTripRange
+        ? buildHistoricalSmoothSources(appliedTripRange, "srkw")
+        : [],
+    [appliedTripRange],
+  );
   const {
     occurrence: tripOccurrence,
     loading: tripLoading,
@@ -629,6 +637,18 @@ export function PlannerPage() {
       availablePlannerPlaces.find((place) => place.id === detailPlaceId) ??
       null,
     [availablePlannerPlaces, detailPlaceId],
+  );
+  const selectedCamera = useMemo(
+    () =>
+      cameraLocations.find((camera) => camera.id === selectedCameraId) ?? null,
+    [cameraLocations, selectedCameraId],
+  );
+  const selectedHydrophone = useMemo(
+    () =>
+      hydrophoneLocations.find(
+        (hydrophone) => hydrophone.id === selectedHydrophoneId,
+      ) ?? null,
+    [hydrophoneLocations, selectedHydrophoneId],
   );
   const detailPlaceCameras = useMemo(() => {
     if (!detailPlace) return [];
@@ -910,8 +930,34 @@ export function PlannerPage() {
     handleOpenPlaceDetails(place);
   };
 
+  const handleOpenCameraDetails = (
+    camera: (typeof cameraLocations)[number],
+  ) => {
+    setSpotsCollapsed(false);
+    setSidebarMode("location-details");
+    setDetailPlaceId(null);
+    setSelectedPlaceId(null);
+    setSelectedHydrophoneId(null);
+    setSelectedCameraId(camera.id);
+    setPulseSelectedPlaceMarker(false);
+  };
+
+  const handleOpenHydrophoneDetails = (
+    hydrophone: (typeof hydrophoneLocations)[number],
+  ) => {
+    setSpotsCollapsed(false);
+    setSidebarMode("location-details");
+    setDetailPlaceId(null);
+    setSelectedPlaceId(null);
+    setSelectedCameraId(null);
+    setSelectedHydrophoneId(hydrophone.id);
+    setPulseSelectedPlaceMarker(false);
+  };
+
   const clearMapLocationSelection = useCallback(() => {
     setSelectedPlaceId(null);
+    setSelectedCameraId(null);
+    setSelectedHydrophoneId(null);
     setPulseSelectedPlaceMarker(false);
   }, []);
 
@@ -1116,28 +1162,6 @@ export function PlannerPage() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [settingsOpen]);
-
-  useEffect(() => {
-    if (!paletteOpen) return;
-    const onPointerDown = (event: MouseEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (legendPaletteRef.current?.contains(target)) return;
-      setPaletteOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setPaletteOpen(false);
-        legendPaletteTriggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [paletteOpen]);
 
   useEffect(() => {
     if (!settingsOpen) setPaletteOpen(false);
@@ -1471,6 +1495,7 @@ export function PlannerPage() {
     externalValues:
       plannerSubmitted && tripOccurrence ? tripOccurrence.values : undefined,
     forecastOverlayEnabled: plannerSubmitted && !!tripOccurrence,
+    weightedSmoothedForecastSources: plannerHistoricalSmoothSources,
     forecastOverlayLoadKey: recommendedPlacesSignature,
     onForecastOverlayReady: setRenderedTripLoadKey,
     onFatalDataError: handlePlannerMapFatalError,
@@ -1492,6 +1517,8 @@ export function PlannerPage() {
     onPlaceSelect: (place: SuggestedPlace) => {
       handleOpenPlaceDetails(place);
     },
+    onCameraSelect: handleOpenCameraDetails,
+    onHydrophoneSelect: handleOpenHydrophoneDetails,
     onPoiSelect: handleOpenPoiDetails,
     onLocationSelectionClear: clearMapLocationSelection,
     baseLocation: activeBaseLocation,
@@ -1505,25 +1532,7 @@ export function PlannerPage() {
 
   return (
     <div className="mapPageRoot">
-      <AppHeader
-        title="OrcaCast"
-        subtitle="Forecast Lab"
-        variant="home"
-        onOpenMenu={() => setMenuOpen(true)}
-        rightSlot={
-          <nav className="homeNav" aria-label="Planner navigation">
-            <Link to="/watch" aria-label="This week">
-              This week
-            </Link>
-            <Link to="/planner" aria-label="Plan a trip" aria-current="page">
-              Plan a trip
-            </Link>
-            <Link to="/explore" aria-label="Explore">
-              Explore
-            </Link>
-          </nav>
-        }
-      />
+      <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
 
       <main id="main-content" className="app__main" tabIndex={-1}>
         <div className="visuallyHidden" role="status" aria-live="polite">
@@ -2163,116 +2172,22 @@ export function PlannerPage() {
             ) : null}
 
             {showPlannerChrome ? (
-              <aside
+              <ActivityLegend
                 ref={legendPaletteRef}
-                className={`plannerResultsPage__legendCard${paletteOpen ? " isPaletteOpen" : ""}`}
-                aria-label="Typical orca activity legend, low to high"
-              >
-                <button
-                  ref={legendPaletteTriggerRef}
-                  type="button"
-                  className="plannerResultsPage__legendPaletteTrigger"
-                  aria-label="Typical activity color scale"
-                  aria-haspopup="listbox"
-                  aria-expanded={paletteOpen}
-                  onClick={() => {
-                    setPaletteOpen((value) => !value);
-                    window.requestAnimationFrame(() =>
-                      legendPaletteRef.current
-                        ?.querySelector<HTMLElement>(
-                          '[role="option"][aria-selected="true"], [role="option"]',
-                        )
-                        ?.focus(),
-                    );
-                  }}
-                />
-                <strong className="plannerResultsPage__legendTitle">
-                  Typical activity
-                </strong>
-                <div className="plannerResultsPage__legendScale">
-                  <span>Low</span>
-                  <div
-                    className="plannerResultsPage__legendRamp"
-                    aria-hidden="true"
-                  >
-                    {[...legendColors].reverse().map((color, index) => (
-                      <span
-                        key={`${color}-${index}`}
-                        style={{ background: color }}
-                      />
-                    ))}
-                  </div>
-                  <span>High</span>
-                </div>
-                {paletteOpen ? (
-                  <div
-                    className="plannerResultsPage__legendPaletteList"
-                    role="listbox"
-                    aria-label="Color scale palettes"
-                    onClick={(event) => event.stopPropagation()}
-                    onKeyDown={(event) => {
-                      event.stopPropagation();
-                      const options = Array.from(
-                        event.currentTarget.querySelectorAll<HTMLElement>(
-                          '[role="option"]',
-                        ),
-                      );
-                      const currentIndex = options.indexOf(
-                        document.activeElement as HTMLElement,
-                      );
-                      let nextIndex = currentIndex;
-                      if (event.key === "ArrowDown") nextIndex += 1;
-                      else if (event.key === "ArrowUp") nextIndex -= 1;
-                      else if (event.key === "Home") nextIndex = 0;
-                      else if (event.key === "End")
-                        nextIndex = options.length - 1;
-                      else return;
-                      event.preventDefault();
-                      options[
-                        Math.max(0, Math.min(options.length - 1, nextIndex))
-                      ]?.focus();
-                    }}
-                  >
-                    {paletteEntries.map((palette) => {
-                      const selected = palette.id === selectedPaletteId;
-                      return (
-                        <button
-                          key={palette.id}
-                          type="button"
-                          role="option"
-                          aria-selected={selected}
-                          tabIndex={selected ? 0 : -1}
-                          className={`plannerResultsPage__legendPaletteRow${selected ? " isSelected" : ""}`}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            setPlannerOpen(false);
-                            setPlannerCollapsing(false);
-                            setPlannerEditingTransition(false);
-                            setTripRevealPending(false);
-                            setRevealMinimumElapsed(false);
-                            setSelectedPaletteId(palette.id);
-                            setPaletteOpen(false);
-                          }}
-                        >
-                          <span
-                            className="plannerResultsPage__legendPaletteSwatches"
-                            aria-hidden="true"
-                          >
-                            {palette.colors.slice(0, 6).map((color, index) => (
-                              <span
-                                key={`${palette.id}-${index}`}
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
-                          </span>
-                          <span>{palette.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </aside>
+                colors={[...legendColors].reverse()}
+                open={paletteOpen}
+                onOpenChange={setPaletteOpen}
+                onPaletteSelect={(paletteId) => {
+                  setPlannerOpen(false);
+                  setPlannerCollapsing(false);
+                  setPlannerEditingTransition(false);
+                  setTripRevealPending(false);
+                  setRevealMinimumElapsed(false);
+                  setSelectedPaletteId(paletteId);
+                }}
+                palettes={paletteEntries}
+                selectedPaletteId={selectedPaletteId}
+              />
             ) : null}
 
             {showPlannerChrome ? (
@@ -2280,7 +2195,7 @@ export function PlannerPage() {
                 ref={sidebarRef}
                 className={`plannerResultsPage__spotsCard plannerResultsPage__tripSidebar isMode-${sidebarMode}${
                   spotsCollapsed ? " isCollapsed" : ""
-                }${detailPlace ? " isDetailOpen" : ""}`}
+                }${detailPlace || selectedCamera || selectedHydrophone ? " isDetailOpen" : ""}`}
               >
                 {spotsCollapsed ? (
                   <button
@@ -2682,6 +2597,28 @@ export function PlannerPage() {
                           onBack={() => {
                             setDetailPlaceId(null);
                             setSidebarMode("overview");
+                          }}
+                        />
+                      </div>
+                    ) : selectedCamera || selectedHydrophone ? (
+                      <div className="plannerResultsPage__detailModeWrap">
+                        <MediaLocationDetail
+                          webcam={selectedCamera}
+                          hydrophone={selectedHydrophone}
+                          hydrophoneListenUrl={hydrophoneListenUrl}
+                          onBack={() => {
+                            setSelectedCameraId(null);
+                            setSelectedHydrophoneId(null);
+                            setSidebarMode("overview");
+                          }}
+                          onCenterMap={() => {
+                            const location =
+                              selectedCamera ?? selectedHydrophone;
+                            if (!location) return;
+                            primaryMapRef.current?.fitLocations(
+                              [[location.longitude, location.latitude]],
+                              { padding: 120, maxZoom: 12 },
+                            );
                           }}
                         />
                       </div>

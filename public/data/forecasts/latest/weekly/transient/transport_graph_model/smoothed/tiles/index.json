@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-19T00:04:39.792502Z",
+  "minzoom": 5,
+  "maxzoom": 9,
+  "encoding": "red-byte-normalized-v1",
+  "items": [
+    {
+      "periodStart": "2026-07-13",
+      "source": "2026-07-13.tif",
+      "tilejson": "./2026-07-13/tilejson.json",
+      "bounds": [
+        -128.66956785521128,
+        45.1547383030543,
+        -121.6986412504438,
+        50.39900194270222
+      ],
+      "tileCount": 173,
+      "cacheKey": "1edd2fd50ec0"
+    }
+  ],
+  "latest": "2026-07-13"
+}

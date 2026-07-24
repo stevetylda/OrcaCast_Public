@@ -1,0 +1,1568 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-07-17",
+  "items": [
+    {
+      "id": "webcam-site-bc-dp-008",
+      "name": "Campbell River",
+      "region": "Discovery Passage",
+      "locality": "Campbell River",
+      "waterbody": "Discovery Passage",
+      "latitude": 50.023,
+      "longitude": -125.238,
+      "coordinateQuality": "Approximate pier",
+      "feeds": [
+        {
+          "id": "BC-DP-008",
+          "name": "Discovery Pier — Campbell River North",
+          "operator": "City of Campbell River / SkylineWebcams",
+          "accessUrl": "https://campbellriver.travel/news/live-webcams-at-discovery-pier-campbell-river/",
+          "feedFormat": "Live video",
+          "status": "verified-current",
+          "statusEvidence": "City and destination pages identify three live Discovery Pier cameras; this north view can occasionally capture orcas near the pier.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 87,
+          "targetSpecies": "Orca; humpback; seals",
+          "seasonality": "Year-round",
+          "caveat": "North view includes marina and pier; marine wildlife can pass unusually close.",
+          "appMode": "External link",
+          "evidenceUrl": "https://campbellriver.travel/news/live-webcams-at-discovery-pier-campbell-river/"
+        },
+        {
+          "id": "BC-DP-009",
+          "name": "Discovery Pier — Quadra Island View",
+          "operator": "City of Campbell River / SkylineWebcams",
+          "accessUrl": "https://campbellriver.travel/news/live-webcams-at-discovery-pier-campbell-river/",
+          "feedFormat": "Live video",
+          "status": "verified-current",
+          "statusEvidence": "Official tourism page describes the view toward northern Quadra Island and the fast-moving passage.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 93,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Broad crossing view with high vessel traffic and good horizon coverage.",
+          "appMode": "External link",
+          "evidenceUrl": "https://campbellriver.travel/news/live-webcams-at-discovery-pier-campbell-river/"
+        },
+        {
+          "id": "BC-DP-010",
+          "name": "Discovery Pier — Discovery Passage South",
+          "operator": "City of Campbell River / SkylineWebcams",
+          "accessUrl": "https://campbellriver.travel/news/live-webcams-at-discovery-pier-campbell-river/",
+          "feedFormat": "Live video",
+          "status": "verified-current",
+          "statusEvidence": "Official tourism page calls this the best of the three for watching Discovery Passage and marine wildlife, including orcas and humpbacks.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 97,
+          "targetSpecies": "Orca; humpback; seals",
+          "seasonality": "Year-round",
+          "caveat": "Top-tier purpose-fit surface camera for the northern Salish Sea.",
+          "appMode": "External link",
+          "evidenceUrl": "https://campbellriver.travel/news/live-webcams-at-discovery-pier-campbell-river/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-sji-001",
+      "name": "Lime Kiln Lighthouse Webcam",
+      "region": "San Juan Islands / Haro Strait",
+      "locality": "Lime Kiln Point, San Juan Island",
+      "waterbody": "Haro Strait",
+      "latitude": 48.5153,
+      "longitude": -123.1524,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-SJI-001",
+          "name": "Lime Kiln Lighthouse Webcam",
+          "operator": "The Whale Museum",
+          "accessUrl": "https://whalemuseum.org/pages/seasound-remote-sensing-network",
+          "feedFormat": "Live video + hydrophone",
+          "status": "landing-verified",
+          "statusEvidence": "Official program page identifies the live lighthouse webcam and nearshore hydrophone.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 97,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round; historically strongest whale-watching use in spring–fall",
+          "caveat": "Exceptional close-to-shore bathymetry and unobstructed Haro Strait view.",
+          "appMode": "External link + availability badge",
+          "evidenceUrl": "https://whalemuseum.org/pages/seasound-remote-sensing-network"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-nis-003",
+      "name": "OrcaLab Base Cam",
+      "region": "Johnstone Strait / Broughton",
+      "locality": "Hanson Island / Blackney Pass",
+      "waterbody": "Blackney Pass",
+      "latitude": 50.574,
+      "longitude": -126.7,
+      "coordinateQuality": "Approximate network site",
+      "feeds": [
+        {
+          "id": "BC-NIS-003",
+          "name": "OrcaLab Base Cam",
+          "operator": "OrcaLab / Explore.org",
+          "accessUrl": "https://explore.org/livecams/orcas/orcalab-base",
+          "feedFormat": "Year-round live video",
+          "status": "seasonal",
+          "statusEvidence": "OrcaLab states its network includes three year-round and five seasonal remote cameras.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 97,
+          "targetSpecies": "Northern Resident orca; Bigg’s orca; humpback",
+          "seasonality": "Northern Residents strongest July–Sep; humpbacks Apr–Oct; Bigg’s year-round",
+          "caveat": "Purpose-built whale research vantage; feeds may switch to highlights at night or during signal loss.",
+          "appMode": "External link + schedule",
+          "evidenceUrl": "https://orcalab.org/live-streams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-jdf-001",
+      "name": "Race Rocks Ecological Reserve",
+      "region": "Eastern Strait of Juan de Fuca",
+      "locality": "Race Rocks Ecological Reserve",
+      "waterbody": "Strait of Juan de Fuca",
+      "latitude": 48.2989,
+      "longitude": -123.5318,
+      "coordinateQuality": "Published site",
+      "feeds": [
+        {
+          "id": "BC-JDF-001",
+          "name": "Race Rocks Camera 1 — Lighthouse Tower",
+          "operator": "Race Rocks / Pearson College UWC",
+          "accessUrl": "https://racerocks.ca/video-cameras/",
+          "feedFormat": "24-hour remotely controlled video",
+          "status": "verified-current",
+          "statusEvidence": "Official page states three cameras webcast live 24 hours a day; Camera 1 is remotely controlled from the lighthouse tower.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 97,
+          "targetSpecies": "Orca; humpback; gray whale; pinnipeds",
+          "seasonality": "Year-round",
+          "caveat": "Exceptional entrance-channel view and frequent marine-mammal context; operator warns of bandwidth limits.",
+          "appMode": "External link",
+          "evidenceUrl": "https://racerocks.ca/video-cameras/"
+        },
+        {
+          "id": "BC-JDF-002",
+          "name": "Race Rocks Camera 5 — North Side",
+          "operator": "Race Rocks / Pearson College UWC",
+          "accessUrl": "https://racerocks.ca/video-cameras/",
+          "feedFormat": "24-hour live video",
+          "status": "verified-current",
+          "statusEvidence": "Official page identifies the north-side camera within the three-camera live network.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 87,
+          "targetSpecies": "Orca; humpback; gray whale; pinnipeds",
+          "seasonality": "Year-round",
+          "caveat": "Complementary angle; lens can be fouled by wildlife and salt spray.",
+          "appMode": "External link",
+          "evidenceUrl": "https://racerocks.ca/video-cameras/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-nis-004",
+      "name": "Robson Bight area",
+      "region": "Johnstone Strait / Broughton",
+      "locality": "Robson Bight area",
+      "waterbody": "Johnstone Strait",
+      "latitude": 50.494,
+      "longitude": -126.599,
+      "coordinateQuality": "Approximate network site",
+      "feeds": [
+        {
+          "id": "BC-NIS-004",
+          "name": "Strider Rubbing Beach Surface Cam",
+          "operator": "OrcaLab / Explore.org",
+          "accessUrl": "https://explore.org/livecams/orcas/orcalab-rubbing-beach",
+          "feedFormat": "Seasonal live video",
+          "status": "seasonal",
+          "statusEvidence": "OrcaLab lists the Strider Rubbing Beach surface camera in its remote network.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 97,
+          "targetSpecies": "Northern Resident orca",
+          "seasonality": "Peak July–Sep",
+          "caveat": "Among the highest-probability whale-specific surface views in the region.",
+          "appMode": "External link + schedule",
+          "evidenceUrl": "https://orcalab.org/live-streams/"
+        },
+        {
+          "id": "BC-NIS-005",
+          "name": "Strider Rubbing Beach Underwater Cam",
+          "operator": "OrcaLab / Explore.org",
+          "accessUrl": "https://explore.org/livecams/orcas/orcalab-rubbing-beach-underwater",
+          "feedFormat": "Seasonal live video",
+          "status": "seasonal",
+          "statusEvidence": "OrcaLab lists the Strider underwater camera.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 79,
+          "targetSpecies": "Northern Resident orca",
+          "seasonality": "Peak July–Sep",
+          "caveat": "Extraordinary when whales rub nearby; not a substitute for surface situational awareness.",
+          "appMode": "External link + underwater label",
+          "evidenceUrl": "https://orcalab.org/live-streams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-jdf-006",
+      "name": "Dungeness Spit, Sequim",
+      "region": "Strait of Juan de Fuca",
+      "locality": "Dungeness Spit, Sequim",
+      "waterbody": "Strait of Juan de Fuca",
+      "latitude": 48.181,
+      "longitude": -123.111,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-JDF-006",
+          "name": "New Dungeness Lighthouse — North",
+          "operator": "New Dungeness Light Station Association",
+          "accessUrl": "https://newdungenesslighthouse.com/webcams/",
+          "feedFormat": "Still image (1 min refresh)",
+          "status": "verified-current",
+          "statusEvidence": "Official page states north- and south-facing images upload every minute; search evidence was current on 2026-07-17.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 93,
+          "targetSpecies": "Orca; humpback; gray whale",
+          "seasonality": "Year-round",
+          "caveat": "North view covers a broad strait approach from a remote spit.",
+          "appMode": "External link + timestamp",
+          "evidenceUrl": "https://newdungenesslighthouse.com/webcams/"
+        },
+        {
+          "id": "WA-JDF-007",
+          "name": "New Dungeness Lighthouse — South",
+          "operator": "New Dungeness Light Station Association",
+          "accessUrl": "https://newdungenesslighthouse.com/webcams/",
+          "feedFormat": "Still image (1 min refresh)",
+          "status": "verified-current",
+          "statusEvidence": "Official page states north- and south-facing images upload every minute.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Gray whale; orca; seals",
+          "seasonality": "Year-round",
+          "caveat": "Bay-facing complement to the higher-value north camera.",
+          "appMode": "External link + timestamp",
+          "evidenceUrl": "https://newdungenesslighthouse.com/webcams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-dp-011",
+      "name": "Hakai Quadra Bluff Webcam",
+      "region": "Discovery Passage",
+      "locality": "Quadra Island",
+      "waterbody": "Discovery Passage",
+      "latitude": 50.08,
+      "longitude": -125.19,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-DP-011",
+          "name": "Hakai Quadra Bluff Webcam",
+          "operator": "Hakai Institute",
+          "accessUrl": "https://hakai.org/live-webcams",
+          "feedFormat": "Live still webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official Hakai page lists Quadra Bluff among its public webcams.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 93,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "High-elevation complementary view to Campbell River’s pier cameras.",
+          "appMode": "External link",
+          "evidenceUrl": "https://hakai.org/live-webcams"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-dp-012",
+      "name": "Hakai Rock Point Webcam",
+      "region": "Discovery Passage",
+      "locality": "Quadra Island",
+      "waterbody": "Discovery Passage",
+      "latitude": 50.11,
+      "longitude": -125.22,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-DP-012",
+          "name": "Hakai Rock Point Webcam",
+          "operator": "Hakai Institute",
+          "accessUrl": "https://hakai.org/live-webcams",
+          "feedFormat": "Live still webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official Hakai page lists Rock Point, Quadra Island.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 93,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Potentially strong water coverage; confirm exact camera bearing during onboarding.",
+          "appMode": "External link",
+          "evidenceUrl": "https://hakai.org/live-webcams"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-js-014",
+      "name": "Kelsey Bay / Sayward",
+      "region": "Johnstone Strait",
+      "locality": "Kelsey Bay / Sayward",
+      "waterbody": "Johnstone Strait",
+      "latitude": 50.398,
+      "longitude": -125.961,
+      "coordinateQuality": "Published/approximate wharf",
+      "feeds": [
+        {
+          "id": "BC-JS-014",
+          "name": "Kelsey Bay Wharf — Northeast",
+          "operator": "Sayward Futures Society",
+          "accessUrl": "https://www.sayward.ca/our-community/web-cams",
+          "feedFormat": "Live webcam",
+          "status": "verified-current",
+          "statusEvidence": "Official village page lists northeast and east views from Kelsey Bay Wharf; The Whale Trail identifies the wharf as an orca-viewing location.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 93,
+          "targetSpecies": "Orca; sea lion; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Excellent channel-facing community camera at a documented land-based whale point.",
+          "appMode": "External link",
+          "evidenceUrl": "https://thewhaletrail.org/sites/port-of-kelsey-bay/"
+        },
+        {
+          "id": "BC-JS-015",
+          "name": "Kelsey Bay Wharf — East",
+          "operator": "Sayward Futures Society",
+          "accessUrl": "https://saywardfutures.ca/webcams/",
+          "feedFormat": "Live webcam",
+          "status": "verified-current",
+          "statusEvidence": "Official operator page lists the east view; camera directories show current frames toward Hardwicke and Helmcken islands.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 93,
+          "targetSpecies": "Orca; sea lion; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Complementary eastward coverage of the same strategic strait.",
+          "appMode": "External link",
+          "evidenceUrl": "https://thewhaletrail.org/sites/port-of-kelsey-bay/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-ps-029",
+      "name": "Skunk Bay Daylight Live Stream",
+      "region": "North Puget / Admiralty Inlet",
+      "locality": "Hansville",
+      "waterbody": "Admiralty Inlet",
+      "latitude": 47.918,
+      "longitude": -122.565,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-PS-029",
+          "name": "Skunk Bay Daylight Live Stream",
+          "operator": "Skunk Bay Weather",
+          "accessUrl": "https://www.skunkbayweather.com/SBWLiveCam.html",
+          "feedFormat": "Daylight HD stream",
+          "status": "verified-current",
+          "statusEvidence": "Operator page says the stream is available in daylight hours; Camera 1 is described as pointing NNW up Admiralty Inlet.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 93,
+          "targetSpecies": "Orca; gray whale; humpback",
+          "seasonality": "Daylight only; year-round",
+          "caveat": "One of the best current strategic views in north Puget Sound.",
+          "appMode": "External link + daylight status",
+          "evidenceUrl": "https://www.skunkbayweather.com/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-svi-029",
+      "name": "Harling Point / Juan de Fuca View",
+      "region": "Southern Vancouver Island",
+      "locality": "Harling Point, Victoria",
+      "waterbody": "Strait of Juan de Fuca",
+      "latitude": 48.408,
+      "longitude": -123.312,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-SVI-029",
+          "name": "Harling Point / Juan de Fuca View",
+          "operator": "NAMROC / Big Wave Dave directory",
+          "accessUrl": "https://www.bigwavedave.ca/webcams.php?cam=5",
+          "feedFormat": "Weather webcam",
+          "status": "directory-current",
+          "statusEvidence": "Current Vancouver Island webcam directory lists Harling Point as viewing Juan de Fuca.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 90,
+          "targetSpecies": "Orca; humpback; gray whale",
+          "seasonality": "Year-round",
+          "caveat": "Strategically excellent south-Victoria field of view; source stability should be confirmed.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.coastwebcams.ca/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-whi-025",
+      "name": "Double Bluff Beach Cam",
+      "region": "Whidbey / Admiralty Inlet",
+      "locality": "Double Bluff, Whidbey Island",
+      "waterbody": "Admiralty Inlet",
+      "latitude": 47.982,
+      "longitude": -122.509,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WHI-025",
+          "name": "Double Bluff Beach Cam",
+          "operator": "Whidbey Telecom",
+          "accessUrl": "https://www.whidbeytel.com/cams/double-bluff-beach-cam/",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Operator page identifies the Double Bluff beach camera.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 86,
+          "targetSpecies": "Gray whale; orca",
+          "seasonality": "Gray whales strongest in spring; orcas year-round",
+          "caveat": "Wide beach view across Admiralty Inlet with useful gray-whale context.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.whidbeytel.com/cams/double-bluff-beach-cam/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gi-034",
+      "name": "East Point Saturna WxCam",
+      "region": "Southern Gulf Islands",
+      "locality": "East Point, Saturna Island",
+      "waterbody": "Boundary Pass",
+      "latitude": 48.7831,
+      "longitude": -123.0453,
+      "coordinateQuality": "Published NAV CANADA site",
+      "feeds": [
+        {
+          "id": "BC-GI-034",
+          "name": "East Point Saturna WxCam",
+          "operator": "NAV CANADA",
+          "accessUrl": "https://www.metcam.navcanada.ca/dawc/wxCam.jsp?dawc=cameraSite.jsp&id=128&lang=e",
+          "feedFormat": "Directional still images",
+          "status": "verified-current",
+          "statusEvidence": "NAV CANADA provides current directional weather images; The Whale Trail identifies East Point as an outstanding whale-watch site on the Fraser approach.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 86,
+          "targetSpecies": "Southern Resident orca; Bigg’s orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "High-value strategic point; confirm which direction provides the most continuous water field of view.",
+          "appMode": "External link + directional labels",
+          "evidenceUrl": "https://thewhaletrail.org/sites/east-point-saturna-gulf-islands-national-park-reserve/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gs-039",
+      "name": "Nanaimo Harbour NAV CANADA WxCams",
+      "region": "Central Strait of Georgia",
+      "locality": "Nanaimo Harbour",
+      "waterbody": "Nanaimo Harbour / Strait of Georgia",
+      "latitude": 49.168,
+      "longitude": -123.934,
+      "coordinateQuality": "Approximate aerodrome",
+      "feeds": [
+        {
+          "id": "BC-GS-039",
+          "name": "Nanaimo Harbour NAV CANADA WxCams",
+          "operator": "NAV CANADA",
+          "accessUrl": "https://www.metcam.navcanada.ca/dawc/lb/cameraSite.jsp?id=43&lang=e",
+          "feedFormat": "North / NE / SE still images",
+          "status": "verified-current",
+          "statusEvidence": "Official page provides north, northeast and southeast current images.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 85,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Reliable multi-directional coverage; weather-camera cadence rather than continuous video.",
+          "appMode": "External link + direction selector",
+          "evidenceUrl": "https://www.metcam.navcanada.ca/dawc/lb/cameraSite.jsp?id=43&lang=e"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-svi-024",
+      "name": "Sidney Waterfront Cam",
+      "region": "Southern Vancouver Island",
+      "locality": "Beacon Park, Sidney",
+      "waterbody": "Haro Strait / Gulf Islands view",
+      "latitude": 48.65,
+      "longitude": -123.398,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-SVI-024",
+          "name": "Sidney Waterfront Cam",
+          "operator": "Town of Sidney",
+          "accessUrl": "https://www.sidney.ca/discover-sidney/community-cams/waterfront/",
+          "feedFormat": "Still image (60 sec refresh)",
+          "status": "verified-current",
+          "statusEvidence": "Official municipal page states an east-facing waterfront/Gulf Islands image refreshed every 60 seconds.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 85,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Strong municipal, reliable water-facing view into the southern Gulf Islands.",
+          "appMode": "External link + timestamp",
+          "evidenceUrl": "https://www.sidney.ca/discover-sidney/community-cams/waterfront/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gs-036",
+      "name": "Tigh-Na-Mara Georgia Strait Webcam",
+      "region": "Central Strait of Georgia",
+      "locality": "Parksville",
+      "waterbody": "Strait of Georgia",
+      "latitude": 49.318,
+      "longitude": -124.264,
+      "coordinateQuality": "Published address / approximate camera",
+      "feeds": [
+        {
+          "id": "BC-GS-036",
+          "name": "Tigh-Na-Mara Georgia Strait Webcam",
+          "operator": "Tigh-Na-Mara Seaside Spa",
+          "accessUrl": "https://tigh-na-mara.com/gallery/video-webcam",
+          "feedFormat": "Live video",
+          "status": "verified-current",
+          "statusEvidence": "Official resort page identifies a live oceanfront webcam.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 82,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Broad open-water view across the central Strait of Georgia.",
+          "appMode": "External link",
+          "evidenceUrl": "https://tigh-na-mara.com/gallery/video-webcam"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-ps-003",
+      "name": "Langley Whale Cam",
+      "region": "Whidbey / Saratoga Passage",
+      "locality": "Langley",
+      "waterbody": "Saratoga Passage",
+      "latitude": 48.0393,
+      "longitude": -122.409,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-PS-003",
+          "name": "Langley Whale Cam",
+          "operator": "Whidbey Telecom",
+          "accessUrl": "https://www.whidbeytel.com/cams/langley-whale-cam/",
+          "feedFormat": "Live streaming video",
+          "status": "landing-verified",
+          "statusEvidence": "Operator page describes a live stream facing Saratoga Passage and seasonal gray-whale viewing.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 80,
+          "targetSpecies": "Gray whale; orca",
+          "seasonality": "Gray whales strongest in spring; orcas possible year-round",
+          "caveat": "One of the best purpose-labeled whale cams in inner Puget Sound.",
+          "appMode": "External link + seasonal label",
+          "evidenceUrl": "https://www.whidbeytel.com/cams/langley-whale-cam/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-jdf-010",
+      "name": "Port Townsend Weather Webcam",
+      "region": "Admiralty Inlet",
+      "locality": "Point Hudson, Port Townsend",
+      "waterbody": "Admiralty Inlet / Port Townsend Bay",
+      "latitude": 48.116,
+      "longitude": -122.755,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-JDF-010",
+          "name": "Port Townsend Weather Webcam",
+          "operator": "Northwest Maritime",
+          "accessUrl": "https://nwmaritime.org/weather-webcam/",
+          "feedFormat": "Live HLS video",
+          "status": "landing-verified",
+          "statusEvidence": "Browser inspection loaded a live-video element, but a current water frame could not be confirmed.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 80,
+          "targetSpecies": "Southern Resident orca; Bigg’s orca; humpback",
+          "seasonality": "Year-round; SRKW use often stronger in fall",
+          "caveat": "Excellent chokepoint context; confirm visible frame before launch.",
+          "appMode": "External link + health badge",
+          "evidenceUrl": "https://nwmaritime.org/weather-webcam/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-sps-035",
+      "name": "Tacoma Narrows Bridge Live Camera",
+      "region": "South Puget Sound",
+      "locality": "Tacoma Narrows",
+      "waterbody": "Tacoma Narrows",
+      "latitude": 47.269,
+      "longitude": -122.551,
+      "coordinateQuality": "Approximate landmark",
+      "feeds": [
+        {
+          "id": "WA-SPS-035",
+          "name": "Tacoma Narrows Bridge Live Camera",
+          "operator": "FOX 13 Seattle",
+          "accessUrl": "https://www.fox13seattle.com/tacoma-narrows-bridge-live-camera",
+          "feedFormat": "Live video",
+          "status": "landing-verified",
+          "statusEvidence": "Current broadcaster page identifies a live Tacoma Narrows Bridge camera.",
+          "verifiedAt": "2026-07-17",
+          "tier": 1,
+          "priorityScore": 80,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "High-value chokepoint, though the bridge—not the water—is the primary subject.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.fox13seattle.com/tacoma-narrows-bridge-live-camera"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-whi-026",
+      "name": "Bush Point Boat Launch Cam",
+      "region": "Whidbey / Admiralty Inlet",
+      "locality": "Bush Point, Whidbey Island",
+      "waterbody": "Admiralty Inlet",
+      "latitude": 48.033,
+      "longitude": -122.604,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WHI-026",
+          "name": "Bush Point Boat Launch Cam",
+          "operator": "Whidbey Telecom",
+          "accessUrl": "https://www.whidbeytel.com/cams/bush-point-boat-launch/",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Operator page identifies the Bush Point Boat Launch camera.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 77,
+          "targetSpecies": "Orca; gray whale; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Very strategic location; foreground launch angle may limit horizon coverage.",
+          "appMode": "External link + Orcasound pairing",
+          "evidenceUrl": "https://www.whidbeytel.com/cams/bush-point-boat-launch/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-sc-043",
+      "name": "Beach Gardens Marina Live Feed",
+      "region": "Upper Strait of Georgia",
+      "locality": "Powell River",
+      "waterbody": "Malaspina Strait",
+      "latitude": 49.801,
+      "longitude": -124.519,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-SC-043",
+          "name": "Beach Gardens Marina Live Feed",
+          "operator": "Beach Gardens Resort & Marina",
+          "accessUrl": "https://www.beachgardens.com/live-feed",
+          "feedFormat": "Live video",
+          "status": "verified-current",
+          "statusEvidence": "Official marina page identifies a live feed.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Good upper-Strait geographic coverage with marina foreground.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.beachgardens.com/live-feed"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gs-040",
+      "name": "Blackfin Pub Ocean Cam",
+      "region": "Northern Strait of Georgia",
+      "locality": "Comox",
+      "waterbody": "Comox Harbour / Strait of Georgia",
+      "latitude": 49.674,
+      "longitude": -124.929,
+      "coordinateQuality": "Published address",
+      "feeds": [
+        {
+          "id": "BC-GS-040",
+          "name": "Blackfin Pub Ocean Cam",
+          "operator": "Blackfin Pub",
+          "accessUrl": "https://www.blackfinpub.com/webcam",
+          "feedFormat": "Live video",
+          "status": "verified-current",
+          "statusEvidence": "Official operator page labels a live ocean cam and was crawled current.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Harbor view with Strait of Georgia context.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.blackfinpub.com/webcam"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gs-037",
+      "name": "French Creek Harbour Webcams",
+      "region": "Central Strait of Georgia",
+      "locality": "French Creek",
+      "waterbody": "Strait of Georgia",
+      "latitude": 49.351,
+      "longitude": -124.36,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-GS-037",
+          "name": "French Creek Harbour Webcams",
+          "operator": "French Creek Harbour Authority",
+          "accessUrl": "https://frenchcreekharbour.ca/webcams/",
+          "feedFormat": "Webcam landing",
+          "status": "landing-verified",
+          "statusEvidence": "Official harbour authority page lists current web cams.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Good geographic coverage; exact camera bearings should be catalogued during onboarding.",
+          "appMode": "External link",
+          "evidenceUrl": "https://frenchcreekharbour.ca/webcams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gs-038",
+      "name": "Nanaimo Harbour Cam — CHEK",
+      "region": "Central Strait of Georgia",
+      "locality": "Nanaimo",
+      "waterbody": "Nanaimo Harbour",
+      "latitude": 49.166,
+      "longitude": -123.936,
+      "coordinateQuality": "Approximate rooftop",
+      "feeds": [
+        {
+          "id": "BC-GS-038",
+          "name": "Nanaimo Harbour Cam — CHEK",
+          "operator": "CHEK Media",
+          "accessUrl": "https://www.youtube.com/watch?v=p-SaENs_teU",
+          "feedFormat": "24/7 live YouTube video",
+          "status": "verified-current",
+          "statusEvidence": "Current CHEK listing identifies a 24/7 stream from the Port Theatre rooftop.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Broad harbor view toward Protection and Newcastle islands.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.youtube.com/watch?v=p-SaENs_teU"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-svi-027",
+      "name": "Oak Bay Marina Live Webcam",
+      "region": "Southern Vancouver Island",
+      "locality": "Oak Bay, Victoria",
+      "waterbody": "Oak Bay / Haro Strait approaches",
+      "latitude": 48.425,
+      "longitude": -123.302,
+      "coordinateQuality": "Published address",
+      "feeds": [
+        {
+          "id": "BC-SVI-027",
+          "name": "Oak Bay Marina Live Webcam",
+          "operator": "Oak Bay Marina",
+          "accessUrl": "https://oakbaymarina.com/weather/",
+          "feedFormat": "Live video",
+          "status": "verified-current",
+          "statusEvidence": "Official operator page labels a live webcam and was crawled current.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Good east-Victoria coverage; marina infrastructure may partially obscure open water.",
+          "appMode": "External link",
+          "evidenceUrl": "https://oakbaymarina.com/weather/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-wc-022",
+      "name": "Point Roberts",
+      "region": "Boundary / Strait of Georgia",
+      "locality": "Point Roberts",
+      "waterbody": "Strait of Georgia",
+      "latitude": 48.971,
+      "longitude": -123.066,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WC-022",
+          "name": "Point Roberts Marina — Northwest",
+          "operator": "Point Roberts Marina / HDOnTap",
+          "accessUrl": "https://www.pointrobertsmarina.com/webcams/",
+          "feedFormat": "Live HD video",
+          "status": "landing-verified",
+          "statusEvidence": "Official marina page links multiple live camera directions.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Northwest view can cover the marina entrance and broader Strait of Georgia.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.pointrobertsmarina.com/webcams/"
+        },
+        {
+          "id": "WA-WC-023",
+          "name": "Point Roberts Marina — Southwest",
+          "operator": "Point Roberts Marina / HDOnTap",
+          "accessUrl": "https://hdontap.com/stream/586917/point-roberts-marina-sw-live-webcam/",
+          "feedFormat": "Live HD video",
+          "status": "verified-current",
+          "statusEvidence": "Current HDOnTap landing was indexed recently.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Complementary southwest look toward boundary waters.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.pointrobertsmarina.com/webcams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-jdf-009",
+      "name": "Port Angeles Harbor Webcam",
+      "region": "Strait of Juan de Fuca",
+      "locality": "Port Angeles",
+      "waterbody": "Port Angeles Harbor",
+      "latitude": 48.12,
+      "longitude": -123.44,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-JDF-009",
+          "name": "Port Angeles Harbor Webcam",
+          "operator": "Port of Port Angeles",
+          "accessUrl": "https://portofpa.com/marine/port-angeles-boat-haven/webcams/",
+          "feedFormat": "Live YouTube video",
+          "status": "landing-verified",
+          "statusEvidence": "Official port page links the live harbor stream.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback; gray whale",
+          "seasonality": "Year-round",
+          "caveat": "Harbor and Ediz Hook constrain the view but the broader strait is strategically useful.",
+          "appMode": "External link",
+          "evidenceUrl": "https://portofpa.com/marine/port-angeles-boat-haven/webcams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-svi-026",
+      "name": "Port Sidney Marina Cameras",
+      "region": "Southern Vancouver Island",
+      "locality": "Sidney",
+      "waterbody": "Sidney Channel",
+      "latitude": 48.65,
+      "longitude": -123.395,
+      "coordinateQuality": "Published address",
+      "feeds": [
+        {
+          "id": "BC-SVI-026",
+          "name": "Port Sidney Marina Cameras",
+          "operator": "Port Sidney Marina",
+          "accessUrl": "https://www.portsidney.com/cameras",
+          "feedFormat": "Camera landing",
+          "status": "landing-verified",
+          "statusEvidence": "Official marina camera page is current.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Potentially broader channel coverage than the inland marinas; verify exact camera bearings.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.portsidney.com/cameras"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-nis-007",
+      "name": "Sea Lion Beach Cam",
+      "region": "Johnstone Strait / Broughton",
+      "locality": "Hanson Island area",
+      "waterbody": "Blackfish Sound",
+      "latitude": 50.58,
+      "longitude": -126.71,
+      "coordinateQuality": "Approximate network site",
+      "feeds": [
+        {
+          "id": "BC-NIS-007",
+          "name": "Sea Lion Beach Cam",
+          "operator": "OrcaLab / Explore.org",
+          "accessUrl": "https://explore.org/livecams/orcas/orcalab-steller-sea-lion-haulout",
+          "feedFormat": "Live video",
+          "status": "seasonal",
+          "statusEvidence": "OrcaLab lists the Sea Lion Beach camera in its network.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 76,
+          "targetSpecies": "Bigg’s orca; humpback; sea lions",
+          "seasonality": "Whales and humpbacks strongest spring–fall",
+          "caveat": "Good marine-mammal context and open-water backdrop.",
+          "appMode": "External link",
+          "evidenceUrl": "https://orcalab.org/live-streams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-van-018",
+      "name": "Ambleside Beach Cam",
+      "region": "Metro Vancouver",
+      "locality": "West Vancouver",
+      "waterbody": "English Bay / Burrard Inlet",
+      "latitude": 49.324,
+      "longitude": -123.154,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-VAN-018",
+          "name": "Ambleside Beach Cam",
+          "operator": "Hollyburn Sailing Club",
+          "accessUrl": "https://www.hollyburnsailingclub.ca/",
+          "feedFormat": "Daylight still image (~20 min)",
+          "status": "current-frame-verified",
+          "statusEvidence": "Salish Sea webcam directory showed a current frame timestamped 2026-07-17 and notes daylight-only capture.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 75,
+          "targetSpecies": "Bigg’s orca; humpback",
+          "seasonality": "Daylight only; year-round",
+          "caveat": "Broad urban Salish Sea view; animals may be distant.",
+          "appMode": "External link + daylight status",
+          "evidenceUrl": "https://halibutbank.ca/webcams.html"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-nis-006",
+      "name": "Cracroft Point Underwater Cam",
+      "region": "Johnstone Strait / Broughton",
+      "locality": "West Cracroft Island",
+      "waterbody": "Johnstone Strait",
+      "latitude": 50.546,
+      "longitude": -126.72,
+      "coordinateQuality": "Approximate network site",
+      "feeds": [
+        {
+          "id": "BC-NIS-006",
+          "name": "Cracroft Point Underwater Cam",
+          "operator": "OrcaLab / Explore.org",
+          "accessUrl": "https://explore.org/livecams/orcas/orcalab-cracroft-point-underwater",
+          "feedFormat": "Seasonal live video",
+          "status": "seasonal",
+          "statusEvidence": "OrcaLab lists the Cracroft Point underwater camera.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 75,
+          "targetSpecies": "Northern Resident orca; humpback",
+          "seasonality": "Primarily summer",
+          "caveat": "High strategic location, but underwater visibility depends on light and turbidity.",
+          "appMode": "External link + underwater label",
+          "evidenceUrl": "https://orcalab.org/live-streams/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-wc-017",
+      "name": "Fairhaven, Bellingham",
+      "region": "Whatcom / Bellingham Bay",
+      "locality": "Fairhaven, Bellingham",
+      "waterbody": "Bellingham Bay",
+      "latitude": 48.719,
+      "longitude": -122.512,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WC-017",
+          "name": "Fairhaven Boat Ramp",
+          "operator": "Community Boating Center",
+          "accessUrl": "https://www.boatingcenter.org/webcams",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official boating-center page lists the Fairhaven Boat Ramp live view.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 69,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Useful south-Bellingham Bay coverage; nearshore foreground may dominate.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.boatingcenter.org/webcams"
+        },
+        {
+          "id": "WA-WC-018",
+          "name": "Fairhaven Cove Panorama",
+          "operator": "Community Boating Center",
+          "accessUrl": "https://www.boatingcenter.org/webcams",
+          "feedFormat": "Panoramic webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official boating-center page lists the Fairhaven Cove Panorama.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 75,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Best broad water view among the Bellingham operator’s listed cameras.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.boatingcenter.org/webcams"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-van-016",
+      "name": "Jericho Beach, Vancouver",
+      "region": "Metro Vancouver",
+      "locality": "Jericho Beach, Vancouver",
+      "waterbody": "English Bay",
+      "latitude": 49.277,
+      "longitude": -123.197,
+      "coordinateQuality": "Published address",
+      "feeds": [
+        {
+          "id": "BC-VAN-016",
+          "name": "Jericho Sailing Centre HD Streamcam",
+          "operator": "Jericho Sailing Centre",
+          "accessUrl": "https://jsca.bc.ca/services/steamcam-ptz/",
+          "feedFormat": "Live HD PTZ video",
+          "status": "verified-current",
+          "statusEvidence": "Official sailing-centre page shows a live stream over English Bay and was crawled current.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 75,
+          "targetSpecies": "Bigg’s orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Strong open-water urban view; PTZ may change bearing.",
+          "appMode": "External link",
+          "evidenceUrl": "https://jsca.bc.ca/services/steamcam-ptz/"
+        },
+        {
+          "id": "BC-VAN-017",
+          "name": "KiteboardBC Jericho Beach Cam",
+          "operator": "KiteboardBC",
+          "accessUrl": "https://www.kiteboardbc.com/webcam/jericho/",
+          "feedFormat": "Live webcam",
+          "status": "directory-current",
+          "statusEvidence": "Listed as an active source by the current Salish Sea coastal webcam directory.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 66,
+          "targetSpecies": "Bigg’s orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Useful fixed-angle complement to the sailing-centre PTZ.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.coastwebcams.ca/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-ps-030",
+      "name": "Shilshole Bay Webcam",
+      "region": "Central Puget Sound",
+      "locality": "Ballard, Seattle",
+      "waterbody": "Shilshole Bay / Puget Sound",
+      "latitude": 47.681,
+      "longitude": -122.405,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-PS-030",
+          "name": "Shilshole Bay Webcam",
+          "operator": "Ballard Elks Lodge",
+          "accessUrl": "https://ballardelks.org/shilshole-bay-webcam/",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official page states the camera faces southwest over Puget Sound.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 75,
+          "targetSpecies": "Orca; humpback; gray whale",
+          "seasonality": "Year-round",
+          "caveat": "Broad water view; whales may be distant because of camera elevation and range.",
+          "appMode": "External link",
+          "evidenceUrl": "https://ballardelks.org/shilshole-bay-webcam/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-bb-020",
+      "name": "White Rock East Beach Cam",
+      "region": "Boundary Bay",
+      "locality": "White Rock",
+      "waterbody": "Semiahmoo Bay",
+      "latitude": 49.017,
+      "longitude": -122.793,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-BB-020",
+          "name": "White Rock East Beach Cam",
+          "operator": "Community stream",
+          "accessUrl": "https://www.youtube.com/watch?v=ClvJjIz5GE4",
+          "feedFormat": "Live YouTube video",
+          "status": "current-frame-verified",
+          "statusEvidence": "Salish Sea webcam directory showed a current frame timestamped 2026-07-17.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 75,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Complementary eastward shoreline view.",
+          "appMode": "External link",
+          "evidenceUrl": "https://halibutbank.ca/webcams.html"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-bb-019",
+      "name": "White Rock Pier Cam",
+      "region": "Boundary Bay",
+      "locality": "White Rock",
+      "waterbody": "Semiahmoo Bay",
+      "latitude": 49.022,
+      "longitude": -122.806,
+      "coordinateQuality": "Approximate pier",
+      "feeds": [
+        {
+          "id": "BC-BB-019",
+          "name": "White Rock Pier Cam",
+          "operator": "Community stream",
+          "accessUrl": "https://www.youtube.com/watch?v=4MK3E9EWDSY",
+          "feedFormat": "Live YouTube video",
+          "status": "current-frame-verified",
+          "statusEvidence": "Salish Sea webcam directory showed a current frame timestamped 2026-07-17.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 75,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Excellent water visibility; whale density is lower than major straits.",
+          "appMode": "External link",
+          "evidenceUrl": "https://halibutbank.ca/webcams.html"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-nis-047",
+      "name": "Alert Bay",
+      "region": "Johnstone Strait / Broughton",
+      "locality": "Alert Bay",
+      "waterbody": "Broughton Strait",
+      "latitude": 50.5824,
+      "longitude": -126.9162,
+      "coordinateQuality": "Published directory coordinates",
+      "feeds": [
+        {
+          "id": "BC-NIS-047",
+          "name": "Alert Bay Airstrip — Northwest",
+          "operator": "Alert Bay / community source",
+          "accessUrl": "https://www.alertbay.ca/current-conditions",
+          "feedFormat": "Current still webcam",
+          "status": "directory-current",
+          "statusEvidence": "Municipal current-conditions page links airstrip cameras; current webcam directories show recent NW and NE frames.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 73,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Potentially valuable elevated strait view; verify how much water appears in frame.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.alertbay.ca/current-conditions"
+        },
+        {
+          "id": "BC-NIS-048",
+          "name": "Alert Bay Airstrip — Northeast",
+          "operator": "Alert Bay / community source",
+          "accessUrl": "https://www.alertbay.ca/current-conditions",
+          "feedFormat": "Current still webcam",
+          "status": "directory-current",
+          "statusEvidence": "Municipal current-conditions page links airstrip cameras; current directories show recent NE frames.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 73,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Complementary directional coverage; verify water fraction and source stability.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.alertbay.ca/current-conditions"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gs-041",
+      "name": "Point Holmes Ramp Cam",
+      "region": "Northern Strait of Georgia",
+      "locality": "Point Holmes, Comox",
+      "waterbody": "Strait of Georgia",
+      "latitude": 49.686,
+      "longitude": -124.898,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-GS-041",
+          "name": "Point Holmes Ramp Cam",
+          "operator": "Point Holmes Recreation Association",
+          "accessUrl": "https://www.pointholmesrecreation.ca/rampcam/",
+          "feedFormat": "Solar-powered webcam",
+          "status": "verified-current",
+          "statusEvidence": "Official association page identifies a solar-powered webcam on Lazo Road.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 73,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round; weather/power dependent",
+          "caveat": "Better open-water potential than inner Comox Harbour, but low ramp angle.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.pointholmesrecreation.ca/rampcam/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-whi-027",
+      "name": "Possession Beach Boat Launch Cam",
+      "region": "South Whidbey / Possession Sound",
+      "locality": "Possession Point, Whidbey Island",
+      "waterbody": "Possession Sound",
+      "latitude": 47.902,
+      "longitude": -122.401,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WHI-027",
+          "name": "Possession Beach Boat Launch Cam",
+          "operator": "Whidbey Telecom",
+          "accessUrl": "https://www.whidbeytel.com/cams/possession-beach-boat-launch/",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Operator page identifies the Possession Beach Boat Launch camera.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 70,
+          "targetSpecies": "Orca; gray whale; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Strategic south-Whidbey channel; limited by low launch viewpoint.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.whidbeytel.com/cams/possession-beach-boat-launch/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-wc-020",
+      "name": "Bellingham Bay from Zuanich Park",
+      "region": "Whatcom / Bellingham Bay",
+      "locality": "Zuanich Point Park",
+      "waterbody": "Bellingham Bay",
+      "latitude": 48.754,
+      "longitude": -122.507,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WC-020",
+          "name": "Bellingham Bay from Zuanich Park",
+          "operator": "Community Boating Center",
+          "accessUrl": "https://www.boatingcenter.org/webcams",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official boating-center page lists the Zuanich Park view.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 69,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Good northern bay coverage; harbor infrastructure may occupy part of frame.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.boatingcenter.org/webcams"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-jdf-008",
+      "name": "Juan de Fuca Cottages Dungeness Bay Cams",
+      "region": "Strait of Juan de Fuca",
+      "locality": "Dungeness Bay, Sequim",
+      "waterbody": "Dungeness Bay",
+      "latitude": 48.143,
+      "longitude": -123.082,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-JDF-008",
+          "name": "Juan de Fuca Cottages Dungeness Bay Cams",
+          "operator": "Juan de Fuca Cottages",
+          "accessUrl": "https://sequimwebcam.com/",
+          "feedFormat": "Two live images, 24/7",
+          "status": "verified-current",
+          "statusEvidence": "Operator page states two webcams run 24/7 over Dungeness Bay.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 69,
+          "targetSpecies": "Gray whale; seals; sea otter",
+          "seasonality": "Year-round",
+          "caveat": "Good bay conditions and wildlife; less direct access to the main strait corridor.",
+          "appMode": "External link",
+          "evidenceUrl": "https://sequimwebcam.com/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-wc-019",
+      "name": "Post Point Buoy Cam",
+      "region": "Whatcom / Bellingham Bay",
+      "locality": "Post Point, Bellingham",
+      "waterbody": "Bellingham Bay",
+      "latitude": 48.719,
+      "longitude": -122.521,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WC-019",
+          "name": "Post Point Buoy Cam",
+          "operator": "Community Boating Center",
+          "accessUrl": "https://www.boatingcenter.org/webcams",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official boating-center page lists the Post Point Buoy camera.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 69,
+          "targetSpecies": "Orca; humpback; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Nearshore vantage with broader bay context.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.boatingcenter.org/webcams"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-sji-012",
+      "name": "Friday Harbor Ferry Landing Cam",
+      "region": "San Juan Islands",
+      "locality": "Friday Harbor",
+      "waterbody": "Friday Harbor",
+      "latitude": 48.535,
+      "longitude": -123.013,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-SJI-012",
+          "name": "Friday Harbor Ferry Landing Cam",
+          "operator": "IslandCam",
+          "accessUrl": "https://islandcam.com/story/live-webcams",
+          "feedFormat": "Current still image",
+          "status": "current-frame-verified",
+          "statusEvidence": "Browser inspection showed a broad current harbor image on the IslandCam directory.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 66,
+          "targetSpecies": "Orca; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Broad harbor water view; aggregator dependency lowers reliability.",
+          "appMode": "External link",
+          "evidenceUrl": "https://islandcam.com/story/live-webcams"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-whi-028",
+      "name": "Langley Marina Cam",
+      "region": "Whidbey / Saratoga Passage",
+      "locality": "Langley",
+      "waterbody": "Saratoga Passage",
+      "latitude": 48.038,
+      "longitude": -122.405,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-WHI-028",
+          "name": "Langley Marina Cam",
+          "operator": "Whidbey Telecom",
+          "accessUrl": "https://www.whidbeytel.com/cams/langley-marina/",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Operator page identifies the marina view.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 66,
+          "targetSpecies": "Gray whale; orca",
+          "seasonality": "Gray whales strongest in spring",
+          "caveat": "Useful complement to the dedicated whale cam; boats may obscure the lower frame.",
+          "appMode": "External link",
+          "evidenceUrl": "https://www.whidbeytel.com/cams/langley-marina/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-ps-032",
+      "name": "Port of Edmonds Marina Entrance Cam",
+      "region": "Central Puget Sound",
+      "locality": "Edmonds",
+      "waterbody": "Puget Sound",
+      "latitude": 47.8114,
+      "longitude": -122.3825,
+      "coordinateQuality": "Published coordinates",
+      "feeds": [
+        {
+          "id": "WA-PS-032",
+          "name": "Port of Edmonds Marina Entrance Cam",
+          "operator": "Port of Edmonds",
+          "accessUrl": "https://portofedmonds.gov/marina-camera/",
+          "feedFormat": "Live webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official port page identifies a live view of guest moorage and marina entrance.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 66,
+          "targetSpecies": "Orca; gray whale; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Strategic crossing but the camera emphasizes moorage rather than open water.",
+          "appMode": "External link",
+          "evidenceUrl": "https://portofedmonds.gov/marina-camera/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-wa-sji-015",
+      "name": "West Sound from Orcas Island Yacht Club",
+      "region": "San Juan Islands",
+      "locality": "West Sound, Orcas Island",
+      "waterbody": "West Sound",
+      "latitude": 48.618,
+      "longitude": -122.954,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "WA-SJI-015",
+          "name": "West Sound from Orcas Island Yacht Club",
+          "operator": "Orcas Island Yacht Club / CamStreamer",
+          "accessUrl": "https://camstreamer.com/live/stream/10310-west-sound-from-orcas-island-yacht-club",
+          "feedFormat": "1080p PTZ stream",
+          "status": "verified-current",
+          "statusEvidence": "Stream listing was indexed recently and identifies a 1080p PTZ feed.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 66,
+          "targetSpecies": "Orca; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "PTZ may periodically point away from open water.",
+          "appMode": "External link",
+          "evidenceUrl": "https://camstreamer.com/live/stream/10310-west-sound-from-orcas-island-yacht-club"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-gi-030",
+      "name": "Ganges Harbour Live Cam — Salt Spring Exchange",
+      "region": "Southern Gulf Islands",
+      "locality": "Ganges, Salt Spring Island",
+      "waterbody": "Ganges Harbour",
+      "latitude": 48.853,
+      "longitude": -123.498,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-GI-030",
+          "name": "Ganges Harbour Live Cam — Salt Spring Exchange",
+          "operator": "Salt Spring Exchange",
+          "accessUrl": "https://saltspringexchange.com/cams/ganges-harbour/",
+          "feedFormat": "Live webcam",
+          "status": "verified-current",
+          "statusEvidence": "Current community page identifies a live Ganges Harbour camera hosted at Moby’s Pub.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 65,
+          "targetSpecies": "Orca; porpoise",
+          "seasonality": "Year-round",
+          "caveat": "Good island-community view, but protected harbor reduces whale probability.",
+          "appMode": "External link",
+          "evidenceUrl": "https://saltspringexchange.com/cams/ganges-harbour/"
+        }
+      ]
+    },
+    {
+      "id": "webcam-site-bc-svi-028",
+      "name": "Hakai Victoria Office & Labs Webcam",
+      "region": "Southern Vancouver Island",
+      "locality": "Victoria Harbour",
+      "waterbody": "Victoria Harbour / Strait approaches",
+      "latitude": 48.416,
+      "longitude": -123.37,
+      "coordinateQuality": "Approximate site",
+      "feeds": [
+        {
+          "id": "BC-SVI-028",
+          "name": "Hakai Victoria Office & Labs Webcam",
+          "operator": "Hakai Institute",
+          "accessUrl": "https://hakai.org/live-webcams",
+          "feedFormat": "Live still webcam",
+          "status": "landing-verified",
+          "statusEvidence": "Official Hakai page lists its Victoria Office & Labs webcam.",
+          "verifiedAt": "2026-07-17",
+          "tier": 2,
+          "priorityScore": 65,
+          "targetSpecies": "Orca; humpback",
+          "seasonality": "Year-round",
+          "caveat": "Busy inner-harbor context; whales are more likely outside the harbor entrance.",
+          "appMode": "External link",
+          "evidenceUrl": "https://hakai.org/live-webcams"
+        }
+      ]
+    }
+  ]
+}

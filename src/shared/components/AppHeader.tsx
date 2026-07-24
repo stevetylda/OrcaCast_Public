@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 type Props = {
+  className?: string;
   title: string;
   subtitle: string;
   onOpenMenu: () => void;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function AppHeader({
+  className = "",
   title,
   subtitle,
   onOpenMenu,
@@ -19,7 +21,7 @@ export function AppHeader({
   const { pathname } = useLocation();
   return (
     <header
-      className={`header${variant === "home" ? " header--home" : ""}`}
+      className={`header${variant === "home" ? " header--home" : ""}${className ? ` ${className}` : ""}`}
       data-tour="top-bar"
     >
       <div className="header__left">

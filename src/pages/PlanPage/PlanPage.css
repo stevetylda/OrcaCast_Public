@@ -128,9 +128,9 @@
 
 .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar {
   top: 24px !important;
-  right: auto !important;
+  right: 24px !important;
   bottom: 286px !important;
-  left: 24px !important;
+  left: auto !important;
   width: 410px !important;
   height: auto !important;
   min-height: 390px;
@@ -2649,7 +2649,9 @@
 .footerDock__panel--places {
   padding: 16px;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
+  max-height: min(72vh, 680px);
 }
 
 .footerDock__panel--settings {
@@ -2757,6 +2759,12 @@
 .footerDock__paletteList {
   display: grid;
   gap: 8px;
+}
+
+.footerDock__panel--places .footerDock__placeList {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .footerDock__placeItem,
@@ -8270,9 +8278,9 @@
 .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar,
 .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar:not(.isCollapsed) {
   top: 24px !important;
-  right: auto !important;
+  right: 24px !important;
   bottom: 286px !important;
-  left: 24px !important;
+  left: auto !important;
   width: 410px !important;
   height: auto !important;
   min-height: 390px !important;
@@ -8365,13 +8373,14 @@
   width: 410px;
   min-height: 250px;
   flex-direction: column;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .plannerResultsPage__leftTripStack .plannerResultsPage__sidebarTripCard {
   position: relative;
   z-index: 2;
   border-radius: 22px 22px 8px 8px;
+  pointer-events: auto;
 }
 
 .plannerResultsPage__leftItineraryCard {
@@ -8389,6 +8398,7 @@
   border-radius: 0 0 19px 19px;
   background: #fffdf6;
   box-shadow: 6px 7px 0 var(--planner-ink);
+  pointer-events: auto;
 }
 
 .plannerResultsPage__sidebarViewItinerary {

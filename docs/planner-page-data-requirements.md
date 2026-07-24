@@ -18,7 +18,7 @@ Primary implementation files:
 
 ## 1. Planner page inputs at a glance
 
-The planner page needs four real data sources:
+The planner page needs six real data sources:
 
 1. Base locations
    - File: `public/data/places/base_locations.json`
@@ -34,17 +34,29 @@ The planner page needs four real data sources:
      - the seasonal histogram
      - the "Typical activity" insight
 
-3. Places of interest
+3. Historical smoothed sightings by week of year
+   - Directory: `public/data/week_of_year_agg_history_smooth/srkw`
+   - Used only by the Planner's **Smooth** map view.
+   - The selected date range is split into ISO weeks and the corresponding
+     GeoTIFFs are combined in proportion to the number of selected days in
+     each week.
+
+4. Places of interest
    - File: `public/data/places_of_interest.json`
    - Used to rank and display recommended viewing spots.
 
-4. Viewing spot photo manifest
+5. Webcam inventory
+   - File: `public/data/webcams.json`
+   - Used by the Planner camera layer and the This Week Watch panel.
+   - Contains grouped sites; each site can expose multiple external camera pages.
+
+6. Viewing spot photo manifest
    - File: `public/data/places/viewing_spot_photos.json`
    - Used to override map-preview thumbnails with approved photos and attribution metadata.
 
 The planner page also depends on one non-planner shared data source:
 
-5. Grid geometry by H3 resolution
+7. Grid geometry by H3 resolution
    - Files:
      - `public/data/grids/H4.geojson`
      - `public/data/grids/H5.geojson`
@@ -227,7 +239,44 @@ Fetch path candidates are hard-coded as:
 - `${BASE_URL}data/trip_planner/${resolution}_historical_doy.json`
 - `${BASE_URL}data/historical_occurrence/${resolution}_HISTORICAL_DOY.json`
 
-### 3.3 Places of interest
+### 3.3 Historical smoothed sightings
+
+Source builder: `src/features/planner/model/historicalSmooth.ts`
+
+Raster renderer: `src/shared/geo/gridOverlay.ts`
+
+Runtime files:
+
+- `public/data/week_of_year_agg_history_smooth/manifest.json`
+- `public/data/week_of_year_agg_history_smooth/periods.json`
+- `public/data/week_of_year_agg_history_smooth/srkw/week_01.tif` through
+  `week_53.tif`
+
+The Planner currently uses the SRKW set because its historical H4-H6
+occurrence layers, activity score, and recommended-place ranking are SRKW
+data. The same source builder accepts `transient` so a future Planner ecotype
+selector can switch every historical layer together instead of mixing
+ecotypes.
+
+The date window is inclusive. Each selected calendar day contributes to its
+ISO week, so a ten-day selection containing seven days from week 27 and three
+days from week 28 produces weights of `0.7` and `0.3`. If a range spans years,
+days assigned to the same ISO week are accumulated into one weight. The
+weighted numeric TIFF values are combined first, then recolored with the
+currently selected Planner palette.
+
+This path is deliberately limited to the Planner's **Smooth** view:
+
+- **Smooth** is the Planner's initial surface mode.
+- **Hex grid**, scoring, charting, and recommendations continue to use the
+  existing historical trip-occurrence payloads.
+- This Week continues to use its forecast-specific smoothed raster.
+- The PNG files are packaged previews; the browser aggregates the numeric TIFF
+  files.
+- If a weighted TIFF cannot be loaded, the map falls back to the existing
+  generated surface so the Planner remains usable.
+
+### 3.4 Places of interest
 
 Loader: `src/features/locations/poiData.ts`
 
@@ -298,7 +347,37 @@ How the planner uses POIs:
 - POIs can be filtered by selected base-location radius before ranking
 - POIs are scored against the selected trip’s aggregated H3 values
 
-### 3.4 Viewing spot photo manifest
+### 3.5 Webcam inventory
+
+Loader: `src/shared/data/webcams.ts`
+
+Accepted normalized shape:
+
+```ts
+type WebcamPayload = {
+  version: string;
+  updatedAt: string;
+  items: WebcamSite[];
+};
+
+type WebcamSite = {
+  id: string;
+  name: string;
+  region: string;
+  locality: string;
+  waterbody: string;
+  latitude: number;
+  longitude: number;
+  coordinateQuality: string;
+  feeds: WebcamFeed[];
+};
+```
+
+The packaged inventory contains 58 Tier 1–2 feeds grouped into 48 map sites.
+Camera status is static verification metadata, not a real-time health claim.
+The app links to operator pages and does not embed feeds or reuse thumbnails.
+
+### 3.6 Viewing spot photo manifest
 
 Loader: `src/shared/data/viewingSpotPhotos.ts`
 
@@ -353,7 +432,7 @@ Fetch path candidates are hard-coded as:
 - `/data/places/viewing_spot_photos.json`
 - `data/places/viewing_spot_photos.json`
 
-### 3.5 Grid geometry
+### 3.7 Grid geometry
 
 Loader path source: `src/shared/config/dataPaths.ts`
 

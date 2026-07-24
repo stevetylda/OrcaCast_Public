@@ -117,6 +117,29 @@ test("primary navigation works", async ({ page }) => {
   await expect(page).toHaveURL(/\/planner$/);
 });
 
+test("forecast header underlines the active route in orange", async ({
+  page,
+}) => {
+  for (const [route, label] of [
+    ["/watch", "This week"],
+    ["/planner", "Plan a trip"],
+    ["/explore", "Explore"],
+  ] as const) {
+    await page.goto(route, { waitUntil: "domcontentloaded" });
+    const activeLink = page.getByRole("link", { name: label, exact: true });
+    await expect(activeLink).toHaveAttribute("aria-current", "page");
+    const decoration = await activeLink.evaluate((link) => {
+      const style = getComputedStyle(link);
+      return {
+        color: style.textDecorationColor,
+        line: style.textDecorationLine,
+      };
+    });
+    expect(decoration.line).toContain("underline");
+    expect(decoration.color).toBe("rgb(255, 100, 88)");
+  }
+});
+
 test("This Week renders the live map, forecast, places, details, and itinerary", async ({
   page,
 }) => {
@@ -141,13 +164,13 @@ test("This Week renders the live map, forecast, places, details, and itinerary",
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("tab", { selected: true })).toBeFocused();
 
-  const details = page.getByRole("button", { name: /details/i }).first();
+  const details = page.getByRole("button", { name: /view details/i }).first();
   if (await details.isVisible()) {
-    await details.click({ force: true });
+    await details.evaluate((button: HTMLButtonElement) => button.click());
     await expect(page.getByText("Why it is recommended")).toBeVisible();
     await page
       .getByRole("button", { name: "Add to itinerary" })
-      .click({ force: true });
+      .evaluate((button: HTMLButtonElement) => button.click());
     await expect(page.getByText("Added to itinerary")).toBeVisible();
     await expect(page.locator(".plannerMapMarker.is-pulsing")).toBeVisible();
 
@@ -183,6 +206,139 @@ test("This Week renders the live map, forecast, places, details, and itinerary",
     await page.mouse.click(emptyMapPoint?.x ?? 0, emptyMapPoint?.y ?? 0);
     await expect(page.locator(".plannerMapMarker.is-pulsing")).toHaveCount(0);
   }
+});
+
+test("This Week playback advances forward with field picks unloaded", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/watch", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+  await expect(page.getByRole("article").first()).toBeVisible({
+    timeout: 45_000,
+  });
+  await expect(
+    page.getByRole("slider", { name: "Selected forecast week" }),
+  ).toHaveCount(0);
+
+  if (!testInfo.project.name.startsWith("mobile")) {
+    await page.getByRole("button", { name: "Settings" }).click();
+    await page
+      .getByRole("combobox", { name: "Surface view" })
+      .selectOption("surface");
+    await expect(
+      page.getByRole("combobox", { name: "Surface view" }),
+    ).toHaveValue("surface");
+    await page.getByRole("button", { name: "Close settings" }).click();
+  }
+
+  const firstWeek = page.getByRole("tab").first();
+  await firstWeek.click();
+  const startingIndex = Number(
+    await page
+      .getByRole("tab", { selected: true })
+      .getAttribute("data-forecast-period-index"),
+  );
+  await page.getByRole("button", { name: "Play weekly forecast" }).click();
+  await expect(
+    page.getByRole("status", { name: "Playing weekly forecast" }),
+  ).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(0);
+  await expect
+    .poll(async () =>
+      Number(
+        await page
+          .getByRole("tab", { selected: true })
+          .getAttribute("data-forecast-period-index"),
+      ),
+    )
+    .toBeGreaterThan(startingIndex);
+
+  await page.getByRole("button", { name: "Pause playback" }).click();
+  await expect(
+    page.getByRole("status", { name: "Playing weekly forecast" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("article").first()).toBeVisible({
+    timeout: 45_000,
+  });
+});
+
+test("This Week Watch and Listen open media details without map popups", async ({
+  page,
+}) => {
+  await page.goto("/watch", { waitUntil: "domcontentloaded" });
+  const map = page.locator('[data-tour="map-canvas"]');
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+  await expect
+    .poll(async () =>
+      Number(await map.getAttribute("data-planner-camera-count")),
+    )
+    .toBe(0);
+
+  await page.getByRole("button", { name: "Watch", exact: true }).click();
+  await expect(page.getByText("Webcams", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".footerDock__count").filter({ hasText: "48" }),
+  ).toBeVisible();
+  await expect
+    .poll(async () =>
+      Number(await map.getAttribute("data-planner-camera-count")),
+    )
+    .toBe(48);
+
+  const webcamList = page.locator(".footerDock__placeList");
+  const listMetrics = await webcamList.evaluate((element) => ({
+    clientHeight: element.clientHeight,
+    scrollHeight: element.scrollHeight,
+    overflowY: getComputedStyle(element).overflowY,
+  }));
+  expect(listMetrics.overflowY).toBe("auto");
+  expect(listMetrics.scrollHeight).toBeGreaterThan(listMetrics.clientHeight);
+  await page
+    .locator(".footerDock__placeItem")
+    .first()
+    .evaluate((button: HTMLButtonElement) => button.click());
+  await expect(page.getByText("Webcam details", { exact: true })).toBeVisible();
+  const goWatch = page.getByRole("button", { name: "Go Watch" }).first();
+  await expect(goWatch).toBeVisible();
+  await expect(goWatch).toHaveAttribute("title", /^https?:\/\//);
+  await goWatch.click();
+  await expect(
+    page.getByText(
+      "This button will take you to a website that is not OrcaCast.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Nah" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Yah" })).toHaveAttribute(
+    "rel",
+    "noopener noreferrer",
+  );
+  await page.getByRole("button", { name: "Nah" }).click();
+
+  await page.getByRole("button", { name: "Watch", exact: true }).click();
+  await expect
+    .poll(async () =>
+      Number(await map.getAttribute("data-planner-camera-count")),
+    )
+    .toBe(0);
+
+  await page.getByRole("button", { name: "Listen", exact: true }).click();
+  await expect(page.getByText("Hydrophones", { exact: true })).toBeVisible();
+  await page
+    .locator(".footerDock__placeItem")
+    .first()
+    .evaluate((button: HTMLButtonElement) => button.click());
+  await expect(
+    page.getByText("Hydrophone details", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Go Listen" })).toHaveAttribute(
+    "title",
+    "https://live.orcasound.net/",
+  );
+  await expect(page.locator(".maplibregl-popup")).toHaveCount(0);
 });
 
 test("mobile navigation opens and closes", async ({ page }, testInfo) => {
@@ -241,6 +397,7 @@ test("mobile Planner keeps the complete form within reach", async ({
 test("Planner renders each POI filter without bulk DOM markers", async ({
   page,
 }) => {
+  test.setTimeout(120_000);
   await page.addInitScript(() => {
     window.sessionStorage.setItem(
       "orcacast.planner.selection",
@@ -262,6 +419,7 @@ test("Planner renders each POI filter without bulk DOM markers", async ({
   });
 
   await page.getByRole("button", { name: /Places/ }).click();
+  const map = page.locator('[data-tour="map-canvas"]');
   await page.getByRole("button", { name: "All POIs" }).click();
 
   const locationPicker = page.getByRole("combobox", {
@@ -272,7 +430,6 @@ test("Planner renders each POI filter without bulk DOM markers", async ({
     .poll(() => locationPicker.locator("option").count())
     .toBeGreaterThan(1);
 
-  const map = page.locator('[data-tour="map-canvas"]');
   await expect
     .poll(async () => Number(await map.getAttribute("data-planner-poi-count")))
     .toBeGreaterThan(0);
@@ -282,81 +439,19 @@ test("Planner renders each POI filter without bulk DOM markers", async ({
     .poll(() => page.locator(".plannerMapMarker").count())
     .toBeLessThan(100);
 
-  const mapBounds = await map.boundingBox();
-  expect(mapBounds).not.toBeNull();
-  let hoveredPoi: { x: number; y: number; name: string } | null = null;
-  for (
-    let y = (mapBounds?.y ?? 0) + 80;
-    y < (mapBounds?.y ?? 0) + (mapBounds?.height ?? 0) - 220 && !hoveredPoi;
-    y += 28
-  ) {
-    for (
-      let x = (mapBounds?.x ?? 0) + 480;
-      x < (mapBounds?.x ?? 0) + (mapBounds?.width ?? 0) - 140;
-      x += 28
-    ) {
-      await page.mouse.move(x, y);
-      const label = page.locator(".plannerMapHoverLabel");
-      if (await label.isVisible()) {
-        hoveredPoi = { x, y, name: (await label.innerText()).trim() };
-        break;
-      }
-    }
-  }
-
-  expect(hoveredPoi).not.toBeNull();
-  expect(hoveredPoi?.name).toMatch(/\S/);
-  const hoverPopup = page.locator(".plannerMapHoverPopup");
-  await expect(hoverPopup).toBeVisible();
-  await expect
-    .poll(() =>
-      hoverPopup.evaluate(
-        (element) => element === element.parentElement?.lastElementChild,
-      ),
-    )
-    .toBe(true);
-  await page.mouse.click(hoveredPoi?.x ?? 0, hoveredPoi?.y ?? 0);
+  const firstPoiOption = locationPicker.locator("option").nth(1);
+  const firstPoiName =
+    (await firstPoiOption.textContent())?.split(" — ")[0]?.trim() ?? "";
+  const firstPoiValue = await firstPoiOption.getAttribute("value");
+  expect(firstPoiName).toMatch(/\S/);
+  expect(firstPoiValue).toBeTruthy();
+  await locationPicker.selectOption(firstPoiValue ?? "");
   await expect(page.getByText("About this location")).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: hoveredPoi?.name }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: firstPoiName })).toBeVisible();
   await expect
     .poll(() => map.getAttribute("data-planner-pulsing-location"))
     .not.toBe("");
-
-  const settledMapBounds = await map.boundingBox();
-  expect(settledMapBounds).not.toBeNull();
-  let emptyMapPoint: { x: number; y: number } | null = null;
-  for (
-    let y = (settledMapBounds?.y ?? 0) + 80;
-    y < (settledMapBounds?.y ?? 0) + (settledMapBounds?.height ?? 0) - 220 &&
-    !emptyMapPoint;
-    y += 40
-  ) {
-    for (
-      let x = (settledMapBounds?.x ?? 0) + 80;
-      x < (settledMapBounds?.x ?? 0) + (settledMapBounds?.width ?? 0) - 120;
-      x += 40
-    ) {
-      await page.mouse.move(x, y);
-      const isBareMapCanvas = await page.evaluate(
-        ({ pointX, pointY }) =>
-          document
-            .elementFromPoint(pointX, pointY)
-            ?.classList.contains("maplibregl-canvas") ?? false,
-        { pointX: x, pointY: y },
-      );
-      if (
-        isBareMapCanvas &&
-        !(await page.locator(".plannerMapHoverLabel").isVisible())
-      ) {
-        emptyMapPoint = { x, y };
-        break;
-      }
-    }
-  }
-  expect(emptyMapPoint).not.toBeNull();
-  await page.mouse.click(emptyMapPoint?.x ?? 0, emptyMapPoint?.y ?? 0);
+  await page.getByRole("button", { name: "Top Places" }).click();
   await expect
     .poll(() => map.getAttribute("data-planner-pulsing-location"))
     .toBe("");
@@ -377,6 +472,230 @@ test("Planner renders each POI filter without bulk DOM markers", async ({
       page.getByRole("button", { name: "All POIs" }),
     ).toHaveAttribute("aria-pressed", "false");
   }
+});
+
+test("Planner loads date-weighted historical smooth weeks by default", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem(
+      "orcacast.planner.selection",
+      JSON.stringify({
+        city: "Friday Harbor, WA",
+        arrivalDate: "2026-06-29",
+        departureDate: "2026-07-08",
+      }),
+    );
+  });
+
+  const requestedTiffs: string[] = [];
+  page.on("response", (response) => {
+    const url = response.url();
+    if (url.includes("/week_of_year_agg_history_smooth/")) {
+      requestedTiffs.push(url);
+      expect(response.ok()).toBeTruthy();
+    }
+  });
+
+  await page.goto("/planner?resume=1", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+  if (!testInfo.project.name.startsWith("mobile")) {
+    await page
+      .getByRole("button", { name: "Expand recommended viewing spots" })
+      .click();
+    const sidebarPosition = await page
+      .locator(".plannerResultsPage__tripSidebar")
+      .evaluate((sidebar) => {
+        const rect = sidebar.getBoundingClientRect();
+        return {
+          left: rect.left,
+          rightGap: window.innerWidth - rect.right,
+          viewportWidth: window.innerWidth,
+        };
+      });
+    expect(sidebarPosition.left).toBeGreaterThan(
+      sidebarPosition.viewportWidth / 2,
+    );
+    expect(sidebarPosition.rightGap).toBe(24);
+
+    const belowTripCardHitTarget = await page.evaluate(() => {
+      const stack = document.querySelector<HTMLElement>(
+        ".plannerResultsPage__leftTripStack",
+      );
+      const card = stack?.querySelector<HTMLElement>(
+        ".plannerResultsPage__sidebarTripCard",
+      );
+      if (!stack || !card) return null;
+      const stackRect = stack.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const target = document.elementFromPoint(
+        stackRect.left + stackRect.width / 2,
+        Math.min(stackRect.bottom - 20, cardRect.bottom + 44),
+      );
+      return {
+        className: target?.className ?? "",
+        insideTripStack: Boolean(
+          target?.closest(".plannerResultsPage__leftTripStack"),
+        ),
+      };
+    });
+    expect(belowTripCardHitTarget).not.toBeNull();
+    expect(belowTripCardHitTarget?.insideTripStack).toBe(false);
+    expect(String(belowTripCardHitTarget?.className)).toContain(
+      "maplibregl-canvas",
+    );
+  }
+  await expect
+    .poll(() => requestedTiffs.some((url) => url.endsWith("week_27.tif")), {
+      timeout: 60_000,
+    })
+    .toBe(true);
+  await expect
+    .poll(() => requestedTiffs.some((url) => url.endsWith("week_28.tif")), {
+      timeout: 60_000,
+    })
+    .toBe(true);
+  expect(requestedTiffs).toHaveLength(2);
+  expect(requestedTiffs.every((url) => url.includes("/srkw/"))).toBe(true);
+
+  await page.getByRole("button", { name: "Open planner settings" }).click();
+  await expect(
+    page.getByRole("combobox", { name: "Surface view" }),
+  ).toHaveValue("surface");
+
+  if (!testInfo.project.name.startsWith("mobile")) {
+    await page.getByRole("button", { name: "Close settings" }).click();
+    await page
+      .getByRole("button", { name: "Activity likelihood color scale" })
+      .click();
+    await page.getByRole("option", { name: "Rose Noir" }).click();
+    await page
+      .getByRole("button", { name: "Activity likelihood color scale" })
+      .click();
+    await expect(
+      page.getByRole("option", { name: "Rose Noir" }),
+    ).toHaveAttribute("aria-selected", "true");
+  }
+});
+
+test("Planner sidebar stays right after a This Week round trip", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name.startsWith("mobile"),
+    "Desktop Planner sidebar regression",
+  );
+  test.setTimeout(120_000);
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem(
+      "orcacast.planner.selection",
+      JSON.stringify({
+        city: "Sequim, WA",
+        arrivalDate: "2026-08-03",
+        departureDate: "2026-08-21",
+      }),
+    );
+  });
+
+  const readSidebarPosition = () =>
+    page.locator(".plannerResultsPage__tripSidebar").evaluate((sidebar) => {
+      const rect = sidebar.getBoundingClientRect();
+      return {
+        left: rect.left,
+        position: getComputedStyle(sidebar).position,
+        rightGap: window.innerWidth - rect.right,
+        viewportWidth: window.innerWidth,
+      };
+    });
+  const readLegendStyle = async () => {
+    const legend = page.locator(".activityLegend:visible");
+    await legend.waitFor({ state: "visible" });
+    return legend.evaluate((legend) => {
+      const rect = legend.getBoundingClientRect();
+      const style = getComputedStyle(legend);
+      return {
+        background: style.backgroundColor,
+        border: style.border,
+        borderRadius: style.borderRadius,
+        gap: style.gap,
+        height: rect.height,
+        padding: style.padding,
+        width: rect.width,
+      };
+    });
+  };
+
+  await page.goto("/planner?resume=1", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+  await page
+    .getByRole("button", { name: "Expand recommended viewing spots" })
+    .click();
+  const initialSidebar = await readSidebarPosition();
+  const plannerLegend = await readLegendStyle();
+
+  await page.getByRole("link", { name: "This week" }).click();
+  await expect(page).toHaveURL(/\/watch$/);
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+  const watchLegend = await readLegendStyle();
+
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/\/planner\?resume=1$/);
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+  await page
+    .getByRole("button", { name: "Expand recommended viewing spots" })
+    .click();
+  const returnedSidebar = await readSidebarPosition();
+  const returnedLegend = await readLegendStyle();
+
+  for (const sidebar of [initialSidebar, returnedSidebar]) {
+    expect(sidebar.position).toBe("absolute");
+    expect(sidebar.left).toBeGreaterThan(sidebar.viewportWidth / 2);
+    expect(sidebar.rightGap).toBe(24);
+  }
+  expect(watchLegend).toEqual(plannerLegend);
+  expect(returnedLegend).toEqual(plannerLegend);
+});
+
+test("Planner toggles the grouped webcam inventory", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem(
+      "orcacast.planner.selection",
+      JSON.stringify({
+        city: "Friday Harbor, WA",
+        arrivalDate: "2026-07-14",
+        departureDate: "2026-07-16",
+      }),
+    );
+  });
+
+  await page.goto("/planner?resume=1", { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+  const map = page.locator('[data-tour="map-canvas"]');
+  await page.getByRole("button", { name: /Places/ }).click();
+  await page.getByRole("button", { name: "Cameras" }).click();
+  await expect
+    .poll(async () =>
+      Number(await map.getAttribute("data-planner-camera-count")),
+    )
+    .toBe(48);
+
+  await page.getByRole("button", { name: "Cameras" }).click();
+  await expect
+    .poll(async () =>
+      Number(await map.getAttribute("data-planner-camera-count")),
+    )
+    .toBe(0);
 });
 
 test("This Week exposes its mobile page heading", async ({

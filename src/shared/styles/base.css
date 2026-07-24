@@ -725,7 +725,7 @@ body {
   max-width: 980px;
   transform: translateX(var(--week-timeline-shift, 0px));
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  grid-template-columns: 64px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   padding: 16px 18px;
@@ -812,44 +812,6 @@ body {
 .weekTimeline__weekDate {
   font-size: 12px;
   font-weight: 700;
-}
-
-.weekTimeline__slider {
-  width: 100%;
-  margin: 0;
-  accent-color: #16b8f0;
-}
-
-.weekTimeline__slider::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(0, 194, 210, 0.88), rgba(16, 184, 240, 0.9));
-}
-
-.weekTimeline__slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  margin-top: -7px;
-  border: 4px solid rgba(255, 255, 255, 0.96);
-  border-radius: 50%;
-  background: #16b8f0;
-  box-shadow: 0 6px 16px rgba(22, 184, 240, 0.34);
-}
-
-.weekTimeline__slider::-moz-range-track {
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(0, 194, 210, 0.88), rgba(16, 184, 240, 0.9));
-}
-
-.weekTimeline__slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border: 4px solid rgba(255, 255, 255, 0.96);
-  border-radius: 50%;
-  background: #16b8f0;
-  box-shadow: 0 6px 16px rgba(22, 184, 240, 0.34);
 }
 
 .app--dark .weekTimeline {
@@ -1895,7 +1857,7 @@ body {
     bottom: 5.5rem;
     width: auto;
     min-width: 0;
-    grid-template-columns: 52px minmax(0, 1fr) 52px;
+    grid-template-columns: 52px minmax(0, 1fr);
     padding: 12px;
     border-radius: 24px;
   }

@@ -13,62 +13,6 @@
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
 }
 
-.exploreSoonHeader {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  min-height: 88px;
-  padding: 0 clamp(18px, 3vw, 58px);
-  border-bottom: 3px solid var(--explore-navy);
-  background: rgba(255, 252, 243, 0.97);
-}
-
-.exploreSoonHeader__menu {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border: 3px solid var(--explore-navy);
-  border-radius: 50%;
-  background: var(--explore-yellow);
-  color: var(--explore-navy);
-  cursor: pointer;
-}
-
-.exploreSoonHeader__brand {
-  color: var(--explore-navy);
-  font-size: clamp(1.45rem, 2.2vw, 2rem);
-  font-weight: 950;
-  letter-spacing: -0.06em;
-  text-decoration: none;
-}
-
-.exploreSoonHeader__brand span {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 6px 10px;
-  border: 2px solid var(--explore-navy);
-  border-radius: 999px;
-  background: var(--explore-teal);
-  font-size: 0.63rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  transform: rotate(2deg);
-}
-
-.exploreSoonHeader__watch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-  color: var(--explore-navy);
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
 .exploreSoonMain {
   width: min(1600px, 100%);
   margin: 0 auto;
@@ -286,8 +230,6 @@
 .exploreSoonCard p { margin: 0; font-weight: 650; line-height: 1.5; }
 .exploreSoonCard b { display: inline-block; margin-top: 24px; padding: 7px 10px; border: 2px solid var(--explore-navy); background: #fffdf6; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; transform: rotate(-2deg); }
 
-.exploreSoonHeader a:focus-visible,
-.exploreSoonHeader button:focus-visible,
 .exploreSoonButton:focus-visible { outline: 4px solid #2f59d7; outline-offset: 4px; }
 
 .app--dark .exploreSoonPage { --explore-paper: #071827; --explore-cream: #0d2638; color: #eef8f7; }
@@ -295,9 +237,6 @@
 .app--dark .exploreSoonHero h1 em { color: #ff8b82; }
 
 @media (max-width: 850px) {
-  .exploreSoonHeader { min-height: 72px; padding: 0 14px; }
-  .exploreSoonHeader__menu { width: 48px; height: 48px; border-width: 2px; }
-  .exploreSoonHeader__brand span { display: none; }
   .exploreSoonHero { grid-template-columns: 1fr; border-radius: 28px; }
   .exploreSoonHero__copy { min-height: 0; padding: 52px 28px; }
   .exploreSoonWorksite { min-height: 430px; border-top: 3px solid var(--explore-navy); border-left: 0; }
@@ -305,8 +244,6 @@
 }
 
 @media (max-width: 520px) {
-  .exploreSoonHeader__watch { font-size: 0; }
-  .exploreSoonHeader__watch .material-symbols-rounded { font-size: 24px; }
   .exploreSoonMain { padding: 18px 12px 70px; }
   .exploreSoonHero { box-shadow: 7px 8px 0 var(--explore-navy); }
   .exploreSoonHero h1 { font-size: clamp(3.4rem, 17vw, 4.7rem); }

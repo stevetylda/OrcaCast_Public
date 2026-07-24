@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { Link, MemoryRouter, useLocation } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { AppHeader } from "./AppHeader";
+import { ForecastLabHeader } from "./ForecastLabHeader";
 import { SideDrawer } from "./SideDrawer";
 
 function CurrentPath() {
@@ -23,6 +24,28 @@ function DrawerHarness() {
 }
 
 describe("application navigation", () => {
+  it.each([
+    ["/watch", "This week"],
+    ["/planner", "Plan a trip"],
+    ["/explore", "Explore"],
+  ])("marks %s as the active forecast route", (path, activeLabel) => {
+    render(
+      <MemoryRouter initialEntries={[path]}>
+        <ForecastLabHeader onOpenMenu={vi.fn()} />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: activeLabel })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(
+      screen
+        .getByRole("navigation", { name: "Forecast navigation" })
+        .querySelectorAll('[aria-current="page"]'),
+    ).toHaveLength(1);
+  });
+
   it("exposes labelled header actions", async () => {
     const user = userEvent.setup();
     const onMenu = vi.fn();

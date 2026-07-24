@@ -5,7 +5,7 @@ import type { DataLoadError } from "../../shared/data/errors";
 import type { Period } from "../../shared/data/periods";
 import type { PlannerBaseLocation } from "../../shared/data/plannerBaseLocations";
 import type { PaletteId } from "../../shared/geo/palettes";
-import type { SuggestedPlace, ViewingLocation } from "../locations/types";
+import type { SuggestedPlace, WebcamSite } from "../locations/types";
 import type { PublicPoi } from "../locations/poiData";
 
 export type FillColorSpec = DataDrivenPropertyValueSpecification<string>;
@@ -13,6 +13,7 @@ export type LngLat = [number, number];
 export type MapViewportPadding =
   number | { top: number; right: number; bottom: number; left: number };
 export type SparklineSeries = { forecast: number[]; sightings: number[] };
+export type WeightedGeoTiffSource = { path: string; weight: number };
 
 export type GridCellExpandRequest = {
   h3: string;
@@ -49,6 +50,9 @@ export type ForecastMapProps = {
   fallbackForecastPath?: string;
   smoothedForecastPath?: string;
   fallbackSmoothedForecastPath?: string;
+  smoothedForecastTilePath?: string;
+  fallbackSmoothedForecastTilePath?: string;
+  weightedSmoothedForecastSources?: WeightedGeoTiffSource[];
   colorScaleValues?: Record<string, number>;
   useExternalColorScale?: boolean;
   externalValues?: Record<string, number>;
@@ -61,11 +65,13 @@ export type ForecastMapProps = {
   suggestedPlaces?: SuggestedPlace[];
   itineraryPlaceIds?: string[];
   selectedPlaceId?: string | null;
-  cameraLocations?: ViewingLocation[];
+  cameraLocations?: WebcamSite[];
   selectedCameraId?: string | null;
   selectedHydrophoneId?: string | null;
   pulseSelectedPlaceMarker?: boolean;
   onPlaceSelect?: (place: SuggestedPlace) => void;
+  onCameraSelect?: (camera: WebcamSite) => void;
+  onHydrophoneSelect?: (hydrophone: OrcasoundHydrophone) => void;
   onPoiSelect?: (place: PublicPoi) => void;
   onLocationSelectionClear?: () => void;
   showTripHotspotMarkers?: boolean;

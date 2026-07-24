@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { ForecastMapHandle } from "../../map";
-import type { SuggestedPlace, ViewingPotential } from "../../locations/types";
+import type {
+  SuggestedPlace,
+  ViewingPotential,
+  WebcamSite,
+} from "../../locations/types";
+import type { OrcasoundHydrophone } from "../../../shared/data/orcasoundHydrophones";
+import { MediaLocationDetail } from "../../../shared/components/MediaLocationDetail";
 import { PlannerPlaceCard } from "../../planner/components/PlannerPlaces";
 import {
   getViewingSpotPhoto,
@@ -14,7 +20,11 @@ type PlaceFilter = "top" | "shore" | "Park" | "Marina" | "Ferry";
 type SuggestedPlacesPanelProps = {
   places: SuggestedPlace[];
   selectedPlaceId: string | null;
+  selectedWebcam?: WebcamSite | null;
+  selectedHydrophone?: OrcasoundHydrophone | null;
+  hydrophoneListenUrl?: string;
   isLoading?: boolean;
+  isPlaybackActive?: boolean;
   error?: string | null;
   mapRef: RefObject<ForecastMapHandle | null>;
   open: boolean;
@@ -22,6 +32,7 @@ type SuggestedPlacesPanelProps = {
   onClose: () => void;
   onSelectPlace: (place: SuggestedPlace) => void;
   onClearSelection?: () => void;
+  onClearMediaSelection?: () => void;
   itineraryPlaceIds?: string[];
   onAddToItinerary?: (place: SuggestedPlace) => void;
   onRemoveFromItinerary?: (place: SuggestedPlace) => void;
@@ -81,7 +92,11 @@ function getPlaceImage(
 export function SuggestedPlacesPanel({
   places,
   selectedPlaceId,
+  selectedWebcam = null,
+  selectedHydrophone = null,
+  hydrophoneListenUrl,
   isLoading = false,
+  isPlaybackActive = false,
   error = null,
   mapRef,
   open,
@@ -89,6 +104,7 @@ export function SuggestedPlacesPanel({
   onClose,
   onSelectPlace,
   onClearSelection,
+  onClearMediaSelection,
   itineraryPlaceIds = [],
   onAddToItinerary,
   onRemoveFromItinerary,
@@ -121,7 +137,10 @@ export function SuggestedPlacesPanel({
     () => places.find((place) => place.id === selectedPlaceId) ?? null,
     [places, selectedPlaceId],
   );
-  const showingDetail = selectedPlace !== null;
+  const showingDetail =
+    selectedPlace !== null ||
+    selectedWebcam !== null ||
+    selectedHydrophone !== null;
 
   useEffect(() => {
     setPreviewUrls(buildPreviewUrlMap(places, previewUrlCacheRef.current));
@@ -297,23 +316,25 @@ export function SuggestedPlacesPanel({
             </div>
           </header>
 
-          <div
-            className="suggestedPlacesPanel__filters"
-            role="group"
-            aria-label="Filter recommended places"
-          >
-            {FILTERS.map((filter) => (
-              <button
-                key={filter.id}
-                type="button"
-                className={activeFilter === filter.id ? "isActive" : ""}
-                aria-pressed={activeFilter === filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
+          {!isPlaybackActive ? (
+            <div
+              className="suggestedPlacesPanel__filters"
+              role="group"
+              aria-label="Filter recommended places"
+            >
+              {FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  className={activeFilter === filter.id ? "isActive" : ""}
+                  aria-pressed={activeFilter === filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           <div
             className="suggestedPlacesPanel__content"
@@ -321,7 +342,17 @@ export function SuggestedPlacesPanel({
             aria-label="Recommended places"
             tabIndex={0}
           >
-            {isLoading ? (
+            {isPlaybackActive ? (
+              <div
+                className="suggestedPlacesPanel__playbackSpinner"
+                role="status"
+                aria-label="Playing weekly forecast"
+              >
+                <span className="material-symbols-rounded" aria-hidden="true">
+                  progress_activity
+                </span>
+              </div>
+            ) : isLoading ? (
               <div className="suggestedPlacesPanel__status">
                 <span className="material-symbols-rounded" aria-hidden="true">
                   travel_explore
@@ -521,6 +552,25 @@ export function SuggestedPlacesPanel({
                 </button>
               </div>
             </div>
+          ) : selectedWebcam || selectedHydrophone ? (
+            <MediaLocationDetail
+              webcam={selectedWebcam}
+              hydrophone={selectedHydrophone}
+              hydrophoneListenUrl={hydrophoneListenUrl}
+              onBack={() => onClearMediaSelection?.()}
+              onClose={onClose}
+              onCenterMap={() => {
+                const location = selectedWebcam ?? selectedHydrophone;
+                if (!location) return;
+                mapRef.current?.fitLocations(
+                  [[location.longitude, location.latitude]],
+                  {
+                    padding: { top: 70, right: 70, bottom: 110, left: 70 },
+                    maxZoom: 13,
+                  },
+                );
+              }}
+            />
           ) : null}
         </section>
       </div>

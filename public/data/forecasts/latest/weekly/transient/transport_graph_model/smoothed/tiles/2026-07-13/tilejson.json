@@ -1,0 +1,28 @@
+{
+  "tilejson": "3.0.0",
+  "name": "OrcaCast smooth activity values: 2026-07-13.tif",
+  "scheme": "xyz",
+  "tiles": [
+    "./{z}/{x}/{y}.png?v=1edd2fd50ec0"
+  ],
+  "bounds": [
+    -128.6695679,
+    45.1547383,
+    -121.6986413,
+    50.3990019
+  ],
+  "minzoom": 5,
+  "maxzoom": 9,
+  "tileSize": 256,
+  "encoding": {
+    "format": "png",
+    "channel": "red",
+    "nodataCode": 0,
+    "valueCodeMin": 1,
+    "valueCodeMax": 255,
+    "decodedValue": "(red - 1) / 254",
+    "sourceNodata": -9999.0,
+    "version": "red-byte-normalized-v1"
+  },
+  "cacheKey": "1edd2fd50ec0"
+}

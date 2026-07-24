@@ -38,18 +38,20 @@
 
 /* Weekly digest card ------------------------------------------------------ */
 
-.thisWeekResultsPage__summaryCard {
+.thisWeekResultsPage__summaryStrip {
   position: absolute;
-  z-index: 7;
+  z-index: 11;
   top: 24px;
+  right: auto;
   left: 24px;
   display: grid;
-  grid-template-columns: 54px max-content;
-  align-items: center;
-  gap: 14px;
-  width: max-content;
-  max-width: calc(100% - var(--this-week-panel-offset, 0px) - 92px);
-  padding: 13px 20px;
+  grid-template-areas: "week outlook";
+  grid-template-columns: 1.05fr 1.7fr;
+  gap: 0;
+  align-items: stretch;
+  width: min(650px, calc(100% - var(--this-week-panel-offset, 0px) - 64px));
+  min-height: 100px;
+  overflow: visible;
   border: 3px solid var(--planner-ink);
   border-radius: 25px;
   background: var(--planner-paper);
@@ -57,8 +59,129 @@
   box-shadow: 7px 8px 0 var(--planner-ink);
 }
 
-.thisWeekResultsPage__summaryIcon,
-.thisWeekResultsPage__timelineIcon {
+.thisWeekResultsPage__summaryCard {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  padding: 15px 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--planner-ink);
+  cursor: pointer;
+  transition: background 160ms ease;
+  grid-area: week;
+  border-radius: 21px 0 0 21px;
+}
+
+.thisWeekResultsPage__outlookSummary {
+  display: grid;
+  grid-area: outlook;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 22px;
+  border-left: 2px solid rgba(6, 29, 60, .22);
+  border-radius: 0 21px 21px 0;
+}
+
+.thisWeekResultsPage__outlookSummary > img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+}
+
+.thisWeekResultsPage__outlookSummary > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.thisWeekResultsPage__outlookSummary strong {
+  overflow: hidden;
+  color: var(--planner-ink);
+  font-size: clamp(1.35rem, 2.05vw, 1.9rem);
+  font-weight: 950;
+  letter-spacing: -.045em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thisWeekResultsPage__outlookReading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.thisWeekResultsPage__outlookReading b {
+  color: #708297;
+  font-weight: 800;
+}
+
+.mapPageRoot--thisWeek .plannerResultsPage__legendCard.activityLegend.thisWeekResultsPage__floatingLegend {
+  z-index: 10;
+  top: auto !important;
+  right: auto !important;
+  bottom: 16px !important;
+  left: 24px !important;
+  width: 268px !important;
+  height: 58px;
+  gap: 4px;
+  padding: 7px 14px !important;
+  border-radius: 22px;
+}
+
+.thisWeekResultsPage__floatingLegend .activityLegend__title {
+  font-size: .62rem;
+}
+
+.thisWeekResultsPage__floatingLegend .activityLegend__scale {
+  gap: 7px;
+  font-size: .56rem;
+}
+
+.thisWeekResultsPage__floatingLegend .activityLegend__ramp {
+  height: 13px;
+  min-height: 13px;
+}
+
+.thisWeekResultsPage__floatingLegend .activityLegend__paletteList {
+  top: auto;
+  right: auto;
+  bottom: calc(100% + 10px);
+  left: 0;
+}
+
+.thisWeekResultsPage__summaryCard:hover,
+.thisWeekResultsPage__summaryCard:has(.thisWeekResultsPage__summaryToggle:focus-visible) {
+  background: #fffdf6;
+}
+
+.thisWeekResultsPage__summaryCard:has(.thisWeekResultsPage__summaryToggle:focus-visible) {
+  box-shadow: inset 0 0 0 4px var(--planner-coral);
+  outline: none;
+}
+
+.thisWeekResultsPage__summaryToggle {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.thisWeekResultsPage__summaryIcon {
   display: grid;
   place-items: center;
   width: 62px;
@@ -70,12 +193,11 @@
 }
 
 .thisWeekResultsPage__summaryIcon {
-  width: 54px;
-  height: 54px;
+  width: 58px;
+  height: 58px;
 }
 
-.thisWeekResultsPage__summaryIcon .material-symbols-rounded,
-.thisWeekResultsPage__timelineIcon .material-symbols-rounded {
+.thisWeekResultsPage__summaryIcon .material-symbols-rounded {
   font-size: 31px;
   font-variation-settings: "FILL" 0, "wght" 650, "GRAD" 0, "opsz" 32;
 }
@@ -134,41 +256,6 @@
   font-size: .82rem;
   font-weight: 700;
   line-height: 1.35;
-}
-
-.thisWeekResultsPage__summaryMeta {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
-.thisWeekResultsPage__summaryMeta > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 30px;
-  padding: 0 10px;
-  border: 2px solid var(--planner-ink);
-  border-radius: 999px;
-  background: #fffdf6;
-  color: var(--planner-ink);
-  font-size: .64rem;
-  font-weight: 900;
-  letter-spacing: .045em;
-  text-transform: uppercase;
-}
-
-.thisWeekResultsPage__summaryMeta > span:nth-child(2) {
-  background: #d9f4ef;
-}
-
-.thisWeekResultsPage__summaryMeta > span:nth-child(3) {
-  background: var(--planner-yellow);
-}
-
-.thisWeekResultsPage__summaryMeta .material-symbols-rounded {
-  font-size: 16px;
 }
 
 .thisWeekResultsPage__caveat {
@@ -277,7 +364,7 @@
 .thisWeekResultsPage__itineraryPopover {
   position: absolute;
   z-index: 10;
-  top: 126px;
+  top: calc(40px + var(--this-week-summary-strip-height, 98px));
   left: 24px;
   width: min(460px, calc(100% - 48px));
   padding: 14px;
@@ -285,6 +372,11 @@
   border-radius: 17px;
   background: #fff8e9;
   box-shadow: 6px 7px 0 var(--planner-ink);
+  transition: top 180ms ease;
+}
+
+.thisWeekResultsPage.isForecastWindowOpen .thisWeekResultsPage__itineraryPopover {
+  top: calc(56px + var(--this-week-summary-strip-height, 98px) + var(--this-week-forecast-window-height, 102px));
 }
 
 .thisWeekResultsPage__itineraryPopover:not(.isExpanded) {
@@ -413,6 +505,10 @@
   0% { opacity: 0; transform: translateY(-10px) scale(.72); }
   65% { opacity: 1; transform: translateY(1px) scale(1.05); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes thisWeekPlaybackSpin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes thisWeekItineraryAddStamp {
@@ -712,6 +808,19 @@
 .thisWeekResultsPage .suggestedPlacesPanel__status--warning > .material-symbols-rounded {
   background: var(--planner-coral);
   color: #fff;
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__playbackSpinner {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--planner-ink);
+}
+
+.thisWeekResultsPage .suggestedPlacesPanel__playbackSpinner .material-symbols-rounded {
+  font-size: 48px;
+  font-variation-settings: "FILL" 0, "wght" 700, "GRAD" 0, "opsz" 48;
+  animation: thisWeekPlaybackSpin 900ms linear infinite;
 }
 
 .thisWeekResultsPage .suggestedPlacesPanel__list {
@@ -1193,46 +1302,34 @@
 .thisWeekResultsPage__timelineCard {
   position: absolute;
   z-index: 8;
-  right: calc(var(--this-week-panel-offset, 0px) + 24px);
-  bottom: 24px;
+  top: calc(40px + var(--this-week-summary-strip-height, 98px));
+  right: auto;
+  bottom: auto;
   left: 24px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: 126px minmax(0, 1fr);
   align-items: center;
   gap: 14px;
-  min-height: 142px;
-  padding: 13px 16px;
+  min-height: 102px;
+  width: min(900px, calc(100% - var(--this-week-panel-offset, 0px) - 48px));
+  padding: 14px 18px;
   border: 3px solid var(--planner-ink);
   border-radius: 25px;
   background: var(--planner-paper);
   color: var(--planner-ink);
   box-shadow: 7px 8px 0 var(--planner-ink);
+  animation: thisWeekForecastWindowOpen 180ms ease-out both;
+}
+
+@keyframes thisWeekForecastWindowOpen {
+  from { opacity: 0; transform: translateY(-8px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .thisWeekResultsPage__timelineHeading {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  width: 224px;
-}
-
-.thisWeekResultsPage__timelineIcon {
-  width: 50px;
-  height: 50px;
-}
-
-.thisWeekResultsPage__timelineIcon .material-symbols-rounded {
-  font-size: 25px;
-}
-
-.thisWeekResultsPage__timelineHeading h2 {
-  margin: 3px 0 0;
-  color: var(--planner-ink);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.18rem;
-  font-weight: 700;
-  line-height: 1.05;
+  align-self: start;
+  width: 126px;
+  padding-top: 8px;
 }
 
 .thisWeekResultsPage__timelineCard .weekTimeline {
@@ -1242,8 +1339,8 @@
   width: 100%;
   min-width: 0;
   max-width: none;
-  grid-template-columns: 48px minmax(0, 1fr) 48px;
-  gap: 9px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -1273,7 +1370,7 @@
 }
 
 .thisWeekResultsPage__timelineCard .weekTimeline__main {
-  gap: 8px;
+  gap: 0;
 }
 
 .thisWeekResultsPage__timelineCard .weekTimeline__weeks {
@@ -1311,35 +1408,6 @@
 .thisWeekResultsPage__timelineCard .weekTimeline__weekDate {
   font-size: .67rem;
   font-weight: 850;
-}
-
-.thisWeekResultsPage__timelineCard .weekTimeline__slider {
-  min-height: 24px;
-  accent-color: var(--planner-coral);
-}
-
-.thisWeekResultsPage__timelineCard .weekTimeline__slider::-webkit-slider-runnable-track,
-.thisWeekResultsPage__timelineCard .weekTimeline__slider::-moz-range-track {
-  height: 7px;
-  border: 2px solid var(--planner-ink);
-  background: var(--planner-yellow);
-}
-
-.thisWeekResultsPage__timelineCard .weekTimeline__slider::-webkit-slider-thumb {
-  width: 24px;
-  height: 24px;
-  margin-top: -10px;
-  border: 3px solid var(--planner-ink);
-  background: var(--planner-coral);
-  box-shadow: 2px 3px 0 var(--planner-ink);
-}
-
-.thisWeekResultsPage__timelineCard .weekTimeline__slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border: 3px solid var(--planner-ink);
-  background: var(--planner-coral);
-  box-shadow: 2px 3px 0 var(--planner-ink);
 }
 
 .thisWeekResultsPage__statusBanner {
@@ -1645,7 +1713,6 @@
   color: #b7cbd7;
 }
 
-.app--dark .thisWeekResultsPage__summaryMeta > span,
 .app--dark .thisWeekPlaceCard,
 .app--dark .thisWeekResultsPage .suggestedPlacesPanel__status,
 .app--dark .thisWeekPlaceDetail__coordinates span,
@@ -1688,11 +1755,11 @@
   }
 
   .thisWeekResultsPage__timelineCard {
-    right: calc(var(--this-week-panel-offset, 0px) + 24px);
+    width: calc(100% - var(--this-week-panel-offset, 0px) - 48px);
   }
 
   .thisWeekResultsPage__timelineHeading {
-    width: 190px;
+    width: 112px;
   }
 }
 
@@ -1710,21 +1777,61 @@
     border-radius: 26px;
   }
 
+  .thisWeekResultsPage__summaryStrip {
+    top: 14px;
+    right: auto;
+    left: 14px;
+    grid-template-areas: "week outlook";
+    grid-template-columns: 1.05fr 1.7fr;
+    gap: 0;
+    width: min(650px, calc(100% - 28px));
+    min-height: 102px;
+    border-radius: 21px;
+    box-shadow: 5px 6px 0 var(--planner-ink);
+  }
+
   .thisWeekResultsPage__summaryCard {
-    display: none;
+    top: auto;
+    left: auto;
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 10px;
+    max-width: none;
+    padding: 10px 14px;
+    border-radius: 0;
+  }
+
+  .thisWeekResultsPage__summaryIcon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .thisWeekResultsPage__outlookSummary {
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 10px 14px;
+    border-left: 2px solid rgba(6, 29, 60, .22);
+  }
+
+  .thisWeekResultsPage__outlookSummary > img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .thisWeekResultsPage__summaryBody h1 {
+    font-size: clamp(1.35rem, 4.8vw, 1.8rem);
   }
 
   .thisWeekResultsPage__timelineCard {
-    top: 14px;
+    top: calc(28px + var(--this-week-summary-strip-height, 176px));
     right: 14px;
     bottom: auto;
     left: 14px;
-    min-height: 118px;
+    width: auto;
+    min-height: 94px;
     padding: 10px 12px;
   }
 
   .thisWeekResultsPage__timelineHeading {
-    width: 188px;
+    width: 112px;
   }
 
   .thisWeekResultsPage .suggestedPlacesPanel {
@@ -1737,6 +1844,12 @@
     min-height: 320px;
   }
 
+  .thisWeekResultsPage.isForecastWindowOpen .suggestedPlacesPanel {
+    top: calc(38px + var(--this-week-summary-strip-height, 176px) + var(--this-week-forecast-window-height, 102px));
+    height: auto;
+    min-height: 0;
+  }
+
   .thisWeekFieldNotebook {
     top: auto;
     right: 14px;
@@ -1744,14 +1857,35 @@
   }
 
   .thisWeekResultsPage__statusBanner {
-    top: 148px;
+    top: calc(44px + var(--this-week-summary-strip-height, 176px));
     bottom: auto;
     left: 14px;
     max-width: calc(100% - 28px);
   }
+
+  .thisWeekResultsPage.isForecastWindowOpen .thisWeekResultsPage__statusBanner {
+    top: calc(60px + var(--this-week-summary-strip-height, 176px) + var(--this-week-forecast-window-height, 102px));
+  }
 }
 
 @media (max-width: 760px) {
+  .mapPageRoot--thisWeek .plannerResultsPage__legendCard.activityLegend.thisWeekResultsPage__floatingLegend {
+    display: none !important;
+  }
+
+  .thisWeekResultsPage__summaryStrip {
+    grid-template-areas:
+      "week"
+      "outlook";
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .thisWeekResultsPage__outlookSummary {
+    border-top: 2px solid rgba(6, 29, 60, .22);
+    border-left: 0;
+    border-radius: 0 0 17px 17px;
+  }
+
   .thisWeekResultsPage__timelineCard {
     display: block;
     min-height: 108px;
@@ -1763,7 +1897,7 @@
   }
 
   .thisWeekResultsPage__timelineCard .weekTimeline {
-    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    grid-template-columns: 42px minmax(0, 1fr);
     gap: 7px;
   }
 
@@ -1860,8 +1994,52 @@
 }
 
 @media (max-width: 520px) {
-  .thisWeekResultsPage__timelineCard {
+  .thisWeekResultsPage__summaryStrip {
     top: 10px;
+    right: 10px;
+    left: 10px;
+    gap: 0;
+    border-width: 2px;
+    border-radius: 17px;
+    box-shadow: 4px 5px 0 var(--planner-ink);
+  }
+
+  .thisWeekResultsPage__summaryCard {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px;
+    border-width: 0;
+    border-radius: 0;
+  }
+
+  .thisWeekResultsPage__outlookSummary {
+    border-top-width: 2px;
+    border-left-width: 0;
+  }
+
+  .thisWeekResultsPage__summaryIcon {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+  }
+
+  .thisWeekResultsPage__outlookSummary {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 6px;
+    padding: 7px 8px;
+  }
+
+  .thisWeekResultsPage__outlookSummary > img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .thisWeekResultsPage__summaryCard .thisWeekResultsPage__eyebrow {
+    font-size: .58rem;
+  }
+
+  .thisWeekResultsPage__timelineCard {
+    top: calc(24px + var(--this-week-summary-strip-height, 144px));
     right: 10px;
     left: 10px;
     padding: 9px;

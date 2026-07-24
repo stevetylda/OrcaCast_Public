@@ -1,4 +1,4 @@
-import { readFile, readdir } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 
@@ -196,6 +196,89 @@ for (const resolution of ["H4", "H5", "H6"]) {
   );
 }
 
+const historicalSmoothRoot = path.join(root, "week_of_year_agg_history_smooth");
+const historicalSmoothManifestFile = path.join(
+  historicalSmoothRoot,
+  "manifest.json",
+);
+const historicalSmoothManifest = await readJson(historicalSmoothManifestFile);
+if (
+  historicalSmoothManifest?.product !==
+  "week_of_year_aggregated_sighting_history_smoothed"
+) {
+  fail(historicalSmoothManifestFile, "has an unexpected product");
+}
+if (historicalSmoothManifest?.h3_resolution !== 6)
+  fail(historicalSmoothManifestFile, "h3_resolution must be 6");
+if (historicalSmoothManifest?.weeks !== 53)
+  fail(historicalSmoothManifestFile, "weeks must be 53");
+const historicalSmoothEcotypes = ["srkw", "transient"];
+if (
+  JSON.stringify(historicalSmoothManifest?.ecotypes) !==
+  JSON.stringify(historicalSmoothEcotypes)
+) {
+  fail(historicalSmoothManifestFile, "ecotypes must be srkw and transient");
+}
+
+const historicalSmoothPeriodsFile = path.join(
+  historicalSmoothRoot,
+  "periods.json",
+);
+const historicalSmoothPeriods = await readJson(historicalSmoothPeriodsFile);
+if (
+  !Array.isArray(historicalSmoothPeriods) ||
+  historicalSmoothPeriods.length !== 53 ||
+  historicalSmoothPeriods.some(
+    (entry, index) => entry?.week_of_year !== index + 1,
+  )
+) {
+  fail(
+    historicalSmoothPeriodsFile,
+    "must contain sequential week_of_year records 1 through 53",
+  );
+}
+
+for (const ecotype of historicalSmoothEcotypes) {
+  for (let week = 1; week <= 53; week += 1) {
+    const stem = path.join(
+      historicalSmoothRoot,
+      ecotype,
+      `week_${String(week).padStart(2, "0")}`,
+    );
+    const jsonFile = `${stem}.json`;
+    const payload = await readJson(jsonFile);
+    if (String(payload?.ecotype ?? "").toLowerCase() !== ecotype)
+      fail(jsonFile, `ecotype must be ${ecotype}`);
+    if (payload?.week_of_year !== week)
+      fail(jsonFile, `week_of_year must be ${week}`);
+    if (payload?.h3_resolution !== 6) fail(jsonFile, "h3_resolution must be 6");
+    const entries = Object.entries(payload?.values ?? {});
+    if (entries.length !== historicalSmoothManifest?.h3_support_cells)
+      fail(jsonFile, "values count does not match manifest support cells");
+    for (const [id, value] of entries) {
+      if (!h3.safeParse(id).success || String(id)[1] !== "6")
+        fail(jsonFile, `values contains invalid H6 index ${id}`);
+      for (const field of [
+        "mean_sightings_per_year",
+        "total_sightings",
+        "years_with_sightings",
+      ]) {
+        if (!finite.safeParse(value?.[field]).success || value[field] < 0)
+          fail(jsonFile, `${id}.${field} must be finite and non-negative`);
+      }
+    }
+    for (const extension of ["png", "tif"]) {
+      const file = `${stem}.${extension}`;
+      try {
+        const metadata = await stat(file);
+        if (metadata.size <= 0) fail(file, "must not be empty");
+      } catch {
+        fail(file, "is missing");
+      }
+    }
+  }
+}
+
 const forecastDirectories = [
   [path.join(root, "forecasts/latest/weekly"), false],
   [path.join(root, "forecasts/latest/actuals"), true],
@@ -275,6 +358,60 @@ validateLocations(Array.isArray(poi) ? poi : poi?.items, poiFile);
 const hydrophoneFile = path.join(root, "orcasound_hydrophones.json");
 const hydrophones = await readJson(hydrophoneFile);
 validateLocations(hydrophones?.items, hydrophoneFile);
+
+const webcamFile = path.join(root, "webcams.json");
+const webcamPayload = await readJson(webcamFile);
+const webcamStatuses = new Set([
+  "verified-current",
+  "current-frame-verified",
+  "landing-verified",
+  "directory-current",
+  "seasonal",
+]);
+const webcamSiteIds = new Set();
+const webcamFeedIds = new Set();
+validateLocations(webcamPayload?.items, webcamFile);
+if (typeof webcamPayload?.version !== "string" || !webcamPayload.version.trim())
+  fail(webcamFile, "version must be a non-empty string");
+if (!/^\d{4}-\d{2}-\d{2}$/.test(webcamPayload?.updatedAt ?? ""))
+  fail(webcamFile, "updatedAt must be an ISO date");
+for (const [siteIndex, site] of (webcamPayload?.items ?? []).entries()) {
+  if (typeof site?.id !== "string" || !site.id.trim())
+    fail(webcamFile, `site ${siteIndex} needs an id`);
+  else if (webcamSiteIds.has(site.id))
+    fail(webcamFile, `duplicate site id ${site.id}`);
+  else webcamSiteIds.add(site.id);
+  if (!Array.isArray(site?.feeds) || site.feeds.length === 0) {
+    fail(webcamFile, `site ${siteIndex} needs at least one feed`);
+    continue;
+  }
+  for (const [feedIndex, feed] of site.feeds.entries()) {
+    const label = `site ${siteIndex} feed ${feedIndex}`;
+    if (typeof feed?.id !== "string" || !feed.id.trim())
+      fail(webcamFile, `${label} needs an id`);
+    else if (webcamFeedIds.has(feed.id))
+      fail(webcamFile, `duplicate feed id ${feed.id}`);
+    else webcamFeedIds.add(feed.id);
+    if (!webcamStatuses.has(feed?.status))
+      fail(webcamFile, `${label} has an invalid status`);
+    if (feed?.tier !== 1 && feed?.tier !== 2)
+      fail(webcamFile, `${label} must be Tier 1 or Tier 2`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(feed?.verifiedAt ?? ""))
+      fail(webcamFile, `${label} has an invalid verification date`);
+    for (const [field, value] of [
+      ["accessUrl", feed?.accessUrl],
+      ["evidenceUrl", feed?.evidenceUrl],
+    ]) {
+      try {
+        const url = new URL(value);
+        if (url.protocol !== "https:" && url.protocol !== "http:")
+          fail(webcamFile, `${label} ${field} must use HTTP(S)`);
+      } catch {
+        fail(webcamFile, `${label} has an invalid ${field}`);
+      }
+    }
+  }
+}
 
 for (const entry of await readdir(path.join(root, "last_week_sightings"))) {
   if (!entry.endsWith(".geojson")) continue;

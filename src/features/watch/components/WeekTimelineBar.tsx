@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Period } from "../../../shared/data/periods";
 import { isoWeekToDateRange } from "../../../shared/time/forecastPeriodToIsoWeek";
 
@@ -10,9 +10,6 @@ type Props = {
   onChangeIndex: (idx: number) => void;
   isPlaying: boolean;
   onPlayingChange: (value: boolean) => void;
-  playDir: 1 | -1;
-  onPlayDirChange: (value: 1 | -1) => void;
-  rightInsetPx?: number;
 };
 
 const SPEED_MS: Record<Speed, number> = {
@@ -55,26 +52,16 @@ export function WeekTimelineBar({
   onChangeIndex,
   isPlaying,
   onPlayingChange,
-  playDir,
-  onPlayDirChange,
 }: Props) {
   const [speed] = useState<Speed>(1);
-  const selectedRef = useRef(selectedIndex);
-
-  useEffect(() => {
-    selectedRef.current = selectedIndex;
-  }, [selectedIndex]);
 
   useEffect(() => {
     if (!isPlaying || periods.length === 0) return;
     const id = window.setTimeout(() => {
       const maxIndex = periods.length - 1;
-      const next = selectedIndex + playDir;
-      if (next < 0 || next > maxIndex) {
-        const reversedDir: 1 | -1 = playDir === 1 ? -1 : 1;
-        onPlayDirChange(reversedDir);
-        const bounced = selectedIndex + reversedDir;
-        if (bounced >= 0 && bounced <= maxIndex) onChangeIndex(bounced);
+      const next = selectedIndex + 1;
+      if (next > maxIndex) {
+        onPlayingChange(false);
         return;
       }
       onChangeIndex(next);
@@ -83,9 +70,8 @@ export function WeekTimelineBar({
   }, [
     isPlaying,
     onChangeIndex,
-    onPlayDirChange,
+    onPlayingChange,
     periods.length,
-    playDir,
     selectedIndex,
     speed,
   ]);
@@ -102,7 +88,7 @@ export function WeekTimelineBar({
       return;
     }
     const maxIndex = periods.length - 1;
-    onPlayDirChange(selectedIndex >= maxIndex ? -1 : 1);
+    if (selectedIndex >= maxIndex) onChangeIndex(0);
     onPlayingChange(true);
   };
 
@@ -177,18 +163,6 @@ export function WeekTimelineBar({
             );
           })}
         </div>
-
-        <input
-          className="weekTimeline__slider"
-          type="range"
-          min={0}
-          max={Math.max(0, periods.length - 1)}
-          step={1}
-          value={periods.length === 0 ? 0 : selectedIndex}
-          disabled={periods.length === 0}
-          onChange={(event) => onChangeIndex(Number(event.target.value))}
-          aria-label="Selected forecast week"
-        />
       </div>
     </div>
   );

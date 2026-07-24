@@ -1,7 +1,7 @@
 import type {
   SuggestedPlace,
-  ViewingLocation,
   ViewingPotential,
+  WebcamSite,
 } from "../../locations/types";
 import type { OrcasoundHydrophone } from "../../../shared/data/orcasoundHydrophones";
 import {
@@ -261,7 +261,7 @@ export function PlannerPlaceDetailView({
 }: {
   place: SuggestedPlace;
   photoManifest: ViewingSpotPhotoManifest;
-  matchedCameras: ViewingLocation[];
+  matchedCameras: WebcamSite[];
   matchedHydrophones: OrcasoundHydrophone[];
   hydrophoneListenUrl: string;
   itineraryAdded: boolean;
@@ -375,30 +375,32 @@ export function PlannerPlaceDetailView({
                   <span className="material-symbols-rounded" aria-hidden="true">
                     videocam
                   </span>
-                  <span>Nearby camera</span>
+                  <span>Nearby webcams</span>
                 </div>
-                {matchedCameras.map((camera) => (
-                  <div
-                    key={camera.id}
-                    className="plannerResultsPage__spotDetailAssetCard"
-                  >
-                    <div>
-                      <strong>{camera.name}</strong>
-                      <p>{camera.region}</p>
+                {matchedCameras.flatMap((camera) =>
+                  camera.feeds.map((feed) => (
+                    <div
+                      key={feed.id}
+                      className="plannerResultsPage__spotDetailAssetCard"
+                    >
+                      <div>
+                        <strong>{feed.name}</strong>
+                        <p>
+                          {feed.operator} · {camera.waterbody}
+                        </p>
+                      </div>
+                      {safeExternalHref(feed.accessUrl) ? (
+                        <a
+                          href={safeExternalHref(feed.accessUrl) ?? undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Open
+                        </a>
+                      ) : null}
                     </div>
-                    {safeExternalHref(camera.liveCameraUrl) ? (
-                      <a
-                        href={
-                          safeExternalHref(camera.liveCameraUrl) ?? undefined
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Watch
-                      </a>
-                    ) : null}
-                  </div>
-                ))}
+                  )),
+                )}
               </div>
             ) : null}
 

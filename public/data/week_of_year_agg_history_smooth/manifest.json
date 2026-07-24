@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-07-18T16:52:05.377319Z",
+  "product": "week_of_year_aggregated_sighting_history_smoothed",
+  "ecotypes": [
+    "srkw",
+    "transient"
+  ],
+  "h3_resolution": 6,
+  "h3_support_cells": 1236,
+  "aoi": {
+    "bbox_source": "config/common.yaml:areas.model_area.bbox_wgs84",
+    "bbox_wgs84": {
+      "min_lon": -125.8,
+      "min_lat": 46.85,
+      "max_lon": -121.6,
+      "max_lat": 50.0
+    },
+    "validity_mask": "model-area bbox intersected with territorial-water polygon"
+  },
+  "weeks": 53,
+  "count_unit": "canonical observation rows",
+  "temporal_aggregation": "mean annual count by ISO week and H3 cell",
+  "zero_handling": "eligible years without a sighting contribute zero",
+  "coverage": {
+    "srkw": {
+      "first_observation_date": "1980-01-04",
+      "last_observation_date": "2026-06-15",
+      "first_complete_week_start": "1980-01-07",
+      "last_complete_week_start": "2026-06-08"
+    },
+    "transient": {
+      "first_observation_date": "1993-08-25",
+      "last_observation_date": "2026-07-14",
+      "first_complete_week_start": "1993-08-30",
+      "last_complete_week_start": "2026-07-06"
+    }
+  },
+  "smoothing": {
+    "implementation": "orcacast.models.sightings.smoothing",
+    "gaussian_sigma_km": 9.0,
+    "water_clipped": true,
+    "valid_zero": true,
+    "nodata_value": -9999.0,
+    "raster_quantity": "relative historical sighting intensity normalized 0-1 per week/ecotype"
+  },
+  "layout": "<ecotype>/week_<01-53>.{json,png,tif}",
+  "file_count": 320
+}

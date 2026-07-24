@@ -11,6 +11,7 @@ import {
 import {
   getForecastPathForPeriod,
   getSmoothedForecastPath,
+  getSmoothedForecastTilePath,
   type H3Resolution,
 } from "../../shared/config/dataPaths";
 import {
@@ -48,6 +49,23 @@ import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlace
 import type { SuggestedPlace } from "../../features/locations/types";
 
 export type WatchPageController = ReturnType<typeof useWatchPageController>;
+
+function summarizeForecastPattern(values: Record<string, number>) {
+  const positiveValues = Object.values(values)
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => b - a);
+  const totalMass = positiveValues.reduce((sum, value) => sum + value, 0);
+  if (positiveValues.length === 0 || totalMass <= 0) return "Unavailable";
+  const topCellCount = Math.max(1, Math.ceil(positiveValues.length * 0.1));
+  const topShare =
+    positiveValues
+      .slice(0, topCellCount)
+      .reduce((sum, value) => sum + value, 0) / totalMass;
+  if (topShare >= 0.62) return "Concentrated";
+  if (topShare >= 0.38) return "Clustered";
+  return "Dispersed";
+}
 
 export function useWatchPageController() {
   const {
@@ -111,6 +129,7 @@ export function useWatchPageController() {
   const [selectedPeriodHasForecast, setSelectedPeriodHasForecast] = useState<
     boolean | null
   >(null);
+  const [forecastPattern, setForecastPattern] = useState("Loading");
   const [showNoForecastNotice, setShowNoForecastNotice] = useState(false);
   const [shareBusy, setShareBusy] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
@@ -282,6 +301,18 @@ export function useWatchPageController() {
     () => getSmoothedForecastPath(forecastDirectory),
     [forecastDirectory],
   );
+  const smoothedForecastTilePath = useMemo(() => {
+    if (!selectedForecast) return undefined;
+    const periodStart = isoWeekToDateRange(
+      selectedForecast.year,
+      selectedForecast.stat_week,
+    ).start;
+    return getSmoothedForecastTilePath(forecastDirectory, periodStart);
+  }, [forecastDirectory, selectedForecast]);
+  const latestSmoothedForecastTilePath = useMemo(
+    () => getSmoothedForecastTilePath(forecastDirectory),
+    [forecastDirectory],
+  );
   const latestAvailableForecastPeriod = useMemo(
     () =>
       selectLatestPeriod(
@@ -411,14 +442,16 @@ export function useWatchPageController() {
     const loadModels = async () => {
       try {
         let hasForecastForSelectedPeriod: boolean | null = null;
+        let loadedForecastValues: Record<string, number> | null = null;
 
         if (forecastPath) {
           try {
-            await loadForecast(resolution, {
+            const forecast = await loadForecast(resolution, {
               kind: "explicit",
               explicitPath: forecastPath,
               modelId,
             });
+            loadedForecastValues = forecast.values;
             hasForecastForSelectedPeriod = true;
           } catch {
             hasForecastForSelectedPeriod = false;
@@ -430,18 +463,25 @@ export function useWatchPageController() {
           latestForecastPath &&
           latestForecastPath !== forecastPath
         ) {
-          await loadForecast(resolution, {
+          const fallbackForecast = await loadForecast(resolution, {
             kind: "explicit",
             explicitPath: latestForecastPath,
             modelId,
           }).catch(() => undefined);
+          loadedForecastValues = fallbackForecast?.values ?? null;
         }
 
         if (!active) return;
         setSelectedPeriodHasForecast(hasForecastForSelectedPeriod);
+        setForecastPattern(
+          loadedForecastValues
+            ? summarizeForecastPattern(loadedForecastValues)
+            : "Unavailable",
+        );
       } catch {
         if (!active) return;
         setSelectedPeriodHasForecast(false);
+        setForecastPattern("Unavailable");
       }
     };
 
@@ -656,8 +696,11 @@ export function useWatchPageController() {
     forecastPath,
     latestForecastPath,
     smoothedForecastPath,
+    smoothedForecastTilePath,
+    latestSmoothedForecastTilePath,
     latestSmoothedForecastPath,
     expectedSummary,
+    forecastPattern,
     currentWeek,
     currentWeekYear,
     shareBusy,
