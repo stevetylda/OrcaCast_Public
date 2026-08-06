@@ -74,7 +74,10 @@ function extractGeometryCoordinates(geometry: Feature["geometry"]): number[][] {
 function getFeatureProbability(
   properties: GeoJsonProperties | null | undefined,
 ) {
-  return Number((properties as Record<string, unknown> | null)?.prob ?? 0);
+  const record = properties as Record<string, unknown> | null;
+  const raw = record?.prob;
+  if (record?.prob_status !== "modeled") return Number.NaN;
+  return typeof raw === "number" && Number.isFinite(raw) ? raw : Number.NaN;
 }
 
 function getFeatureCenter(feature: Feature): [number, number] | null {
@@ -215,7 +218,11 @@ function buildColorStops(
     const minValue = scale.binRanges[0]?.probMin ?? scale.thresholds[0] ?? 0;
     const stopValues = [minValue, ...scale.thresholds];
     const stopColors = scale.binColorsRgba.map(parseCssColor);
-    return { stopValues, stopColors };
+    return {
+      stopValues,
+      stopColors,
+      zeroColor: parseCssColor(scale.zeroColor ?? "rgba(0,0,0,0)"),
+    };
   }
   const colors =
     paletteColors.length > 0
@@ -230,15 +237,17 @@ function buildColorStops(
   const stopValues = colors.map(
     (_, index) => minValue + ((maxValue - minValue) * index) / steps,
   );
-  return { stopValues, stopColors: colors };
+  return { stopValues, stopColors: colors, zeroColor: [0, 0, 0, 0] as RGBA };
 }
 
 function sampleColor(
   value: number,
   stopValues: number[],
   stopColors: RGBA[],
+  zeroColor: RGBA,
 ): RGBA {
-  if (stopColors.length === 0 || value <= 0) return [0, 0, 0, 0];
+  if (stopColors.length === 0) return zeroColor;
+  if (value <= 0) return zeroColor;
   if (stopColors.length === 1 || stopValues.length <= 1)
     return [...stopColors[0]] as RGBA;
   if (value <= stopValues[0]) return [...stopColors[0]] as RGBA;
@@ -262,7 +271,7 @@ function surfaceAlphaForValue(
   _stopValues: number[],
   baseAlpha: number,
 ) {
-  if (!Number.isFinite(value) || value <= 0) return 0;
+  if (!Number.isFinite(value)) return 0;
   return clamp(baseAlpha, 0, 1);
 }
 
@@ -374,6 +383,7 @@ function maskSurfaceToFootprint(
   ctx.globalCompositeOperation = "destination-in";
   ctx.beginPath();
   (fc.features ?? []).forEach((feature) => {
+    if (!Number.isFinite(getFeatureProbability(feature.properties))) return;
     const geometry = feature.geometry;
     if (
       !geometry ||
@@ -417,7 +427,7 @@ async function buildSurfaceRasterBlob(request: SurfaceRasterWorkerRequest) {
   const imageData = ctx.createImageData(width, height);
   const pixels = imageData.data;
   const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 1e-6);
-  const { stopValues, stopColors } = buildColorStops(
+  const { stopValues, stopColors, zeroColor } = buildColorStops(
     samples,
     paletteColors,
     scale,
@@ -436,11 +446,16 @@ async function buildSurfaceRasterBlob(request: SurfaceRasterWorkerRequest) {
         maxDistance,
       );
       const pixelIndex = (y * width + x) * 4;
-      if (value === null || !Number.isFinite(value) || value <= 0) {
+      if (value === null || !Number.isFinite(value)) {
         pixels[pixelIndex + 3] = 0;
         continue;
       }
-      const [r, g, b, a] = sampleColor(value, stopValues, stopColors);
+      const [r, g, b, a] = sampleColor(
+        value,
+        stopValues,
+        stopColors,
+        zeroColor,
+      );
       const alpha = surfaceAlphaForValue(value, stopValues, a);
       if (alpha <= 0) {
         pixels[pixelIndex + 3] = 0;

@@ -17,6 +17,7 @@ import {
   type ForecastMapProps,
 } from "../../features/map";
 import { appConfig } from "../../shared/config/appConfig";
+import { routePath } from "../../shared/config/routes";
 import { DEFAULT_RECOMMENDATION_RADIUS_MILES } from "../../shared/config/planner";
 import { ActivityLegend } from "../../shared/components/ActivityLegend";
 import { ForecastLabHeader } from "../../shared/components/ForecastLabHeader";
@@ -33,8 +34,9 @@ import {
   useMapState,
   type UnitsMode,
 } from "../../shared/state/MapStateContext";
-import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlaces";
+import { useSuggestedPlaces } from "../../features/locations/useSuggestedPlaces";
 import type { SuggestedPlace } from "../../features/locations/types";
+import { usePersistedItinerary } from "../../features/itinerary/usePersistedItinerary";
 import {
   filterPoisByType,
   hasActivePoiFilter,
@@ -104,8 +106,6 @@ const PLANNER_COLLAPSE_DURATION_MS = 320;
 const PLANNER_REVEAL_MIN_DURATION_MS = 300;
 const PLANNER_REVEAL_EXIT_DURATION_MS = 180;
 const PLACE_DETAIL_MATCH_RADIUS_KM = 1.25;
-const PLANNER_ITINERARY_STORAGE_KEY = "orcacast.planner.itinerary.v1";
-
 type FieldPickFilter = "top" | "Ferry" | "Marina" | "Park";
 type PlannerSidebarMode = "overview" | "location-details" | "itinerary";
 
@@ -135,6 +135,7 @@ function haversineKm(a: [number, number], b: [number, number]) {
 }
 
 type StoredPlannerRecommendedPlaces = {
+  schemaVersion: 2;
   signature: string;
   places: SuggestedPlace[];
 };
@@ -176,8 +177,10 @@ function isSuggestedPlace(value: unknown): value is SuggestedPlace {
       candidate.viewingPotential === "very-high") &&
     Number.isFinite(candidate.score) &&
     typeof candidate.reason === "string" &&
-    (candidate.distanceKm === undefined ||
-      Number.isFinite(candidate.distanceKm))
+    (candidate.distanceFromBaseKm === undefined ||
+      Number.isFinite(candidate.distanceFromBaseKm)) &&
+    (candidate.distanceToForecastSupportKm === undefined ||
+      Number.isFinite(candidate.distanceToForecastSupportKm))
   );
 }
 
@@ -208,6 +211,7 @@ function readStoredRecommendedPlaces(signature: string): SuggestedPlace[] {
     ) as Partial<StoredPlannerRecommendedPlaces> | null;
     if (
       !parsed ||
+      parsed.schemaVersion !== 2 ||
       parsed.signature !== signature ||
       !Array.isArray(parsed.places)
     )
@@ -311,19 +315,8 @@ export function PlannerPage() {
   const [spotsCollapsed, setSpotsCollapsed] = useState(true);
   const [sidebarMode, setSidebarMode] =
     useState<PlannerSidebarMode>("overview");
-  const [itineraryPlaceIds, setItineraryPlaceIds] = useState<string[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const parsed = JSON.parse(
-        window.sessionStorage.getItem(PLANNER_ITINERARY_STORAGE_KEY) ?? "[]",
-      );
-      return Array.isArray(parsed)
-        ? parsed.filter((value): value is string => typeof value === "string")
-        : [];
-    } catch {
-      return [];
-    }
-  });
+  const { itineraryPlaceIds, setItineraryPlaceIds, clearItinerary } =
+    usePersistedItinerary();
   const [itineraryExpanded, setItineraryExpanded] = useState(false);
   const [itineraryExportOpen, setItineraryExportOpen] = useState(false);
   const [itineraryMapViewActive, setItineraryMapViewActive] = useState(false);
@@ -428,7 +421,7 @@ export function PlannerPage() {
   useEffect(() => {
     if (resumeStoredPlan) return;
     clearStoredPlannerState();
-    if (location.search) navigate("/planner", { replace: true });
+    if (location.search) navigate(routePath("planner"), { replace: true });
   }, [location.search, navigate, resumeStoredPlan]);
 
   const downloadSnapshot = (blob: Blob, fileName: string) => {
@@ -562,8 +555,7 @@ export function PlannerPage() {
 
   const recommendedPlacesData = useSuggestedPlaces({
     resolution,
-    modelId: appConfig.compositeModelId,
-    externalValues: tripOccurrence?.values,
+    activityValues: tripOccurrence?.values ?? null,
     enabled: appliedPlannerSubmitted && !tripLoading && !!tripOccurrence,
     limit: DEFAULT_RECOMMENDED_SPOTS_COUNT,
     baseLocation: activeBaseLocation,
@@ -913,7 +905,7 @@ export function PlannerPage() {
       reason:
         poi.reason ??
         `${poi.name} is a mapped ${poi.type.toLowerCase()} in the Salish Sea region.`,
-      distanceKm: activeBaseLocation
+      distanceFromBaseKm: activeBaseLocation
         ? haversineKm(
             [activeBaseLocation.longitude, activeBaseLocation.latitude],
             [poi.longitude, poi.latitude],
@@ -1053,12 +1045,10 @@ export function PlannerPage() {
       setSelectedPlaceId(null);
       setDetailPlaceId(null);
       setSupplementalPlaces((current) => (current.length > 0 ? [] : current));
-      setItineraryPlaceIds([]);
+      clearItinerary();
       setSidebarMode("overview");
       setItineraryMapViewActive(false);
       setPulseSelectedPlaceMarker(false);
-      if (typeof window !== "undefined")
-        window.sessionStorage.removeItem(PLANNER_ITINERARY_STORAGE_KEY);
       return;
     }
 
@@ -1083,17 +1073,11 @@ export function PlannerPage() {
   }, [
     detailPlaceId,
     availablePlannerPlaces,
+    clearItinerary,
     plannerSubmitted,
     selectedPlaceId,
+    setItineraryPlaceIds,
   ]);
-
-  useEffect(() => {
-    if (!plannerSubmitted || typeof window === "undefined") return;
-    window.sessionStorage.setItem(
-      PLANNER_ITINERARY_STORAGE_KEY,
-      JSON.stringify(itineraryPlaceIds),
-    );
-  }, [itineraryPlaceIds, plannerSubmitted]);
 
   useEffect(() => {
     if (sidebarMode === "location-details" && !detailPlace) {
@@ -1141,6 +1125,7 @@ export function PlannerPage() {
     window.sessionStorage.setItem(
       PLANNER_RECOMMENDED_PLACES_STORAGE_KEY,
       JSON.stringify({
+        schemaVersion: 2,
         signature: recommendedPlacesSignature,
         places: recommendedPlaces,
       } satisfies StoredPlannerRecommendedPlaces),
@@ -1498,8 +1483,8 @@ export function PlannerPage() {
     hotspotPercentile: 1,
     expectedActivityHotspotCellCount: null,
     onHotspotsEnabledChange: () => undefined,
-    externalValues:
-      plannerSubmitted && tripOccurrence ? tripOccurrence.values : undefined,
+    activityValues:
+      plannerSubmitted && tripOccurrence ? tripOccurrence.values : null,
     forecastOverlayEnabled: plannerSubmitted && !!tripOccurrence,
     weightedSmoothedForecastSources: plannerHistoricalSmoothSources,
     forecastOverlayLoadKey: recommendedPlacesSignature,
@@ -2374,8 +2359,8 @@ export function PlannerPage() {
                                     <strong>{place.name}</strong>
                                     <small>
                                       {place.region ?? "Salish Sea"} ·{" "}
-                                      {place.distanceKm !== undefined
-                                        ? `${Math.round(place.distanceKm * 0.621371)} mi`
+                                      {place.distanceFromBaseKm !== undefined
+                                        ? `${Math.round(place.distanceFromBaseKm * 0.621371)} mi`
                                         : "Selected stop"}
                                     </small>
                                   </span>

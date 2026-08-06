@@ -181,6 +181,14 @@ export function SuggestedPlacesPanel({
   const [photoManifest, setPhotoManifest] = useState<ViewingSpotPhotoManifest>(
     {},
   );
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      Boolean(window.matchMedia?.("(max-width: 760px)").matches),
+  );
+  const [expandedMobileListKey, setExpandedMobileListKey] = useState<
+    string | null
+  >(null);
   const previewUrlCacheRef = useRef<Map<string, string>>(new Map());
   const panelRef = useRef<HTMLElement | null>(null);
 
@@ -190,6 +198,17 @@ export function SuggestedPlacesPanel({
       return places.filter((place) => place.type !== "Ferry");
     return places.filter((place) => place.type === activeFilter);
   }, [activeFilter, places]);
+  const mobileListKey = `${viewMode}:${activeFilter}:${filteredPlaces
+    .map((place) => place.id)
+    .join("|")}`;
+  const showAllMobilePlaces = expandedMobileListKey === mobileListKey;
+  const visibleFilteredPlaces = useMemo(
+    () =>
+      isMobile && !showAllMobilePlaces
+        ? filteredPlaces.slice(0, 5)
+        : filteredPlaces,
+    [filteredPlaces, isMobile, showAllMobilePlaces],
+  );
 
   const countLabel = useMemo(() => {
     if (isLoading) return "Finding field picks";
@@ -219,6 +238,15 @@ export function SuggestedPlacesPanel({
   useEffect(() => {
     setPreviewUrls(buildPreviewUrlMap(places, previewUrlCacheRef.current));
   }, [places]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const query = window.matchMedia("(max-width: 760px)");
+    const updateMobileState = () => setIsMobile(query.matches);
+    updateMobileState();
+    query.addEventListener?.("change", updateMobileState);
+    return () => query.removeEventListener?.("change", updateMobileState);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -373,7 +401,9 @@ export function SuggestedPlacesPanel({
                   : viewMode === "watch"
                     ? "Watch locations"
                     : "Listen locations"}{" "}
-                <span>{viewMode === "places" ? places.length : mediaCount}</span>
+                <span>
+                  {viewMode === "places" ? places.length : mediaCount}
+                </span>
               </h2>
               <p className="suggestedPlacesPanel__subtle">
                 {viewMode === "places"
@@ -390,10 +420,7 @@ export function SuggestedPlacesPanel({
                   aria-label="Show top 25 field picks on map"
                   title="Show Top 25 on map"
                 >
-                  <span
-                    className="material-symbols-rounded"
-                    aria-hidden="true"
-                  >
+                  <span className="material-symbols-rounded" aria-hidden="true">
                     visibility
                   </span>
                 </button>
@@ -472,15 +499,23 @@ export function SuggestedPlacesPanel({
                       <span className="suggestedPlacesPanel__mediaRank">
                         {index + 1}
                       </span>
-                      <span className="suggestedPlacesPanel__mediaIcon material-symbols-rounded" aria-hidden="true">
+                      <span
+                        className="suggestedPlacesPanel__mediaIcon material-symbols-rounded"
+                        aria-hidden="true"
+                      >
                         videocam
                       </span>
                       <span className="suggestedPlacesPanel__mediaCopy">
                         <strong>{location.name}</strong>
-                        <small>{location.waterbody} · {location.locality}</small>
+                        <small>
+                          {location.waterbody} · {location.locality}
+                        </small>
                         <em>{formatForecastDistance(distanceKm)}</em>
                       </span>
-                      <span className="material-symbols-rounded suggestedPlacesPanel__mediaChevron" aria-hidden="true">
+                      <span
+                        className="material-symbols-rounded suggestedPlacesPanel__mediaChevron"
+                        aria-hidden="true"
+                      >
                         chevron_right
                       </span>
                     </button>
@@ -510,7 +545,10 @@ export function SuggestedPlacesPanel({
                       <span className="suggestedPlacesPanel__mediaRank">
                         {index + 1}
                       </span>
-                      <span className="suggestedPlacesPanel__mediaIcon material-symbols-rounded" aria-hidden="true">
+                      <span
+                        className="suggestedPlacesPanel__mediaIcon material-symbols-rounded"
+                        aria-hidden="true"
+                      >
                         graphic_eq
                       </span>
                       <span className="suggestedPlacesPanel__mediaCopy">
@@ -518,7 +556,10 @@ export function SuggestedPlacesPanel({
                         <small>{location.region}</small>
                         <em>{formatForecastDistance(distanceKm)}</em>
                       </span>
-                      <span className="material-symbols-rounded suggestedPlacesPanel__mediaChevron" aria-hidden="true">
+                      <span
+                        className="material-symbols-rounded suggestedPlacesPanel__mediaChevron"
+                        aria-hidden="true"
+                      >
                         chevron_right
                       </span>
                     </button>
@@ -573,7 +614,7 @@ export function SuggestedPlacesPanel({
               </div>
             ) : (
               <div className="suggestedPlacesPanel__list suggestedPlacesPanel__list--plannerCards">
-                {filteredPlaces.map((place, index) => (
+                {visibleFilteredPlaces.map((place, index) => (
                   <PlannerPlaceCard
                     key={place.id}
                     place={place}
@@ -587,6 +628,21 @@ export function SuggestedPlacesPanel({
                     onViewDetails={() => onSelectPlace(place)}
                   />
                 ))}
+                {isMobile && filteredPlaces.length > 5 ? (
+                  <button
+                    type="button"
+                    className="suggestedPlacesPanel__showAll"
+                    onClick={() =>
+                      setExpandedMobileListKey((current) =>
+                        current === mobileListKey ? null : mobileListKey,
+                      )
+                    }
+                  >
+                    {showAllMobilePlaces
+                      ? "Show top 5"
+                      : `Show all ${filteredPlaces.length}`}
+                  </button>
+                ) : null}
               </div>
             )}
           </div>

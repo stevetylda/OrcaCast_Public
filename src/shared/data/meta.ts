@@ -1,6 +1,7 @@
 import { DataLoadError } from "./errors";
 import { fetchJson } from "./fetchClient";
 import { dataMetaFileSchema, parseWithSchema } from "./validation";
+import { resolveAppAssetPath } from "../config/basePath";
 
 export type DataMeta = {
   data_version: string;
@@ -8,9 +9,7 @@ export type DataMeta = {
 };
 
 const FALLBACK_DATA_VERSION = "";
-const VITE_ENV = (
-  import.meta as { env?: { BASE_URL?: string; VITE_BUILD_ID?: string } }
-).env;
+const VITE_ENV = (import.meta as { env?: { VITE_BUILD_ID?: string } }).env;
 const BUILD_VERSION =
   typeof VITE_ENV?.VITE_BUILD_ID === "string" &&
   VITE_ENV.VITE_BUILD_ID.trim().length > 0
@@ -20,14 +19,11 @@ let cachedMetaPromise: Promise<DataMeta> | null = null;
 let resolvedMeta: DataMeta | null = null;
 let resolvedDataVersionToken: string | null = null;
 
-function withBase(path: string): string {
-  const base = VITE_ENV?.BASE_URL || "/";
-  const trimmed = path.startsWith("/") ? path.slice(1) : path;
-  return `${base}${trimmed}`;
-}
-
 function metaUrlCandidates(): string[] {
-  return [withBase("data/meta.json"), withBase("data/version.json")];
+  return [
+    resolveAppAssetPath("data/meta.json"),
+    resolveAppAssetPath("data/version.json"),
+  ];
 }
 
 function normalizeMeta(payload: Record<string, unknown>): DataMeta {
@@ -106,7 +102,7 @@ export async function loadDataMeta(): Promise<DataMeta> {
         lastNotFound ??
         new DataLoadError({
           kind: "http",
-          url: withBase("data/meta.json"),
+          url: resolveAppAssetPath("data/meta.json"),
           status: 404,
           message: "No metadata file found",
         })

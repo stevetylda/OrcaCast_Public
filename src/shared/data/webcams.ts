@@ -4,6 +4,7 @@ import type {
   WebcamSite,
   WebcamStatus,
 } from "../../features/locations/types";
+import { resolveAppAssetPath } from "../config/basePath";
 
 export type WebcamPayload = {
   version: string;
@@ -153,25 +154,14 @@ export function normalizeWebcamPayload(payload: unknown): WebcamPayload {
 }
 
 async function fetchWebcamPayload(): Promise<WebcamPayload> {
-  const base = import.meta.env.BASE_URL || "/";
-  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
-  const candidates = Array.from(
-    new Set([
-      `${normalizedBase}data/webcams.json`,
-      "/data/webcams.json",
-      "data/webcams.json",
-    ]),
-  );
-  for (const url of candidates) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) continue;
-      return normalizeWebcamPayload(await response.json());
-    } catch {
-      // Try the next static-hosting path.
-    }
+  const url = resolveAppAssetPath("data/webcams.json");
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load webcam data (${response.status}) from ${url}`,
+    );
   }
-  throw new Error("Failed to load webcam data");
+  return normalizeWebcamPayload(await response.json());
 }
 
 function cameraSlug(value: string) {

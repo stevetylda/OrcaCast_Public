@@ -1,6 +1,7 @@
 import type { H3Resolution } from "../config/dataPaths";
 import { fetchJson } from "./fetchClient";
 import { getDataVersionToken } from "./meta";
+import { resolveAppAssetPath } from "../config/basePath";
 
 export type ExpectedCountPoint = {
   year: number;
@@ -42,19 +43,13 @@ type ActualActivityPayload = {
 const cache = new Map<H3Resolution, ExpectedCountPoint[]>();
 const actualCache = new Map<H3Resolution, ActualActivityPoint[]>();
 
-function withBase(path: string): string {
-  const base = import.meta.env.BASE_URL || "/";
-  const trimmed = path.startsWith("/") ? path.slice(1) : path;
-  return `${base}${trimmed}`;
-}
-
 export async function loadExpectedCountSeries(
   resolution: H3Resolution,
 ): Promise<ExpectedCountPoint[]> {
   const cached = cache.get(resolution);
   if (cached) return cached;
 
-  const preferredUrl = withBase(
+  const preferredUrl = resolveAppAssetPath(
     `data/expected_count/${resolution}_EXPECTED_ACTIVITY.json`,
   );
   const { data: payload } = await fetchJson<ExpectedCountPayload>(
@@ -105,7 +100,7 @@ export async function loadActualActivitySeries(
   const cached = actualCache.get(resolution);
   if (cached) return cached;
 
-  const preferredUrl = withBase(
+  const preferredUrl = resolveAppAssetPath(
     `data/expected_count/${resolution}_ACTUAL_ACTIVITY.json`,
   );
   const { data: payload } = await fetchJson<ActualActivityPayload>(

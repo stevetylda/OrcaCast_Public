@@ -1,13 +1,7 @@
 import { getDataVersionToken } from "../data/meta";
+import { resolveAppAssetPath } from "./basePath";
 
 export type H3Resolution = "H4" | "H5" | "H6";
-
-function withBase(path: string): string {
-  const base =
-    (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL || "/";
-  const trimmed = path.startsWith("/") ? path.slice(1) : path;
-  return `${base}${trimmed}`;
-}
 
 function withForecastCacheBust(url: string): string {
   const token = getDataVersionToken();
@@ -17,15 +11,21 @@ function withForecastCacheBust(url: string): string {
 }
 
 export const GRID_PATH: Record<H3Resolution, string> = {
-  H4: withBase("data/grids/H4.geojson"),
-  H5: withBase("data/grids/H5.geojson"),
-  H6: withBase("data/grids/H6.geojson"),
+  H4: resolveAppAssetPath("data/grids/H4.geojson"),
+  H5: resolveAppAssetPath("data/grids/H5.geojson"),
+  H6: resolveAppAssetPath("data/grids/H6.geojson"),
 };
 
 export const FORECAST_PATH_LATEST_WEEKLY: Record<H3Resolution, string> = {
-  H4: withForecastCacheBust(withBase("data/forecasts/latest/weekly/H4.json")),
-  H5: withForecastCacheBust(withBase("data/forecasts/latest/weekly/H5.json")),
-  H6: withForecastCacheBust(withBase("data/forecasts/latest/weekly/H6.json")),
+  H4: withForecastCacheBust(
+    resolveAppAssetPath("data/forecasts/latest/weekly/H4.json"),
+  ),
+  H5: withForecastCacheBust(
+    resolveAppAssetPath("data/forecasts/latest/weekly/H5.json"),
+  ),
+  H6: withForecastCacheBust(
+    resolveAppAssetPath("data/forecasts/latest/weekly/H6.json"),
+  ),
 };
 
 export function getForecastPathForPeriod(
@@ -34,7 +34,9 @@ export function getForecastPathForPeriod(
   forecastDirectory = "forecasts/latest/weekly",
 ): string {
   return withForecastCacheBust(
-    withBase(`data/${forecastDirectory}/${periodFileId}_${resolution}.json`),
+    resolveAppAssetPath(
+      `data/${forecastDirectory}/${periodFileId}_${resolution}.json`,
+    ),
   );
 }
 
@@ -43,7 +45,7 @@ export function getLatestForecastPath(
   forecastDirectory: string,
 ): string {
   return withForecastCacheBust(
-    withBase(`data/${forecastDirectory}/${resolution}.json`),
+    resolveAppAssetPath(`data/${forecastDirectory}/${resolution}.json`),
   );
 }
 
@@ -52,7 +54,9 @@ export function getSmoothedForecastPath(
   periodStart = "latest",
 ): string {
   return withForecastCacheBust(
-    withBase(`data/${forecastDirectory}/smoothed/${periodStart}.tif`),
+    resolveAppAssetPath(
+      `data/${forecastDirectory}/smoothed/${periodStart}.tif`,
+    ),
   );
 }
 
@@ -61,7 +65,7 @@ export function getSmoothedForecastTilePath(
   periodStart = "latest",
 ): string {
   return withForecastCacheBust(
-    withBase(
+    resolveAppAssetPath(
       `data/${forecastDirectory}/smoothed/tiles/${periodStart}/tilejson.json`,
     ),
   );
@@ -72,7 +76,7 @@ export function getActualsPathForPeriod(
   periodFileId: string,
 ): string {
   return withForecastCacheBust(
-    withBase(
+    resolveAppAssetPath(
       `data/forecasts/latest/actuals/${periodFileId}_${resolution}.json`,
     ),
   );
@@ -86,7 +90,7 @@ export function getShapPathForPeriod(
 ): string {
   const suffix = kind === "global" ? "_shap_global" : "_shap";
   return withForecastCacheBust(
-    withBase(
+    resolveAppAssetPath(
       `data/forecasts/latest/shap/${periodFileId}_${resolution}_${modelId}${suffix}.json`,
     ),
   );

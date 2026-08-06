@@ -3,10 +3,8 @@ import type { ForecastMapHandle } from "../../features/map";
 import type { GridCellExpandRequest } from "../../features/map/types";
 import {
   buildPeriod,
-  periodRange,
   readForecastPeriodOverride,
   resolvePeriodsForSelection,
-  selectLatestPeriod,
 } from "../../shared/config/forecastPeriod";
 import {
   getForecastPathForPeriod,
@@ -35,7 +33,11 @@ import {
   loadActualActivitySeries,
   loadExpectedCountSeries,
 } from "../../shared/data/expectedCount";
-import { loadForecast } from "../../shared/data/forecastIO";
+import {
+  loadForecast,
+  resetForecastCache,
+  type ForecastDataset,
+} from "../../shared/data/forecastIO";
 import {
   buildPeriodsUrl,
   loadPeriodsForResolution,
@@ -45,10 +47,20 @@ import {
 import { DEFAULT_PALETTE_ID } from "../../shared/geo/palettes";
 import { useMenu } from "../../shared/state/MenuContext";
 import { useMapState } from "../../shared/state/MapStateContext";
-import { useSuggestedPlaces } from "../../features/watch/hooks/useSuggestedPlaces";
+import { useSuggestedPlaces } from "../../features/locations/useSuggestedPlaces";
 import type { SuggestedPlace } from "../../features/locations/types";
+import { resolveWatchForecastPeriods } from "./watchForecastSelection";
 
 export type WatchPageController = ReturnType<typeof useWatchPageController>;
+export type WatchForecastSelection = {
+  status: "selected" | "fallback" | "unavailable";
+  requestedPeriod: Period | null;
+  displayedPeriod: Period | null;
+  jsonPath: string | null;
+  smoothedRasterPath: string | null;
+  smoothedTilePath: string | null;
+  dataset: ForecastDataset | null;
+};
 
 function summarizeForecastPattern(values: Record<string, number>) {
   const positiveValues = Object.values(values)
@@ -126,11 +138,9 @@ export function useWatchPageController() {
     null,
   );
   const [reloadToken, setReloadToken] = useState(0);
-  const [selectedPeriodHasForecast, setSelectedPeriodHasForecast] = useState<
-    boolean | null
-  >(null);
+  const [forecastDataset, setForecastDataset] =
+    useState<ForecastDataset | null>(null);
   const [forecastPattern, setForecastPattern] = useState("Loading");
-  const [showNoForecastNotice, setShowNoForecastNotice] = useState(false);
   const [shareBusy, setShareBusy] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [expectedSeries, setExpectedSeries] = useState<
@@ -147,7 +157,6 @@ export function useWatchPageController() {
     Array<{ year: number; stat_week: number; actual_count: number }>
   >([]);
 
-  const lastMissingNoticePeriodKeyRef = useRef<string | null>(null);
   const didInitializeForecastIndexRef = useRef(false);
   const defaultForecastIndexRef = useRef(0);
   const primaryMapRef = useRef<ForecastMapHandle | null>(null);
@@ -255,71 +264,43 @@ export function useWatchPageController() {
     );
   }, [periods, setForecastIndex]);
 
-  const selectedForecast = useMemo(
-    () =>
-      forecastIndex >= 0 && forecastIndex < periods.length
-        ? periods[forecastIndex]
-        : null,
+  const periodSelection = useMemo(
+    () => resolveWatchForecastPeriods(periods, forecastIndex),
     [forecastIndex, periods],
   );
-  const selectedPeriodKeyForNotice =
-    selectedForecast?.periodKey ?? fallbackPeriod.periodKey;
-  const selectedPeriodYear = selectedForecast?.year ?? fallbackPeriod.year;
+  const selectedForecast = periodSelection.requestedPeriod;
+  const displayedForecast = periodSelection.displayedPeriod;
+  const usingFallbackForecast = periodSelection.status === "fallback";
+  const selectedPeriodYear = displayedForecast?.year ?? fallbackPeriod.year;
   const selectedPeriodWeek =
-    selectedForecast?.stat_week ?? fallbackPeriod.stat_week;
+    displayedForecast?.stat_week ?? fallbackPeriod.stat_week;
   const forecastPath = useMemo(
     () =>
-      selectedForecast
+      displayedForecast
         ? getForecastPathForPeriod(
             resolution,
-            selectedForecast.fileId,
+            displayedForecast.fileId,
             forecastDirectory,
           )
         : undefined,
-    [forecastDirectory, resolution, selectedForecast],
+    [displayedForecast, forecastDirectory, resolution],
   );
-  const latestForecastPath = useMemo(() => {
-    const latest = selectLatestPeriod(
-      periods.filter((period) => period.forecastAvailable !== false),
-    );
-    if (!latest) return undefined;
-    return getForecastPathForPeriod(
-      resolution,
-      latest.fileId,
-      forecastDirectory,
-    );
-  }, [forecastDirectory, periods, resolution]);
   const smoothedForecastPath = useMemo(() => {
-    if (!selectedForecast) return undefined;
+    if (!displayedForecast) return undefined;
     const periodStart = isoWeekToDateRange(
-      selectedForecast.year,
-      selectedForecast.stat_week,
+      displayedForecast.year,
+      displayedForecast.stat_week,
     ).start;
     return getSmoothedForecastPath(forecastDirectory, periodStart);
-  }, [forecastDirectory, selectedForecast]);
-  const latestSmoothedForecastPath = useMemo(
-    () => getSmoothedForecastPath(forecastDirectory),
-    [forecastDirectory],
-  );
+  }, [displayedForecast, forecastDirectory]);
   const smoothedForecastTilePath = useMemo(() => {
-    if (!selectedForecast) return undefined;
+    if (!displayedForecast) return undefined;
     const periodStart = isoWeekToDateRange(
-      selectedForecast.year,
-      selectedForecast.stat_week,
+      displayedForecast.year,
+      displayedForecast.stat_week,
     ).start;
     return getSmoothedForecastTilePath(forecastDirectory, periodStart);
-  }, [forecastDirectory, selectedForecast]);
-  const latestSmoothedForecastTilePath = useMemo(
-    () => getSmoothedForecastTilePath(forecastDirectory),
-    [forecastDirectory],
-  );
-  const latestAvailableForecastPeriod = useMemo(
-    () =>
-      selectLatestPeriod(
-        periods.filter((period) => period.forecastAvailable !== false),
-      ),
-    [periods],
-  );
+  }, [displayedForecast, forecastDirectory]);
 
   const {
     places: suggestedPlaces,
@@ -327,10 +308,8 @@ export function useWatchPageController() {
     error: suggestedPlacesError,
   } = useSuggestedPlaces({
     resolution,
-    modelId,
-    forecastPath,
-    fallbackForecastPath: latestForecastPath,
-    enabled: periods.length > 0,
+    activityValues: forecastDataset?.values ?? null,
+    enabled: forecastDataset !== null,
     limit: 25,
     poiFilters,
   });
@@ -438,94 +417,48 @@ export function useWatchPageController() {
 
   useEffect(() => {
     let active = true;
-
-    const loadModels = async () => {
-      try {
-        let hasForecastForSelectedPeriod: boolean | null = null;
-        let loadedForecastValues: Record<string, number> | null = null;
-
-        if (forecastPath) {
-          try {
-            const forecast = await loadForecast(resolution, {
-              kind: "explicit",
-              explicitPath: forecastPath,
-              modelId,
-            });
-            loadedForecastValues = forecast.values;
-            hasForecastForSelectedPeriod = true;
-          } catch {
-            hasForecastForSelectedPeriod = false;
-          }
-        }
-
-        if (
-          hasForecastForSelectedPeriod === false &&
-          latestForecastPath &&
-          latestForecastPath !== forecastPath
-        ) {
-          const fallbackForecast = await loadForecast(resolution, {
-            kind: "explicit",
-            explicitPath: latestForecastPath,
-            modelId,
-          }).catch(() => undefined);
-          loadedForecastValues = fallbackForecast?.values ?? null;
-        }
-
+    setForecastDataset(null);
+    setForecastPattern(forecastPath ? "Loading" : "Unavailable");
+    if (!forecastPath) return () => undefined;
+    setPageLoadError(null);
+    void loadForecast(resolution, {
+      kind: "explicit",
+      explicitPath: forecastPath,
+      modelId,
+    })
+      .then((dataset) => {
         if (!active) return;
-        setSelectedPeriodHasForecast(hasForecastForSelectedPeriod);
-        setForecastPattern(
-          loadedForecastValues
-            ? summarizeForecastPattern(loadedForecastValues)
-            : "Unavailable",
-        );
-      } catch {
+        setForecastDataset(dataset);
+        setForecastPattern(summarizeForecastPattern(dataset.values));
+      })
+      .catch((error) => {
         if (!active) return;
-        setSelectedPeriodHasForecast(false);
+        setForecastDataset(null);
         setForecastPattern("Unavailable");
-      }
-    };
-
-    void loadModels();
+        setPageLoadError(normalizeDataLoadError(error, forecastPath));
+      });
     return () => {
       active = false;
     };
-  }, [forecastPath, latestForecastPath, modelId, resolution]);
+  }, [forecastPath, modelId, resolution]);
 
-  useEffect(() => {
-    if (selectedPeriodHasForecast === true) {
-      lastMissingNoticePeriodKeyRef.current = null;
-      setShowNoForecastNotice(false);
-      return;
-    }
-    if (selectedPeriodHasForecast !== false) {
-      setShowNoForecastNotice(false);
-      return;
-    }
-    if (lastMissingNoticePeriodKeyRef.current === selectedPeriodKeyForNotice)
-      return;
-    lastMissingNoticePeriodKeyRef.current = selectedPeriodKeyForNotice;
-    setShowNoForecastNotice(true);
-    const timeoutId = window.setTimeout(
-      () => setShowNoForecastNotice(false),
-      3200,
-    );
-    return () => window.clearTimeout(timeoutId);
-  }, [selectedPeriodHasForecast, selectedPeriodKeyForNotice]);
-
-  const usingFallbackForecast = selectedPeriodHasForecast === false;
-  const selectedPeriodIsCurrentWeek =
-    selectedPeriodKeyForNotice === fallbackPeriod.periodKey;
-  const latestAvailableForecastRange = latestAvailableForecastPeriod
-    ? periodRange(latestAvailableForecastPeriod)
-    : null;
+  const forecastSelection: WatchForecastSelection = {
+    status: periodSelection.status,
+    requestedPeriod: selectedForecast,
+    displayedPeriod: displayedForecast,
+    jsonPath: forecastPath ?? null,
+    smoothedRasterPath: smoothedForecastPath ?? null,
+    smoothedTilePath: smoothedForecastTilePath ?? null,
+    dataset: forecastDataset,
+  };
 
   const currentWeek = useMemo(
-    () => selectedForecast?.stat_week ?? fallbackPeriod.stat_week,
-    [fallbackPeriod.stat_week, selectedForecast],
+    () => displayedForecast?.stat_week ?? fallbackPeriod.stat_week,
+    [displayedForecast, fallbackPeriod.stat_week],
   );
   const currentWeekYear = useMemo(
-    () => selectedForecast?.year ?? fallbackPeriod.year,
-    [fallbackPeriod.year, selectedForecast],
+    () => displayedForecast?.year ?? fallbackPeriod.year,
+    [displayedForecast, fallbackPeriod.year],
   );
 
   const handleResetMap = () => {
@@ -556,10 +489,11 @@ export function useWatchPageController() {
 
   const retryPageLoad = () => {
     resetPeriodsCache();
+    resetForecastCache();
     didInitializeForecastIndexRef.current = false;
     defaultForecastIndexRef.current = 0;
-    lastMissingNoticePeriodKeyRef.current = null;
     setPeriods([]);
+    setForecastDataset(null);
     setPageLoadError(null);
     setForecastIndex(0);
     setGridDetailOpen(false);
@@ -689,16 +623,8 @@ export function useWatchPageController() {
     poiFilters,
     setPoiFilters,
     mapResetNonce,
-    showNoForecastNotice,
     usingFallbackForecast,
-    selectedPeriodIsCurrentWeek,
-    latestAvailableForecastRange,
-    forecastPath,
-    latestForecastPath,
-    smoothedForecastPath,
-    smoothedForecastTilePath,
-    latestSmoothedForecastTilePath,
-    latestSmoothedForecastPath,
+    forecastSelection,
     expectedSummary,
     forecastPattern,
     currentWeek,

@@ -59,7 +59,8 @@ export type SuggestedPlace = {
   viewingPotential: ViewingPotential;
   score: number;
   reason: string;
-  distanceKm?: number;
+  distanceFromBaseKm?: number;
+  distanceToForecastSupportKm?: number;
   imageUrl?: string;
   hasLiveFeed?: boolean;
   liveCameraUrl?: string;

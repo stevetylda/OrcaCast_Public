@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
+import { PrimaryNavigation } from "../../shared/components/PrimaryNavigation";
 import { ReturnToTopButton } from "../../shared/components/ReturnToTopButton";
 import { SiteFooter } from "../../shared/components/SiteFooter";
 import { appConfig } from "../../shared/config/appConfig";
+import { routePath } from "../../shared/config/routes";
 import {
   getCachedDataMeta,
   loadDataMeta,
@@ -184,17 +186,10 @@ export function AboutPage() {
         variant="home"
         onOpenMenu={() => setMenuOpen(true)}
         rightSlot={
-          <nav className="aboutGuideNav" aria-label="About page navigation">
-            <a href="/#this-week" aria-label="This week">
-              This week
-            </a>
-            <Link to="/planner" aria-label="Plan a trip">
-              Plan a trip
-            </Link>
-            <Link to="/explore" aria-label="Explore">
-              Explore
-            </Link>
-          </nav>
+          <PrimaryNavigation
+            className="aboutGuideNav"
+            ariaLabel="About page navigation"
+          />
         }
       />
 
@@ -512,7 +507,7 @@ export function AboutPage() {
             </div>
             <Link
               className="aboutGuideButton aboutGuideButton--teal"
-              to="/about/model"
+              to={routePath("model")}
             >
               Learn how the model works{" "}
               <span className="material-symbols-rounded" aria-hidden="true">
@@ -684,14 +679,17 @@ export function AboutPage() {
           <div className="aboutGuideCta__actions">
             <Link
               className="aboutGuideButton aboutGuideButton--teal"
-              to="/planner"
+              to={routePath("planner")}
             >
               Build my trip{" "}
               <span className="material-symbols-rounded" aria-hidden="true">
                 arrow_forward
               </span>
             </Link>
-            <Link className="aboutGuideButton aboutGuideButton--cream" to="/">
+            <Link
+              className="aboutGuideButton aboutGuideButton--cream"
+              to={routePath("home")}
+            >
               See this week{" "}
               <span className="material-symbols-rounded" aria-hidden="true">
                 arrow_forward
@@ -712,8 +710,11 @@ export function AboutPage() {
           },
           { label: "Methodology", to: "#methodology", external: true },
           { label: "Privacy", to: "#privacy", external: true },
-          { label: "Learn how the model works", to: "/about/model" },
-          { label: "Plan a trip", to: "/planner" },
+          {
+            label: "Learn how the model works",
+            to: routePath("model"),
+          },
+          { label: "Plan a trip", to: routePath("planner") },
           {
             label: "Contribute",
             to: "https://github.com/stevetylda/OrcaCast_Public",

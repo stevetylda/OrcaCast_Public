@@ -46,16 +46,12 @@ export type ForecastMapProps = {
   onGridCellSelect?: (h3: string) => void;
   onGridCellExpand?: (request: GridCellExpandRequest) => void;
   enableGridInteraction?: boolean;
-  forecastPath?: string;
-  fallbackForecastPath?: string;
   smoothedForecastPath?: string;
-  fallbackSmoothedForecastPath?: string;
   smoothedForecastTilePath?: string;
-  fallbackSmoothedForecastTilePath?: string;
   weightedSmoothedForecastSources?: WeightedGeoTiffSource[];
   colorScaleValues?: Record<string, number>;
   useExternalColorScale?: boolean;
-  externalValues?: Record<string, number>;
+  activityValues: Record<string, number> | null;
   forecastOverlayEnabled?: boolean;
   pulseAllGridCells?: boolean;
   mapModeLabel?: string;

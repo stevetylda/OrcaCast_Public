@@ -44,27 +44,14 @@ function normalizePayload(payload: unknown): OrcasoundHydrophonePayload {
 }
 
 async function fetchHydrophonePayload(): Promise<OrcasoundHydrophonePayload> {
-  const base = import.meta.env.BASE_URL || "/";
-  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
-  const candidates = Array.from(
-    new Set([
-      `${normalizedBase}data/orcasound_hydrophones.json`,
-      "/data/orcasound_hydrophones.json",
-      "data/orcasound_hydrophones.json",
-    ]),
-  );
-
-  for (const url of candidates) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) continue;
-      return normalizePayload(await response.json());
-    } catch {
-      // Try next candidate URL.
-    }
+  const url = resolveAppAssetPath("data/orcasound_hydrophones.json");
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load Orcasound hydrophone data (${response.status}) from ${url}`,
+    );
   }
-
-  throw new Error("Failed to load Orcasound hydrophone data");
+  return normalizePayload(await response.json());
 }
 
 export function loadOrcasoundHydrophonePayload() {
@@ -79,3 +66,4 @@ export async function loadOrcasoundHydrophones() {
 export function resetOrcasoundHydrophonesCacheForTests() {
   hydrophonePayloadPromise = null;
 }
+import { resolveAppAssetPath } from "../config/basePath";

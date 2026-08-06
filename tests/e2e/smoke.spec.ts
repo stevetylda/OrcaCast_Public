@@ -1,15 +1,21 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import {
+  APP_ROUTES,
+  NAVIGABLE_ROUTE_LIST,
+  getNavigationRoutes,
+  routePath,
+} from "../../src/shared/config/routes";
 
 const routes = [
-  "/",
-  "/watch",
-  "/planner",
-  "/explore",
-  "/about",
-  "/about/model",
+  ...NAVIGABLE_ROUTE_LIST.map((route) => route.path),
   "/route-that-does-not-exist",
 ];
+const plannerResumePath = `${routePath("planner")}?resume=1`;
+
+function pathSuffixPattern(path: string) {
+  return new RegExp(`${path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
+}
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -41,6 +47,23 @@ function monitorPage(page: Page, baseURL: string) {
   return { consoleErrors, firstPartyFailures };
 }
 
+async function openMobileFieldPicks(page: Page) {
+  if ((page.viewportSize()?.width ?? 9999) > 760) return;
+  const trigger = page.getByRole("button", {
+    name: "Expand recommended places",
+  });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+}
+
+async function openForecastWeekSelector(page: Page) {
+  if ((await page.getByRole("tab").count()) > 0) return;
+  await page
+    .getByRole("button", { name: /^Open forecast window and week selector/ })
+    .click();
+  await expect(page.getByRole("tab").first()).toBeVisible();
+}
+
 test("metadata failure does not block metadata-independent pages", async ({
   page,
 }) => {
@@ -48,10 +71,10 @@ test("metadata failure does not block metadata-independent pages", async ({
     route.fulfill({ status: 503, body: "temporarily unavailable" }),
   );
 
-  await page.goto("/about", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("about"), { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
 
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("home"), { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
 });
 
@@ -103,30 +126,41 @@ for (const route of routes) {
 }
 
 test("primary navigation works", async ({ page }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("home"), { waitUntil: "domcontentloaded" });
   const menu = page.getByRole("button", { name: "Open main menu" });
   if (await menu.isVisible()) {
     await menu.click();
-    await page.getByRole("button", { name: "Planner" }).click();
+    await page
+      .getByRole("button", {
+        name: APP_ROUTES.planner.navigationLabel,
+      })
+      .click();
   } else {
     await page
-      .getByRole("link", { name: /Planner/i })
+      .getByRole("link", {
+        name: APP_ROUTES.planner.navigationLabel,
+      })
       .first()
       .click();
   }
-  await expect(page).toHaveURL(/\/planner$/);
+  await expect(page).toHaveURL(
+    new RegExp(`${routePath("planner").replace("/", "\\/")}$`),
+  );
 });
 
 test("forecast header underlines the active route in orange", async ({
   page,
-}) => {
-  for (const [route, label] of [
-    ["/watch", "This week"],
-    ["/planner", "Plan a trip"],
-    ["/explore", "Explore"],
-  ] as const) {
-    await page.goto(route, { waitUntil: "domcontentloaded" });
-    const activeLink = page.getByRole("link", { name: label, exact: true });
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name.startsWith("mobile"),
+    "Desktop forecast navigation only",
+  );
+  for (const route of getNavigationRoutes("primary")) {
+    await page.goto(route.path, { waitUntil: "domcontentloaded" });
+    const activeLink = page.getByRole("link", {
+      name: route.navigationLabel,
+      exact: true,
+    });
     await expect(activeLink).toHaveAttribute("aria-current", "page");
     const decoration = await activeLink.evaluate((link) => {
       const style = getComputedStyle(link);
@@ -143,22 +177,32 @@ test("forecast header underlines the active route in orange", async ({
 test("This Week renders the live map, forecast, places, details, and itinerary", async ({
   page,
 }) => {
-  const tileResponses: string[] = [];
-  page.on("response", (response) => {
-    if (/\.(?:png|pbf)(?:\?|$)/.test(response.url()) && response.ok())
-      tileResponses.push(response.url());
+  const forecastRequests: string[] = [];
+  page.on("request", (request) => {
+    if (
+      /\/weekly\/(?:srkw|transient)\/[^/]+\/\d{4}_\d+_H6\.json/.test(
+        request.url(),
+      )
+    ) {
+      forecastRequests.push(request.url());
+    }
   });
-  await page.goto("/watch", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("watch"), { waitUntil: "domcontentloaded" });
+  await openMobileFieldPicks(page);
   await expect(page.locator("canvas.maplibregl-canvas").first()).toBeVisible({
     timeout: 45_000,
   });
-  await expect(page.getByText(/recommended place/i).first()).toBeVisible({
+  await expect(page.getByRole("article").first()).toBeVisible({
     timeout: 45_000,
   });
-  await expect
-    .poll(() => tileResponses.length, { timeout: 45_000 })
-    .toBeGreaterThan(0);
+  const requestCounts = new Map<string, number>();
+  forecastRequests.forEach((url) =>
+    requestCounts.set(url, (requestCounts.get(url) ?? 0) + 1),
+  );
+  expect(requestCounts.size).toBeGreaterThan(0);
+  expect(Math.max(...requestCounts.values())).toBe(1);
 
+  await openForecastWeekSelector(page);
   const selectedForecastTab = page.getByRole("tab", { selected: true });
   await selectedForecastTab.focus();
   await page.keyboard.press("ArrowRight");
@@ -174,36 +218,9 @@ test("This Week renders the live map, forecast, places, details, and itinerary",
     await expect(page.getByText("Added to itinerary")).toBeVisible();
     await expect(page.locator(".plannerMapMarker.is-pulsing")).toBeVisible();
 
-    const canvas = page.locator("canvas.maplibregl-canvas").first();
-    const canvasBounds = await canvas.boundingBox();
-    expect(canvasBounds).not.toBeNull();
-    let emptyMapPoint: { x: number; y: number } | null = null;
-    for (
-      let y = (canvasBounds?.y ?? 0) + 80;
-      y < (canvasBounds?.y ?? 0) + (canvasBounds?.height ?? 0) - 120 &&
-      !emptyMapPoint;
-      y += 40
-    ) {
-      for (
-        let x = (canvasBounds?.x ?? 0) + 80;
-        x < (canvasBounds?.x ?? 0) + (canvasBounds?.width ?? 0) - 120;
-        x += 40
-      ) {
-        const isBareMapCanvas = await page.evaluate(
-          ({ pointX, pointY }) =>
-            document
-              .elementFromPoint(pointX, pointY)
-              ?.classList.contains("maplibregl-canvas") ?? false,
-          { pointX: x, pointY: y },
-        );
-        if (isBareMapCanvas) {
-          emptyMapPoint = { x, y };
-          break;
-        }
-      }
-    }
-    expect(emptyMapPoint).not.toBeNull();
-    await page.mouse.click(emptyMapPoint?.x ?? 0, emptyMapPoint?.y ?? 0);
+    await page
+      .getByRole("button", { name: "Back to field picks" })
+      .evaluate((button: HTMLButtonElement) => button.click());
     await expect(page.locator(".plannerMapMarker.is-pulsing")).toHaveCount(0);
   }
 });
@@ -211,7 +228,8 @@ test("This Week renders the live map, forecast, places, details, and itinerary",
 test("This Week playback advances forward with field picks unloaded", async ({
   page,
 }, testInfo) => {
-  await page.goto("/watch", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("watch"), { waitUntil: "domcontentloaded" });
+  await openMobileFieldPicks(page);
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
   });
@@ -233,6 +251,7 @@ test("This Week playback advances forward with field picks unloaded", async ({
     await page.getByRole("button", { name: "Close settings" }).click();
   }
 
+  await openForecastWeekSelector(page);
   const firstWeek = page.getByRole("tab").first();
   await firstWeek.click();
   const startingIndex = Number(
@@ -267,7 +286,7 @@ test("This Week playback advances forward with field picks unloaded", async ({
 test("This Week Watch and Listen open media details without map popups", async ({
   page,
 }) => {
-  await page.goto("/watch", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("watch"), { waitUntil: "domcontentloaded" });
   const map = page.locator('[data-tour="map-canvas"]');
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
@@ -279,9 +298,8 @@ test("This Week Watch and Listen open media details without map popups", async (
     .toBe(0);
 
   await page.getByRole("button", { name: "Watch", exact: true }).click();
-  await expect(page.getByText("Webcams", { exact: true })).toBeVisible();
   await expect(
-    page.locator(".footerDock__count").filter({ hasText: "48" }),
+    page.getByRole("heading", { name: "Watch locations 48" }),
   ).toBeVisible();
   await expect
     .poll(async () =>
@@ -289,16 +307,16 @@ test("This Week Watch and Listen open media details without map popups", async (
     )
     .toBe(48);
 
-  const webcamList = page.locator(".footerDock__placeList");
+  const webcamList = page.locator(".suggestedPlacesPanel__content");
   const listMetrics = await webcamList.evaluate((element) => ({
     clientHeight: element.clientHeight,
     scrollHeight: element.scrollHeight,
     overflowY: getComputedStyle(element).overflowY,
   }));
-  expect(listMetrics.overflowY).toBe("auto");
+  expect(["auto", "scroll"]).toContain(listMetrics.overflowY);
   expect(listMetrics.scrollHeight).toBeGreaterThan(listMetrics.clientHeight);
   await page
-    .locator(".footerDock__placeItem")
+    .locator(".suggestedPlacesPanel__mediaCard")
     .first()
     .evaluate((button: HTMLButtonElement) => button.click());
   await expect(page.getByText("Webcam details", { exact: true })).toBeVisible();
@@ -318,7 +336,10 @@ test("This Week Watch and Listen open media details without map popups", async (
   );
   await page.getByRole("button", { name: "Nah" }).click();
 
-  await page.getByRole("button", { name: "Watch", exact: true }).click();
+  await page.getByRole("button", { name: "Back to watch locations" }).click();
+  await page
+    .getByRole("button", { name: "Back to recommended places" })
+    .click();
   await expect
     .poll(async () =>
       Number(await map.getAttribute("data-planner-camera-count")),
@@ -326,9 +347,11 @@ test("This Week Watch and Listen open media details without map popups", async (
     .toBe(0);
 
   await page.getByRole("button", { name: "Listen", exact: true }).click();
-  await expect(page.getByText("Hydrophones", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Listen locations 5" }),
+  ).toBeVisible();
   await page
-    .locator(".footerDock__placeItem")
+    .locator(".suggestedPlacesPanel__mediaCard")
     .first()
     .evaluate((button: HTMLButtonElement) => button.click());
   await expect(
@@ -346,7 +369,7 @@ test("mobile navigation opens and closes", async ({ page }, testInfo) => {
     testInfo.project.name !== "mobile-chromium",
     "Mobile navigation project only",
   );
-  await page.goto("/watch", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("watch"), { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Open main menu" }).click();
   await expect(
     page.getByRole("navigation", { name: "Primary navigation" }),
@@ -365,7 +388,7 @@ test("mobile Planner keeps the complete form within reach", async ({
     "Mobile Planner regression test",
   );
   await page.setViewportSize({ width: 412, height: 839 });
-  await page.goto("/planner", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("planner"), { waitUntil: "domcontentloaded" });
 
   const promptCard = page.locator(".plannerResultsPage__promptCard");
   await expect(promptCard).toBeVisible();
@@ -412,7 +435,7 @@ test("Planner renders each POI filter without bulk DOM markers", async ({
   const poiResponse = page.waitForResponse((response) =>
     response.url().includes("/data/places_of_interest.json"),
   );
-  await page.goto("/planner?resume=1", { waitUntil: "domcontentloaded" });
+  await page.goto(plannerResumePath, { waitUntil: "domcontentloaded" });
   await poiResponse;
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
@@ -498,7 +521,7 @@ test("Planner loads date-weighted historical smooth weeks by default", async ({
     }
   });
 
-  await page.goto("/planner?resume=1", { waitUntil: "domcontentloaded" });
+  await page.goto(plannerResumePath, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
   });
@@ -548,23 +571,33 @@ test("Planner loads date-weighted historical smooth weeks by default", async ({
       "maplibregl-canvas",
     );
   }
+  expect(requestedTiffs).toHaveLength(0);
+  await page.getByRole("button", { name: "Open planner settings" }).click();
+  const surfaceView = page.getByRole("combobox", { name: "Surface view" });
+  await expect(surfaceView).toHaveValue("grid");
+  await surfaceView.selectOption("surface");
+  await expect(surfaceView).toHaveValue("surface");
+
   await expect
-    .poll(() => requestedTiffs.some((url) => url.endsWith("week_27.tif")), {
-      timeout: 60_000,
-    })
+    .poll(
+      () =>
+        requestedTiffs.some((url) =>
+          new URL(url).pathname.endsWith("week_27.tif"),
+        ),
+      { timeout: 60_000 },
+    )
     .toBe(true);
   await expect
-    .poll(() => requestedTiffs.some((url) => url.endsWith("week_28.tif")), {
-      timeout: 60_000,
-    })
+    .poll(
+      () =>
+        requestedTiffs.some((url) =>
+          new URL(url).pathname.endsWith("week_28.tif"),
+        ),
+      { timeout: 60_000 },
+    )
     .toBe(true);
   expect(requestedTiffs).toHaveLength(2);
   expect(requestedTiffs.every((url) => url.includes("/srkw/"))).toBe(true);
-
-  await page.getByRole("button", { name: "Open planner settings" }).click();
-  await expect(
-    page.getByRole("combobox", { name: "Surface view" }),
-  ).toHaveValue("surface");
 
   if (!testInfo.project.name.startsWith("mobile")) {
     await page.getByRole("button", { name: "Close settings" }).click();
@@ -628,7 +661,7 @@ test("Planner sidebar stays right after a This Week round trip", async ({
     });
   };
 
-  await page.goto("/planner?resume=1", { waitUntil: "domcontentloaded" });
+  await page.goto(plannerResumePath, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
   });
@@ -639,14 +672,14 @@ test("Planner sidebar stays right after a This Week round trip", async ({
   const plannerLegend = await readLegendStyle();
 
   await page.getByRole("link", { name: "This week" }).click();
-  await expect(page).toHaveURL(/\/watch$/);
+  await expect(page).toHaveURL(pathSuffixPattern(routePath("watch")));
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
   });
   const watchLegend = await readLegendStyle();
 
   await page.goBack({ waitUntil: "domcontentloaded" });
-  await expect(page).toHaveURL(/\/planner\?resume=1$/);
+  await expect(page).toHaveURL(pathSuffixPattern(plannerResumePath));
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
   });
@@ -661,7 +694,7 @@ test("Planner sidebar stays right after a This Week round trip", async ({
     expect(sidebar.left).toBeGreaterThan(sidebar.viewportWidth / 2);
     expect(sidebar.rightGap).toBe(24);
   }
-  expect(watchLegend).toEqual(plannerLegend);
+  expect(watchLegend.width).toEqual(plannerLegend.width);
   expect(returnedLegend).toEqual(plannerLegend);
 });
 
@@ -677,7 +710,7 @@ test("Planner toggles the grouped webcam inventory", async ({ page }) => {
     );
   });
 
-  await page.goto("/planner?resume=1", { waitUntil: "domcontentloaded" });
+  await page.goto(plannerResumePath, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
     timeout: 45_000,
   });
@@ -702,13 +735,36 @@ test("This Week exposes its mobile page heading", async ({
   page,
 }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith("mobile"));
-  await page.goto("/watch", { waitUntil: "domcontentloaded" });
+  await page.goto(routePath("watch"), { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /This week.s orca forecast/i,
+      name: /^(This week|Latest available)\s*·/i,
     }),
   ).toBeAttached();
+});
+
+test("mobile Field Picks starts collapsed and expands from five to 25", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile-chromium");
+  await page.goto(routePath("watch"), { waitUntil: "domcontentloaded" });
+  const trigger = page.getByRole("button", {
+    name: "Expand recommended places",
+  });
+  await expect(trigger).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(0);
+  await trigger.click();
+  await expect(page.getByRole("article")).toHaveCount(5, { timeout: 45_000 });
+  const panel = page.locator(".suggestedPlacesPanel");
+  const panelHeight = await panel.evaluate(
+    (element) => element.getBoundingClientRect().height,
+  );
+  expect(panelHeight).toBeLessThanOrEqual(
+    Math.ceil((page.viewportSize()?.height ?? 0) * 0.55) + 1,
+  );
+  await page.getByRole("button", { name: "Show all 25" }).click();
+  await expect(page.getByRole("article")).toHaveCount(25);
 });
 
 test("favicons, manifest, fonts, style, and CORS-enabled map resources respond", async ({

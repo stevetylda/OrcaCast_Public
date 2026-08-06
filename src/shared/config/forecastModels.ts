@@ -1,3 +1,5 @@
+import forecastModelRegistry from "../../../config/forecast-models.json";
+
 export type ForecastEcotypeId = "srkw" | "transient";
 
 export type ForecastModelOption = {
@@ -11,27 +13,8 @@ export type ForecastEcotypeOption = {
   models: ForecastModelOption[];
 };
 
-export const FORECAST_ECOTYPES: ForecastEcotypeOption[] = [
-  {
-    id: "srkw",
-    label: "Southern Resident (SRKW)",
-    models: [
-      { id: "kernel_decay_model", label: "Kernel decay model" },
-      {
-        id: "log_gaussian_cox_process",
-        label: "Log-Gaussian Cox process",
-      },
-    ],
-  },
-  {
-    id: "transient",
-    label: "Transient (Bigg's)",
-    models: [
-      { id: "sightings_ensemble", label: "Sightings ensemble" },
-      { id: "transport_graph_model", label: "Transport graph model" },
-    ],
-  },
-];
+export const FORECAST_ECOTYPES =
+  forecastModelRegistry as ForecastEcotypeOption[];
 
 export const DEFAULT_FORECAST_ECOTYPE_ID: ForecastEcotypeId = "srkw";
 export const DEFAULT_FORECAST_MODEL_ID = "kernel_decay_model";

@@ -3,6 +3,7 @@ import type {
   TripPlannerDraft,
   PlannerStorage,
 } from "./plannerTypes";
+import { clearStoredItinerary } from "../../itinerary/itineraryStorage";
 
 export const PLANNER_SELECTION_STORAGE_KEY = "orcacast.planner.selection";
 export const PLANNER_OPEN_STORAGE_KEY = "orcacast.planner.open";
@@ -140,4 +141,5 @@ export function clearStoredPlannerState(
   storage.removeItem(PLANNER_OPEN_STORAGE_KEY);
   storage.removeItem(PLANNER_DRAFT_STORAGE_KEY);
   storage.removeItem(PLANNER_RECOMMENDED_PLACES_STORAGE_KEY);
+  clearStoredItinerary(storage);
 }

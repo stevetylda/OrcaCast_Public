@@ -3,8 +3,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Link, MemoryRouter, useLocation } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { getNavigationRoutes, routePath } from "../config/routes";
+import { NotFoundPage } from "../../pages/NotFoundPage/NotFoundPage";
+import { MenuProvider } from "../state/MenuContext";
 import { AppHeader } from "./AppHeader";
 import { ForecastLabHeader } from "./ForecastLabHeader";
+import { PrimaryNavigation } from "./PrimaryNavigation";
 import { SideDrawer } from "./SideDrawer";
 
 function CurrentPath() {
@@ -24,11 +28,27 @@ function DrawerHarness() {
 }
 
 describe("application navigation", () => {
-  it.each([
-    ["/watch", "This week"],
-    ["/planner", "Plan a trip"],
-    ["/explore", "Explore"],
-  ])("marks %s as the active forecast route", (path, activeLabel) => {
+  it.each(["home", "about", "model"] as const)(
+    "uses the canonical primary links on the %s header",
+    (routeId) => {
+      render(
+        <MemoryRouter initialEntries={[routePath(routeId)]}>
+          <PrimaryNavigation ariaLabel="Page navigation" />
+        </MemoryRouter>,
+      );
+
+      expect(
+        screen.getAllByRole("link").map((link) => link.textContent),
+      ).toEqual(["This Week", "Plan a Trip", "Explore"]);
+    },
+  );
+
+  it.each(
+    getNavigationRoutes("primary").map((route) => [
+      route.path,
+      route.navigationLabel,
+    ]),
+  )("marks %s as the active forecast route", (path, activeLabel) => {
     render(
       <MemoryRouter initialEntries={[path]}>
         <ForecastLabHeader onOpenMenu={vi.fn()} />
@@ -50,17 +70,17 @@ describe("application navigation", () => {
     const user = userEvent.setup();
     const onMenu = vi.fn();
     render(
-      <MemoryRouter initialEntries={["/watch"]}>
+      <MemoryRouter initialEntries={[routePath("watch")]}>
         <AppHeader
           title="OrcaCast"
           subtitle="This Week"
           onOpenMenu={onMenu}
           rightSlot={
             <nav aria-label="Header navigation">
-              <Link to="/planner" aria-label="Plan a trip">
+              <Link to={routePath("planner")} aria-label="Plan a trip">
                 Plan a trip
               </Link>
-              <Link to="/explore" aria-label="Explore">
+              <Link to={routePath("explore")} aria-label="Explore">
                 Explore
               </Link>
             </nav>
@@ -74,7 +94,9 @@ describe("application navigation", () => {
     expect(onMenu).toHaveBeenCalledOnce();
 
     await user.click(screen.getByRole("link", { name: "About OrcaCast" }));
-    expect(screen.getByLabelText("Current path")).toHaveTextContent("/about");
+    expect(screen.getByLabelText("Current path")).toHaveTextContent(
+      routePath("about"),
+    );
     expect(
       screen.getByRole("link", { name: "About OrcaCast" }),
     ).toHaveAttribute("aria-current", "page");
@@ -89,7 +111,9 @@ describe("application navigation", () => {
     );
 
     await user.click(screen.getByRole("link", { name: "OrcaCast home" }));
-    expect(screen.getByLabelText("Current path")).toHaveTextContent("/");
+    expect(screen.getByLabelText("Current path")).toHaveTextContent(
+      routePath("home"),
+    );
     expect(screen.getByRole("link", { name: "OrcaCast home" })).toHaveAttribute(
       "aria-current",
       "page",
@@ -100,7 +124,7 @@ describe("application navigation", () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
     render(
-      <MemoryRouter initialEntries={["/"]}>
+      <MemoryRouter initialEntries={[routePath("home")]}>
         <SideDrawer open onClose={onClose} />
         <CurrentPath />
       </MemoryRouter>,
@@ -109,15 +133,34 @@ describe("application navigation", () => {
     expect(
       screen.getByRole("navigation", { name: "Primary navigation" }),
     ).toBeVisible();
-    await user.click(screen.getByRole("button", { name: "Planner" }));
-    expect(screen.getByLabelText("Current path")).toHaveTextContent("/planner");
+    await user.click(screen.getByRole("button", { name: "Plan a Trip" }));
+    expect(screen.getByLabelText("Current path")).toHaveTextContent(
+      routePath("planner"),
+    );
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("derives the 404 destinations from the route registry", () => {
+    render(
+      <MemoryRouter initialEntries={["/missing"]}>
+        <MenuProvider>
+          <NotFoundPage />
+        </MenuProvider>
+      </MemoryRouter>,
+    );
+
+    const popularRoutes = screen
+      .getByRole("navigation", { name: "Popular destinations" })
+      .querySelectorAll("a");
+    expect(Array.from(popularRoutes, (link) => link.textContent)).toEqual(
+      getNavigationRoutes("notFound").map((route) => route.navigationLabel),
+    );
   });
 
   it("traps focus, closes on Escape, and restores the opener", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={["/"]}>
+      <MemoryRouter initialEntries={[routePath("home")]}>
         <DrawerHarness />
       </MemoryRouter>,
     );

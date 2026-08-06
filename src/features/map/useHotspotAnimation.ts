@@ -6,7 +6,7 @@ type UseHotspotAnimationArgs = {
   mapRef: MutableRefObject<MapLibreMap | null>;
   hotspotsOnlyRef: MutableRefObject<boolean>;
   resolution: string;
-  forecastPath?: string;
+  overlayLoadKey?: string;
 };
 
 export function useHotspotAnimation({
@@ -14,7 +14,7 @@ export function useHotspotAnimation({
   mapRef,
   hotspotsOnlyRef,
   resolution,
-  forecastPath,
+  overlayLoadKey,
 }: UseHotspotAnimationArgs) {
   useEffect(() => {
     const map = mapRef.current;
@@ -127,5 +127,5 @@ export function useHotspotAnimation({
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [mapReady, mapRef, hotspotsOnlyRef, resolution, forecastPath]);
+  }, [mapReady, mapRef, hotspotsOnlyRef, resolution, overlayLoadKey]);
 }

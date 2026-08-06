@@ -40,6 +40,7 @@ import {
   mergePoiCamerasIntoWebcamSites,
 } from "../../shared/data/webcams";
 import { useDialogFocus } from "../../shared/components/useDialogFocus";
+import { usePersistedItinerary } from "../../features/itinerary/usePersistedItinerary";
 
 function pickLegendColors(colors: string[], colorNoData = false) {
   const source = colorNoData ? colors.slice(1) : colors;
@@ -96,23 +97,16 @@ const WATCH_REVEAL_EXIT_DURATION_MS = 180;
 export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   trackRender("WatchPageLayout");
   const [sidebarOffsetPx, setSidebarOffsetPx] = useState(0);
-  const [recommendedPanelOpen, setRecommendedPanelOpen] = useState(true);
+  const [recommendedPanelOpen, setRecommendedPanelOpen] = useState(
+    () =>
+      typeof window === "undefined" ||
+      !window.matchMedia?.("(max-width: 760px)").matches,
+  );
   const [locationPanelView, setLocationPanelView] =
     useState<SuggestedPlacesPanelView>("places");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [itineraryPlaceIds, setItineraryPlaceIds] = useState<string[]>(() => {
-    try {
-      const parsed = JSON.parse(
-        window.sessionStorage.getItem("orcacast.planner.itinerary.v1") ?? "[]",
-      );
-      return Array.isArray(parsed)
-        ? parsed.filter((value): value is string => typeof value === "string")
-        : [];
-    } catch {
-      return [];
-    }
-  });
+  const { itineraryPlaceIds, setItineraryPlaceIds } = usePersistedItinerary();
   const [itineraryExpanded, setItineraryExpanded] = useState(false);
   const [itineraryExportOpen, setItineraryExportOpen] = useState(false);
   const [itineraryExportBusy, setItineraryExportBusy] = useState(false);
@@ -189,20 +183,12 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     poiFilters,
     setPoiFilters,
     mapResetNonce,
-    forecastPath,
-    latestForecastPath,
-    smoothedForecastPath,
-    smoothedForecastTilePath,
-    latestSmoothedForecastTilePath,
-    latestSmoothedForecastPath,
+    forecastSelection,
     expectedSummary,
     forecastPattern,
     currentWeek,
     currentWeekYear,
-    showNoForecastNotice,
     usingFallbackForecast,
-    selectedPeriodIsCurrentWeek,
-    latestAvailableForecastRange,
     shareBusy,
     suggestedPlaces,
     suggestedPlacesLoading,
@@ -222,6 +208,15 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     () => formatWeekRange(currentWeekYear, currentWeek),
     [currentWeek, currentWeekYear],
   );
+  const requestedWeekRangeLabel = useMemo(() => {
+    const requested = forecastSelection.requestedPeriod;
+    return requested
+      ? formatWeekRange(requested.year, requested.stat_week)
+      : weekRangeLabel;
+  }, [forecastSelection.requestedPeriod, weekRangeLabel]);
+  const forecastHeadingLabel = usingFallbackForecast
+    ? `Latest available · ${weekRangeLabel}`
+    : `This week · ${weekRangeLabel}`;
   const trendPresentation = TREND_PRESENTATION[expectedSummary.trend];
   const orcaOutlookLabel = useMemo(() => {
     const current = expectedSummary.current;
@@ -294,19 +289,12 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     };
   }, [itineraryExportOpen, itineraryPlaces]);
   useEffect(() => {
-    window.sessionStorage.setItem(
-      "orcacast.planner.itinerary.v1",
-      JSON.stringify(itineraryPlaceIds),
-    );
-  }, [itineraryPlaceIds]);
-
-  useEffect(() => {
     if (!itineraryAddPulse) return;
     const timerId = window.setTimeout(() => setItineraryAddPulse(false), 900);
     return () => window.clearTimeout(timerId);
   }, [itineraryAddPulse]);
 
-  const forecastLoadKey = forecastPath ?? latestForecastPath ?? "";
+  const forecastLoadKey = forecastSelection.jsonPath ?? "";
   const watchResourcesReady =
     periods.length > 0 &&
     forecastLoadKey.length > 0 &&
@@ -556,6 +544,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     itineraryPlaceIds,
     showTripHotspotMarkers: true,
     forceDomSuggestedMarkers: true,
+    activityValues: null,
     hydrophoneLocations,
     selectedHydrophoneId,
     showHydrophones: hydrophonesVisible,
@@ -594,6 +583,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     | "itineraryPlaceIds"
     | "showTripHotspotMarkers"
     | "forceDomSuggestedMarkers"
+    | "activityValues"
     | "hydrophoneLocations"
     | "selectedHydrophoneId"
     | "showHydrophones"
@@ -642,9 +632,6 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
       <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
 
       <main id="main-content" className="app__main" tabIndex={-1}>
-        <div className="thisWeekMobileHeading" role="heading" aria-level={1}>
-          This week’s orca forecast, {weekRangeLabel}
-        </div>
         <div className="visuallyHidden" role="status" aria-live="polite">
           {itineraryReorderAnnouncement}
         </div>
@@ -665,13 +652,12 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                   modelId,
                   selectedWeek: currentWeek,
                   selectedWeekYear: currentWeekYear,
-                  forecastPath,
-                  fallbackForecastPath: latestForecastPath,
-                  smoothedForecastPath,
-                  fallbackSmoothedForecastPath: latestSmoothedForecastPath,
-                  smoothedForecastTilePath,
-                  fallbackSmoothedForecastTilePath:
-                    latestSmoothedForecastTilePath,
+                  activityValues: forecastSelection.dataset?.values ?? null,
+                  forecastOverlayEnabled: forecastSelection.dataset !== null,
+                  smoothedForecastPath:
+                    forecastSelection.smoothedRasterPath ?? undefined,
+                  smoothedForecastTilePath:
+                    forecastSelection.smoothedTilePath ?? undefined,
                   forecastOverlayLoadKey: forecastLoadKey,
                   onForecastOverlayReady: setRenderedForecastLoadKey,
                 },
@@ -703,10 +689,21 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                   <span className="material-symbols-rounded">waves</span>
                 </div>
                 <div className="thisWeekResultsPage__summaryBody">
-                  <p className="thisWeekResultsPage__eyebrow">This week</p>
+                  <p className="thisWeekResultsPage__eyebrow">
+                    {usingFallbackForecast ? "Latest available" : "This week"}
+                  </p>
                   <div className="thisWeekResultsPage__summaryLine">
-                    <h1 id="thisWeekSummaryTitle">{weekRangeLabel}</h1>
+                    <h1 id="thisWeekSummaryTitle">{forecastHeadingLabel}</h1>
                   </div>
+                  {usingFallbackForecast ? (
+                    <p
+                      className="thisWeekResultsPage__fallbackSummary"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      Requested {requestedWeekRangeLabel} is unavailable.
+                    </p>
+                  ) : null}
                 </div>
               </section>
 
@@ -1033,26 +1030,6 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
                   onPlayingChange={setForecastPlaybackPlaying}
                 />
               </section>
-            ) : null}
-
-            {showNoForecastNotice || usingFallbackForecast ? (
-              <div
-                className="thisWeekResultsPage__statusBanner"
-                role="status"
-                aria-live="polite"
-              >
-                <span className="material-symbols-rounded" aria-hidden="true">
-                  info
-                </span>
-                <span>
-                  {selectedPeriodIsCurrentWeek
-                    ? "A forecast for this week is not available. "
-                    : "This period does not have a dedicated forecast. "}
-                  {latestAvailableForecastRange
-                    ? `Showing the latest packaged forecast (${latestAvailableForecastRange.start} to ${latestAvailableForecastRange.end}).`
-                    : "Showing the latest available forecast surface."}
-                </span>
-              </div>
             ) : null}
           </div>
           {thisWeekLoading ? (

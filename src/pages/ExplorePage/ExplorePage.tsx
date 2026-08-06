@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ForecastLabHeader } from "../../shared/components/ForecastLabHeader";
+import { routePath } from "../../shared/config/routes";
 import { useMenu } from "../../shared/state/MenuContext";
 import "./ExplorePage.css";
 
@@ -55,7 +56,7 @@ export function ExplorePage() {
                 <span>The guide is still taking shape.</span>
               </div>
             </div>
-            <Link className="exploreSoonButton" to="/watch">
+            <Link className="exploreSoonButton" to={routePath("watch")}>
               Explore this week’s map
               <span className="material-symbols-rounded" aria-hidden="true">
                 map

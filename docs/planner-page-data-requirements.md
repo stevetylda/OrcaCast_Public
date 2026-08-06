@@ -472,7 +472,8 @@ type SuggestedPlace = {
   viewingPotential: "low" | "medium" | "high";
   score: number;
   reason: string;
-  distanceKm?: number;
+  distanceFromBaseKm?: number;
+  distanceToForecastSupportKm?: number;
   imageUrl?: string;
   hasLiveFeed?: boolean;
   hasHydrophone?: boolean;
@@ -491,8 +492,10 @@ Field origins:
   - mean of nearby planner cell values
 - `reason`
   - POI file reason, else planner metadata reason, else generated fallback sentence
-- `distanceKm`
-  - nearest matching planner-scored cell distance
+- `distanceFromBaseKm`
+  - direct haversine distance from the selected trip base to the POI
+- `distanceToForecastSupportKm`
+  - distance from the POI to the nearest modeled forecast cell, retained only as ranking provenance
 
 ### 4.2 Seasonal chart data
 
@@ -536,11 +539,11 @@ From `src/features/watch/hooks/useSuggestedPlaces.ts`:
 
 The planner page overrides the top-5% rule with a hard cap:
 
-- `DEFAULT_RECOMMENDED_SPOTS_COUNT = 15`
+- `DEFAULT_RECOMMENDED_SPOTS_COUNT = 25`
 
 That means the actual display target is:
 
-- top 15 places, when at least 15 eligible places exist
+- top 25 places, when at least 25 eligible places exist
 - otherwise however many eligible places remain
 
 ### 5.2 Embedded POI metadata
@@ -779,7 +782,7 @@ The planner page is not driven by one payload. It is a composition of:
 
 The most important hard-coded product rules are:
 
-- top 15 recommendations
+- top 25 recommendations
 - POI scoring within 10 miles
 - default travel radius of 175 miles
 - fixed activity-label thresholds
