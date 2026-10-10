@@ -99,7 +99,14 @@ const budget = JSON.parse(
 for (const file of publicFiles) {
   const relative = path.relative(process.cwd(), file);
   const bytes = (await stat(file)).size;
-  const limit = budget.allowlistedMaxBytes[relative] ?? budget.defaultMaxBytes;
+  const scopedLimit = budget.scopedMaxBytes?.find(
+    (scope) =>
+      relative.startsWith(scope.prefix) && relative.endsWith(scope.suffix),
+  )?.maxBytes;
+  const limit =
+    budget.allowlistedMaxBytes[relative] ??
+    scopedLimit ??
+    budget.defaultMaxBytes;
   if (bytes > limit)
     failures.push(`${relative} is ${bytes} bytes; budget is ${limit}`);
 }

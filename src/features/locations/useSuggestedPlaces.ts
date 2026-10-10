@@ -1,36 +1,33 @@
 import { useEffect, useState } from "react";
 import type { FeatureCollection, Geometry, Position } from "geojson";
-import type { H3Resolution } from "../../../shared/config/dataPaths";
+import type { H3Resolution } from "../../shared/config/dataPaths";
 import {
   DEFAULT_RECOMMENDATION_RADIUS_MILES,
   KILOMETERS_PER_MILE,
-} from "../../../shared/config/planner";
-import { loadForecast, loadGrid } from "../../../shared/data/forecastIO";
-import { getH3CellId } from "../../../shared/data/h3";
+} from "../../shared/config/planner";
+import { loadGrid } from "../../shared/data/forecastIO";
+import { getH3CellId } from "../../shared/data/h3";
 import {
   loadTripPlannerOccurrencePayload,
   type TripPlannerOccurrencePayload,
-} from "../../../shared/data/tripPlanner";
-import type { SuggestedPlace, ViewingPotential } from "../../locations/types";
+} from "../../shared/data/tripPlanner";
+import type { SuggestedPlace, ViewingPotential } from "./types";
 import {
   filterPoisByType,
   hasActivePoiFilter,
   loadPoiDataBundle,
   type PoiFilters,
   type PublicPoi,
-} from "../../locations/poiData";
+} from "./poiData";
 
-type ForecastCellScore = {
+export type ForecastCellScore = {
   value: number;
   center: [number, number];
 };
 
 type UseSuggestedPlacesArgs = {
   resolution: H3Resolution;
-  modelId: string;
-  forecastPath?: string;
-  fallbackForecastPath?: string;
-  externalValues?: Record<string, number>;
+  activityValues: Record<string, number> | null;
   enabled?: boolean;
   limit?: number | null;
   poiFilters?: PoiFilters;
@@ -215,7 +212,7 @@ function filterPoisByBaseRadius(
   );
 }
 
-function buildForecastCellScores(
+export function buildForecastCellScores(
   grid: FeatureCollection,
   values: Record<string, number>,
 ): ForecastCellScore[] {
@@ -224,12 +221,17 @@ function buildForecastCellScores(
       const cellId = getH3CellId(
         feature.properties as Record<string, unknown> | null,
       );
-      const value = Number(values[cellId] ?? 0);
-      if (!Number.isFinite(value) || value < 0 || !feature.geometry)
+      const rawValue = values[cellId];
+      if (
+        typeof rawValue !== "number" ||
+        !Number.isFinite(rawValue) ||
+        rawValue < 0 ||
+        !feature.geometry
+      )
         return null;
       const center = geometryCenter(feature.geometry);
       if (!center) return null;
-      return { value, center } satisfies ForecastCellScore;
+      return { value: rawValue, center } satisfies ForecastCellScore;
     })
     .filter((cell): cell is ForecastCellScore => cell !== null);
 }
@@ -309,7 +311,7 @@ function percentileFromBaseline(
   return (index / (sortedScoresAscending.length - 1)) * 100;
 }
 
-function rankPoiAgainstForecast(
+export function rankPoiAgainstForecast(
   pois: PublicPoi[],
   cells: ForecastCellScore[],
   baselineCells: ForecastCellScore[],
@@ -421,7 +423,13 @@ function rankPoiAgainstForecast(
         viewingPotential: toViewingPotential(percentileFromBottom),
         score: meanNearbyScore,
         reason,
-        distanceKm: Number.isFinite(nearestDistanceKm)
+        distanceFromBaseKm: baseLocation
+          ? haversineKm(
+              [baseLocation.longitude, baseLocation.latitude],
+              [poi.longitude, poi.latitude],
+            )
+          : undefined,
+        distanceToForecastSupportKm: Number.isFinite(nearestDistanceKm)
           ? nearestDistanceKm
           : undefined,
         imageUrl: poi.imageUrl,
@@ -438,10 +446,7 @@ export function useSuggestedPlaces(
 ): UseSuggestedPlacesResult {
   const {
     resolution,
-    modelId,
-    forecastPath,
-    fallbackForecastPath,
-    externalValues,
+    activityValues,
     enabled = true,
     baseLocation,
     maxTravelDistanceMiles,
@@ -461,7 +466,7 @@ export function useSuggestedPlaces(
   } = poiFilters;
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || activityValues === null) return;
 
     let cancelled = false;
 
@@ -490,24 +495,7 @@ export function useSuggestedPlaces(
       );
       if (pois.length === 0) return [];
 
-      const values =
-        externalValues ??
-        (
-          await loadForecast(resolution, {
-            kind: forecastPath ? "explicit" : "latest",
-            explicitPath: forecastPath,
-            modelId,
-          }).catch(async (primaryError) => {
-            if (!fallbackForecastPath || fallbackForecastPath === forecastPath)
-              throw primaryError;
-            return loadForecast(resolution, {
-              kind: "explicit",
-              explicitPath: fallbackForecastPath,
-              modelId,
-            });
-          })
-        ).values;
-      const cells = buildForecastCellScores(grid, values);
+      const cells = buildForecastCellScores(grid, activityValues);
       const baselineCells = buildForecastCellScores(
         grid,
         buildAllTimeOccurrenceValues(baselinePayload),
@@ -548,12 +536,9 @@ export function useSuggestedPlaces(
   }, [
     baseLocation,
     enabled,
-    externalValues,
-    fallbackForecastPath,
-    forecastPath,
+    activityValues,
     limit,
     maxTravelDistanceMiles,
-    modelId,
     includeFerries,
     includeMarinas,
     includeParks,

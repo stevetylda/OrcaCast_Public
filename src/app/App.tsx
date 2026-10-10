@@ -1,9 +1,16 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import {
+  lazy,
+  Suspense,
+  type ComponentType,
+  type LazyExoticComponent,
+  type ReactNode,
+} from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { SideDrawer } from "../shared/components/SideDrawer";
 import { PageErrorBoundary } from "../shared/components/PageErrorBoundary";
 import { MenuProvider, useMenu } from "../shared/state/MenuContext";
 import { MapStateProvider, useMapState } from "../shared/state/MapStateContext";
+import { APP_ROUTE_LIST, type AppRouteId } from "../shared/config/routes";
 import { HashScrollHandler } from "./HashScrollHandler";
 import { RouteMetadata } from "./RouteMetadata";
 import "../shared/styles/base.css";
@@ -32,6 +39,19 @@ const ExplorePage = lazy(() =>
   import("../pages/ExplorePage").then((m) => ({ default: m.ExplorePage })),
 );
 
+const ROUTE_COMPONENTS: Record<
+  AppRouteId,
+  LazyExoticComponent<ComponentType>
+> = {
+  home: HomePage,
+  watch: WatchPage,
+  planner: PlanPage,
+  explore: ExplorePage,
+  about: AboutPage,
+  model: ModelPage,
+  notFound: NotFoundPage,
+};
+
 function withPageBoundary(pageName: string, page: ReactNode) {
   return <PageErrorBoundary pageName={pageName}>{page}</PageErrorBoundary>;
 }
@@ -58,31 +78,16 @@ function AppFrame() {
         }
       >
         <Routes>
-          <Route path="/" element={withPageBoundary("Home", <HomePage />)} />
-          <Route
-            path="/watch"
-            element={withPageBoundary("Watch", <WatchPage />)}
-          />
-          <Route
-            path="/planner"
-            element={withPageBoundary("Planner", <PlanPage />)}
-          />
-          <Route
-            path="/about"
-            element={withPageBoundary("About", <AboutPage />)}
-          />
-          <Route
-            path="/about/model"
-            element={withPageBoundary("Model", <ModelPage />)}
-          />
-          <Route
-            path="/explore"
-            element={withPageBoundary("Explore", <ExplorePage />)}
-          />
-          <Route
-            path="*"
-            element={withPageBoundary("Not found", <NotFoundPage />)}
-          />
+          {APP_ROUTE_LIST.map((route) => {
+            const Page = ROUTE_COMPONENTS[route.id];
+            return (
+              <Route
+                key={route.id}
+                path={route.path}
+                element={withPageBoundary(route.pageName, <Page />)}
+              />
+            );
+          })}
         </Routes>
       </Suspense>
 

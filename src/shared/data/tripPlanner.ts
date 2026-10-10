@@ -1,6 +1,7 @@
 import type { H3Resolution } from "../config/dataPaths";
 import { fetchJson } from "./fetchClient";
 import { getDataVersionToken } from "./meta";
+import { resolveAppAssetPath } from "../config/basePath";
 
 export type TripLengthOption =
   "1 day" | "2 days" | "3 days" | "5 days" | "Weekend";
@@ -66,13 +67,6 @@ type RawTripPlannerPayload = {
 };
 
 const occurrenceCache = new Map<H3Resolution, TripPlannerOccurrencePayload>();
-
-function withBase(path: string): string {
-  const base = import.meta.env.BASE_URL || "/";
-  const cleanBase = base.endsWith("/") ? base : `${base}/`;
-  const trimmed = path.startsWith("/") ? path.slice(1) : path;
-  return `${cleanBase}${trimmed}`;
-}
 
 function dayOfYear(date: Date): number {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
@@ -248,9 +242,11 @@ function buildHistogramFromRows(
 
 function occurrenceUrlCandidates(resolution: H3Resolution): string[] {
   return [
-    withBase(`data/trip_planner/${resolution}_HISTORICAL_DOY.json`),
-    withBase(`data/trip_planner/${resolution}_historical_doy.json`),
-    withBase(`data/historical_occurrence/${resolution}_HISTORICAL_DOY.json`),
+    resolveAppAssetPath(`data/trip_planner/${resolution}_HISTORICAL_DOY.json`),
+    resolveAppAssetPath(`data/trip_planner/${resolution}_historical_doy.json`),
+    resolveAppAssetPath(
+      `data/historical_occurrence/${resolution}_HISTORICAL_DOY.json`,
+    ),
   ];
 }
 

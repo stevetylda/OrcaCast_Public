@@ -1,5 +1,6 @@
 import { fetchJson } from "./fetchClient";
 import { getDataVersionToken } from "./meta";
+import { resolveAppAssetPath } from "../config/basePath";
 
 export type SpotPhotoLicense =
   | "public_domain"
@@ -29,11 +30,9 @@ export interface ViewingSpotPhoto {
 
 export type ViewingSpotPhotoManifest = Record<string, ViewingSpotPhoto>;
 
-const VIEWING_SPOT_PHOTO_MANIFEST_URL_CANDIDATES = [
-  `${(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}data/places/viewing_spot_photos.json`,
-  "/data/places/viewing_spot_photos.json",
+const VIEWING_SPOT_PHOTO_MANIFEST_URL = resolveAppAssetPath(
   "data/places/viewing_spot_photos.json",
-];
+);
 
 const VALID_LICENSES: SpotPhotoLicense[] = [
   "public_domain",
@@ -186,26 +185,25 @@ export async function loadViewingSpotPhotoManifest(): Promise<ViewingSpotPhotoMa
   if (cachedManifestPromise) return cachedManifestPromise;
 
   cachedManifestPromise = (async () => {
-    for (const url of VIEWING_SPOT_PHOTO_MANIFEST_URL_CANDIDATES) {
-      try {
-        const { data } = await fetchJson<unknown>(url, {
+    try {
+      const { data } = await fetchJson<unknown>(
+        VIEWING_SPOT_PHOTO_MANIFEST_URL,
+        {
           cache: "force-cache",
           cacheToken: getDataVersionToken(),
-        });
-        const manifest = normalizeManifest(data);
-        cachedManifest = manifest;
-        if (!validatedManifest) {
-          validateViewingSpotPhotos(manifest);
-          validatedManifest = true;
-        }
-        return manifest;
-      } catch {
-        // Try next candidate URL.
+        },
+      );
+      const manifest = normalizeManifest(data);
+      cachedManifest = manifest;
+      if (!validatedManifest) {
+        validateViewingSpotPhotos(manifest);
+        validatedManifest = true;
       }
+      return manifest;
+    } catch {
+      cachedManifest = {};
+      return cachedManifest;
     }
-
-    cachedManifest = {};
-    return cachedManifest;
   })();
 
   return cachedManifestPromise;

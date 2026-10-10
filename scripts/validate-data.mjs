@@ -1,5 +1,6 @@
 import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
+import { fromFile as openGeoTiff } from "geotiff";
 import { z } from "zod";
 
 const root = path.resolve("public/data");
@@ -134,6 +135,80 @@ function validateForecast(payload, file, allowEmpty) {
   return [];
 }
 
+function validateCoverage(coverage, file, label, valueCount, gridCount) {
+  if (!coverage || typeof coverage !== "object") {
+    fail(file, `${label} coverage is required`);
+    return;
+  }
+  const expected = {
+    grid_cell_count: gridCount,
+    modeled_cell_count: valueCount,
+    unknown_cell_count: gridCount - valueCount,
+    missing_cell_policy: "omitted_as_unknown",
+    unknown_reason: "outside_model_support",
+  };
+  for (const [field, value] of Object.entries(expected)) {
+    if (coverage[field] !== value) {
+      fail(file, `${label}.coverage.${field} must be ${String(value)}`);
+    }
+  }
+}
+
+function validateActiveForecast(
+  payload,
+  file,
+  resolution,
+  modelId,
+  gridSupport,
+) {
+  if (payload?.schema_version !== 2)
+    fail(file, "active forecast schema_version must be 2");
+  if (payload?.resolution !== resolution)
+    fail(file, `resolution must be ${resolution}`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(payload?.target_start ?? ""))
+    fail(file, "invalid target_start");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(payload?.target_end ?? ""))
+    fail(file, "invalid target_end");
+  if (!Array.isArray(payload?.models) || payload.models.length !== 1) {
+    fail(file, "active forecast must contain exactly one model");
+    return [];
+  }
+  const model = payload.models[0];
+  if (model?.id !== modelId) fail(file, `model id must be ${modelId}`);
+  const ids = numericRecord(model?.values, file, "models[0].values");
+  for (const id of ids) {
+    if (String(id)[1] !== resolution.slice(1))
+      fail(file, `H3 index ${id} does not match ${resolution}`);
+    if (!gridSupport.has(id))
+      fail(file, `H3 index ${id} is outside the ${resolution} app grid`);
+    const probability = model.values[id];
+    if (probability < 0 || probability > 1)
+      fail(file, `models[0].values.${id} must be between 0 and 1`);
+  }
+  validateCoverage(
+    model?.coverage,
+    file,
+    "models[0]",
+    ids.length,
+    gridSupport.size,
+  );
+  return ids;
+}
+
+async function validateSmoothedNoData(file) {
+  try {
+    const tiff = await openGeoTiff(file);
+    const image = await tiff.getImage();
+    const nodata = image.getGDALNoData();
+    if (!Number.isNaN(nodata)) fail(file, "GeoTIFF NoData must be NaN");
+  } catch (error) {
+    fail(
+      file,
+      `could not read GeoTIFF NoData (${error instanceof Error ? error.message : String(error)})`,
+    );
+  }
+}
+
 function validateLocations(items, file) {
   if (!Array.isArray(items) || items.length === 0) {
     fail(file, "must contain a non-empty location array");
@@ -194,6 +269,119 @@ for (const resolution of ["H4", "H5", "H6"]) {
     resolution,
     validateGeoJson(await readJson(file), file, resolution),
   );
+}
+
+const forecastRegistryFile = path.resolve("config/forecast-models.json");
+const forecastRegistry = await readJson(forecastRegistryFile);
+if (!Array.isArray(forecastRegistry) || forecastRegistry.length === 0)
+  fail(forecastRegistryFile, "must contain configured forecast ecotypes");
+for (const ecotype of Array.isArray(forecastRegistry) ? forecastRegistry : []) {
+  for (const model of Array.isArray(ecotype?.models) ? ecotype.models : []) {
+    const directory = path.join(
+      root,
+      "forecasts/latest/weekly",
+      String(ecotype.id),
+      String(model.id),
+    );
+    const manifestPath = path.join(directory, "manifest.json");
+    const periodsPath = path.join(directory, "periods.json");
+    const activeManifest = await readJson(manifestPath);
+    const activePeriods = await readJson(periodsPath);
+    const parsedPeriods = z.array(period).min(1).safeParse(activePeriods);
+    if (!parsedPeriods.success) {
+      fail(periodsPath, "must contain at least one valid period");
+      continue;
+    }
+    if (activeManifest?.schema_version !== 2)
+      fail(manifestPath, "schema_version must be 2");
+    if (activeManifest?.model !== model.id)
+      fail(manifestPath, `model must be ${model.id}`);
+    if (
+      String(activeManifest?.ecotype ?? "").toLowerCase() !==
+      String(ecotype.id).toLowerCase()
+    )
+      fail(manifestPath, `ecotype must be ${ecotype.id}`);
+    if (activeManifest?.period_count !== parsedPeriods.data.length)
+      fail(manifestPath, "period_count does not match periods.json");
+    if (
+      activeManifest?.grid_alignment?.missing_cell_policy !==
+        "omitted_as_unknown" ||
+      activeManifest?.grid_alignment?.zero_semantics !==
+        "modeled_probability_zero"
+    ) {
+      fail(
+        manifestPath,
+        "grid_alignment must preserve unknown cells and modeled zeros",
+      );
+    }
+
+    const listedFiles = new Set(activeManifest?.files ?? []);
+    for (const relative of listedFiles) {
+      const listedPath = path.join(directory, relative);
+      try {
+        const metadata = await stat(listedPath);
+        if (metadata.size <= 0) fail(listedPath, "must not be empty");
+      } catch {
+        fail(manifestPath, `references missing file ${relative}`);
+      }
+      if (relative.endsWith(".tif")) await validateSmoothedNoData(listedPath);
+    }
+
+    const newest = parsedPeriods.data.reduce((latest, candidate) =>
+      candidate.year > latest.year ||
+      (candidate.year === latest.year && candidate.stat_week > latest.stat_week)
+        ? candidate
+        : latest,
+    );
+    const periodKeysForModel = new Set(
+      parsedPeriods.data.map((item) => `${item.year}_${item.stat_week}`),
+    );
+    for (const resolution of ["H4", "H5", "H6"]) {
+      const support = gridIds.get(resolution) ?? new Set();
+      const latestPath = path.join(directory, `${resolution}.json`);
+      const latestPayload = await readJson(latestPath);
+      validateActiveForecast(
+        latestPayload,
+        latestPath,
+        resolution,
+        model.id,
+        support,
+      );
+      if (!listedFiles.has(`${resolution}.json`))
+        fail(manifestPath, `files must include ${resolution}.json`);
+      const newestName = `${newest.year}_${newest.stat_week}_${resolution}.json`;
+      const newestPath = path.join(directory, newestName);
+      const newestPayload = await readJson(newestPath);
+      if (JSON.stringify(latestPayload) !== JSON.stringify(newestPayload))
+        fail(latestPath, `must match newest period ${newestName}`);
+      const manifestCoverage =
+        activeManifest?.grid_alignment?.coverage_by_resolution?.[resolution];
+      if (
+        JSON.stringify(manifestCoverage) !==
+        JSON.stringify(latestPayload?.models?.[0]?.coverage)
+      )
+        fail(
+          manifestPath,
+          `${resolution} coverage does not match latest payload`,
+        );
+    }
+
+    for (const relative of listedFiles) {
+      const match = relative.match(/^(\d{4})_(\d{1,2})_(H[456])\.json$/);
+      if (!match) continue;
+      const [, year, week, resolution] = match;
+      if (!periodKeysForModel.has(`${year}_${Number(week)}`))
+        fail(manifestPath, `${relative} is not represented in periods.json`);
+      const file = path.join(directory, relative);
+      validateActiveForecast(
+        await readJson(file),
+        file,
+        resolution,
+        model.id,
+        gridIds.get(resolution) ?? new Set(),
+      );
+    }
+  }
 }
 
 const historicalSmoothRoot = path.join(root, "week_of_year_agg_history_smooth");

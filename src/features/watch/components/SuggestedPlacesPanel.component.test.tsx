@@ -18,6 +18,19 @@ const place = {
   reason: "Strong forecast near accessible shoreline.",
 };
 
+function setMobileViewport(matches: boolean) {
+  vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
+    matches: query === "(max-width: 760px)" ? matches : false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
+}
+
 describe("SuggestedPlacesPanel", () => {
   it("shows only a playback spinner instead of field picks while playing", () => {
     render(
@@ -109,9 +122,11 @@ describe("SuggestedPlacesPanel", () => {
       />,
     );
 
-    const locationButtons = screen.getAllByRole("button").filter((button) =>
-      button.classList.contains("suggestedPlacesPanel__mediaCard"),
-    );
+    const locationButtons = screen
+      .getAllByRole("button")
+      .filter((button) =>
+        button.classList.contains("suggestedPlacesPanel__mediaCard"),
+      );
     expect(locationButtons[0]).toHaveTextContent("Near webcam");
     expect(locationButtons[1]).toHaveTextContent("Far webcam");
 
@@ -119,5 +134,30 @@ describe("SuggestedPlacesPanel", () => {
       screen.getByRole("button", { name: "Back to recommended places" }),
     );
     expect(onShowRecommendedPlaces).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows five mobile recommendations initially and can reveal all 25", async () => {
+    setMobileViewport(true);
+    const user = userEvent.setup();
+    const places = Array.from({ length: 25 }, (_, index) => ({
+      ...place,
+      id: `place-${index + 1}`,
+      name: `Place ${index + 1}`,
+    }));
+    render(
+      <SuggestedPlacesPanel
+        places={places}
+        selectedPlaceId={null}
+        mapRef={createRef<ForecastMapHandle>()}
+        open
+        onOpen={vi.fn()}
+        onClose={vi.fn()}
+        onSelectPlace={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByRole("article")).toHaveLength(5);
+    await user.click(screen.getByRole("button", { name: "Show all 25" }));
+    expect(screen.getAllByRole("article")).toHaveLength(25);
   });
 });

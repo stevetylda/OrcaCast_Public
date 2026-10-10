@@ -177,7 +177,10 @@ function clamp(value: number, min: number, max: number) {
 function getFeatureProbability(
   properties: GeoJsonProperties | null | undefined,
 ) {
-  return Number((properties as Record<string, unknown> | null)?.prob ?? 0);
+  const record = properties as Record<string, unknown> | null;
+  if (record?.prob_status !== "modeled") return Number.NaN;
+  const raw = record?.prob;
+  return typeof raw === "number" && Number.isFinite(raw) ? raw : Number.NaN;
 }
 
 function getFeatureCenter(feature: Feature): [number, number] | null {
@@ -352,20 +355,12 @@ function webMercatorToLngLat(x: number, y: number): [number, number] {
   return [longitude, latitudeRadians * RAD_TO_DEG];
 }
 
-async function fetchGeoTiff(path: string, fallbackPath?: string) {
-  const load = async (url: string) => {
-    const response = await fetch(url, { cache: "no-cache" });
-    if (!response.ok) {
-      throw new Error(`GeoTIFF request failed (${response.status}) for ${url}`);
-    }
-    return response.arrayBuffer();
-  };
-  try {
-    return await load(path);
-  } catch (error) {
-    if (!fallbackPath || fallbackPath === path) throw error;
-    return load(fallbackPath);
+async function fetchGeoTiff(path: string) {
+  const response = await fetch(path, { cache: "no-cache" });
+  if (!response.ok) {
+    throw new Error(`GeoTIFF request failed (${response.status}) for ${path}`);
   }
+  return response.arrayBuffer();
 }
 
 async function renderGeoTiffSurfaceRaster(
@@ -432,15 +427,14 @@ async function renderGeoTiffSurfaceRaster(
 
 async function buildGeoTiffSurfaceRaster(
   path: string,
-  fallbackPath: string | undefined,
   paletteColors: string[],
 ): Promise<SurfaceRaster> {
-  const cacheKey = `${path}|${fallbackPath ?? ""}|${paletteColors.join(",")}`;
+  const cacheKey = `${path}|${paletteColors.join(",")}`;
   const cached = geoTiffSurfaceCache.get(cacheKey);
   if (cached) return cached;
 
   const task = (async () => {
-    const tiff = await fromArrayBuffer(await fetchGeoTiff(path, fallbackPath));
+    const tiff = await fromArrayBuffer(await fetchGeoTiff(path));
     const image = await tiff.getImage();
     const sourceWidth = image.getWidth();
     const sourceHeight = image.getHeight();
@@ -795,7 +789,7 @@ function surfaceAlphaForValue(
   _stopValues: number[],
   baseAlpha: number,
 ) {
-  if (!Number.isFinite(value) || value <= 0) return 0;
+  if (!Number.isFinite(value)) return 0;
   return clamp(baseAlpha, 0, 1);
 }
 
@@ -907,6 +901,7 @@ function maskSurfaceToFootprint(
   ctx.globalCompositeOperation = "destination-in";
   ctx.beginPath();
   (fc.features ?? []).forEach((feature) => {
+    if (!Number.isFinite(getFeatureProbability(feature.properties))) return;
     const geometry = feature.geometry;
     if (
       !geometry ||
@@ -980,8 +975,8 @@ function resolveTileTemplate(template: string, manifestUrl: string) {
   return resolved;
 }
 
-async function fetchSurfaceTileJson(path: string, fallbackPath?: string) {
-  const cacheKey = `${path}|${fallbackPath ?? ""}`;
+async function fetchSurfaceTileJson(path: string) {
+  const cacheKey = path;
   const cached = surfaceTileJsonCache.get(cacheKey);
   if (cached) return cached;
 
@@ -1006,12 +1001,7 @@ async function fetchSurfaceTileJson(path: string, fallbackPath?: string) {
       } as SurfaceTileJson;
     };
 
-    try {
-      return await load(path);
-    } catch (error) {
-      if (!fallbackPath || fallbackPath === path) throw error;
-      return load(fallbackPath);
-    }
+    return load(path);
   })();
 
   surfaceTileJsonCache.set(cacheKey, task);
@@ -1103,11 +1093,10 @@ function waitForSurfaceTileSource(map: MapLibreMap, sourceId: string) {
 export async function addRasterTileSurfaceOverlay(
   map: MapLibreMap,
   path: string,
-  fallbackPath: string | undefined,
   paletteColors: string[],
   isCancelled: () => boolean = () => false,
 ) {
-  const tileJson = await fetchSurfaceTileJson(path, fallbackPath);
+  const tileJson = await fetchSurfaceTileJson(path);
   if (isCancelled()) return;
 
   const state = surfaceTileState.get(map) ?? {
@@ -1454,11 +1443,7 @@ export function addGridOverlay(
 
   if (DEBUG_MAP) {
     const probs = (fc.features ?? [])
-      .map((feature) =>
-        Number(
-          (feature.properties as Record<string, unknown> | null)?.prob ?? 0,
-        ),
-      )
+      .map((feature) => getFeatureProbability(feature.properties))
       .filter((value) => Number.isFinite(value));
     const positive = probs.filter((value) => value > 0);
     console.info("[MapDebug] addGridOverlay", {
@@ -1821,28 +1806,44 @@ export function addGridOverlay(
       6,
       [
         "case",
-        [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold],
+        [
+          "all",
+          ["==", ["get", "prob_status"], "modeled"],
+          [">=", ["get", "prob"], shimmerThreshold],
+        ],
         0.72,
         0.38,
       ],
       9,
       [
         "case",
-        [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold],
+        [
+          "all",
+          ["==", ["get", "prob_status"], "modeled"],
+          [">=", ["get", "prob"], shimmerThreshold],
+        ],
         0.96,
         0.44,
       ],
       12,
       [
         "case",
-        [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold],
+        [
+          "all",
+          ["==", ["get", "prob_status"], "modeled"],
+          [">=", ["get", "prob"], shimmerThreshold],
+        ],
         1.24,
         0.56,
       ],
     ] as ExpressionSpecification);
     map.setPaintProperty(lineId, "line-color", [
       "case",
-      [">=", ["coalesce", ["get", "prob"], 0], shimmerThreshold],
+      [
+        "all",
+        ["==", ["get", "prob_status"], "modeled"],
+        [">=", ["get", "prob"], shimmerThreshold],
+      ],
       lineAccentColor,
       borderColor,
     ] as ExpressionSpecification);
@@ -1861,9 +1862,9 @@ export function addGridOverlay(
       ? ("visible" as const)
       : ("none" as const);
     const filter = [
-      ">=",
-      ["get", "prob"],
-      hotspotThreshold,
+      "all",
+      ["==", ["get", "prob_status"], "modeled"],
+      [">=", ["get", "prob"], hotspotThreshold],
     ] as ExpressionSpecification;
     // Visual "dissolve": avoid per-hex hotspot linework and use soft stacked fills.
     removeLayerIfExists(map, PEAK_GLOW_ID);
@@ -2046,15 +2047,10 @@ export function addSurfaceOverlay(
 export async function addGeoTiffSurfaceOverlay(
   map: MapLibreMap,
   path: string,
-  fallbackPath: string | undefined,
   paletteColors: string[],
   isCancelled: () => boolean = () => false,
 ) {
-  const raster = await buildGeoTiffSurfaceRaster(
-    path,
-    fallbackPath,
-    paletteColors,
-  );
+  const raster = await buildGeoTiffSurfaceRaster(path, paletteColors);
   if (isCancelled()) return;
   updateSurfaceSource(map, raster);
   setSurfaceVisibility(map, true);

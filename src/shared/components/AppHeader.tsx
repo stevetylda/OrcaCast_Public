@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { APP_ROUTES, isRouteActive, routePath } from "../config/routes";
 
 type Props = {
   className?: string;
@@ -39,9 +40,11 @@ export function AppHeader({
 
         <Link
           className="brand brandBtn brandBtn--active"
-          to="/"
+          to={routePath("home")}
           aria-label="OrcaCast home"
-          aria-current={pathname === "/" ? "page" : undefined}
+          aria-current={
+            isRouteActive(pathname, APP_ROUTES.home) ? "page" : undefined
+          }
         >
           <div className="brand__title">
             {title} <span className="brand__subtitle">– {subtitle}</span>
@@ -53,9 +56,11 @@ export function AppHeader({
         {rightSlot}
         <Link
           className="iconBtn"
-          to="/about"
+          to={routePath("about")}
           aria-label="About OrcaCast"
-          aria-current={pathname.startsWith("/about") ? "page" : undefined}
+          aria-current={
+            isRouteActive(pathname, APP_ROUTES.about) ? "page" : undefined
+          }
           data-tour="info"
         >
           <span className="material-symbols-rounded" aria-hidden="true">

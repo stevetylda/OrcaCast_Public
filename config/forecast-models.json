@@ -1,0 +1,21 @@
+[
+  {
+    "id": "srkw",
+    "label": "Southern Resident (SRKW)",
+    "models": [
+      { "id": "kernel_decay_model", "label": "Kernel decay model" },
+      {
+        "id": "log_gaussian_cox_process",
+        "label": "Log-Gaussian Cox process"
+      }
+    ]
+  },
+  {
+    "id": "transient",
+    "label": "Transient (Bigg's)",
+    "models": [
+      { "id": "sightings_ensemble", "label": "Sightings ensemble" },
+      { "id": "transport_graph_model", "label": "Transport graph model" }
+    ]
+  }
+]

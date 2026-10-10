@@ -5,6 +5,24 @@
     "public/data/trip_planner/H6_HISTORICAL_DOY.json": 1800000,
     "public/images/OrcaCast-Icon-Arch.png": 1200000,
     "public/images/OrcaCast-Icon.png": 1200000,
-    "public/images/home/home-background.png": 1800000
-  }
+    "public/images/home/home-background.png": 1800000,
+    "public/images/icons/whale-tail.png": 1153434
+  },
+  "scopedMaxBytes": [
+    {
+      "prefix": "public/data/forecasts/latest/weekly/",
+      "suffix": ".tif",
+      "maxBytes": 6291456
+    },
+    {
+      "prefix": "public/data/week_of_year_agg_history_smooth/",
+      "suffix": ".tif",
+      "maxBytes": 3145728
+    },
+    {
+      "prefix": "public/data/forecasts/latest/weekly/",
+      "suffix": ".png",
+      "maxBytes": 1310720
+    }
+  ]
 }

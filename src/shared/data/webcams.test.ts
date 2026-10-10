@@ -75,7 +75,7 @@ describe("webcam data", () => {
     ).toMatchObject({ status: "listed", accessUrl: addition.liveCameraUrl });
   });
 
-  it("fails cleanly when every static webcam path is unavailable", async () => {
+  it("fails cleanly after requesting the canonical webcam path once", async () => {
     resetWebcamCacheForTests();
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
@@ -83,7 +83,8 @@ describe("webcam data", () => {
     await expect(loadWebcamSites()).rejects.toThrow(
       "Failed to load webcam data",
     );
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledWith("/data/webcams.json");
     fetchMock.mockRestore();
     resetWebcamCacheForTests();
   });

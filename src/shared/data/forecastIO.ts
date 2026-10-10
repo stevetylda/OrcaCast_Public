@@ -4,17 +4,33 @@ import type { H3Resolution } from "../config/dataPaths";
 import { fetchJson } from "./fetchClient";
 import { getH3CellId } from "./h3";
 import { getDataVersionToken } from "./meta";
+import { DataLoadError } from "./errors";
 import { forecastPayloadSchema, parseWithSchema } from "./validation";
 
-type ForecastPayload = {
+export type ForecastCoverage = {
+  gridCellCount: number;
+  modeledCellCount: number;
+  unknownCellCount: number;
+  missingCellPolicy: "omitted_as_unknown";
+  unknownReason: "outside_model_support";
+};
+
+export type ForecastDataset = {
+  schemaVersion?: number;
+  resolution: H3Resolution;
   target_start?: string;
   target_end?: string;
   values: Record<string, number>;
+  coverage: ForecastCoverage | null;
+  modelId?: string;
 };
 
 const gridCache = new Map<H3Resolution, FeatureCollection>();
-const forecastCache = new Map<string, ForecastPayload>();
+const gridRequests = new Map<H3Resolution, Promise<FeatureCollection>>();
+const forecastCache = new Map<string, ForecastDataset>();
+const forecastRequests = new Map<string, Promise<ForecastDataset>>();
 const forecastRawCache = new Map<string, ForecastPayloadRaw>();
+const forecastRawRequests = new Map<string, Promise<ForecastPayloadRaw>>();
 const DISABLE_RUNTIME_DATA_CACHE = Boolean(
   (import.meta as { env?: { DEV?: boolean } }).env?.DEV,
 );
@@ -26,19 +42,39 @@ export async function loadGrid(
     ? undefined
     : gridCache.get(resolution);
   if (cached) return cached;
-  const url = GRID_PATH[resolution];
-  const { data } = await fetchJson<FeatureCollection>(url, {
-    cache: DISABLE_RUNTIME_DATA_CACHE ? "no-store" : "force-cache",
-    cacheToken: getDataVersionToken(),
-  });
-  if (!DISABLE_RUNTIME_DATA_CACHE) gridCache.set(resolution, data);
-  // Grid consumers treat geometry as immutable and create new features when
-  // joining forecast values. Sharing this large object avoids repeated deep
-  // clones when the map, recommendations, and detail views request H6.
-  return data;
+  const pending = gridRequests.get(resolution);
+  if (pending) return pending;
+  const request = (async () => {
+    const url = GRID_PATH[resolution];
+    const { data } = await fetchJson<FeatureCollection>(url, {
+      cache: DISABLE_RUNTIME_DATA_CACHE ? "no-store" : "force-cache",
+      cacheToken: getDataVersionToken(),
+    });
+    if (!DISABLE_RUNTIME_DATA_CACHE) gridCache.set(resolution, data);
+    // Grid consumers treat geometry as immutable and create new features when
+    // joining forecast values. Sharing this large object avoids repeated deep
+    // clones when the map, recommendations, and detail views request H6.
+    return data;
+  })();
+  gridRequests.set(resolution, request);
+  try {
+    return await request;
+  } finally {
+    gridRequests.delete(resolution);
+  }
 }
 
+type ForecastCoverageRaw = {
+  grid_cell_count: number;
+  modeled_cell_count: number;
+  unknown_cell_count: number;
+  missing_cell_policy: "omitted_as_unknown";
+  unknown_reason: "outside_model_support";
+};
+
 type ForecastPayloadRaw = {
+  schema_version?: number;
+  resolution?: H3Resolution;
   target_start?: string;
   target_end?: string;
   values?: Record<string, number>;
@@ -47,6 +83,7 @@ type ForecastPayloadRaw = {
     id?: string;
     model?: string;
     values: Record<string, number>;
+    coverage?: ForecastCoverageRaw;
   }>;
   valuesByModel?: Record<string, Record<string, number>>;
 };
@@ -56,24 +93,35 @@ async function loadForecastRaw(url: string): Promise<ForecastPayloadRaw> {
     ? undefined
     : forecastRawCache.get(url);
   if (cached) return cached;
-  const raw = parseWithSchema(
-    forecastPayloadSchema,
-    (
-      await fetchJson<unknown>(url, {
-        cache: DISABLE_RUNTIME_DATA_CACHE ? "no-store" : "force-cache",
-        cacheToken: getDataVersionToken(),
-      })
-    ).data,
-    url,
-    "Forecast payload",
-  );
-  if (!DISABLE_RUNTIME_DATA_CACHE) forecastRawCache.set(url, raw);
-  return raw;
+  const pending = forecastRawRequests.get(url);
+  if (pending) return pending;
+  const request = (async () => {
+    const raw = parseWithSchema(
+      forecastPayloadSchema,
+      (
+        await fetchJson<unknown>(url, {
+          cache: DISABLE_RUNTIME_DATA_CACHE ? "no-store" : "force-cache",
+          cacheToken: getDataVersionToken(),
+        })
+      ).data,
+      url,
+      "Forecast payload",
+    );
+    if (!DISABLE_RUNTIME_DATA_CACHE) forecastRawCache.set(url, raw);
+    return raw;
+  })();
+  forecastRawRequests.set(url, request);
+  try {
+    return await request;
+  } finally {
+    forecastRawRequests.delete(url);
+  }
 }
 
 type ModelValuesEntry = {
   id?: string;
   values: Record<string, number>;
+  coverage?: ForecastCoverageRaw;
 };
 
 function collectModelEntries(raw: ForecastPayloadRaw): ModelValuesEntry[] {
@@ -81,6 +129,7 @@ function collectModelEntries(raw: ForecastPayloadRaw): ModelValuesEntry[] {
     return raw.models.map((entry) => ({
       id: entry.id ?? entry.model,
       values: entry.values ?? {},
+      coverage: entry.coverage,
     }));
   }
   if (raw.valuesByModel) {
@@ -92,44 +141,93 @@ function collectModelEntries(raw: ForecastPayloadRaw): ModelValuesEntry[] {
   return [];
 }
 
-function buildConsensusMean(
+export function buildConsensusMean(
   entries: ModelValuesEntry[],
 ): Record<string, number> {
-  const modelCount = entries.length;
-  if (modelCount === 0) return {};
-  const keys = new Set<string>();
-  entries.forEach((entry) => {
-    Object.keys(entry.values ?? {}).forEach((key) => keys.add(key));
-  });
+  if (entries.length === 0) return {};
+  const [first, ...rest] = entries;
+  const keys = Object.keys(first.values).filter((key) =>
+    rest.every((entry) => Number.isFinite(entry.values[key])),
+  );
   const result: Record<string, number> = {};
   keys.forEach((key) => {
     let sum = 0;
     for (const entry of entries) {
-      const value = Number(entry.values?.[key] ?? 0);
-      if (Number.isFinite(value)) sum += value;
+      sum += entry.values[key];
     }
-    result[key] = sum / modelCount;
+    result[key] = sum / entries.length;
   });
   return result;
 }
 
-function resolveModelValues(raw: ForecastPayloadRaw, modelId?: string) {
+function toCoverage(value?: ForecastCoverageRaw): ForecastCoverage | null {
+  if (!value) return null;
+  return {
+    gridCellCount: value.grid_cell_count,
+    modeledCellCount: value.modeled_cell_count,
+    unknownCellCount: value.unknown_cell_count,
+    missingCellPolicy: value.missing_cell_policy,
+    unknownReason: value.unknown_reason,
+  };
+}
+
+function resolveModelEntry(raw: ForecastPayloadRaw, modelId?: string) {
   if (raw.models && raw.models.length > 0) {
     if (modelId) {
       const match = raw.models.find(
         (entry) => entry.id === modelId || entry.model === modelId,
       );
-      if (match) return match.values;
+      if (match) return match;
     }
-    return raw.models[0].values;
+    return raw.models[0];
   }
   if (raw.valuesByModel) {
     if (modelId && raw.valuesByModel[modelId])
-      return raw.valuesByModel[modelId];
+      return { id: modelId, values: raw.valuesByModel[modelId] };
     const firstKey = Object.keys(raw.valuesByModel)[0];
-    if (firstKey) return raw.valuesByModel[firstKey];
+    if (firstKey) return { id: firstKey, values: raw.valuesByModel[firstKey] };
   }
-  return raw.values ?? {};
+  return { id: raw.model, values: raw.values ?? {} };
+}
+
+async function validateV2AgainstGrid(
+  raw: ForecastPayloadRaw,
+  resolution: H3Resolution,
+  url: string,
+): Promise<void> {
+  if (raw.schema_version !== 2) return;
+  if (raw.resolution !== resolution) {
+    throw new DataLoadError({
+      kind: "validation",
+      url,
+      message: `Forecast resolution ${raw.resolution ?? "missing"} does not match ${resolution}`,
+    });
+  }
+  const grid = await loadGrid(resolution);
+  const gridIds = new Set(
+    (grid.features ?? []).map((feature) =>
+      getH3CellId(feature.properties as Record<string, unknown> | null),
+    ),
+  );
+  for (const entry of raw.models ?? []) {
+    if (entry.coverage?.grid_cell_count !== gridIds.size) {
+      throw new DataLoadError({
+        kind: "validation",
+        url,
+        message: `${entry.id ?? "Forecast model"} coverage grid count does not match the ${resolution} app grid`,
+      });
+    }
+    const outsideGrid = Object.keys(entry.values).find(
+      (cell) => !gridIds.has(cell),
+    );
+    if (outsideGrid) {
+      throw new DataLoadError({
+        kind: "validation",
+        url,
+        message: `${entry.id ?? "Forecast model"} includes ${outsideGrid} outside the ${resolution} app grid`,
+      });
+    }
+  }
 }
 
 export async function loadForecast(
@@ -139,25 +237,73 @@ export async function loadForecast(
     explicitPath?: string;
     modelId?: string;
   } = {},
-): Promise<ForecastPayload> {
+): Promise<ForecastDataset> {
   const url = getForecastPath(resolution, opts);
   const cacheKey = `${resolution}|${url}|${opts.modelId ?? ""}`;
   const cached = DISABLE_RUNTIME_DATA_CACHE
     ? undefined
     : forecastCache.get(cacheKey);
   if (cached) return cached;
-  const raw = await loadForecastRaw(url);
-  const values =
-    opts.modelId === "consensus"
-      ? buildConsensusMean(collectModelEntries(raw))
-      : resolveModelValues(raw, opts.modelId);
-  const data: ForecastPayload = {
-    target_start: raw.target_start,
-    target_end: raw.target_end,
-    values,
-  };
-  if (!DISABLE_RUNTIME_DATA_CACHE) forecastCache.set(cacheKey, data);
-  return data;
+  const pending = forecastRequests.get(cacheKey);
+  if (pending) return pending;
+  const request = (async () => {
+    const raw = await loadForecastRaw(url);
+    await validateV2AgainstGrid(raw, resolution, url);
+    if (
+      raw.schema_version === 2 &&
+      opts.modelId &&
+      opts.modelId !== "consensus" &&
+      !(raw.models ?? []).some((entry) => entry.id === opts.modelId)
+    ) {
+      throw new DataLoadError({
+        kind: "validation",
+        url,
+        message: `Forecast payload does not contain requested model ${opts.modelId}`,
+      });
+    }
+    const modelEntry = resolveModelEntry(raw, opts.modelId);
+    const entries = collectModelEntries(raw);
+    const values =
+      opts.modelId === "consensus"
+        ? buildConsensusMean(entries)
+        : modelEntry.values;
+    const baseCoverage = modelEntry.coverage;
+    const coverage =
+      opts.modelId === "consensus" && baseCoverage
+        ? toCoverage({
+            ...baseCoverage,
+            modeled_cell_count: Object.keys(values).length,
+            unknown_cell_count:
+              baseCoverage.grid_cell_count - Object.keys(values).length,
+          })
+        : toCoverage(baseCoverage);
+    const data: ForecastDataset = {
+      schemaVersion: raw.schema_version,
+      resolution: raw.resolution ?? resolution,
+      target_start: raw.target_start,
+      target_end: raw.target_end,
+      values,
+      coverage,
+      modelId: opts.modelId ?? modelEntry.id ?? modelEntry.model,
+    };
+    if (!DISABLE_RUNTIME_DATA_CACHE) forecastCache.set(cacheKey, data);
+    return data;
+  })();
+  forecastRequests.set(cacheKey, request);
+  try {
+    return await request;
+  } finally {
+    forecastRequests.delete(cacheKey);
+  }
+}
+
+export function resetForecastCache(): void {
+  gridCache.clear();
+  forecastCache.clear();
+  forecastRawCache.clear();
+  gridRequests.clear();
+  forecastRequests.clear();
+  forecastRawRequests.clear();
 }
 
 export async function loadForecastModelIds(
@@ -197,9 +343,9 @@ export function attachProbabilities(
       };
       const id = getH3CellId(props);
       const raw = values[id];
-      const numeric = Number(raw);
-      const prob = Number.isFinite(numeric) ? numeric : 0;
-      props[outKey] = prob;
+      const modeled = typeof raw === "number" && Number.isFinite(raw);
+      props[outKey] = modeled ? raw : null;
+      props[`${outKey}_status`] = modeled ? "modeled" : "unknown";
       return {
         ...feature,
         properties: props,

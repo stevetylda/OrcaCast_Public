@@ -3,6 +3,7 @@ export type HeatScale = {
   binColorsRgba: string[];
   labels: string[];
   zeroColor?: string;
+  noDataColor?: string;
   binRanges: Array<{
     percentileMin: number;
     percentileMax: number;
@@ -18,6 +19,7 @@ type ColorScaleResult = {
 };
 
 export const ZERO_COLOR = "rgba(25,240,215,0.12)";
+export const NO_DATA_COLOR = "rgba(90,104,117,0.24)";
 export const OUTLOOK_BIN_LABELS = [
   "Very Low",
   "Low",
@@ -27,7 +29,7 @@ export const OUTLOOK_BIN_LABELS = [
   "Peak",
 ] as const;
 
-const LABELS: string[] = ["Not Scored", ...OUTLOOK_BIN_LABELS];
+const LABELS: string[] = ["Modeled zero", ...OUTLOOK_BIN_LABELS];
 
 const Q_LEVELS = [0.6, 0.88, 0.95, 0.985, 0.997];
 
@@ -70,12 +72,15 @@ function buildInterpolatedFillExpr(
   colors: string[],
   minValue: number,
   zeroColor: string,
+  noDataColor: string,
   valueExpr: unknown[] = ["get", "prob"],
 ): unknown[] {
   if (colors.length === 0) {
     return [
       "case",
-      ["<=", ["coalesce", valueExpr, 0], 0],
+      ["!=", ["get", "prob_status"], "modeled"],
+      noDataColor,
+      ["<=", valueExpr, 0],
       zeroColor,
       zeroColor,
     ];
@@ -84,7 +89,9 @@ function buildInterpolatedFillExpr(
   if (thresholds.length === 0) {
     return [
       "case",
-      ["<=", ["coalesce", valueExpr, 0], 0],
+      ["!=", ["get", "prob_status"], "modeled"],
+      noDataColor,
+      ["<=", valueExpr, 0],
       zeroColor,
       colors[0] ?? zeroColor,
     ];
@@ -106,7 +113,9 @@ function buildInterpolatedFillExpr(
 
   return [
     "case",
-    ["<=", ["coalesce", valueExpr, 0], 0],
+    ["!=", ["get", "prob_status"], "modeled"],
+    noDataColor,
+    ["<=", valueExpr, 0],
     zeroColor,
     interpolateExpr,
   ];
@@ -125,7 +134,9 @@ export function buildAutoColorExprFromValues(
     return {
       fillColorExpr: [
         "case",
-        ["<=", ["coalesce", valueExpr, 0], 0],
+        ["!=", ["get", "prob_status"], "modeled"],
+        NO_DATA_COLOR,
+        ["<=", valueExpr, 0],
         ZERO_COLOR,
         ZERO_COLOR,
       ],
@@ -158,6 +169,7 @@ export function buildAutoColorExprFromValues(
         colors,
         minValue,
         zeroColor,
+        NO_DATA_COLOR,
         valueExpr,
       ),
       scale: {
@@ -165,6 +177,7 @@ export function buildAutoColorExprFromValues(
         binColorsRgba: colors.length ? colors : [ZERO_COLOR],
         labels: LABELS,
         zeroColor,
+        noDataColor: NO_DATA_COLOR,
         binRanges,
         hotspotThreshold: maxValue,
       },
@@ -176,6 +189,7 @@ export function buildAutoColorExprFromValues(
     colors,
     minValue,
     zeroColor,
+    NO_DATA_COLOR,
     valueExpr,
   );
 
@@ -186,6 +200,7 @@ export function buildAutoColorExprFromValues(
       binColorsRgba: colors,
       labels: LABELS,
       zeroColor,
+      noDataColor: NO_DATA_COLOR,
       binRanges,
       hotspotThreshold: thresholds[thresholds.length - 1],
     },
@@ -198,10 +213,13 @@ export function buildFillExprFromScale(
   valueExpr: unknown[] = ["get", "prob"],
 ): unknown[] {
   const resolvedZeroColor = scale.zeroColor ?? zeroColor;
+  const resolvedNoDataColor = scale.noDataColor ?? NO_DATA_COLOR;
   if (scale.thresholds.length === 0) {
     return [
       "case",
-      ["<=", ["coalesce", valueExpr, 0], 0],
+      ["!=", ["get", "prob_status"], "modeled"],
+      resolvedNoDataColor,
+      ["<=", valueExpr, 0],
       resolvedZeroColor,
       scale.binColorsRgba[0] ?? resolvedZeroColor,
     ];
@@ -211,6 +229,7 @@ export function buildFillExprFromScale(
     scale.binColorsRgba,
     scale.binRanges[0]?.probMin ?? scale.thresholds[0] ?? 0,
     resolvedZeroColor,
+    resolvedNoDataColor,
     valueExpr,
   );
 }
@@ -223,7 +242,11 @@ export function buildHotspotOnlyExpr(
 ): unknown[] {
   return [
     "case",
-    [">=", ["coalesce", valueExpr, 0], threshold],
+    [
+      "all",
+      ["==", ["get", "prob_status"], "modeled"],
+      [">=", valueExpr, threshold],
+    ],
     hotspotFill,
     zeroColor,
   ];

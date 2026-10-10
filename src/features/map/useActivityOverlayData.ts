@@ -12,23 +12,17 @@ import {
   normalizeDataLoadError,
   type DataLoadError,
 } from "../../shared/data/errors";
-import {
-  attachProbabilities,
-  loadForecast,
-  loadGrid,
-} from "../../shared/data/forecastIO";
+import { attachProbabilities, loadGrid } from "../../shared/data/forecastIO";
 import { buildAutoColorExprFromValues } from "../../shared/geo/colorScale";
 import { removeGridOverlay } from "../../shared/geo/gridOverlay";
 import type { HeatScale } from "../../shared/geo/colorScale";
 import type { FillColorSpec } from "./types";
 
-type UseForecastDataArgs = {
+type UseActivityOverlayDataArgs = {
   resolution: H3Resolution;
   mapReady: boolean;
-  forecastPath?: string;
-  fallbackForecastPath?: string;
   modelId: string;
-  externalValues?: Record<string, number>;
+  activityValues: Record<string, number> | null;
   forecastOverlayEnabled?: boolean;
   colorNoData?: boolean;
   pulseAllGridCells?: boolean;
@@ -58,13 +52,11 @@ type UseForecastDataArgs = {
   onOverlayRendered?: () => void;
 };
 
-export function useForecastData({
+export function useActivityOverlayData({
   resolution,
   mapReady,
-  forecastPath,
-  fallbackForecastPath,
   modelId,
-  externalValues,
+  activityValues,
   forecastOverlayEnabled = true,
   colorNoData = false,
   pulseAllGridCells = false,
@@ -88,11 +80,11 @@ export function useForecastData({
   onFatalDataError,
   onOverlayLoaded,
   onOverlayRendered,
-}: UseForecastDataArgs) {
+}: UseActivityOverlayDataArgs) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
-    if (!forecastOverlayEnabled) {
+    if (!forecastOverlayEnabled || activityValues === null) {
       removeGridOverlay(map);
       overlayRef.current = null;
       fillExprRef.current = null;
@@ -105,7 +97,7 @@ export function useForecastData({
       valuesByCellRef.current = {};
       setLegendSpec(null);
       onGridCellCount?.(0);
-      onOverlayLoaded?.();
+      if (!forecastOverlayEnabled) onOverlayLoaded?.();
       return;
     }
 
@@ -152,57 +144,7 @@ export function useForecastData({
     const loadOverlay = async () => {
       try {
         const grid = await loadGrid(resolution);
-        let values: Record<string, number> = externalValues ?? {};
-
-        if (!externalValues) {
-          try {
-            let forecast;
-            if (forecastPath) {
-              try {
-                forecast = await loadForecast(resolution, {
-                  kind: "explicit",
-                  explicitPath: forecastPath,
-                  modelId,
-                });
-              } catch (err) {
-                if (
-                  fallbackForecastPath &&
-                  fallbackForecastPath !== forecastPath
-                ) {
-                  console.warn(
-                    "[Forecast] explicit path failed, falling back to latest period",
-                    err,
-                  );
-                  forecast = await loadForecast(resolution, {
-                    kind: "explicit",
-                    explicitPath: fallbackForecastPath,
-                    modelId,
-                  });
-                } else {
-                  throw err;
-                }
-              }
-            } else if (fallbackForecastPath) {
-              forecast = await loadForecast(resolution, {
-                kind: "explicit",
-                explicitPath: fallbackForecastPath,
-                modelId,
-              });
-            }
-            values = forecast?.values ?? {};
-          } catch (err) {
-            console.warn("[Forecast] failed to load", err);
-            onFatalDataError?.(
-              normalizeDataLoadError(
-                err,
-                forecastPath ??
-                  fallbackForecastPath ??
-                  `forecast:${resolution}`,
-              ),
-            );
-            return;
-          }
-        }
+        const values = activityValues;
 
         if (cancelled) return;
 
@@ -217,7 +159,7 @@ export function useForecastData({
           console.info("[MapDebug] forecastLoaded", {
             resolution,
             modelId,
-            loadedPath: forecastPath ?? fallbackForecastPath ?? null,
+            overlayLoadKey: overlayLoadKey ?? null,
             positiveCount: positiveVals.length,
             min: positiveVals.length ? Math.min(...positiveVals) : null,
             median: positiveVals.length
@@ -235,12 +177,14 @@ export function useForecastData({
         }
 
         const featureValues = (joined.features ?? [])
-          .map((feature) =>
-            Number(
-              (feature.properties as Record<string, unknown> | null)?.prob ?? 0,
-            ),
+          .map(
+            (feature) =>
+              (feature.properties as Record<string, unknown> | null)?.prob,
           )
-          .filter((v) => Number.isFinite(v));
+          .filter(
+            (value): value is number =>
+              typeof value === "number" && Number.isFinite(value),
+          );
         sortedValuesDescRef.current = [...featureValues].sort((a, b) => b - a);
         totalCellsRef.current = featureValues.length;
         onGridCellCount?.(featureValues.length);
@@ -257,8 +201,7 @@ export function useForecastData({
             ).length,
             nonZeroJoinedFeatures: featureValues.filter((value) => value > 0)
               .length,
-            forecastPath,
-            fallbackForecastPath,
+            overlayLoadKey,
           });
         }
         scheduleForecastRender(map, () => cancelled, onOverlayRendered);
@@ -277,11 +220,9 @@ export function useForecastData({
   }, [
     resolution,
     mapReady,
-    forecastPath,
-    fallbackForecastPath,
     forecastOverlayEnabled,
     modelId,
-    externalValues,
+    activityValues,
     pulseAllGridCells,
     overlayLoadKey,
     colorNoData,

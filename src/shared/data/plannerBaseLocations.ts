@@ -4,11 +4,9 @@ export type PlannerBaseLocation = {
   longitude: number;
 };
 
-const BASE_LOCATION_URL_CANDIDATES = [
-  `${(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}data/places/base_locations.json`,
-  "/data/places/base_locations.json",
+const BASE_LOCATION_URL = resolveAppAssetPath(
   "data/places/base_locations.json",
-];
+);
 
 function isPlannerBaseLocation(value: unknown): value is PlannerBaseLocation {
   if (!value || typeof value !== "object") return false;
@@ -23,18 +21,20 @@ function isPlannerBaseLocation(value: unknown): value is PlannerBaseLocation {
 export async function loadPlannerBaseLocations(): Promise<
   PlannerBaseLocation[]
 > {
-  for (const url of BASE_LOCATION_URL_CANDIDATES) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) continue;
-      const payload = (await response.json()) as unknown;
-      if (!Array.isArray(payload)) continue;
-      const items = payload.filter(isPlannerBaseLocation);
-      if (items.length > 0) return items;
-    } catch {
-      // Try next candidate URL.
-    }
+  const response = await fetch(BASE_LOCATION_URL);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load planner base locations (${response.status})`,
+    );
   }
-
-  throw new Error("Failed to load planner base locations");
+  const payload = (await response.json()) as unknown;
+  if (!Array.isArray(payload)) {
+    throw new Error("Planner base locations payload must be an array");
+  }
+  const items = payload.filter(isPlannerBaseLocation);
+  if (items.length === 0) {
+    throw new Error("Planner base locations payload has no valid locations");
+  }
+  return items;
 }
+import { resolveAppAssetPath } from "../config/basePath";

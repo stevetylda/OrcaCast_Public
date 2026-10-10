@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { routePath } from "../config/routes";
 
 type SiteFooterLink = {
   label: string;
@@ -36,7 +37,11 @@ export function SiteFooter({
 }) {
   return (
     <footer className="appSiteFooter">
-      <Link className="appSiteFooter__brand" to="/" aria-label="OrcaCast home">
+      <Link
+        className="appSiteFooter__brand"
+        to={routePath("home")}
+        aria-label="OrcaCast home"
+      >
         <img
           src="/images/OrcaCast-Icon-128.webp"
           srcSet="/images/OrcaCast-Icon-128.webp 128w, /images/OrcaCast-Icon-256.webp 256w"

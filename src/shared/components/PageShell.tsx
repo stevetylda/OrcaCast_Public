@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { routePath } from "../config/routes";
 import { useMenu } from "../state/MenuContext";
 
 type Props = {
@@ -54,7 +55,7 @@ export function PageShell({
         <div className="pageHeader__right">
           <Link
             className="backToMap"
-            to="/"
+            to={routePath("home")}
             aria-label="Back home"
             title="Back home"
           >

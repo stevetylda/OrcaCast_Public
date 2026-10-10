@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T11:50:21.796483Z",
+  "generated_at": "2026-08-01T12:14:42.881070Z",
   "run_id": "origin_20260713_r6",
   "model": "kernel_decay_model",
   "ecotype": "SRKW",
@@ -8,7 +8,35 @@
   "selection_rank": 2,
   "native_resolution": 6,
   "parent_aggregation": "1 - product(1 - child_probability)",
-  "grid_alignment": "App grid support; unsupported cells filled with zero",
+  "schema_version": 2,
+  "grid_alignment": {
+    "reference_grid": "public/data/grids/H{resolution}.geojson",
+    "missing_cell_policy": "omitted_as_unknown",
+    "zero_semantics": "modeled_probability_zero",
+    "coverage_by_resolution": {
+      "H4": {
+        "grid_cell_count": 135,
+        "modeled_cell_count": 61,
+        "unknown_cell_count": 74,
+        "missing_cell_policy": "omitted_as_unknown",
+        "unknown_reason": "outside_model_support"
+      },
+      "H5": {
+        "grid_cell_count": 661,
+        "modeled_cell_count": 322,
+        "unknown_cell_count": 339,
+        "missing_cell_policy": "omitted_as_unknown",
+        "unknown_reason": "outside_model_support"
+      },
+      "H6": {
+        "grid_cell_count": 3628,
+        "modeled_cell_count": 1755,
+        "unknown_cell_count": 1873,
+        "missing_cell_policy": "omitted_as_unknown",
+        "unknown_reason": "outside_model_support"
+      }
+    }
+  },
   "smoothed_layers": [
     "PNG preview",
     "GeoTIFF raster"

@@ -228,24 +228,6 @@
   white-space: nowrap;
 }
 
-.thisWeekMobileHeading {
-  display: none;
-}
-
-@media (max-width: 900px) {
-  .thisWeekMobileHeading {
-    display: block;
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-  }
-}
-
 .thisWeekResultsPage__summaryLine {
   display: flex;
   align-items: center;
@@ -2008,16 +1990,38 @@
   }
 
   .thisWeekResultsPage__summaryStrip {
-    grid-template-areas:
-      "week"
-      "outlook";
-    grid-template-columns: minmax(0, max-content);
+    grid-template-areas: "week outlook";
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: calc(100% - 28px);
   }
 
   .thisWeekResultsPage__outlookSummary {
-    border-top: 2px solid rgba(6, 29, 60, .22);
-    border-left: 0;
-    border-radius: 0 0 17px 17px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    padding: 8px 10px;
+    border-top: 0;
+    border-left: 2px solid rgba(6, 29, 60, .22);
+    border-radius: 0 17px 17px 0;
+  }
+
+  .thisWeekResultsPage__outlookSummary > img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .thisWeekResultsPage__outlookSummary strong {
+    max-width: 160px;
+    font-size: clamp(.82rem, 3.1vw, 1rem);
+  }
+
+  .thisWeekResultsPage__outlookReading {
+    gap: 5px;
+  }
+
+  .thisWeekResultsPage__fallbackSummary {
+    overflow: hidden;
+    max-width: 42vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .thisWeekResultsPage__timelineCard {
@@ -2059,8 +2063,9 @@
     right: 10px;
     bottom: 86px;
     left: 10px;
-    height: min(51dvh, 500px);
-    min-height: 300px;
+    height: min(55dvh, 500px);
+    max-height: 55dvh;
+    min-height: 0;
     border-radius: 24px;
   }
 
@@ -2125,6 +2130,19 @@
     left: 10px;
     max-width: none;
   }
+
+  .suggestedPlacesPanel__showAll {
+    min-height: 44px;
+    margin: 4px 2px 2px;
+    border: 2px solid var(--planner-ink);
+    border-radius: 14px;
+    background: var(--planner-yellow);
+    color: var(--planner-ink);
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 2px 3px 0 var(--planner-ink);
+  }
 }
 
 @media (max-width: 520px) {
@@ -2149,8 +2167,8 @@
   }
 
   .thisWeekResultsPage__outlookSummary {
-    border-top-width: 2px;
-    border-left-width: 0;
+    border-top-width: 0;
+    border-left-width: 2px;
   }
 
   .thisWeekResultsPage__summaryIcon {

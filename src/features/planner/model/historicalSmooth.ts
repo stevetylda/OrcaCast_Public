@@ -1,5 +1,6 @@
 import type { TripPlannerRange } from "../../../shared/data/tripPlanner";
 import { isoWeekFromDate } from "../../../shared/time/forecastPeriodToIsoWeek";
+import { resolveAppAssetPath } from "../../../shared/config/basePath";
 import type { WeightedGeoTiffSource } from "../../map/types";
 
 export type HistoricalSmoothEcotype = "srkw" | "transient";
@@ -10,12 +11,6 @@ function parseIsoDate(value: string) {
   return new Date(
     Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])),
   );
-}
-
-function withBase(path: string) {
-  const base = import.meta.env.BASE_URL || "/";
-  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
-  return `${normalizedBase}${path.replace(/^\/+/, "")}`;
 }
 
 export function buildHistoricalSmoothWeekWeights(
@@ -51,7 +46,7 @@ export function buildHistoricalSmoothSources(
   ecotype: HistoricalSmoothEcotype = "srkw",
 ): WeightedGeoTiffSource[] {
   return buildHistoricalSmoothWeekWeights(range).map(({ week, weight }) => ({
-    path: withBase(
+    path: resolveAppAssetPath(
       `data/week_of_year_agg_history_smooth/${ecotype}/week_${String(week).padStart(2, "0")}.tif`,
     ),
     weight,

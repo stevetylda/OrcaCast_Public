@@ -1,5 +1,6 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import { gzipSync } from "node:zlib";
 
 const distDirectory = path.resolve("dist");
 const manifest = JSON.parse(
@@ -37,25 +38,40 @@ if ([...staticFiles].some((file) => file.includes("map-vendor"))) {
 }
 
 const budgets = {
-  javascript: 300 * 1024,
-  css: 250 * 1024,
+  javascript: { raw: 500 * 1024, gzip: 175 * 1024 },
+  css: { raw: 250 * 1024, gzip: 40 * 1024 },
 };
-const totals = { javascript: 0, css: 0 };
+const totals = {
+  javascript: { raw: 0, gzip: 0 },
+  css: { raw: 0, gzip: 0 },
+};
 
 for (const file of staticFiles) {
-  const bytes = (await stat(path.join(distDirectory, file))).size;
-  if (file.endsWith(".js")) totals.javascript += bytes;
-  if (file.endsWith(".css")) totals.css += bytes;
+  const filePath = path.join(distDirectory, file);
+  const bytes = (await stat(filePath)).size;
+  const gzipBytes = gzipSync(await readFile(filePath)).byteLength;
+  if (file.endsWith(".js")) {
+    totals.javascript.raw += bytes;
+    totals.javascript.gzip += gzipBytes;
+  }
+  if (file.endsWith(".css")) {
+    totals.css.raw += bytes;
+    totals.css.gzip += gzipBytes;
+  }
 }
 
-for (const [kind, limit] of Object.entries(budgets)) {
-  if (totals[kind] > limit) {
-    throw new Error(
-      `Initial ${kind} bundle is ${(totals[kind] / 1024).toFixed(1)} kB; budget is ${(limit / 1024).toFixed(0)} kB.`,
-    );
+for (const [kind, limits] of Object.entries(budgets)) {
+  for (const sizeKind of ["raw", "gzip"]) {
+    const total = totals[kind][sizeKind];
+    const limit = limits[sizeKind];
+    if (total > limit) {
+      throw new Error(
+        `Initial ${kind} bundle is ${(total / 1024).toFixed(1)} kB ${sizeKind}; budget is ${(limit / 1024).toFixed(0)} kB.`,
+      );
+    }
   }
 }
 
 console.log(
-  `Initial bundle within budget: ${(totals.javascript / 1024).toFixed(1)} kB JS, ${(totals.css / 1024).toFixed(1)} kB CSS.`,
+  `Initial bundle within budget: ${(totals.javascript.raw / 1024).toFixed(1)}/${(totals.javascript.gzip / 1024).toFixed(1)} kB JS raw/gzip, ${(totals.css.raw / 1024).toFixed(1)}/${(totals.css.gzip / 1024).toFixed(1)} kB CSS raw/gzip.`,
 );

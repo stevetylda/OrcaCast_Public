@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { getNavigationRoutes, routePath } from "../../shared/config/routes";
 import { useMenu } from "../../shared/state/MenuContext";
 import "./NotFoundPage.css";
 
@@ -20,12 +21,16 @@ export function NotFoundPage() {
         </button>
         <Link
           className="notFoundHeader__brand"
-          to="/"
+          to={routePath("home")}
           aria-label="OrcaCast home"
         >
           OrcaCast <span>Forecast Lab</span>
         </Link>
-        <Link className="notFoundHeader__home" to="/" aria-label="Home">
+        <Link
+          className="notFoundHeader__home"
+          to={routePath("home")}
+          aria-label="Home"
+        >
           Home
           <span className="material-symbols-rounded" aria-hidden="true">
             arrow_forward
@@ -45,13 +50,16 @@ export function NotFoundPage() {
               turn through the Salish Sea.
             </p>
             <div className="notFoundActions">
-              <Link className="notFoundButton notFoundButton--primary" to="/">
+              <Link
+                className="notFoundButton notFoundButton--primary"
+                to={routePath("home")}
+              >
                 Return home
                 <span className="material-symbols-rounded" aria-hidden="true">
                   home
                 </span>
               </Link>
-              <Link className="notFoundButton" to="/watch">
+              <Link className="notFoundButton" to={routePath("watch")}>
                 Open Orca Watch
               </Link>
             </div>
@@ -70,11 +78,11 @@ export function NotFoundPage() {
 
         <nav className="notFoundRoutes" aria-label="Popular destinations">
           <span>Try a known heading</span>
-          <Link to="/watch">Watch</Link>
-          <Link to="/planner">Planner</Link>
-          <Link to="/explore">Explore</Link>
-          <Link to="/about">About</Link>
-          <Link to="/about/model">The model</Link>
+          {getNavigationRoutes("notFound").map((route) => (
+            <Link key={route.id} to={route.path}>
+              {route.navigationLabel}
+            </Link>
+          ))}
         </nav>
       </main>
     </div>

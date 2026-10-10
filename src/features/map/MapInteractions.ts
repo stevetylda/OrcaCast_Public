@@ -5,6 +5,7 @@ import {
   getForecastPathForPeriod,
   type H3Resolution,
 } from "../../shared/config/dataPaths";
+import { resolveAppAssetPath } from "../../shared/config/basePath";
 import { loadForecast } from "../../shared/data/forecastIO";
 import { getH3CellId } from "../../shared/data/h3";
 import type { Period } from "../../shared/data/periods";
@@ -79,19 +80,12 @@ function extractCellPolygons(
   return [];
 }
 
-function withBase(url: string): string {
-  const base = import.meta.env.BASE_URL || "/";
-  const normalized = base.endsWith("/") ? base : `${base}/`;
-  const trimmed = url.startsWith("/") ? url.slice(1) : url;
-  return `${normalized}${trimmed}`;
-}
-
 async function loadWeeklySightingPoints(
   year: number,
   week: number,
 ): Promise<LngLat[]> {
   const response = await fetch(
-    withBase(
+    resolveAppAssetPath(
       `data/last_week_sightings/last_week_sightings_${year}-W${week}.geojson`,
     ),
     { cache: "force-cache" },
@@ -132,13 +126,14 @@ function buildSparklineSvg(
   const chartBottom = height - paddingY - labelHeight;
   const chartRight = width - paddingRight;
   const innerH = Math.max(1, chartBottom - chartTop);
-  const safeValues = values.map((v) => (Number.isFinite(v) ? v : 0));
+  const finiteValues = values.filter((value) => Number.isFinite(value));
   const safeSightings = sightings.map((v) => (v >= 1 ? 1 : 0));
-  const max = safeValues.length ? Math.max(...safeValues) : 0;
-  const min = safeValues.length ? Math.min(...safeValues) : 0;
+  const max = finiteValues.length ? Math.max(...finiteValues) : 0;
+  const min = finiteValues.length ? Math.min(...finiteValues) : 0;
   const range = max - min || 1;
-  const step = safeValues.length > 1 ? innerW / (safeValues.length - 1) : 0;
-  const points = safeValues.map((v, i) => {
+  const step = values.length > 1 ? innerW / (values.length - 1) : 0;
+  const points = values.map((v, i) => {
+    if (!Number.isFinite(v)) return null;
     const x = paddingLeft + step * i;
     const t = (v - min) / range;
     const y = chartTop + innerH * (1 - t);
@@ -150,10 +145,18 @@ function buildSparklineSvg(
     return [x, y] as const;
   });
 
+  let penDown = false;
   const path = points
-    .map(
-      (p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`,
-    )
+    .map((point) => {
+      if (!point) {
+        penDown = false;
+        return "";
+      }
+      const command = penDown ? "L" : "M";
+      penDown = true;
+      return `${command}${point[0].toFixed(1)} ${point[1].toFixed(1)}`;
+    })
+    .filter(Boolean)
     .join(" ");
   const sightingsPath = sightingPoints
     .map(
@@ -162,7 +165,7 @@ function buildSparklineSvg(
     .join(" ");
   const marker =
     selectedIndex >= 0 && selectedIndex < points.length
-      ? points[selectedIndex]
+      ? (points[selectedIndex] ?? null)
       : null;
   const markerX =
     selectedIndex >= 0 && selectedIndex < points.length
@@ -190,7 +193,7 @@ function buildSparklineSvg(
   });
 
   return `
-    <svg class="sparkPopup__chart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="Forecast probability with sightings line">
+    <svg class="sparkPopup__chart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="Forecast probability with sightings line; gaps indicate no model coverage">
       ${markerX ? `<line class="sparkPopup__current" x1="${markerX}" x2="${markerX}" y1="${chartTop}" y2="${chartBottom}" />` : ""}
       <path class="sparkPopup__lineSightings" d="${sightingsPath}" />
       <path class="sparkPopup__line" d="${path}" />
@@ -434,11 +437,13 @@ export function createGridInteractionHandlers({
               );
             }
             const values = await periodPromise;
-            const value = Number(values?.[cellId] ?? 0);
-            return Number.isFinite(value) ? value : 0;
+            const value = values?.[cellId];
+            return typeof value === "number" && Number.isFinite(value)
+              ? value
+              : Number.NaN;
           } catch {
             forecastPeriodCacheRef.current.delete(periodCacheKey);
-            return 0;
+            return Number.NaN;
           }
         },
       );

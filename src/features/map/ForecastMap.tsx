@@ -49,7 +49,7 @@ import {
   VOYAGER_RASTER_STYLE,
   VOYAGER_STYLE,
 } from "./buildLayers";
-import { useForecastData } from "./useForecastData";
+import { useActivityOverlayData } from "./useActivityOverlayData";
 import { useHotspotAnimation } from "./useHotspotAnimation";
 import type {
   FillColorSpec,
@@ -981,16 +981,12 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       onGridCellSelect,
       onGridCellExpand,
       enableGridInteraction = true,
-      forecastPath,
-      fallbackForecastPath,
       smoothedForecastPath,
-      fallbackSmoothedForecastPath,
       smoothedForecastTilePath,
-      fallbackSmoothedForecastTilePath,
       weightedSmoothedForecastSources,
       colorScaleValues,
       useExternalColorScale = false,
-      externalValues,
+      activityValues,
       forecastOverlayEnabled = true,
       pulseAllGridCells = false,
       mapModeLabel,
@@ -1321,7 +1317,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           void addRasterTileSurfaceOverlay(
             map,
             smoothedForecastTilePath,
-            fallbackSmoothedForecastTilePath,
             activePalette.colors,
             () =>
               smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current,
@@ -1344,7 +1339,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
             void addGeoTiffSurfaceOverlay(
               map,
               smoothedForecastPath,
-              fallbackSmoothedForecastPath,
               activePalette.colors,
               () =>
                 smoothedSurfaceRequestId !==
@@ -1373,7 +1367,6 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
           void addGeoTiffSurfaceOverlay(
             map,
             smoothedForecastPath,
-            fallbackSmoothedForecastPath,
             activePalette.colors,
             () =>
               smoothedSurfaceRequestId !== smoothedSurfaceRequestIdRef.current,
@@ -1459,9 +1452,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
         resolution,
         resolveHotspotThreshold,
         smoothedForecastPath,
-        fallbackSmoothedForecastPath,
         smoothedForecastTilePath,
-        fallbackSmoothedForecastTilePath,
         weightedSmoothedForecastSources,
         surfaceMode,
       ],
@@ -1860,13 +1851,11 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       ],
     );
 
-    useForecastData({
+    useActivityOverlayData({
       resolution,
       mapReady,
-      forecastPath,
-      fallbackForecastPath,
       modelId,
-      externalValues,
+      activityValues,
       forecastOverlayEnabled,
       pulseAllGridCells,
       overlayLoadKey: forecastOverlayLoadKey,
@@ -1944,15 +1933,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
 
     useEffect(() => {
       lastGridLayerSignatureRef.current = null;
-    }, [
-      resolution,
-      modelId,
-      forecastPath,
-      fallbackForecastPath,
-      externalValues,
-      pulseAllGridCells,
-      activePalette,
-    ]);
+    }, [resolution, modelId, activityValues, pulseAllGridCells, activePalette]);
 
     useEffect(() => {
       if (!containerRef.current || mapRef.current) return;
@@ -2043,7 +2024,7 @@ export const ForecastMap = forwardRef<ForecastMapHandle, ForecastMapProps>(
       mapRef,
       hotspotsOnlyRef,
       resolution,
-      forecastPath,
+      overlayLoadKey: forecastOverlayLoadKey,
     });
 
     useEffect(() => {

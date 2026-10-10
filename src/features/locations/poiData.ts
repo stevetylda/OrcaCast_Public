@@ -1,4 +1,5 @@
 import type { Feature, Geometry } from "geojson";
+import { resolveAppAssetPath } from "../../shared/config/basePath";
 import type { PoiType } from "./types";
 
 export type PoiFilters = { Park: boolean; Marina: boolean; Ferry: boolean };
@@ -180,27 +181,12 @@ function normalizePayload(payload: unknown): PoiDataBundle {
 }
 
 async function fetchPoiDataBundle(): Promise<PoiDataBundle> {
-  const base = import.meta.env.BASE_URL || "/";
-  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
-  const candidates = Array.from(
-    new Set([
-      `${normalizedBase}data/places_of_interest.json`,
-      "/data/places_of_interest.json",
-      "data/places_of_interest.json",
-    ]),
-  );
-
-  for (const url of candidates) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) continue;
-      return normalizePayload(await response.json());
-    } catch {
-      // Try next candidate URL.
-    }
+  const url = resolveAppAssetPath("data/places_of_interest.json");
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load POI data (${response.status}) from ${url}`);
   }
-
-  throw new Error("Failed to load POI data from places_of_interest.json");
+  return normalizePayload(await response.json());
 }
 
 export function loadPoiDataBundle() {

@@ -4,13 +4,16 @@ import type {
   WebcamSite,
 } from "../../locations/types";
 import type { OrcasoundHydrophone } from "../../../shared/data/orcasoundHydrophones";
+import { resolveAppAssetPath } from "../../../shared/config/basePath";
 import {
   getViewingSpotPhoto,
   hasApprovedSpotPhoto,
   type ViewingSpotPhotoManifest,
 } from "../../../shared/data/viewingSpotPhotos";
 
-const PLACE_IMAGE_PLACEHOLDER_SRC = `${(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}spot-images/generic.webp`;
+const PLACE_IMAGE_PLACEHOLDER_SRC = resolveAppAssetPath(
+  "spot-images/generic.webp",
+);
 const LOCAL_PLACE_IMAGE_PATTERN =
   /^\/(?:images|spot-images|spot-photos)\/[A-Za-z0-9_./-]+$/;
 
@@ -198,8 +201,8 @@ export function PlannerPlaceCard({
                 <span>{formatPlaceType(place.type)}</span>
               </span>
               <span className="plannerResultsPage__spotDistance">
-                {place.distanceKm !== undefined
-                  ? `${Math.round(place.distanceKm * 0.621371)} mi from base`
+                {place.distanceFromBaseKm !== undefined
+                  ? `${Math.round(place.distanceFromBaseKm * 0.621371)} mi from base`
                   : "In trip range"}
               </span>
             </p>
@@ -349,8 +352,8 @@ export function PlannerPlaceDetailView({
           <div>
             <span>Travel</span>
             <strong>
-              {place.distanceKm !== undefined
-                ? `${Math.round(place.distanceKm * 0.621371)} mi from base`
+              {place.distanceFromBaseKm !== undefined
+                ? `${Math.round(place.distanceFromBaseKm * 0.621371)} mi from base`
                 : "In range"}
             </strong>
           </div>

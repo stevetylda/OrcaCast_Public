@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
+import { PrimaryNavigation } from "../../shared/components/PrimaryNavigation";
 import { SiteFooter } from "../../shared/components/SiteFooter";
 import { appConfig } from "../../shared/config/appConfig";
+import { routePath } from "../../shared/config/routes";
 import {
   getCachedDataMeta,
   loadDataMeta,
@@ -238,17 +240,10 @@ export function ModelPage() {
         variant="home"
         onOpenMenu={() => setMenuOpen(true)}
         rightSlot={
-          <nav className="aboutGuideNav" aria-label="Model page navigation">
-            <Link to="/about" aria-label="About">
-              About
-            </Link>
-            <a href="#model-journey" aria-label="Model layers">
-              Model layers
-            </a>
-            <Link to="/planner" aria-label="Plan a trip">
-              Plan a trip
-            </Link>
-          </nav>
+          <PrimaryNavigation
+            className="aboutGuideNav"
+            ariaLabel="Model page navigation"
+          />
         }
       />
 
@@ -276,7 +271,7 @@ export function ModelPage() {
               </a>
               <Link
                 className="aboutGuideButton aboutGuideButton--cream"
-                to="/about"
+                to={routePath("about")}
               >
                 Back to about{" "}
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -494,7 +489,7 @@ export function ModelPage() {
             <div className="modelStoryResult__actions">
               <Link
                 className="aboutGuideButton aboutGuideButton--teal"
-                to="/planner"
+                to={routePath("planner")}
               >
                 Use the trip planner{" "}
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -503,7 +498,7 @@ export function ModelPage() {
               </Link>
               <Link
                 className="aboutGuideButton aboutGuideButton--cream"
-                to="/watch"
+                to={routePath("watch")}
               >
                 Explore this week{" "}
                 <span className="material-symbols-rounded" aria-hidden="true">
@@ -582,10 +577,10 @@ export function ModelPage() {
       <SiteFooter
         tagline="Signals in. Context out."
         links={[
-          { label: "About", to: "/about" },
+          { label: "About", to: routePath("about") },
           { label: "Model layers", to: "#model-journey", external: true },
-          { label: "Plan a trip", to: "/planner" },
-          { label: "This week", to: "/watch" },
+          { label: "Plan a trip", to: routePath("planner") },
+          { label: "This week", to: routePath("watch") },
         ]}
       />
     </div>

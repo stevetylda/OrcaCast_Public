@@ -8,7 +8,7 @@ The application is a React and TypeScript single-page app built with Vite. Its m
 
 ## Application pages
 
-### Home — `/`
+### Home
 
 ![OrcaCast home page](docs/screenshots/home.jpg)
 
@@ -21,7 +21,7 @@ Key capabilities:
 - Direct entry points to trip planning, forecast exploration, cameras, and hydrophones
 - Responsible-use framing for the rest of the application
 
-### Watch — `/watch`
+### Watch
 
 ![OrcaCast Watch page](docs/screenshots/watch.jpg)
 
@@ -36,7 +36,7 @@ Key capabilities:
 - Itinerary building, reordering, map preview, and export
 - Map reset, snapshot download, and sharing tools
 
-### Planner — `/planner`
+### Planner
 
 ![OrcaCast Planner page](docs/screenshots/planner.jpg)
 
@@ -51,7 +51,7 @@ Key capabilities:
 - Camera and hydrophone discovery
 - Persisted plan state and itinerary export
 
-### About — `/about`
+### About
 
 ![OrcaCast About page](docs/screenshots/about.jpg)
 
@@ -65,7 +65,7 @@ Key capabilities:
 - Responsible viewing guidance and links to official resources
 - Current data and regional coverage context
 
-### Model Methodology — `/about/model`
+### Model Methodology
 
 ![OrcaCast model methodology page](docs/screenshots/model.jpg)
 
@@ -78,7 +78,7 @@ Key capabilities:
 - Details on observer bias, spatial context, ecological proxies, and uncertainty
 - Interpretation guidance for relative activity and viewing opportunity
 
-### Explore — `/explore`
+### Explore
 
 Explore is a dedicated, coming-soon field-guide experience. It previews practical content about Salish Sea whales, responsible whale watching, species identification, and other wildlife visitors may encounter, including porpoises, seals, sea lions, eagles, and seabirds.
 
@@ -93,7 +93,7 @@ Planned topics:
 
 ### Unknown routes
 
-Unknown URLs render a responsive OrcaCast 404 page rather than an empty application shell. The page provides links back to Home, Watch, Planner, Explore, About, and Model content. Static hosting must still serve `index.html` as the fallback so React Router can resolve direct requests.
+Unknown URLs render a responsive OrcaCast 404 page rather than an empty application shell. Its destination links are generated from the route registry. Static hosting must still serve `index.html` as the fallback so React Router can resolve direct requests.
 
 ## Local development
 
@@ -156,11 +156,11 @@ Forecast metadata is primed asynchronously after React starts. A missing or inva
 
 ## Routing, navigation, and page metadata
 
-OrcaCast uses React Router for client-side navigation. The visible OrcaCast brand in the shared header always navigates to Home; map resets and other page actions belong to explicitly labelled controls.
+OrcaCast uses React Router for client-side navigation. `src/shared/config/routes.ts` is the source of truth for route paths, navigation labels, page metadata, error-boundary names, and navigation placement. `App.tsx` keeps only the exhaustive typed mapping from route IDs to lazy page components. The visible OrcaCast brand in the shared header always navigates to Home; map resets and other page actions belong to explicitly labelled controls.
 
-Each route sets a distinct document title, description, Open Graph title, and Open Graph description during both direct loads and client-side navigation. Add metadata to `src/app/RouteMetadata.tsx` whenever a new route is introduced. Unknown routes use dedicated not-found metadata.
+Each route sets a distinct document title, description, Open Graph title, and Open Graph description during both direct loads and client-side navigation. Add new route knowledge to the typed registry rather than maintaining separate routing, metadata, navigation, documentation, or E2E lists. Unknown routes use the registry’s dedicated not-found metadata, and the smoke suite derives direct-load and Axe coverage from every navigable registry entry.
 
-Hash navigation is handled after route transitions so links to an in-page target scroll after the destination has rendered. Prefer a dedicated route such as `/explore` when content is a first-class page rather than an anchor within Home.
+Hash navigation is handled after route transitions so links to an in-page target scroll after the destination has rendered. Prefer a dedicated registered route when content is a first-class page rather than an anchor within Home.
 
 ## Accessibility
 
@@ -170,7 +170,7 @@ When adding routes or major UI states:
 
 - Use semantic headings, landmarks, and labelled controls.
 - Preserve visible keyboard focus and WCAG AA contrast.
-- Add the route to `tests/e2e/smoke.spec.ts` so desktop and mobile direct-load, refresh, console, network, and Axe checks cover it.
+- Register the route in `src/shared/config/routes.ts`; the smoke suite automatically includes it in desktop and mobile direct-load, refresh, console, network, and Axe checks.
 - Verify dialogs retain focus and restore it to the opener when dismissed.
 
 ## Production deployment
@@ -179,7 +179,7 @@ When adding routes or major UI states:
 npm run build
 ```
 
-Deploy the generated `dist/` directory to a static host. Because OrcaCast uses client-side routing, configure the host to serve `index.html` as the fallback for routes such as `/watch`, `/planner`, `/explore`, and `/about/model`.
+Deploy the generated `dist/` directory to a static host. Because OrcaCast uses client-side routing, configure the host to serve `index.html` as the fallback for every application route.
 
 For Cloudflare Pages:
 

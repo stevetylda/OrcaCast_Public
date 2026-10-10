@@ -2,15 +2,16 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
+import { routePath } from "../shared/config/routes";
 import { RouteMetadata } from "./RouteMetadata";
 
 describe("route metadata", () => {
   it("updates titles and descriptions during client-side navigation", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={["/watch"]}>
+      <MemoryRouter initialEntries={[routePath("watch")]}>
         <RouteMetadata />
-        <Link to="/planner">Planner</Link>
+        <Link to={routePath("planner")}>Planner</Link>
         <Routes>
           <Route path="*" element={null} />
         </Routes>

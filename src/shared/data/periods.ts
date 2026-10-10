@@ -3,6 +3,7 @@ import { fetchJson } from "./fetchClient";
 import type { H3Resolution } from "../config/dataPaths";
 import { getDataVersionToken } from "./meta";
 import { parseWithSchema, periodsFileSchema } from "./validation";
+import { resolveAppAssetPath } from "../config/basePath";
 
 export type Period = {
   year: number;
@@ -17,12 +18,10 @@ const cachedPeriods = new Map<string, Period[]>();
 const cachedPeriodsByResolution = new Map<string, Period[]>();
 
 export function buildPeriodsUrl(forecastDirectory?: string): string {
-  const base = import.meta.env.BASE_URL || "/";
-  const cleanBase = base.endsWith("/") ? base : `${base}/`;
   return new URL(
     forecastDirectory
-      ? `${cleanBase}data/${forecastDirectory}/periods.json`
-      : `${cleanBase}data/periods.json`,
+      ? resolveAppAssetPath(`data/${forecastDirectory}/periods.json`)
+      : resolveAppAssetPath("data/periods.json"),
     window.location.origin,
   ).toString();
 }
@@ -33,12 +32,10 @@ export function resetPeriodsCache(): void {
 }
 
 export function buildManifestUrl(forecastDirectory?: string): string {
-  const base = import.meta.env.BASE_URL || "/";
-  const cleanBase = base.endsWith("/") ? base : `${base}/`;
   return new URL(
     forecastDirectory
-      ? `${cleanBase}data/${forecastDirectory}/manifest.json`
-      : `${cleanBase}data/manifest.json`,
+      ? resolveAppAssetPath(`data/${forecastDirectory}/manifest.json`)
+      : resolveAppAssetPath("data/manifest.json"),
     window.location.origin,
   ).toString();
 }

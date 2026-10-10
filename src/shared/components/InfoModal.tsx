@@ -1,5 +1,6 @@
 import { useId, useRef } from "react";
 import { Link } from "react-router-dom";
+import { routePath } from "../config/routes";
 import { attribution, basemapSources } from "../config/attribution";
 import { useDialogFocus } from "./useDialogFocus";
 
@@ -56,7 +57,7 @@ export function InfoModal({
             </button>
             <Link
               className="btn btn--ghost btn--soft"
-              to="/about"
+              to={routePath("about")}
               onClick={onClose}
             >
               Learn More

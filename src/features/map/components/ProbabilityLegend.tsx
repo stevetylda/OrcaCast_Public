@@ -1,4 +1,8 @@
-import { ZERO_COLOR, type HeatScale } from "../../../shared/geo/colorScale";
+import {
+  NO_DATA_COLOR,
+  ZERO_COLOR,
+  type HeatScale,
+} from "../../../shared/geo/colorScale";
 
 type Props = {
   scale?: HeatScale | null;
@@ -37,7 +41,7 @@ function buildBinTooltip(
 
 export function ProbabilityLegend({ scale }: Props) {
   if (!scale) return null;
-  const { binColorsRgba, labels, binRanges, zeroColor } = scale;
+  const { binColorsRgba, labels, binRanges, zeroColor, noDataColor } = scale;
   const nonZeroLabels = labels.slice(1, 1 + binColorsRgba.length);
 
   return (
@@ -53,7 +57,18 @@ export function ProbabilityLegend({ scale }: Props) {
       <div className="legend__list">
         <div
           className="legend__row legend__row--hasTooltip"
-          data-tooltip="No probability observed for this cell in the selected week (p=0)."
+          data-tooltip="This cell is outside the selected model's published support."
+          tabIndex={0}
+        >
+          <span
+            className="legend__swatch"
+            style={{ background: noDataColor ?? NO_DATA_COLOR }}
+          />
+          <div className="legend__label">No model coverage</div>
+        </div>
+        <div
+          className="legend__row legend__row--hasTooltip"
+          data-tooltip="The model published a probability of zero for this cell."
           tabIndex={0}
         >
           <span

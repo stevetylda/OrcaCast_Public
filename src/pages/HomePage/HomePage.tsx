@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppHeader } from "../../shared/components/AppHeader";
+import { PrimaryNavigation } from "../../shared/components/PrimaryNavigation";
 import { ReturnToTopButton } from "../../shared/components/ReturnToTopButton";
 import { SiteFooter } from "../../shared/components/SiteFooter";
+import { routePath } from "../../shared/config/routes";
 import { useMenu } from "../../shared/state/MenuContext";
 import {
   loadTripPlannerOccurrencePayload,
@@ -164,17 +166,10 @@ export function HomePage() {
         variant="home"
         onOpenMenu={() => setMenuOpen(true)}
         rightSlot={
-          <nav className="homeNav" aria-label="Homepage navigation">
-            <a href="#this-week" aria-label="This week">
-              This week
-            </a>
-            <Link to="/planner" aria-label="Plan a trip">
-              Plan a trip
-            </Link>
-            <Link to="/explore" aria-label="Explore">
-              Explore
-            </Link>
-          </nav>
+          <PrimaryNavigation
+            className="homeNav"
+            ariaLabel="Homepage navigation"
+          />
         }
       />
 
@@ -190,7 +185,10 @@ export function HomePage() {
               places—then point you toward one very good Salish Sea day.
             </p>
             <div className="homeHero__actions">
-              <Link className="homeButton homeButton--teal" to="/planner">
+              <Link
+                className="homeButton homeButton--teal"
+                to={routePath("planner")}
+              >
                 Build my trip{" "}
                 <span className="material-symbols-rounded" aria-hidden="true">
                   arrow_forward
@@ -308,7 +306,10 @@ export function HomePage() {
                   </li>
                 ))}
               </ul>
-              <Link to="/watch" className="homePulseLink homePulseLink--yellow">
+              <Link
+                to={routePath("watch")}
+                className="homePulseLink homePulseLink--yellow"
+              >
                 See weekly outlook <span aria-hidden="true">→</span>
               </Link>
             </article>
@@ -370,7 +371,10 @@ export function HomePage() {
                   </span>
                 </p>
               </div>
-              <Link to="/watch" className="homePulseLink homePulseLink--teal">
+              <Link
+                to={routePath("watch")}
+                className="homePulseLink homePulseLink--teal"
+              >
                 Open weekly forecast <span aria-hidden="true">→</span>
               </Link>
             </article>
@@ -388,7 +392,11 @@ export function HomePage() {
               </div>
               <div className="homeRegionList">
                 {HOME_REGIONS.map((region, index) => (
-                  <Link to="/watch" className="homeRegionRow" key={region.name}>
+                  <Link
+                    to={routePath("watch")}
+                    className="homeRegionRow"
+                    key={region.name}
+                  >
                     <span
                       className={`homeRegionRow__rank homeRegionRow__rank--${region.tone}`}
                     >
@@ -404,7 +412,10 @@ export function HomePage() {
                   </Link>
                 ))}
               </div>
-              <Link to="/watch" className="homePulseLink homePulseLink--teal">
+              <Link
+                to={routePath("watch")}
+                className="homePulseLink homePulseLink--teal"
+              >
                 Browse all forecast areas <span aria-hidden="true">→</span>
               </Link>
             </article>
@@ -439,7 +450,7 @@ export function HomePage() {
                 {weatherState.status === "error" ? "unavailable" : "loading"}
               </span>
             )}
-            <Link to="/planner">
+            <Link to={routePath("planner")}>
               See detailed conditions <span aria-hidden="true">→</span>
             </Link>
           </div>
@@ -458,7 +469,10 @@ export function HomePage() {
               forecast conditions, and accessible viewing places around your
               plan.
             </p>
-            <Link className="homeButton homeButton--yellow" to="/planner">
+            <Link
+              className="homeButton homeButton--yellow"
+              to={routePath("planner")}
+            >
               Let&apos;s plan it{" "}
               <span className="material-symbols-rounded" aria-hidden="true">
                 arrow_forward
@@ -466,7 +480,7 @@ export function HomePage() {
             </Link>
           </div>
           <Link
-            to="/planner"
+            to={routePath("planner")}
             className="homeFieldPass"
             aria-label="Open the trip planner"
           >
@@ -518,7 +532,7 @@ export function HomePage() {
           <div className="homeExplore__cards">
             <Link
               className="homeExploreCard homeExploreCard--pink"
-              to="/explore"
+              to={routePath("explore")}
             >
               <span className="homeExploreCard__icon" aria-hidden="true">
                 <span className="material-symbols-rounded">map</span>
@@ -531,7 +545,7 @@ export function HomePage() {
             </Link>
             <Link
               className="homeExploreCard homeExploreCard--yellow"
-              to="/watch"
+              to={routePath("watch")}
             >
               <span className="homeExploreCard__icon" aria-hidden="true">
                 <span className="material-symbols-rounded">photo_camera</span>
@@ -565,7 +579,7 @@ export function HomePage() {
       <SiteFooter
         tagline="Plan thoughtfully. Watch respectfully."
         links={[
-          { label: "About", to: "/about" },
+          { label: "About", to: routePath("about") },
           {
             label: "Contribute",
             to: "https://github.com/stevetylda/OrcaCast_Public",
