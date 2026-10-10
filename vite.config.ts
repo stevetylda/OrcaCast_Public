@@ -29,7 +29,7 @@ export default defineConfig(() => ({
           if (id.includes("driver.js")) return "tour-vendor";
           if (id.includes("zod")) return "validation-vendor";
           if (id.includes("html-to-image")) return "export-vendor";
-          return "vendor";
+          return undefined;
         },
       },
     },
