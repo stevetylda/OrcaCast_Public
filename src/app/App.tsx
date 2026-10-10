@@ -100,9 +100,7 @@ export default function App() {
   return (
     <MapStateProvider>
       <MenuProvider>
-        <BrowserRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
+        <BrowserRouter>
           <AppFrame />
         </BrowserRouter>
       </MenuProvider>

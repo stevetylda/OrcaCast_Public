@@ -36,7 +36,7 @@ export function useHotspotAnimation({
 
     const setLayerPaint = (
       layerId: string,
-      property: string,
+      property: Parameters<MapLibreMap["setPaintProperty"]>[1],
       value: number | string,
     ) => {
       try {
@@ -69,7 +69,9 @@ export function useHotspotAnimation({
                 ? 1.25 + ((z - 9) / 3) * 0.55
                 : 1.8;
         const edgePulseWidth = edgeBaseWidth + 0.1 * Math.sin(t * 1.7 + 0.5);
-        const opacityPairs: Array<[string, string, number]> = [
+        const opacityPairs: Array<
+          [string, Parameters<MapLibreMap["setPaintProperty"]>[1], number]
+        > = [
           [
             "grid-shimmer-fill",
             "fill-opacity",

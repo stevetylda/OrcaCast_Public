@@ -1,3 +1,4 @@
+import "../../shared/geo/maplibreWorker";
 import {
   forwardRef,
   useCallback,
@@ -7,10 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import maplibregl, {
-  Map as MapLibreMap,
-  type MapLayerMouseEvent,
-} from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import { Map as MapLibreMap, type MapLayerMouseEvent } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "../../shared/styles/map.css";

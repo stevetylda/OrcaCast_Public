@@ -128,7 +128,8 @@ for (const route of routes) {
 test("primary navigation works", async ({ page }) => {
   await page.goto(routePath("home"), { waitUntil: "domcontentloaded" });
   const menu = page.getByRole("button", { name: "Open main menu" });
-  if (await menu.isVisible()) {
+  if ((page.viewportSize()?.width ?? 9999) <= 760) {
+    await expect(menu).toBeVisible();
     await menu.click();
     await page
       .getByRole("button", {
