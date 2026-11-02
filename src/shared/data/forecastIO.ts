@@ -306,30 +306,6 @@ export function resetForecastCache(): void {
   forecastRawRequests.clear();
 }
 
-export async function loadForecastModelIds(
-  resolution: H3Resolution,
-  opts: { kind?: "latest" | "explicit"; explicitPath?: string } = {},
-): Promise<string[]> {
-  const url = getForecastPath(resolution, opts);
-  const raw = await loadForecastRaw(url);
-  let ids: string[] = [];
-  let modelCount = 0;
-  if (raw.models && raw.models.length > 0) {
-    ids = raw.models
-      .map((entry) => entry.id ?? entry.model)
-      .filter((id): id is string => typeof id === "string" && id.length > 0);
-    modelCount = raw.models.length;
-  } else if (raw.valuesByModel) {
-    ids = Object.keys(raw.valuesByModel);
-    modelCount = ids.length;
-  } else if (raw.model) {
-    ids = [raw.model];
-    modelCount = 1;
-  }
-  if (modelCount > 1) ids.push("consensus");
-  return Array.from(new Set(ids));
-}
-
 export function attachProbabilities(
   fc: FeatureCollection,
   values: Record<string, number>,
@@ -352,14 +328,4 @@ export function attachProbabilities(
       };
     }),
   };
-}
-
-export function countNonZero(fc: FeatureCollection, key = "prob"): number {
-  let count = 0;
-  for (const feature of fc.features) {
-    const props = feature.properties as Record<string, unknown> | null;
-    const value = props ? Number(props[key]) : 0;
-    if (value > 0) count += 1;
-  }
-  return count;
 }

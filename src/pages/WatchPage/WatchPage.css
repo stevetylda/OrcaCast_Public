@@ -141,6 +141,10 @@
   border-radius: 22px;
 }
 
+.mapPageRoot--thisWeek .plannerResultsPage__legendCard.activityLegend.thisWeekResultsPage__floatingLegend.isPaletteOpen {
+  z-index: 30;
+}
+
 .thisWeekResultsPage__floatingLegend .activityLegend__title {
   font-size: .62rem;
 }
@@ -151,15 +155,16 @@
 }
 
 .thisWeekResultsPage__floatingLegend .activityLegend__ramp {
-  height: 13px;
-  min-height: 13px;
+  height: 18px;
+  min-height: 18px;
 }
 
 .thisWeekResultsPage__floatingLegend .activityLegend__paletteList {
-  top: auto;
+  top: 0;
   right: auto;
-  bottom: calc(100% + 10px);
-  left: 0;
+  bottom: auto;
+  left: calc(100% + 12px);
+  width: min(380px, calc(100vw - 330px));
 }
 
 .thisWeekResultsPage__summaryCard:hover,

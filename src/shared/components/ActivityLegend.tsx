@@ -29,6 +29,15 @@ function assignRef<T>(ref: ForwardedRef<T> | undefined, value: T | null) {
   else if (ref) ref.current = value;
 }
 
+function getFiveLegendColors(colors: string[]): string[] {
+  if (colors.length === 0) return [];
+  if (colors.length === 5) return colors;
+  return Array.from({ length: 5 }, (_, index) => {
+    const sourceIndex = Math.round((index / 4) * (colors.length - 1));
+    return colors[sourceIndex] ?? colors.at(-1) ?? colors[0];
+  });
+}
+
 export const ActivityLegend = forwardRef<HTMLElement, ActivityLegendProps>(
   function ActivityLegend(
     {
@@ -92,6 +101,8 @@ export const ActivityLegend = forwardRef<HTMLElement, ActivityLegendProps>(
       };
     }, [onOpenChange, open]);
 
+    const legendColors = getFiveLegendColors(colors);
+
     return (
       <aside
         ref={setContainerRef}
@@ -135,7 +146,7 @@ export const ActivityLegend = forwardRef<HTMLElement, ActivityLegendProps>(
         <div className="activityLegend__scale">
           <span>Lower</span>
           <div className="activityLegend__ramp" aria-hidden="true">
-            {colors.map((color, index) => (
+            {legendColors.map((color, index) => (
               <span
                 key={`${color}-${index}`}
                 style={{ backgroundColor: color }}
@@ -191,7 +202,7 @@ export const ActivityLegend = forwardRef<HTMLElement, ActivityLegendProps>(
                     className="activityLegend__paletteSwatches"
                     aria-hidden="true"
                   >
-                    {palette.colors.slice(0, 6).map((color, index) => (
+                    {getFiveLegendColors(palette.colors).map((color, index) => (
                       <span
                         key={`${palette.id}-${color}-${index}`}
                         style={{ backgroundColor: color }}

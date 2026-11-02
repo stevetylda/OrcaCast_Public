@@ -120,3 +120,27 @@
     display: grid;
   }
 }
+
+/* Keep the three primary destinations visible on the map workspaces. */
+@media (max-width: 820px) {
+  .mapPageRoot .forecastLabHeader.header--home .brandBtn,
+  .mapPageRoot .forecastLabHeader.header--home .header__right > .iconBtn {
+    display: none;
+  }
+  .mapPageRoot .forecastLabHeader.header--home .homeNav {
+    display: flex;
+    gap: 18px;
+    margin: 0;
+  }
+  .mapPageRoot .forecastLabHeader.header--home .homeNav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 11px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 380px) {
+  .mapPageRoot .forecastLabHeader.header--home .homeNav { gap: 11px; }
+}

@@ -1,0 +1,3 @@
+.referenceDataNotice { position: fixed; top: 88px; left: 16px; z-index: 120; max-width: min(520px, calc(100vw - 32px)); padding: 14px 18px; border: 2px solid #061d3c; border-radius: 16px; background: #fff8e9; color: #061d3c; box-shadow: 3px 4px 0 #061d3c; }
+.referenceDataNotice p { margin: 0; font-size: .9rem; }
+.referenceDataNotice button { min-height: 44px; margin-top: 8px; border: 1px solid currentColor; border-radius: 8px; padding: 6px 12px; background: #ffda4c; color: inherit; cursor: pointer; }

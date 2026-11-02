@@ -1,6 +1,6 @@
+import { localPreferences } from "../storage/browserStorage";
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 import type { H3Resolution } from "../config/dataPaths";
-import { appConfig } from "../config/appConfig";
 import {
   DEFAULT_PALETTE_ID,
   getPaletteOrDefault,
@@ -24,9 +23,6 @@ type MapState = {
   surfaceMode: SurfaceMode;
   setSurfaceMode: (value: SurfaceMode) => void;
   resolution: H3Resolution;
-  setResolution: (value: H3Resolution) => void;
-  modelId: string;
-  setModelId: (value: string) => void;
   forecastIndex: number;
   setForecastIndex: (value: number | ((prev: number) => number)) => void;
   forecastPlaybackPlaying: boolean;
@@ -53,15 +49,11 @@ const UNITS_MODE_STORAGE_KEY = "orcacast.unitsMode";
 export function MapStateProvider({ children }: { children: ReactNode }) {
   const [surfaceMode, setSurfaceMode] = useState<SurfaceMode>(() => {
     if (typeof window === "undefined") return "grid";
-    return window.localStorage.getItem(SURFACE_MODE_STORAGE_KEY) === "surface"
+    return localPreferences.getItem(SURFACE_MODE_STORAGE_KEY) === "surface"
       ? "surface"
       : "grid";
   });
   const resolution: H3Resolution = "H6";
-  const setResolution = useCallback((value: H3Resolution) => {
-    void value;
-  }, []);
-  const [modelId, setModelId] = useState(appConfig.compositeModelId);
   const [forecastIndex, setForecastIndex] = useState(-1);
   const [forecastPlaybackPlaying, setForecastPlaybackPlaying] = useState(false);
   const [forecastPlaybackDirection, setForecastPlaybackDirection] =
@@ -73,29 +65,29 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
   const [hotspotPercentile, setHotspotPercentile] = useState(1);
   const [selectedPaletteId, setSelectedPaletteId] = useState<PaletteId>(() => {
     if (typeof window === "undefined") return DEFAULT_PALETTE_ID;
-    const stored = window.localStorage.getItem(PALETTE_STORAGE_KEY);
+    const stored = localPreferences.getItem(PALETTE_STORAGE_KEY);
     return getPaletteOrDefault(stored).id;
   });
   const [unitsMode, setUnitsMode] = useState<UnitsMode>(() => {
     if (typeof window === "undefined") return "imperial";
-    return window.localStorage.getItem(UNITS_MODE_STORAGE_KEY) === "metric"
+    return localPreferences.getItem(UNITS_MODE_STORAGE_KEY) === "metric"
       ? "metric"
       : "imperial";
   });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(PALETTE_STORAGE_KEY, selectedPaletteId);
+    localPreferences.setItem(PALETTE_STORAGE_KEY, selectedPaletteId);
   }, [selectedPaletteId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(SURFACE_MODE_STORAGE_KEY, surfaceMode);
+    localPreferences.setItem(SURFACE_MODE_STORAGE_KEY, surfaceMode);
   }, [surfaceMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(UNITS_MODE_STORAGE_KEY, unitsMode);
+    localPreferences.setItem(UNITS_MODE_STORAGE_KEY, unitsMode);
   }, [unitsMode]);
 
   const darkMode = false;
@@ -106,9 +98,6 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       surfaceMode,
       setSurfaceMode,
       resolution,
-      setResolution,
-      modelId,
-      setModelId,
       forecastIndex,
       setForecastIndex,
       forecastPlaybackPlaying,
@@ -130,8 +119,6 @@ export function MapStateProvider({ children }: { children: ReactNode }) {
       darkMode,
       surfaceMode,
       resolution,
-      setResolution,
-      modelId,
       forecastIndex,
       forecastPlaybackPlaying,
       forecastPlaybackDirection,

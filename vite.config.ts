@@ -1,12 +1,3 @@
-// import { defineConfig } from "vite";
-// import react from "@vitejs/plugin-react";
-
-// // https://vite.dev/config/
-// export default defineConfig(({ mode }) => ({
-//   base: mode === "production" ? "/OrcaCast_App/" : "/",
-//   plugins: [react()],
-// }));
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -21,11 +12,7 @@ export default defineConfig(() => ({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
-          if (id.includes("maplibre-gl") || id.includes("@deck.gl"))
-            return "map-vendor";
-          if (id.includes("plotly.js") || id.includes("react-plotly.js"))
-            return "plotly-vendor";
-          if (id.includes("reactflow")) return "flow-vendor";
+          if (id.includes("maplibre-gl")) return "map-vendor";
           if (id.includes("driver.js")) return "tour-vendor";
           if (id.includes("zod")) return "validation-vendor";
           if (id.includes("html-to-image")) return "export-vendor";

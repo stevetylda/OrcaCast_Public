@@ -30,7 +30,7 @@ describe("route registry", () => {
     expect(getNavigationRoutes("primary").map((route) => route.id)).toEqual([
       "watch",
       "planner",
-      "explore",
+      "about",
     ]);
     expect(getNavigationRoutes("drawer").map((route) => route.id)).toEqual([
       "home",

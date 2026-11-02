@@ -50,22 +50,18 @@
 .homeHero__copy::before { position: absolute; top: -135px; left: -125px; width: 380px; height: 340px; border-radius: 50%; background: var(--home-yellow); content: ""; }
 .homeHero__copy > * { position: relative; }
 .homeHero__title, .homeSectionHeading h2, .homePlannerCta h2 { margin: 22px 0; color: var(--home-navy); font-size: clamp(4rem, 7vw, 7.8rem); font-weight: 950; letter-spacing: -.09em; line-height: .84; }
-.homeHero__title em, .homeSectionHeading em, .homePlannerCta h2 em, .homeForecastCard h3 em { color: var(--home-coral); font-family: Georgia, serif; font-weight: 400; letter-spacing: -.08em; }
+.homeHero__title em, .homeSectionHeading em, .homePlannerCta h2 em { color: var(--home-coral); font-family: Georgia, serif; font-weight: 400; letter-spacing: -.08em; }
 .homeHero__body { max-width: 520px; margin: 0; color: #526c84; font-size: clamp(1.1rem, 1.5vw, 1.42rem); font-weight: 600; line-height: 1.5; }
 .homeHero__actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 36px; }
 .homeButton { display: inline-flex; align-items: center; justify-content: center; gap: 20px; min-height: 58px; padding: 0 28px; border: 3px solid var(--home-navy); border-radius: 999px; color: var(--home-navy); font-size: .85rem; font-weight: 900; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; transition: transform 160ms ease, box-shadow 160ms ease; }
 .homeButton:hover, .homeButton:focus-visible { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--home-navy); }
 .homeButton--teal { background: var(--home-teal); }.homeButton--cream { background: #fffdf6; }.homeButton--yellow { background: var(--home-yellow); }
 .homeHero__image { position: relative; min-height: 100%; border-left: 3px solid var(--home-navy); background: linear-gradient(180deg, rgba(255, 248, 233, .06), rgba(6, 29, 60, .16)), url("/images/home/orca_image.jpg") center / cover no-repeat; background-image: linear-gradient(180deg, rgba(255, 248, 233, .06), rgba(6, 29, 60, .16)), image-set(url("/images/home/orca_image-960.webp") 1x, url("/images/home/orca_image-1600.webp") 2x); }
-.homeHero__image::after { position: absolute; inset: 26px; border: 3px solid rgba(255, 252, 243, .72); border-radius: 27px; content: ""; pointer-events: none; }
-.homeHero__activityBadge { position: absolute; z-index: 1; top: 54px; left: 58px; display: grid; place-items: center; width: 194px; height: 194px; padding: 20px; border: 3px solid var(--home-navy); border-radius: 50%; background: var(--home-yellow); box-shadow: 10px 10px 0 var(--home-navy); text-align: center; transform: rotate(-8deg); }.homeHero__activityBadge span, .homeHero__activityBadge small { font-size: .65rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }.homeHero__activityBadge strong { font-family: Georgia, serif; font-size: clamp(1.9rem, 3.1vw, 3.3rem); letter-spacing: -.08em; text-transform: uppercase; }.homeHero__spark { position: absolute; z-index: 1; top: 84px; right: 70px; display: grid; place-items: center; width: 88px; height: 88px; border: 3px solid var(--home-navy); border-radius: 21px; background: var(--home-pink); font-size: 42px; transform: rotate(12deg); }
+.homeHero__image::after { position: absolute; inset: 26px; border: 3px solid rgba(255, 252, 243, .72); border-radius: 27px; content: ""; pointer-events: none; }.homeHero__spark { position: absolute; z-index: 1; top: 84px; right: 70px; display: grid; place-items: center; width: 88px; height: 88px; border: 3px solid var(--home-navy); border-radius: 21px; background: var(--home-pink); font-size: 42px; transform: rotate(12deg); }
 .homeHero__caption { position: absolute; z-index: 1; right: 44px; bottom: 34px; left: 44px; display: flex; justify-content: space-between; gap: 12px; padding: 15px 22px; border: 3px solid var(--home-navy); border-radius: 999px; background: var(--home-cream); font-size: .66rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-.homeHero__weekBadge { position: absolute; z-index: 3; top: 50px; left: calc(46% - 30px); display: grid; place-items: center; width: 112px; height: 112px; border: 3px solid var(--home-navy); border-radius: 50%; background: var(--home-coral); box-shadow: 7px 8px 0 var(--home-navy); color: white; transform: rotate(8deg); }.homeHero__weekBadge span { font-size: .65rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }.homeHero__weekBadge strong { font: 2.45rem Georgia, serif; }
-
-.homeRibbon { width: calc(100% + clamp(32px, 6vw, 120px)); margin: clamp(36px, 4vw, 66px) calc(clamp(16px, 3vw, 60px) * -1) 0; overflow: hidden; border-top: 3px solid var(--home-navy); border-bottom: 3px solid var(--home-navy); background: var(--home-cobalt); color: #fffdf6; white-space: nowrap; }.homeRibbon__track { display: flex; width: max-content; animation: homeTicker 38s linear infinite; }.homeRibbon span { padding: 17px 25px; font-size: .83rem; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }.homeRibbon b { margin-left: 28px; color: var(--home-yellow); }
 @keyframes homeTicker { to { transform: translateX(-50%); } }
 
-.homeWeek, .homeExplore { padding: clamp(80px, 10vw, 155px) 0 0; }.homeSectionHeading { border-bottom: 3px solid var(--home-navy); }.homeSectionHeading h2 { margin: 28px 0 30px; font-size: clamp(3.2rem, 6.1vw, 6.4rem); }.homeWeek__cards { display: grid; grid-template-columns: .78fr 1.4fr .78fr; gap: 22px; margin-top: 42px; }.homeForecastCard { display: flex; flex-direction: column; min-height: 465px; padding: 34px; border: 3px solid var(--home-navy); border-radius: 30px; box-shadow: 9px 11px 0 var(--home-navy); }.homeForecastCard--yellow { background: var(--home-yellow); }.homeForecastCard--chart { background: var(--home-cream); }.homeForecastCard--aqua { background: var(--home-teal); }.homeForecastCard__label { display: flex; align-items: center; gap: 12px; font-size: .8rem; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }.homeForecastCard__label .material-symbols-rounded { display: grid; place-items: center; width: 46px; height: 46px; border: 3px solid var(--home-navy); border-radius: 50%; background: #fffaf0; }.homeForecastCard > p { margin: 28px 0 0; color: #526c84; font-size: .8rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }.homeForecastCard__activity { margin-top: 12px; font-size: clamp(3.5rem, 5vw, 5.8rem); font-weight: 950; letter-spacing: -.1em; line-height: .86; text-transform: uppercase; }.homeForecastCard__week { margin-top: 18px; color: #526c84; font-size: .75rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }.homeForecastCard__description { color: #526c84; font-size: 1rem !important; font-weight: 600 !important; letter-spacing: 0 !important; line-height: 1.45; text-transform: none !important; }.homeWeatherStrip { display: flex; gap: 5px; margin-top: auto; padding-top: 25px; }.homeWeatherStrip span { display: grid; gap: 3px; min-width: 0; flex: 1; padding: 6px 2px; border: 2px solid var(--home-navy); border-radius: 8px; background: var(--home-coral); font-size: .62rem; font-weight: 900; text-align: center; }.homeWeatherStrip b { font-size: .84rem; }.homeWeatherStrip--pending { border: 2px dashed rgba(6,29,60,.45); padding: 10px; font-size: .75rem; font-weight: 800; text-transform: uppercase; }.homeForecastCard__chartHeader { display: flex; justify-content: space-between; gap: 20px; }.homeForecastCard__chartHeader p { margin: 0; color: #526c84; font-size: .8rem; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }.homeForecastCard__chartHeader span { display: block; margin-top: 7px; color: #526c84; }.homeForecastCard__chartHeader > b { align-self: start; padding: 9px 14px; border: 2px solid var(--home-navy); border-radius: 999px; background: var(--home-pink); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; transform: rotate(5deg); }.homeSeasonChart { display: grid; flex: 1; gap: 10px; min-height: 260px; margin-top: 25px; }.homeSeasonChart__bars { display: grid; align-items: end; gap: 3px; padding: 0 10px; border-bottom: 3px solid var(--home-navy); background: repeating-linear-gradient(180deg, transparent 0 32%, rgba(6,29,60,.16) 32% 33%, transparent 33% 65%, rgba(6,29,60,.16) 65% 66%, transparent 66%); }.homeSeasonChart__bars span { min-height: 10px; border: 2px solid var(--home-navy); border-bottom: 0; border-radius: 7px 7px 0 0; background: #c5e8eb; }.homeSeasonChart__bars .is-highlighted { background: var(--home-coral); box-shadow: 0 -4px 0 var(--home-yellow); }.homeSeasonChart__axis { display: grid; color: #526c84; font-size: .7rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }.homeSeasonChart__axis span { transform: translateX(-50%); white-space: nowrap; }.homeForecastCard h3 { margin: 42px 0 0; font-size: clamp(3.5rem, 5.1vw, 5.7rem); font-weight: 950; letter-spacing: -.1em; line-height: .78; }.homeForecastCard h3 em { display: block; color: var(--home-cobalt); font-size: .83em; }.homeForecastCard__locationMeta { display: flex; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 21px; border-top: 3px solid var(--home-navy); font-size: .72rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }.homeForecastCard__locationMeta span { display: flex; gap: 6px; align-items: center; }.homeForecastCard__locationMeta .material-symbols-rounded { font-size: 18px; }.homeTextLink { margin-top: 20px; color: var(--home-navy); font-size: .78rem; font-weight: 900; letter-spacing: .09em; text-decoration: none; text-transform: uppercase; }.homeTextLink:hover { text-decoration: underline; }
+.homeWeek, .homeExplore { padding: clamp(80px, 10vw, 155px) 0 0; }.homeSectionHeading { border-bottom: 3px solid var(--home-navy); }.homeSectionHeading h2 { margin: 28px 0 30px; font-size: clamp(3.2rem, 6.1vw, 6.4rem); }.homeSeasonChart { display: grid; flex: 1; gap: 10px; min-height: 260px; margin-top: 25px; }.homeSeasonChart__bars { display: grid; align-items: end; gap: 3px; padding: 0 10px; border-bottom: 3px solid var(--home-navy); background: repeating-linear-gradient(180deg, transparent 0 32%, rgba(6,29,60,.16) 32% 33%, transparent 33% 65%, rgba(6,29,60,.16) 65% 66%, transparent 66%); }.homeSeasonChart__bars span { min-height: 10px; border: 2px solid var(--home-navy); border-bottom: 0; border-radius: 7px 7px 0 0; background: #c5e8eb; }.homeSeasonChart__bars .is-highlighted { background: var(--home-coral); box-shadow: 0 -4px 0 var(--home-yellow); }.homeSeasonChart__axis { display: grid; color: #526c84; font-size: .7rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }.homeSeasonChart__axis span { transform: translateX(-50%); white-space: nowrap; }.homeTextLink { margin-top: 20px; color: var(--home-navy); font-size: .78rem; font-weight: 900; letter-spacing: .09em; text-decoration: none; text-transform: uppercase; }.homeTextLink:hover { text-decoration: underline; }
 
 .homePlannerCta { position: relative; display: grid; grid-template-columns: .76fr 1.24fr; gap: clamp(35px, 5vw, 92px); margin-top: clamp(90px, 11vw, 170px); padding: clamp(48px, 7vw, 110px); overflow: hidden; border: 3px solid var(--home-navy); border-radius: 42px; background: var(--home-cobalt); box-shadow: 12px 15px 0 var(--home-navy); color: #fffdf6; }.homePlannerCta::after { position: absolute; top: -30px; right: -35px; color: var(--home-pink); content: "✦"; font-size: 250px; line-height: 1; transform: rotate(20deg); }.homePlannerCta__copy { position: relative; z-index: 1; }.homePlannerCta__copy .homeKicker { color: var(--home-yellow); }.homePlannerCta h2 { color: #fffdf6; font-size: clamp(3.4rem, 5.4vw, 6.1rem); }.homePlannerCta h2 em { color: var(--home-yellow); }.homePlannerCta__copy > p:not(.homeKicker) { max-width: 470px; color: #e8edff; font-size: 1.14rem; line-height: 1.5; }.homePlannerCta .homeButton { margin-top: 26px; }.homeFieldPass { z-index: 1; display: grid; grid-template-columns: 210px 1fr; align-self: center; overflow: hidden; border: 3px solid var(--home-navy); border-radius: 28px; background: var(--home-cream); box-shadow: 10px 11px 0 var(--home-navy); color: var(--home-navy); text-decoration: none; transform: rotate(1deg); }.homeFieldPass:hover, .homeFieldPass:focus-visible { transform: rotate(1deg) translate(-2px,-2px); }.homeFieldPass__stub { display: grid; place-items: center; align-content: center; gap: 16px; border-right: 3px dashed var(--home-navy); background: var(--home-coral); color: #fffdf6; text-transform: uppercase; }.homeFieldPass__stub span { display: grid; place-items: center; width: 84px; height: 84px; border: 3px solid currentColor; border-radius: 50%; font: italic 42px Georgia, serif; }.homeFieldPass__stub b { font-size: .7rem; letter-spacing: .12em; }.homeFieldPass__fields > div { display: grid; grid-template-columns: 55px 1fr auto; align-items: center; gap: 15px; min-height: 100px; padding: 18px 26px; border-bottom: 3px solid var(--home-navy); }.homeFieldPass__fields > div:nth-child(2) { background: #c7eaf0; }.homeFieldPass__fields > div:nth-child(3) { border-bottom: 0; background: var(--home-yellow); }.homeFieldPass__fields .material-symbols-rounded { display: grid; place-items: center; width: 50px; height: 50px; border: 3px solid var(--home-navy); border-radius: 50%; background: #fffdf6; }.homeFieldPass__fields p { margin: 0; color: #526c84; font-size: .67rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }.homeFieldPass__fields p b { display: block; margin-top: 7px; color: var(--home-navy); font-size: clamp(.95rem, 1.4vw, 1.35rem); letter-spacing: -.02em; text-transform: none; }.homeFieldPass__fields em { color: var(--home-coral); font: italic 1.7rem Georgia, serif; }
 
@@ -122,12 +118,12 @@
   font-variation-settings: "FILL" 0, "wght" 800, "GRAD" 0, "opsz" 20;
 }
 
-.app--dark .homePageRoot { --home-paper: #071827; --home-cream: #0d2638; color: #eef8f7; background-color: #071827; background-image: radial-gradient(rgba(181, 231, 225, .13) 1px, transparent 1px); }.app--dark .homeHero, .app--dark .homeForecastCard--chart, .app--dark .homeFieldPass { color: #eef8f7; }.app--dark .homeHero__image { border-color: var(--home-navy); }.app--dark .homeHero__caption, .app--dark .homeButton--cream, .app--dark .homeFieldPass__fields .material-symbols-rounded, .app--dark .homeExploreCard { color: var(--home-navy); }.app--dark .homeHero__body, .app--dark .homeForecastCard__description, .app--dark .homeForecastCard > p, .app--dark .homeForecastCard__chartHeader p, .app--dark .homeForecastCard__chartHeader span, .app--dark .homeSeasonChart__axis, .app--dark .homeFieldPass__fields p { color: #9fb7c6; }.app--dark .homeExploreCard p { color: #526c84; }
+.app--dark .homePageRoot { --home-paper: #071827; --home-cream: #0d2638; color: #eef8f7; background-color: #071827; background-image: radial-gradient(rgba(181, 231, 225, .13) 1px, transparent 1px); }.app--dark .homeHero, .app--dark .homeFieldPass { color: #eef8f7; }.app--dark .homeHero__image { border-color: var(--home-navy); }.app--dark .homeHero__caption, .app--dark .homeButton--cream, .app--dark .homeFieldPass__fields .material-symbols-rounded, .app--dark .homeExploreCard { color: var(--home-navy); }.app--dark .homeHero__body, .app--dark .homeSeasonChart__axis, .app--dark .homeFieldPass__fields p { color: #9fb7c6; }.app--dark .homeExploreCard p { color: #526c84; }
 
-@media (max-width: 1120px) { .homeWeek__cards { grid-template-columns: 1fr 1.2fr; }.homeForecastCard--aqua { grid-column: 1 / -1; min-height: 330px; }.homePlannerCta { grid-template-columns: 1fr; }.homeFieldPass { max-width: 850px; width: 100%; }.homeExploreCard { padding: 24px; }.homeExploreCard__icon { width: 66px; height: 66px; }.homeExploreCard__icon .material-symbols-rounded { font-size: 36px; } }
-@media (max-width: 820px) { .header--home { height: 72px; padding: 0 14px; }.header--home .brandBtn { left: 76px; }.header--home .iconBtn { width: 48px; height: 48px; border-width: 2px; }.header--home .brand__title { font-size: 1.55rem; }.header--home .brand__subtitle, .homeNav { display: none; }.homeHero { grid-template-columns: 1fr; min-height: 0; }.homeHero__copy { min-height: 545px; padding: 46px 30px; }.homeHero__image { min-height: 420px; border-top: 3px solid var(--home-navy); border-left: 0; }.homeHero__weekBadge { top: 31px; left: auto; right: 30px; width: 86px; height: 86px; }.homeHero__activityBadge { top: 34px; left: 34px; width: 150px; height: 150px; }.homeHero__caption { right: 20px; bottom: 20px; left: 20px; padding: 12px 15px; }.homeHero__caption span:nth-child(2) { display: none; }.homeWeek__cards, .homeExplore__cards { grid-template-columns: 1fr; }.homeForecastCard--aqua { grid-column: auto; }.homeExploreCard { min-height: 145px; }.homeFooter { display: grid; grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .homePageRoot .header--home .brandBtn { display: block; }.homePageRoot .header--home .brand__title { max-width: none; font-size: 1.3rem; }.homePageRoot .header--home .header__right > .iconBtn { display: grid; }.homeLanding { padding-right: 12px; padding-left: 12px; }.homeHero { border-radius: 25px; box-shadow: 7px 8px 0 var(--home-navy); }.homeHero__copy { min-height: 520px; padding: 36px 24px; }.homeHero__copy::before { width: 230px; height: 220px; top: -85px; left: -80px; }.homeHero__title, .homeSectionHeading h2, .homePlannerCta h2 { font-size: clamp(3.15rem, 16vw, 4.55rem); }.homeHero__actions { width: 100%; margin-top: 28px; }.homeButton { width: 100%; min-height: 54px; }.homeHero__signals { margin-top: 28px; }.homeHero__signals li { font-size: .59rem; }.homeHero__image { min-height: 360px; }.homeHero__activityBadge { width: 125px; height: 125px; padding: 12px; }.homeHero__activityBadge strong { font-size: 1.6rem; }.homeHero__spark { top: 41px; right: 27px; width: 61px; height: 61px; font-size: 30px; }.homeHero__caption { font-size: .53rem; }.homeWeek, .homeExplore { padding-top: 78px; }.homeWeek__cards { margin-top: 28px; }.homeForecastCard { min-height: 390px; padding: 25px; border-radius: 23px; box-shadow: 6px 8px 0 var(--home-navy); }.homeForecastCard__activity { font-size: 3.9rem; }.homeSeasonChart { min-height: 205px; }.homePlannerCta { margin-top: 90px; padding: 38px 24px; border-radius: 26px; box-shadow: 7px 8px 0 var(--home-navy); }.homeFieldPass { grid-template-columns: 86px 1fr; border-radius: 18px; }.homeFieldPass__stub span { width: 52px; height: 52px; font-size: 25px; }.homeFieldPass__stub b { font-size: .5rem; writing-mode: vertical-rl; }.homeFieldPass__fields > div { grid-template-columns: 34px 1fr auto; gap: 9px; min-height: 88px; padding: 13px 10px; }.homeFieldPass__fields .material-symbols-rounded { width: 33px; height: 33px; border-width: 2px; font-size: 18px; }.homeFieldPass__fields p { font-size: .52rem; }.homeFieldPass__fields p b { font-size: .81rem; }.homeFieldPass__fields em { font-size: 1.2rem; }.homeExplore__cards { margin-top: 24px; }.homeExploreCard { min-height: 132px; gap: 15px; padding: 20px; border-radius: 22px; box-shadow: 7px 8px 0 var(--home-navy); }.homeExploreCard__icon { width: 60px; height: 60px; }.homeExploreCard__icon .material-symbols-rounded { font-size: 32px; }.homeExploreCard h3 { font-size: 1.45rem; }.homeExploreCard p { margin-top: 6px; font-size: .86rem; }.homeExploreCard > b { font-size: 1.6rem; }.homeReturnToTop { --return-to-top-gap: 14px; right: 14px; min-height: 48px; padding: 0 14px 0 11px; box-shadow: 4px 5px 0 var(--home-navy); }.homeReturnToTop span:not(.material-symbols-rounded) { display: none; } }
-@media (prefers-reduced-motion: reduce) { .homeRibbon__track { animation: none; }.homeButton, .homeExploreCard, .homeReturnToTop { transition: none; } }
+@media (max-width: 1120px) {.homePlannerCta { grid-template-columns: 1fr; }.homeFieldPass { max-width: 850px; width: 100%; }.homeExploreCard { padding: 24px; }.homeExploreCard__icon { width: 66px; height: 66px; }.homeExploreCard__icon .material-symbols-rounded { font-size: 36px; } }
+@media (max-width: 820px) { .header--home { height: 72px; padding: 0 14px; }.header--home .brandBtn { left: 76px; }.header--home .iconBtn { width: 48px; height: 48px; border-width: 2px; }.header--home .brand__title { font-size: 1.55rem; }.header--home .brand__subtitle, .homeNav { display: none; }.homeHero { grid-template-columns: 1fr; min-height: 0; }.homeHero__copy { min-height: 545px; padding: 46px 30px; }.homeHero__image { min-height: 420px; border-top: 3px solid var(--home-navy); border-left: 0; }.homeHero__caption { right: 20px; bottom: 20px; left: 20px; padding: 12px 15px; }.homeHero__caption span:nth-child(2) { display: none; }.homeExplore__cards { grid-template-columns: 1fr; }.homeExploreCard { min-height: 145px; }.homeFooter { display: grid; grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .homePageRoot .header.header--home:has(.primaryNavigation) .brandBtn { display: block; }.homePageRoot .header--home .brand__title { max-width: none; font-size: 1.3rem; }.homePageRoot .header--home .header__right > .iconBtn { display: grid; }.homeLanding { padding-right: 12px; padding-left: 12px; }.homeHero { border-radius: 25px; box-shadow: 7px 8px 0 var(--home-navy); }.homeHero__copy { min-height: 520px; padding: 36px 24px; }.homeHero__copy::before { width: 230px; height: 220px; top: -85px; left: -80px; }.homeHero__title, .homeSectionHeading h2, .homePlannerCta h2 { font-size: clamp(3.15rem, 16vw, 4.55rem); }.homeHero__actions { width: 100%; margin-top: 28px; }.homeButton { width: 100%; min-height: 54px; }.homeHero__image { min-height: 360px; }.homeHero__spark { top: 41px; right: 27px; width: 61px; height: 61px; font-size: 30px; }.homeHero__caption { font-size: .53rem; }.homeWeek, .homeExplore { padding-top: 78px; }.homeSeasonChart { min-height: 205px; }.homePlannerCta { margin-top: 90px; padding: 38px 24px; border-radius: 26px; box-shadow: 7px 8px 0 var(--home-navy); }.homeFieldPass { grid-template-columns: 86px 1fr; border-radius: 18px; }.homeFieldPass__stub span { width: 52px; height: 52px; font-size: 25px; }.homeFieldPass__stub b { font-size: .5rem; writing-mode: vertical-rl; }.homeFieldPass__fields > div { grid-template-columns: 34px 1fr auto; gap: 9px; min-height: 88px; padding: 13px 10px; }.homeFieldPass__fields .material-symbols-rounded { width: 33px; height: 33px; border-width: 2px; font-size: 18px; }.homeFieldPass__fields p { font-size: .52rem; }.homeFieldPass__fields p b { font-size: .81rem; }.homeFieldPass__fields em { font-size: 1.2rem; }.homeExplore__cards { margin-top: 24px; }.homeExploreCard { min-height: 132px; gap: 15px; padding: 20px; border-radius: 22px; box-shadow: 7px 8px 0 var(--home-navy); }.homeExploreCard__icon { width: 60px; height: 60px; }.homeExploreCard__icon .material-symbols-rounded { font-size: 32px; }.homeExploreCard h3 { font-size: 1.45rem; }.homeExploreCard p { margin-top: 6px; font-size: .86rem; }.homeExploreCard > b { font-size: 1.6rem; }.homeReturnToTop { --return-to-top-gap: 14px; right: 14px; min-height: 48px; padding: 0 14px 0 11px; box-shadow: 4px 5px 0 var(--home-navy); }.homeReturnToTop span:not(.material-symbols-rounded) { display: none; } }
+@media (prefers-reduced-motion: reduce) {.homeButton, .homeExploreCard, .homeReturnToTop { transition: none; } }
 
 /* Weekly pulse editorial cards */
 .homeWeek__intro {
@@ -165,26 +161,6 @@
     radial-gradient(circle at 88% 19%, rgba(255, 218, 76, .22), transparent 26%),
     linear-gradient(145deg, #fff8e9, #fff4d8);
   border-color: rgba(222, 178, 67, .28);
-}
-
-.homePulseCard--outlook > :not(.homePulseLighthouse) {
-  position: relative;
-  z-index: 1;
-}
-
-.homePulseLighthouse {
-  position: absolute;
-  z-index: 0;
-  top: 78px;
-  right: -8px;
-  width: 54%;
-  height: 245px;
-  object-fit: contain;
-  object-position: right center;
-  opacity: .94;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 30%, #000 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 30%, #000 100%);
 }
 
 .homePulseCard__header,
@@ -230,66 +206,6 @@
 .homePulseCard__icon--yellow { background: var(--home-yellow); }
 .homePulseCard__icon--teal { background: var(--home-teal); }
 .homePulseCard__icon .material-symbols-rounded { font-size: 27px; }
-
-.homePulseCard__activity {
-  margin-top: 32px;
-  color: var(--home-navy);
-  font-family: Georgia, serif;
-  font-size: clamp(2.75rem, 4.1vw, 4.4rem);
-  font-weight: 700;
-  letter-spacing: -.06em;
-  line-height: .92;
-  text-transform: capitalize;
-}
-
-.homePulseCard--outlook .homePulseCard__activity {
-  max-width: 58%;
-  font-size: clamp(2.65rem, 3.25vw, 3.55rem);
-}
-
-.homePulseCard__week {
-  margin-top: 16px;
-  color: #08787c;
-  font-size: .78rem;
-  font-weight: 950;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-
-.homePulseCard__description {
-  max-width: 52%;
-  margin: 24px 0 0;
-  color: #425a72;
-  font-size: .98rem;
-  font-weight: 600;
-  line-height: 1.5;
-}
-
-.homePulseCard .homeWeatherStrip {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 26px;
-  padding-top: 0;
-}
-
-.homePulseCard .homeWeatherStrip span {
-  gap: 5px;
-  padding: 10px 3px;
-  border: 1.5px solid rgba(255, 100, 88, .45);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .28);
-  color: #c94648;
-}
-
-.homePulseCard .homeWeatherStrip b { font-size: .95rem; }
-
-.homePulseCard .homeWeatherStrip--pending {
-  display: block;
-  padding: 14px;
-  color: #526c84;
-  text-align: center;
-}
 
 .homePulseCard__chartHeader > b {
   align-self: start;
@@ -483,7 +399,6 @@
 .app--dark .homeWeek__intro,
 .app--dark .homePulseCard__header div > span,
 .app--dark .homePulseCard__chartHeader div > span,
-.app--dark .homePulseCard__description,
 .app--dark .homePulseInsight p span,
 .app--dark .homeConditionsStrip__days > span { color: #a9bdca; }
 
@@ -499,7 +414,6 @@
 
 .app--dark .homePulseCard__header strong,
 .app--dark .homePulseCard__chartHeader strong,
-.app--dark .homePulseCard__activity,
 .app--dark .homePulseInsight p,
 .app--dark .homeRegionRow,
 .app--dark .homeConditionsStrip { color: #eef8f7; }
@@ -532,15 +446,9 @@
   .homeWeek__intro { margin-top: -10px; }
   .homePulseGrid { margin-top: 24px; }
   .homePulseCard { padding: 22px 18px; border-radius: 18px; }
-  .homePulseCard__activity { margin-top: 26px; }
-  .homePulseLighthouse { top: 88px; right: -16px; width: 55%; height: 190px; opacity: .68; }
-  .homePulseCard--outlook .homePulseCard__activity { max-width: 62%; font-size: 2.65rem; }
-  .homePulseCard__description { max-width: 62%; }
   .homePulseCard__chartHeader { align-items: flex-start; }
   .homePulseCard__chartHeader > b { padding: 7px 9px; font-size: .58rem; }
   .homePulseCard--trend .homeSeasonChart { min-height: 180px; }
-  .homePulseCard .homeWeatherStrip { gap: 5px; }
-  .homePulseCard .homeWeatherStrip span { padding: 8px 1px; font-size: .56rem; }
   .homeRegionRow { grid-template-columns: 58px minmax(0, 1fr) auto; }
   .homeRegionRow img { width: 58px; height: 58px; }
   .homeConditionsStrip { padding: 18px; }
@@ -593,64 +501,6 @@
   width: 58px;
   height: 58px;
   border: 2px solid var(--home-navy);
-}
-
-.homePulseCard--outlook .homePulseCard__activity {
-  max-width: 54%;
-  margin-top: 32px;
-  font-size: clamp(3rem, 3.65vw, 4.15rem);
-  line-height: .82;
-  text-transform: uppercase;
-}
-
-.homePulseCard__week {
-  margin-top: 18px;
-  font-size: .92rem;
-  text-transform: capitalize;
-}
-
-.homePulseCard__description {
-  max-width: 56%;
-  margin-top: 18px;
-  font-size: .92rem;
-  line-height: 1.45;
-}
-
-.homePulseLighthouse {
-  top: 92px;
-  right: -4px;
-  width: 57%;
-  height: 270px;
-  opacity: .98;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22%, #000 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 22%, #000 100%);
-}
-
-.homeActivityCues {
-  display: grid;
-  gap: 9px;
-  padding: 0;
-  margin: 25px 0 0;
-  list-style: none;
-}
-
-.homeActivityCues li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 38px;
-  padding: 6px 13px;
-  border: 2px solid rgba(6, 29, 60, .5);
-  border-radius: 999px;
-  background: rgba(255, 253, 246, .76);
-  color: #526c84;
-  font-size: .74rem;
-  font-weight: 800;
-}
-
-.homeActivityCues .material-symbols-rounded {
-  color: var(--home-navy);
-  font-size: 19px;
 }
 
 .homePulseCard--trend .homeSeasonChart {
@@ -829,7 +679,6 @@
   background: #0d2638;
 }
 
-.app--dark .homeActivityCues li,
 .app--dark .homeRegionRow { background: rgba(255, 255, 255, .06); }
 
 @media (max-width: 1120px) {
@@ -860,10 +709,6 @@
 
   .homePulseGrid { margin-top: 28px; }
   .homePulseCard { min-height: 500px; padding: 22px 18px; border-radius: 23px; }
-  .homePulseCard--outlook .homePulseCard__activity { max-width: 55%; font-size: 2.85rem; }
-  .homePulseCard__description { max-width: 58%; }
-  .homePulseLighthouse { top: 94px; right: -16px; width: 59%; height: 238px; opacity: .88; }
-  .homeActivityCues { margin-top: 22px; }
   .homePulseCard--trend .homeSeasonChart { min-height: 225px; }
   .homePulseCard--trend .homeSeasonChart { flex-basis: 225px; }
   .homeRegionRow { grid-template-columns: 58px minmax(0, 1fr) auto; padding-right: 10px; }
@@ -877,12 +722,10 @@
 
 /* Accessible foregrounds for the saturated editorial palette. */
 .homeHero__title em,
-.homeSectionHeading em,
-.homeForecastCard h3 em {
+.homeSectionHeading em {
   color: #c83d36;
 }
 
-.homeHero__weekBadge,
 .homeFieldPass__stub,
 .homeFieldPass__fields p,
 .homeFieldPass__fields em,
@@ -903,4 +746,54 @@
   .homeWeek {
     padding-top: 52px;
   }
+}
+
+/* Home cards have independent data states and size to their content. */
+.homePageRoot .homeHero { min-height: 540px; }
+.homePageRoot .homeHero__copy { min-height: 0; padding: clamp(30px, 5vw, 72px); }
+.homePageRoot .homeHero__title { font-size: clamp(3.5rem, 6vw, 6.5rem); line-height: .95; }
+.homePageRoot .homeHero__body { font-size: 1.15rem; }
+.homePageRoot .homeWeek { margin-top: 64px; padding: 32px; }
+.homePageRoot .homeSectionHeading h2 { font-size: clamp(2.4rem, 4vw, 4rem); line-height: 1.08; }
+.homePageRoot .homePulseCard { min-height: 0; padding: 24px; gap: 16px; }
+.homePageRoot .homePulseCard p { margin: 0; line-height: 1.55; }
+.homePageRoot .homePulseCard__header, .homePageRoot .homePulseCard__chartHeader { min-height: 58px; }
+.homePageRoot .homeForecastTitle { margin: 0; font-size: 1.75rem; line-height: 1.15; letter-spacing: -.025em; }
+.homeForecastDates { font-size: .95rem; }
+.homePageRoot .homePulseLink { margin-top: auto; }
+.homePageRoot .homeRegionRow { grid-template-columns: 58px minmax(0, 1fr); cursor: default; }
+.homePageRoot .homeRegionRow:hover { transform: none; }
+.homePageRoot .homeRegionRow strong { white-space: normal; }
+.homePageRoot .homeSeasonChart { flex: none; min-height: 0; margin: 0; gap: 10px; }
+.homePageRoot .homeSeasonChart__bars { height: 160px; }
+.homePageRoot .homeSeasonChart__axis { display: flex; justify-content: space-between; }
+.homePageRoot .homeSeasonChart__axis span { transform: none; }
+.homeSourceNote, .homeSeasonData { font-size: .82rem; }
+.homeSeasonData summary { cursor: pointer; min-height: 44px; padding: 10px 0; }
+.homeSeasonData table { width: 100%; border-collapse: collapse; }
+.homeSeasonData th, .homeSeasonData td { padding: 6px; text-align: left; border-bottom: 1px solid #cbd6d7; }
+.homePageRoot .homeConditionsStrip { margin-top: 24px; padding: 20px; gap: 16px; }
+.homeConditionsStrip__title small { display: block; margin-top: 6px; font-size: .75rem; }
+.homePageRoot .homeConditionsStrip__days { flex-wrap: wrap; gap: 12px; }
+.homePageRoot .homeConditionsStrip__days > span { flex: none; padding: 0; border: 0; font-size: .85rem; }
+.homePageRoot button:not(.iconBtn):not(.homeReturnToTop) { min-height: 44px; }
+.homePageRoot .homePlannerCta { margin-top: 64px; }
+.homePageRoot .homeExplore { padding-top: 64px; }
+@media (max-width: 820px) {
+  .homePageRoot .header--home .header__left { display: flex; }
+  .homePageRoot .header.header--home:has(.primaryNavigation) .brandBtn { display: block !important; position: static; margin-left: 14px; }
+  .homePageRoot .header--home .primaryNavigation { display: none !important; }
+  .homePageRoot .homeHero { min-height: 0; }
+  .homePageRoot .homeHero__image { min-height: 260px; }
+  .homePageRoot .homeWeek { padding: 24px 16px; margin-top: 44px; }
+  .homePageRoot .homeHero__actions { gap: 12px; }
+  .homePageRoot .homePulseCard { min-height: 0; }
+  .homePageRoot .homeSeasonChart__bars { height: 180px; }
+}
+@media (max-width: 520px) {
+  .homePageRoot .homeHero__copy { padding: 28px 24px; }
+  .homePageRoot .homeHero__title { font-size: clamp(3rem, 14vw, 4rem); }
+  .homePageRoot .homeHero__body { font-size: 1rem; }
+  .homePageRoot .homeKicker { font-size: .68rem; letter-spacing: .1em; }
+  .homePageRoot .homeConditionsStrip { padding: 16px; }
 }

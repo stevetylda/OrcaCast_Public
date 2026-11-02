@@ -7,7 +7,6 @@ describe("activity palettes", () => {
       "rose_noir",
       "basalt_fire",
       "cividis_safe",
-      "mediterranean_atlas",
       "northern_lights",
       "forecast_lab",
       "forecast_lab_glow",
@@ -15,8 +14,7 @@ describe("activity palettes", () => {
   });
 
   it("falls back safely when a removed stored palette is encountered", () => {
-    expect(getPaletteOrDefault("orcacast_classic").id).toBe(
-      "mediterranean_atlas",
-    );
+    expect(getPaletteOrDefault("mediterranean_atlas").id).toBe("forecast_lab");
+    expect(getPaletteOrDefault("orcacast_classic").id).toBe("forecast_lab");
   });
 });

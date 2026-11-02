@@ -105,13 +105,16 @@ export async function loadPeriods(
 export async function loadPeriodsForResolution(
   resolution: H3Resolution,
   forecastDirectory?: string,
+  options: { requireManifest?: boolean } = {},
 ): Promise<Period[]> {
-  const cacheKey = `${forecastDirectory ?? "__legacy__"}|${resolution}`;
+  const cacheKey = `${forecastDirectory ?? "__legacy__"}|${resolution}|${Boolean(options.requireManifest)}`;
   const cached = cachedPeriodsByResolution.get(cacheKey);
   if (cached) return cached;
   const periods = await loadPeriods(forecastDirectory);
   const manifestFiles = await loadManifestFileSet(forecastDirectory);
   if (!manifestFiles) {
+    if (options.requireManifest)
+      throw new Error("Forecast manifest is unavailable");
     cachedPeriodsByResolution.set(cacheKey, periods);
     return periods;
   }
@@ -124,7 +127,7 @@ export async function loadPeriodsForResolution(
         : manifestFiles.has(`forecasts/latest/weekly/${fileName}`))
     );
   });
-  const resolved = filtered.length > 0 ? filtered : periods;
-  cachedPeriodsByResolution.set(cacheKey, resolved);
-  return resolved;
+  // An explicit manifest with no files for this resolution means no coverage.
+  cachedPeriodsByResolution.set(cacheKey, filtered);
+  return filtered;
 }

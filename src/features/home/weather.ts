@@ -47,20 +47,10 @@ function dateKeyInZone(date: Date, timeZone: string) {
 
 export function fridayHarborWeekKeys(now: Date) {
   const current = dateParts(now, FRIDAY_HARBOR_TIME_ZONE);
-  const weekdayIndex = [
-    "Sun",
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thu",
-    "Fri",
-    "Sat",
-  ].indexOf(current.weekday);
   const currentDate = new Date(
     Date.UTC(current.year, current.month - 1, current.day),
   );
-  currentDate.setUTCDate(currentDate.getUTCDate() - Math.max(0, weekdayIndex));
-  return Array.from({ length: 7 }, (_, offset) => {
+  return Array.from({ length: 3 }, (_, offset) => {
     const date = new Date(currentDate);
     date.setUTCDate(currentDate.getUTCDate() + offset);
     return isoDateFromUtc(date);
@@ -68,7 +58,8 @@ export function fridayHarborWeekKeys(now: Date) {
 }
 
 function summarizeSymbol(symbolCode: string | undefined) {
-  const normalized = (symbolCode ?? "").split("_")[0];
+  if (!symbolCode) return "Unavailable";
+  const normalized = symbolCode.split("_")[0];
   if (normalized === "clearsky") return "Clear";
   if (normalized === "fair") return "Fair";
   if (normalized === "partlycloudy") return "Partly cloudy";
@@ -103,9 +94,9 @@ export function summarizeFridayHarborWeather(
     ]),
   );
   timeseries.forEach((entry) => {
-    const bucket = buckets.get(
-      dateKeyInZone(new Date(entry.time), FRIDAY_HARBOR_TIME_ZONE),
-    );
+    const instant = new Date(entry.time);
+    if (!Number.isFinite(instant.getTime()) || instant < now) return;
+    const bucket = buckets.get(dateKeyInZone(instant, FRIDAY_HARBOR_TIME_ZONE));
     if (!bucket) return;
     const temperature = entry.data?.instant?.details?.air_temperature;
     if (typeof temperature === "number" && Number.isFinite(temperature))
@@ -117,7 +108,6 @@ export function summarizeFridayHarborWeather(
     if (symbol)
       bucket.symbols.set(symbol, (bucket.symbols.get(symbol) ?? 0) + 1);
   });
-  const labels = ["S", "M", "T", "W", "Th", "F", "S"];
   return targetKeys.map((key, index) => {
     const bucket = buckets.get(key);
     const temps = bucket?.temps ?? [];
@@ -127,7 +117,15 @@ export function summarizeFridayHarborWeather(
     const summary = summarizeSymbol(topSymbol);
     return {
       key,
-      label: labels[index] ?? "S",
+      label:
+        index === 0
+          ? "Today"
+          : new Intl.DateTimeFormat("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+              timeZone: "UTC",
+            }).format(new Date(`${key}T12:00:00Z`)),
       temperatureF:
         temps.length > 0 ? Math.round((Math.max(...temps) * 9) / 5 + 32) : null,
       icon: weatherIconName(summary),

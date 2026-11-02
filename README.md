@@ -12,11 +12,11 @@ The application is a React and TypeScript single-page app built with Vite. Its m
 
 ![OrcaCast home page](docs/screenshots/home.jpg)
 
-The Home page introduces OrcaCast and gives visitors a quick seasonal pulse before they start planning. It highlights the current week's historical activity, shows a compact Friday Harbor weather outlook, summarizes typical sightings through the year, and routes visitors into the Planner or Watch experiences.
+The Home page introduces OrcaCast and gives visitors a quick seasonal pulse before they start planning. It distinguishes published forecast availability from historical report frequency, shows a three-day Friday Harbor weather outlook, and routes visitors into the Planner, forecast map, or camera list.
 
 Key capabilities:
 
-- Current-week historical activity summary
+- Dated forecast availability and separately labeled historical seasonality
 - Seasonal activity chart and short-range weather context
 - Direct entry points to trip planning, forecast exploration, cameras, and hydrophones
 - Responsible-use framing for the rest of the application
@@ -129,7 +129,7 @@ Use `npm run build:check` to create a production build and check the bundle budg
 src/
   app/                 Application shell and routing
   pages/               Home, Watch, Planner, Explore, About, Model, and 404 pages
-  features/            Map, planner, watch, location, and analyst features
+  features/            Map, planner, watch, location, and itinerary features
   shared/              Shared components, state, configuration, and data access
 public/
   data/                 Forecasts, grids, activity, metadata, and locations
@@ -147,6 +147,8 @@ Important configuration lives in:
 - `vite.config.ts` for the frontend build
 
 ## Runtime data
+
+The home page uses `public/data/trip_planner/seasonal-summary.json`, generated from the H6 historical histogram by `npm run data:home`. Development and production builds regenerate this small artifact; `npm run validate:data` rejects a stale summary. Keep it alongside the source when publishing data updates. The summary retains the source name and year range without downloading the spatial rows on home.
 
 The public application reads packaged datasets from `public/data`, including activity summaries, expected counts, forecasts, forecast grids, recent sightings, population context, periods, metadata, places of interest, the grouped webcam inventory, and week-of-year historical smooth rasters used by the Planner. Keep temporal periods, H3 resolutions, model identifiers, and GeoJSON coordinate order consistent when refreshing these artifacts.
 
@@ -207,3 +209,5 @@ Before enabling deployment jobs:
 
 Browser-visible map keys are public configuration and must be restricted by domain, API, and quota
 at their provider. Never place private credentials in a `VITE_` variable.
+
+Browser preferences and planner persistence use `src/shared/storage/browserStorage.ts`. Storage access is best effort: blocked storage or exhausted quota must not stop rendering or in-memory interaction. The standalone raster tile utility remains available through `npm run tiles:generate:this-week`; it requires NumPy, GDAL Python bindings, and `gdal2tiles.py`. This repository does not provide a Python package or CLI.

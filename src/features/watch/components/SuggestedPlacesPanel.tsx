@@ -1,3 +1,4 @@
+import { FieldPicksToggle } from "../../../shared/components/map-workspace/FieldPicksToggle";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { ForecastMapHandle } from "../../map";
 import type {
@@ -345,23 +346,12 @@ export function SuggestedPlacesPanel({
 
   if (!open) {
     return (
-      <button
-        type="button"
+      <FieldPicksToggle
+        count={places.length}
+        onOpen={onOpen}
+        label="Expand recommended places"
         className="thisWeekFieldNotebook"
-        onClick={onOpen}
-        aria-label="Expand recommended places"
-        aria-expanded="false"
-      >
-        <span className="thisWeekFieldNotebook__graphic" aria-hidden="true">
-          <span className="thisWeekFieldNotebook__page" />
-          <span className="thisWeekFieldNotebook__ring thisWeekFieldNotebook__ring--one" />
-          <span className="thisWeekFieldNotebook__ring thisWeekFieldNotebook__ring--two" />
-          <span className="thisWeekFieldNotebook__ring thisWeekFieldNotebook__ring--three" />
-          <span className="thisWeekFieldNotebook__ring thisWeekFieldNotebook__ring--four" />
-        </span>
-        <span className="thisWeekFieldNotebook__label">Field picks</span>
-        <span className="thisWeekFieldNotebook__count">{places.length}</span>
-      </button>
+      />
     );
   }
 

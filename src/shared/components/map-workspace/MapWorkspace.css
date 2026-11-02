@@ -1,0 +1,414 @@
+/* Shared map workspace. Page-specific data, chart and selection behavior stay
+   with each route; these rules own the common visual hierarchy. */
+.mapWorkspace {
+  --workspace-ink: #061d3c;
+  --workspace-paper: #fff8e9;
+  --workspace-muted: #46606c;
+  --workspace-accent: #47d1ca;
+  --workspace-gap: 24px;
+  --workspace-sidebar: 410px;
+  --workspace-radius: 22px;
+}
+
+.mapWorkspace .mapWorkspaceSummary {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  border: 2px solid var(--workspace-ink);
+  border-radius: var(--workspace-radius);
+  background: var(--workspace-paper);
+  color: var(--workspace-ink);
+  box-shadow: 4px 5px 0 var(--workspace-ink);
+  pointer-events: auto;
+  font-family: "Nunito Sans", "Avenir Next", Avenir, sans-serif;
+}
+
+.mapWorkspaceSummary__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.mapWorkspace .mapWorkspaceSummary__icon {
+  display: grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 2px solid var(--workspace-ink);
+  border-radius: 50%;
+  background: var(--workspace-accent);
+  font-size: 25px;
+}
+
+.mapWorkspaceSummary__copy { flex: 1; min-width: 0; }
+.mapWorkspace .mapWorkspaceSummary__eyebrow {
+  margin: 0 0 4px;
+  color: #346267;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.4;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.mapWorkspace .mapWorkspaceSummary h1 {
+  margin: 0;
+  overflow: visible;
+  color: var(--workspace-ink);
+  font-size: clamp(20px, 1.8vw, 27px);
+  font-weight: 950;
+  line-height: 1.15;
+  letter-spacing: -.035em;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.mapWorkspaceSummary__description {
+  margin-top: 5px;
+  color: var(--workspace-muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.mapWorkspaceSummary__context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 10px 18px;
+  border-top: 1px solid #061d3c29;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.mapWorkspaceSummary__basis {
+  color: #346267;
+  font-weight: 900;
+}
+.mapWorkspaceSummary__context strong { font-weight: 900; }
+
+.mapWorkspace .mapWorkspaceAction {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 2px solid var(--workspace-ink);
+  border-radius: 999px;
+  background: #ffda4c;
+  color: var(--workspace-ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.mapWorkspace .mapWorkspaceAction .material-symbols-rounded { font-size: 19px; }
+.mapWorkspace .mapWorkspaceAction--watch { background: #d9f2f1; }
+.mapWorkspace .mapWorkspaceAction--listen { background: #ffda4c; }
+.mapWorkspace .mapWorkspaceAction[aria-pressed="true"] { box-shadow: 0 0 0 3px #47d1ca; }
+.mapWorkspace .mapWorkspaceAction:hover { background: #47d1ca; }
+.mapWorkspace .mapWorkspaceAction:focus-visible,
+.mapWorkspace .mapWorkspacePicksToggle:focus-visible {
+  outline: 3px solid #147d85;
+  outline-offset: 4px;
+}
+
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage__leftTripStack {
+  top: 24px;
+  left: 24px;
+  width: calc(100% - 480px);
+  min-height: 0;
+}
+.mapWorkspace .thisWeekResultsPage__summaryStrip {
+  top: 24px;
+  left: 24px;
+  right: 456px;
+  width: auto;
+  max-width: none;
+}
+.mapWorkspace .mapWorkspaceSummary .plannerResultsPage__sidebarViewItinerary {
+  margin: 0 18px 12px;
+  min-height: 36px;
+}
+
+/* Matching place panel geometry and density. */
+.mapWorkspace .thisWeekResultsPage .suggestedPlacesPanel,
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar:not(.isCollapsed) {
+  top: 24px !important;
+  right: 24px !important;
+  bottom: 100px !important;
+  left: auto !important;
+  width: var(--workspace-sidebar) !important;
+  min-height: 0 !important;
+  border: 2px solid var(--workspace-ink) !important;
+  border-radius: var(--workspace-radius) !important;
+  box-shadow: 4px 5px 0 var(--workspace-ink) !important;
+}
+.mapWorkspace .suggestedPlacesPanel__header h2,
+.mapWorkspace .plannerResultsPage__sidebarRecommendationsHeader h2 {
+  font-size: 25px;
+  line-height: 1.15;
+}
+.mapWorkspace .suggestedPlacesPanel__subtle { font-size: 11px; }
+.mapWorkspace .thisWeekPlaceCard__name,
+.mapWorkspace .plannerResultsPage__spotTopline h3 {
+  white-space: normal;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+/* Both time controls sit below the map view, away from the page summary. */
+.mapWorkspace .thisWeekResultsPage__timelineCard {
+  top: auto;
+  right: 456px;
+  bottom: 24px;
+  left: 24px;
+  width: auto;
+  max-width: none;
+  border: 2px solid var(--workspace-ink);
+  border-radius: var(--workspace-radius);
+  box-shadow: 4px 5px 0 var(--workspace-ink);
+}
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__bottomPanel {
+  right: 456px !important;
+  left: 24px !important;
+  bottom: 24px;
+}
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage__chartCard {
+  border-width: 2px;
+  border-radius: var(--workspace-radius);
+  box-shadow: 4px 5px 0 var(--workspace-ink);
+}
+.mapWorkspace .plannerResultsPage.hasPlan .activityLegend.plannerResultsPage__legendCard {
+  top: 190px !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 24px !important;
+  width: 268px !important;
+  height: auto;
+  min-height: 54px;
+  padding: 9px 14px !important;
+  border-width: 2px;
+  border-radius: 16px;
+  box-shadow: 3px 4px 0 var(--workspace-ink);
+}
+
+/* A compact, explicit affordance replaces the two different notebook shapes. */
+.mapWorkspace .mapWorkspacePicksToggle {
+  display: flex;
+  width: auto;
+  height: 54px;
+  min-height: 54px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 2px solid var(--workspace-ink);
+  border-radius: 16px;
+  background: #ffda4c;
+  color: var(--workspace-ink);
+  box-shadow: 3px 4px 0 var(--workspace-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transform: none;
+}
+.mapWorkspace .mapWorkspacePicksToggle::before,
+.mapWorkspace .mapWorkspacePicksToggle::after { display: none; }
+.mapWorkspacePicksToggle img { width: 25px; height: 25px; }
+.mapWorkspacePicksToggle strong {
+  display: grid;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 4px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--workspace-ink);
+  color: var(--workspace-paper);
+  font-size: 11px;
+}
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar.isCollapsed {
+  top: 24px !important;
+  right: 24px !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: auto !important;
+  height: 54px !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.mapWorkspace .thisWeekFieldNotebook.mapWorkspacePicksToggle {
+  top: 24px;
+  right: 24px;
+  bottom: auto;
+  left: auto;
+}
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickAction--places,
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickAction--settings {
+  min-width: 0;
+  min-height: 44px;
+  height: 48px;
+  padding: 8px 12px;
+  border-width: 2px;
+  box-shadow: 3px 4px 0 var(--workspace-ink);
+}
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickAction--settings { background: #f48ab3; }
+
+@media (max-width: 1000px) {
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage__leftTripStack,
+  .mapWorkspace .thisWeekResultsPage__summaryStrip {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+  }
+  .mapWorkspace .plannerResultsPage.hasPlan .activityLegend.plannerResultsPage__legendCard { display: none !important; }
+  .mapWorkspace .thisWeekResultsPage .suggestedPlacesPanel,
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar:not(.isCollapsed) {
+    top: auto !important;
+    bottom: 82px !important;
+    right: 12px !important;
+    left: auto !important;
+    width: min(410px, calc(100% - 24px)) !important;
+    height: min(52dvh, 530px) !important;
+    min-height: 0 !important;
+  }
+  .mapWorkspace .thisWeekResultsPage__timelineCard {
+    top: calc(26px + var(--this-week-summary-strip-height, 150px));
+    right: 12px;
+    bottom: auto;
+    left: 12px;
+  }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar.isCollapsed,
+  .mapWorkspace .thisWeekFieldNotebook.mapWorkspacePicksToggle {
+    top: auto !important;
+    right: 12px !important;
+    bottom: 84px !important;
+    left: auto !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .mapWorkspace .mapWorkspaceSummary { border-radius: 18px; }
+  .mapWorkspaceSummary__main { gap: 8px; padding: 12px; flex-wrap: wrap; }
+  .mapWorkspace .mapWorkspaceSummary__icon { flex-basis: 36px; width: 36px; height: 36px; font-size: 22px; }
+  .mapWorkspace .mapWorkspaceSummary h1 { font-size: 21px; }
+  .mapWorkspaceSummary__copy { flex-basis: 0; }
+  .mapWorkspaceSummary__action { margin-left: 0; }
+  .mapWorkspace .mapWorkspaceSummary__action .mapWorkspaceAction { min-height: 44px; padding: 5px 10px; }
+  .mapWorkspaceSummary__description { font-size: 12px; }
+  .mapWorkspaceSummary__context { padding: 8px 12px; font-size: 11px; gap: 3px 8px; }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickActions {
+    position: fixed;
+    right: 12px;
+    bottom: 14px;
+    left: auto;
+    gap: 6px;
+  }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickAction--places em { display: none; }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage__chartCollapsedButton {
+    right: auto;
+    bottom: 82px;
+    left: 12px;
+    width: 145px;
+    min-width: 0;
+    min-height: 54px;
+    padding: 8px;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 6px;
+    border-radius: 16px;
+  }
+  .mapWorkspace .plannerResultsPage__chartCollapsedButton .plannerResultsPage__chartIcon { width: 26px; height: 26px; border: 0; }
+  .mapWorkspace .plannerResultsPage__chartCollapsedButton .plannerResultsPage__chartCollapsedToggle { display: none; }
+  .mapWorkspace .plannerResultsPage__chartCollapsedCopy strong { font-size: 13px; }
+}
+
+/* Retire the legacy stacked mobile dock and in-flow notebook positioning. */
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickActions {
+  flex-direction: row !important;
+}
+.mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar.isCollapsed {
+  position: absolute !important;
+  width: max-content !important;
+}
+.mapWorkspace .mapWorkspacePicksToggle.plannerResultsPage__spotsNotebook {
+  position: static !important;
+  width: max-content !important;
+  inset: auto !important;
+}
+@media (max-width: 1000px) {
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__tripSidebar.isCollapsed { position: fixed !important; }
+}
+@media (max-width: 760px) {
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage__quickActions {
+    right: 12px !important;
+    bottom: 14px !important;
+  }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage__chartCollapsedButton {
+    height: 54px !important;
+    min-height: 54px !important;
+  }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__chartCollapsedButton .plannerResultsPage__chartIcon {
+    width: 26px !important;
+    height: 26px !important;
+    border: 0 !important;
+  }
+}
+
+.mapWorkspace .activityLegend__scale { grid-template-columns: max-content minmax(0, 1fr) max-content; }
+@media (max-width: 760px) {
+  .mapWorkspaceSummary__main { flex-wrap: nowrap; }
+}
+
+.mapWorkspace .suggestedPlacesPanel__header {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.mapWorkspace .suggestedPlacesPanel__headerActions {
+  display: flex;
+  width: auto;
+  min-width: 92px;
+  gap: 4px;
+}
+.mapWorkspace .suggestedPlacesPanel__iconBtn {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
+.mapWorkspace .suggestedPlacesPanel__headerIcon { width: 44px; height: 44px; }
+@media (max-width: 760px) {
+  .mapWorkspace .suggestedPlacesPanel__header h2 { font-size: 22px; }
+  .mapWorkspace .thisWeekResultsPage__timelineCard {
+    display: block;
+    min-height: 0;
+    height: auto;
+    padding: 10px;
+  }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage.hasPlan .plannerResultsPage__bottomPanel {
+    position: fixed !important;
+    display: block !important;
+    right: 12px !important;
+    bottom: 82px !important;
+    left: 12px !important;
+    width: auto !important;
+    margin: 0 !important;
+    z-index: 15;
+  }
+  .mapWorkspace.mapWorkspace--planner .plannerResultsPage__chartCard {
+    height: 240px !important;
+    min-height: 0 !important;
+  }
+}

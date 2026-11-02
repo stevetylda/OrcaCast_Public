@@ -64,8 +64,8 @@ export function getDataVersionToken(): string {
     resolvedDataVersionToken = BUILD_VERSION;
     return resolvedDataVersionToken;
   }
-  resolvedDataVersionToken = FALLBACK_DATA_VERSION;
-  return resolvedDataVersionToken;
+  // Do not freeze an unresolved token before idle metadata priming completes.
+  return FALLBACK_DATA_VERSION;
 }
 
 export async function loadDataMeta(): Promise<DataMeta> {

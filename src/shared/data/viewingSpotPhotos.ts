@@ -136,19 +136,6 @@ export function hasApprovedSpotPhoto(photo?: ViewingSpotPhoto): boolean {
   return Boolean(photo?.status === "approved" && photo.imageSrc);
 }
 
-export function getSpotPhotoAttribution(
-  photo?: ViewingSpotPhoto,
-): string | undefined {
-  if (!photo || photo.status !== "approved") return undefined;
-  const parts = [
-    photo.title,
-    photo.creator,
-    photo.sourceName,
-    photo.license,
-  ].filter(Boolean);
-  return parts.length > 0 ? parts.join(" · ") : undefined;
-}
-
 export function validateViewingSpotPhotos(
   manifest: ViewingSpotPhotoManifest,
 ): void {
@@ -200,9 +187,9 @@ export async function loadViewingSpotPhotoManifest(): Promise<ViewingSpotPhotoMa
         validatedManifest = true;
       }
       return manifest;
-    } catch {
-      cachedManifest = {};
-      return cachedManifest;
+    } catch (error) {
+      cachedManifestPromise = null;
+      throw error;
     }
   })();
 

@@ -688,7 +688,7 @@ export function AboutPage() {
             </Link>
             <Link
               className="aboutGuideButton aboutGuideButton--cream"
-              to={routePath("home")}
+              to={routePath("watch")}
             >
               See this week{" "}
               <span className="material-symbols-rounded" aria-hidden="true">

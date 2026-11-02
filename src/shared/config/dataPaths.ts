@@ -40,15 +40,6 @@ export function getForecastPathForPeriod(
   );
 }
 
-export function getLatestForecastPath(
-  resolution: H3Resolution,
-  forecastDirectory: string,
-): string {
-  return withForecastCacheBust(
-    resolveAppAssetPath(`data/${forecastDirectory}/${resolution}.json`),
-  );
-}
-
 export function getSmoothedForecastPath(
   forecastDirectory: string,
   periodStart = "latest",
@@ -67,31 +58,6 @@ export function getSmoothedForecastTilePath(
   return withForecastCacheBust(
     resolveAppAssetPath(
       `data/${forecastDirectory}/smoothed/tiles/${periodStart}/tilejson.json`,
-    ),
-  );
-}
-
-export function getActualsPathForPeriod(
-  resolution: H3Resolution,
-  periodFileId: string,
-): string {
-  return withForecastCacheBust(
-    resolveAppAssetPath(
-      `data/forecasts/latest/actuals/${periodFileId}_${resolution}.json`,
-    ),
-  );
-}
-
-export function getShapPathForPeriod(
-  resolution: H3Resolution,
-  periodFileId: string,
-  modelId = "composite_linear_logit",
-  kind: "local" | "global" = "local",
-): string {
-  const suffix = kind === "global" ? "_shap_global" : "_shap";
-  return withForecastCacheBust(
-    resolveAppAssetPath(
-      `data/forecasts/latest/shap/${periodFileId}_${resolution}_${modelId}${suffix}.json`,
     ),
   );
 }

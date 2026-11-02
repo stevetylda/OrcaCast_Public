@@ -31,16 +31,3 @@ export function formatPlannerDistanceLabel(
   );
   return `Up to ${displayValue} ${unitsMode === "metric" ? "km" : "mi"}`;
 }
-
-export function formatTravelRangeLabel(
-  miles: number | undefined,
-  unitsMode: UnitsMode,
-) {
-  if (!miles || !Number.isFinite(miles) || miles <= 0) {
-    return "Set an optional travel range";
-  }
-  if (unitsMode === "metric") {
-    return `${Math.round(miles * KILOMETERS_PER_MILE)} km`;
-  }
-  return `${Math.round(miles)} miles`;
-}

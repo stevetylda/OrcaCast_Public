@@ -62,6 +62,7 @@ export type ForecastMapProps = {
   itineraryPlaceIds?: string[];
   selectedPlaceId?: string | null;
   cameraLocations?: WebcamSite[];
+  poiLocations?: PublicPoi[];
   selectedCameraId?: string | null;
   selectedHydrophoneId?: string | null;
   pulseSelectedPlaceMarker?: boolean;

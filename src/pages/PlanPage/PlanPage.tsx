@@ -1,3 +1,8 @@
+import { PlannerItineraryDetails } from "../../features/planner/components/PlannerItineraryDetails";
+import { ReferenceDataNotice } from "../../features/locations/ReferenceDataNotice";
+import { MapWorkspaceSummary } from "../../shared/components/map-workspace/MapWorkspaceSummary";
+import { FieldPicksToggle } from "../../shared/components/map-workspace/FieldPicksToggle";
+import { sessionPreferences } from "../../shared/storage/browserStorage";
 import {
   Fragment,
   useCallback,
@@ -98,6 +103,7 @@ import {
   rasterizeSvgToPngBlob,
 } from "../../features/planner/exports/itineraryExport";
 import "./PlanPage.css";
+import "../../shared/components/map-workspace/MapWorkspace.css";
 
 const DEFAULT_RECOMMENDED_SPOTS_COUNT = 25;
 const TRIP_BRUSH_DAYS = 366;
@@ -202,7 +208,7 @@ function buildRecommendedPlacesSignature(
 function readStoredRecommendedPlaces(signature: string): SuggestedPlace[] {
   if (typeof window === "undefined" || !signature) return [];
   try {
-    const raw = window.sessionStorage.getItem(
+    const raw = sessionPreferences.getItem(
       PLANNER_RECOMMENDED_PLACES_STORAGE_KEY,
     );
     if (!raw) return [];
@@ -303,6 +309,8 @@ export function PlannerPage() {
     poiLocations,
     hydrophoneLocations,
     hydrophoneListenUrl,
+    unavailable: unavailableReferenceData,
+    retry: retryReferenceData,
   } = usePlannerReferenceData();
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [detailPlaceId, setDetailPlaceId] = useState<string | null>(null);
@@ -354,13 +362,12 @@ export function PlannerPage() {
   const [chartZoomMode, setChartZoomMode] = useState<ChartZoomMode>("weekly");
   const primaryMapRef = useRef<ForecastMapHandle | null>(null);
   const mapLayerRef = useRef<HTMLDivElement | null>(null);
-  const summaryCardRef = useRef<HTMLElement | null>(null);
+  const summaryCardRef = useRef<HTMLDivElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const bottomPanelRef = useRef<HTMLElement | null>(null);
   const settingsRef = useRef<HTMLElement | null>(null);
   const settingsButtonRef = useRef<HTMLButtonElement | null>(null);
   const legendPaletteRef = useRef<HTMLElement | null>(null);
-  const itineraryUtilityDialogRef = useRef<HTMLDivElement | null>(null);
   const itineraryExportDialogRef = useRef<HTMLElement | null>(null);
   const chartPlotRef = useRef<HTMLDivElement | null>(null);
   const tripBrushDragRef = useRef<TripBrushDragState | null>(null);
@@ -377,11 +384,6 @@ export function PlannerPage() {
     () => setItineraryExportOpen(false),
     [],
   );
-  useDialogFocus({
-    open: itineraryShareMenuOpen,
-    dialogRef: itineraryUtilityDialogRef,
-    onClose: closeItineraryUtilityDialog,
-  });
   useDialogFocus({
     open: itineraryExportOpen,
     dialogRef: itineraryExportDialogRef,
@@ -820,7 +822,6 @@ export function PlannerPage() {
         primaryMapRef.current?.fitLocations(visiblePlannerMapLocations, {
           padding: getPlannerMapFitPadding(),
           maxZoom: 10,
-          zoomOffset: 1,
         });
       });
     };
@@ -1122,7 +1123,7 @@ export function PlannerPage() {
       recommendedPlaces.length === 0
     )
       return;
-    window.sessionStorage.setItem(
+    sessionPreferences.setItem(
       PLANNER_RECOMMENDED_PLACES_STORAGE_KEY,
       JSON.stringify({
         schemaVersion: 2,
@@ -1500,6 +1501,7 @@ export function PlannerPage() {
       plannerSubmitted && tripHotspotsVisible && !tripLoading,
     selectedPlaceId,
     cameraLocations,
+    poiLocations,
     selectedCameraId,
     selectedHydrophoneId,
     pulseSelectedPlaceMarker: plannerSubmitted
@@ -1522,8 +1524,18 @@ export function PlannerPage() {
   } satisfies ForecastMapProps;
 
   return (
-    <div className="mapPageRoot">
+    <div className="mapPageRoot mapWorkspace mapWorkspace--planner">
       <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
+      <ReferenceDataNotice
+        unavailable={[
+          ...unavailableReferenceData,
+          ...(recommendedPlacesData.error ? ["recommendations"] : []),
+        ]}
+        onRetry={() => {
+          retryReferenceData();
+          if (recommendedPlacesData.error) recommendedPlacesData.retry();
+        }}
+      />
 
       <main id="main-content" className="app__main" tabIndex={-1}>
         <div className="visuallyHidden" role="status" aria-live="polite">
@@ -1695,10 +1707,7 @@ export function PlannerPage() {
 
             {plannerSubmitted &&
             (!isEditingTrip || plannerEditingTransition) ? (
-              <section
-                ref={summaryCardRef}
-                className="plannerResultsPage__summaryCard"
-              >
+              <section className="plannerResultsPage__summaryCard">
                 <div className="plannerResultsPage__summaryIcon">
                   <span className="material-symbols-rounded" aria-hidden="true">
                     calendar_month
@@ -1878,126 +1887,19 @@ export function PlannerPage() {
             ) : null}
 
             {itineraryShareMenuOpen ? (
-              <div
-                ref={itineraryUtilityDialogRef}
-                className="plannerResultsPage__itineraryUtilityModal"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Download itinerary details"
-                tabIndex={-1}
-                onClick={() => setItineraryShareMenuOpen(false)}
-              >
-                <div
-                  className="plannerResultsPage__itineraryUtilityPopover"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    className="plannerResultsPage__itineraryUtilityClose"
-                    onClick={() => setItineraryShareMenuOpen(false)}
-                    aria-label="Close download itinerary dialog"
-                  >
-                    <span
-                      className="material-symbols-rounded"
-                      aria-hidden="true"
-                    >
-                      close
-                    </span>
-                  </button>
-                  <div className="plannerResultsPage__itineraryExportCardShell">
-                    <div className="plannerResultsPage__itineraryExportCard">
-                      <div className="plannerResultsPage__itineraryExportHeader">
-                        <h3>Orca Itinerary</h3>
-                      </div>
-                      <div className="plannerResultsPage__itineraryExportMeta">
-                        <div className="plannerResultsPage__itineraryExportMetaBlock">
-                          <span>From</span>
-                          <strong>{tripCityLabel}</strong>
-                        </div>
-                        <div className="plannerResultsPage__itineraryExportMetaBlock">
-                          <span>Date range</span>
-                          <strong>{tripLabel}</strong>
-                        </div>
-                        <div className="plannerResultsPage__itineraryExportMetaBlock">
-                          <span>Trip length</span>
-                          <strong>{tripLengthLabel}</strong>
-                        </div>
-                      </div>
-                      <div
-                        className="plannerResultsPage__itineraryExportRule"
-                        aria-hidden="true"
-                      />
-                      <div className="plannerResultsPage__itineraryExportStops">
-                        {itineraryPlaces.map((place, index) => (
-                          <div
-                            key={`export-${place.id}`}
-                            className="plannerResultsPage__itineraryExportStop"
-                          >
-                            <span>{index + 1}</span>
-                            <div>
-                              <strong>{`${place.name} (${place.latitude.toFixed(3)}, ${place.longitude.toFixed(3)})`}</strong>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div
-                        className="plannerResultsPage__itineraryExportRule"
-                        aria-hidden="true"
-                      />
-                      <div className="plannerResultsPage__itineraryExportChart">
-                        <div className="plannerResultsPage__itineraryExportChartTitle">
-                          Typical Sightings Per Week
-                        </div>
-                        <div
-                          className="plannerResultsPage__itineraryExportBars"
-                          style={weeklyChartColumnStyle}
-                        >
-                          {weekBars.map((bar) => (
-                            <span
-                              key={`export-bar-${bar.index}`}
-                              className={`plannerResultsPage__itineraryExportBar${bar.highlighted ? " isHighlighted" : ""}`}
-                              style={{
-                                height: `${Math.max(8, (bar.count / weeklyChartMax) * 100)}%`,
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <div
-                          className="plannerResultsPage__itineraryExportMonths"
-                          style={weeklyChartColumnStyle}
-                          aria-hidden="true"
-                        >
-                          {weeklyChartTicks.map((tick) => (
-                            <span
-                              key={`export-tick-${tick.index}`}
-                              className="plannerResultsPage__itineraryExportMonth"
-                              style={{
-                                gridColumn: `${tick.index + 1} / span 1`,
-                              }}
-                            >
-                              {tick.label}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="plannerResultsPage__itineraryUtilityAction"
-                    onClick={handleItineraryDownloadAction}
-                    disabled={shareBusy}
-                  >
-                    <span
-                      className="material-symbols-rounded"
-                      aria-hidden="true"
-                    >
-                      download
-                    </span>
-                    <span>Download card</span>
-                  </button>
-                </div>
-              </div>
+              <PlannerItineraryDetails
+                tripCityLabel={tripCityLabel}
+                tripLabel={tripLabel}
+                tripLengthLabel={tripLengthLabel}
+                itineraryPlaces={itineraryPlaces}
+                weekBars={weekBars}
+                weeklyChartColumnStyle={weeklyChartColumnStyle}
+                weeklyChartMax={weeklyChartMax}
+                weeklyChartTicks={weeklyChartTicks}
+                handleItineraryDownloadAction={handleItineraryDownloadAction}
+                shareBusy={shareBusy}
+                onClose={closeItineraryUtilityDialog}
+              />
             ) : null}
 
             {showPlannerChrome ? (
@@ -2005,32 +1907,42 @@ export function PlannerPage() {
                 className="plannerResultsPage__leftTripStack"
                 aria-label="Trip and itinerary"
               >
-                <div className="plannerResultsPage__sidebarTripCard">
-                  <div
-                    className="plannerResultsPage__sidebarTripIcon"
-                    aria-hidden="true"
-                  >
-                    <span className="material-symbols-rounded">
-                      calendar_month
-                    </span>
-                  </div>
-                  <div className="plannerResultsPage__sidebarTripCopy">
-                    <div className="plannerResultsPage__spotsEyebrow">
-                      Your Salish Sea trip
-                    </div>
-                    <h2>{tripCityLabel}</h2>
-                    <p>
-                      {tripLabel}
+                <MapWorkspaceSummary
+                  ref={summaryCardRef}
+                  id="planner-workspace-title"
+                  icon="calendar_month"
+                  eyebrow="Trip planner"
+                  title={tripCityLabel}
+                  description={
+                    <>
+                      {tripLabel} · {tripLengthLabel}
                       {tripDistanceLabel ? ` · ${tripDistanceLabel}` : ""}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className="plannerResultsPage__sidebarEditTrip"
-                    onClick={openPlannerEditor}
-                  >
-                    Edit trip
-                  </button>
+                    </>
+                  }
+                  action={
+                    <button
+                      type="button"
+                      className="mapWorkspaceAction"
+                      onClick={openPlannerEditor}
+                    >
+                      <span
+                        className="material-symbols-rounded"
+                        aria-hidden="true"
+                      >
+                        edit_calendar
+                      </span>
+                      Edit trip
+                    </button>
+                  }
+                  context={
+                    <>
+                      <span className="mapWorkspaceSummary__basis">
+                        Seasonal context
+                      </span>
+                      <span>Historical activity for your dates</span>
+                    </>
+                  }
+                >
                   {itineraryPlaces.length > 0 ? (
                     <button
                       type="button"
@@ -2054,7 +1966,7 @@ export function PlannerPage() {
                       </span>
                     </button>
                   ) : null}
-                </div>
+                </MapWorkspaceSummary>
                 {itineraryPlaces.length > 0 && itineraryExpanded ? (
                   <div
                     id="planner-trip-itinerary"
@@ -2189,30 +2101,12 @@ export function PlannerPage() {
                 }${detailPlace || selectedCamera || selectedHydrophone ? " isDetailOpen" : ""}`}
               >
                 {spotsCollapsed ? (
-                  <button
-                    type="button"
+                  <FieldPicksToggle
+                    count={displayedRecommendedPlaces.length}
+                    label="Expand recommended viewing spots"
+                    onOpen={() => setSpotsCollapsed(false)}
                     className="plannerResultsPage__spotsNotebook"
-                    onClick={() => setSpotsCollapsed(false)}
-                    aria-expanded="false"
-                    aria-label="Expand recommended viewing spots"
-                  >
-                    <span
-                      className="plannerResultsPage__spotsNotebookGraphic"
-                      aria-hidden="true"
-                    >
-                      <span className="plannerResultsPage__spotsNotebookPage" />
-                      <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--one" />
-                      <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--two" />
-                      <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--three" />
-                      <span className="plannerResultsPage__spotsNotebookRing plannerResultsPage__spotsNotebookRing--four" />
-                    </span>
-                    <span className="plannerResultsPage__spotsNotebookLabel">
-                      Field picks
-                    </span>
-                    <span className="plannerResultsPage__spotsNotebookCount">
-                      {displayedRecommendedPlaces.length}
-                    </span>
-                  </button>
+                  />
                 ) : (
                   <button
                     type="button"
@@ -3087,6 +2981,34 @@ export function PlannerPage() {
                     </button>
                   </div>
                 ) : null}
+                <button
+                  type="button"
+                  className="mapWorkspaceAction mapWorkspaceAction--watch"
+                  aria-pressed={camerasVisible}
+                  onClick={() => {
+                    setTopPlacesVisible(false);
+                    setCamerasVisible((value) => !value);
+                  }}
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    videocam
+                  </span>
+                  Watch
+                </button>
+                <button
+                  type="button"
+                  className="mapWorkspaceAction mapWorkspaceAction--listen"
+                  aria-pressed={hydrophonesVisible}
+                  onClick={() => {
+                    setTopPlacesVisible(false);
+                    setHydrophonesVisible((value) => !value);
+                  }}
+                >
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    graphic_eq
+                  </span>
+                  Listen
+                </button>
                 <div className="plannerResultsPage__settingsDock">
                   <button
                     ref={settingsButtonRef}

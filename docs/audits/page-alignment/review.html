@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  /><title>OrcaCast page alignment review</title>
+  <style>
+    body {
+      margin: 0;
+      background: #fff8e9;
+      color: #061d3c;
+      font:
+        16px system-ui,
+        sans-serif;
+    }
+    main {
+      max-width: 1600px;
+      margin: auto;
+      padding: 28px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+    }
+    p {
+      max-width: 80ch;
+      line-height: 1.6;
+    }
+    nav {
+      display: flex;
+      gap: 20px;
+      padding: 16px 0;
+    }
+    a {
+      color: #145961;
+    }
+    section {
+      margin: 30px 0;
+    }
+    h2 {
+      font-size: 22px;
+    }
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    figure {
+      margin: 0;
+    }
+    figcaption {
+      font-weight: 700;
+      padding: 10px 0;
+    }
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid #ccd4d4;
+      border-radius: 12px;
+    }
+    .mobile img {
+      max-width: 430px;
+    }
+    .mobile figure {
+      display: grid;
+      justify-items: center;
+    }
+    .health {
+      border-left: 4px solid #47d1ca;
+      padding-left: 16px;
+    }
+    @media (max-width: 700px) {
+      .pair {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <main>
+    <h1>One OrcaCast workspace, two distinct questions</h1>
+    <p>
+      Planner helps visitors choose places around their dates, starting point
+      and travel range. This Week helps visitors explore a selected weekly
+      forecast. About explains the outlook, limitations and responsible use.
+    </p>
+    <nav>
+      <a href="#planner">Planner</a><a href="#weekly">This Week</a
+      ><a href="#mobile">Mobile comparison</a><a href="#about">About</a>
+    </nav>
+    <section id="planner">
+      <h2>1. Planner — trip intent preserved</h2>
+      <p class="health">
+        The base, date range, seasonal chart, field picks and itinerary remain.
+        The shared summary labels historical context explicitly. Watch and
+        Listen now have direct map shortcuts.
+      </p>
+      <div class="pair">
+        <figure>
+          <figcaption>Before</figcaption>
+          <img
+            src="03-planner-results-before.png"
+            alt="Planner before alignment"
+          />
+        </figure>
+        <figure>
+          <figcaption>After</figcaption>
+          <img
+            src="09-planner-desktop-after.png"
+            alt="Planner with shared workspace summary and panels"
+          />
+        </figure>
+      </div>
+    </section>
+    <section id="weekly">
+      <h2>2. This Week — forecast intent preserved</h2>
+      <p class="health">
+        The forecast retains its selected dates, latest-available notice,
+        model/ecotype controls and playback. Weeks is now an explicit button;
+        desktop playback sits below the map, matching Planner's seasonal panel
+        position.
+      </p>
+      <div class="pair">
+        <figure>
+          <figcaption>Before</figcaption>
+          <img src="04-this-week-before.png" alt="This Week before alignment" />
+        </figure>
+        <figure>
+          <figcaption>After</figcaption>
+          <img
+            src="10-this-week-desktop-after.png"
+            alt="This Week with shared summary and explicit Weeks control"
+          />
+        </figure>
+      </div>
+    </section>
+    <section id="mobile">
+      <h2>3. Mobile — readable dates and familiar controls</h2>
+      <p class="health">
+        Both pages expose the three primary destinations, preserve readable
+        dates and use the same compact Field Picks toggle. Seasonal context and
+        weekly forecasts retain distinct labels.
+      </p>
+      <div class="pair mobile">
+        <figure>
+          <figcaption>Planner</figcaption>
+          <img src="12-planner-mobile-after.png" alt="Aligned mobile Planner" />
+        </figure>
+        <figure>
+          <figcaption>This Week</figcaption>
+          <img
+            src="11-this-week-mobile-after.png"
+            alt="Aligned mobile This Week"
+          />
+        </figure>
+      </div>
+      <div class="pair mobile">
+        <figure>
+          <figcaption>Planner before</figcaption>
+          <img
+            src="08-planner-mobile-results-before.png"
+            alt="Planner mobile before alignment"
+          />
+        </figure>
+        <figure>
+          <figcaption>This Week before</figcaption>
+          <img
+            src="07-this-week-mobile-before.png"
+            alt="This Week mobile with truncated dates before alignment"
+          />
+        </figure>
+      </div>
+    </section>
+    <section id="about">
+      <h2>4. About — purpose and interpretation</h2>
+      <p class="health">
+        About is now one of the three primary destinations. Its “See this week”
+        action now leads to the weekly forecast. The educational and
+        responsible-viewing content retains its purpose.
+      </p>
+      <img
+        src="06-about-before.png"
+        alt="About page explaining the app's purpose before navigation alignment"
+      />
+    </section>
+    <p>
+      All reference images were captured from the local app during this review.
+      Different map extents and activity values are intentional: the sample
+      Planner trip and weekly forecast use different dates and data sources.
+    </p>
+  </main>
+</html>

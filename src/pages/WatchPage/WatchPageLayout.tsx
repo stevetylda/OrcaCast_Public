@@ -7,10 +7,9 @@ import {
   type CSSProperties,
   type DragEvent,
 } from "react";
-import { AppFooter } from "../../shared/components/AppFooter";
-import { ActivityLegend } from "../../shared/components/ActivityLegend";
-import { ForecastLabHeader } from "../../shared/components/ForecastLabHeader";
-import { trackRender } from "../../shared/debug/perf";
+import { usePersistedItinerary } from "../../features/itinerary/usePersistedItinerary";
+import { ReferenceDataNotice } from "../../features/locations/ReferenceDataNotice";
+import { useLocationResources } from "../../features/locations/useLocationResources";
 import {
   ForecastMap,
   type ForecastMapHandle,
@@ -21,26 +20,20 @@ import {
   type SuggestedPlacesPanelView,
 } from "../../features/watch/components/SuggestedPlacesPanel";
 import { WeekTimelineBar } from "../../features/watch/components/WeekTimelineBar";
-import { isoWeekToDateRange } from "../../shared/time/forecastPeriodToIsoWeek";
-import { WatchPageFailureState } from "./WatchPageFailureState";
-import type { WatchPageController } from "./useWatchPageController";
-import { PALETTES } from "../../shared/geo/palettes";
+import { ActivityLegend } from "../../shared/components/ActivityLegend";
+import { AppFooter } from "../../shared/components/AppFooter";
+import { ForecastLabHeader } from "../../shared/components/ForecastLabHeader";
 import {
   LoadingAnimation,
   LoadingOverlay,
 } from "../../shared/components/loading";
-import {
-  loadOrcasoundHydrophonePayload,
-  type OrcasoundHydrophone,
-} from "../../shared/data/orcasoundHydrophones";
-import { loadPoiData } from "../../features/locations/poiData";
-import type { WebcamSite } from "../../features/locations/types";
-import {
-  loadWebcamSites,
-  mergePoiCamerasIntoWebcamSites,
-} from "../../shared/data/webcams";
+import { MapWorkspaceSummary } from "../../shared/components/map-workspace/MapWorkspaceSummary";
 import { useDialogFocus } from "../../shared/components/useDialogFocus";
-import { usePersistedItinerary } from "../../features/itinerary/usePersistedItinerary";
+import { trackRender } from "../../shared/debug/perf";
+import { PALETTES } from "../../shared/geo/palettes";
+import { isoWeekToDateRange } from "../../shared/time/forecastPeriodToIsoWeek";
+import { WatchPageFailureState } from "./WatchPageFailureState";
+import type { WatchPageController } from "./useWatchPageController";
 
 function pickLegendColors(colors: string[], colorNoData = false) {
   const source = colorNoData ? colors.slice(1) : colors;
@@ -84,11 +77,11 @@ function formatWeekRange(year: number, statWeek: number) {
   return `${startLabel} – ${endLabel}`;
 }
 
-const TREND_PRESENTATION = {
-  up: { icon: "north_east", label: "Trending up" },
-  down: { icon: "south_east", label: "Trending down" },
-  steady: { icon: "east", label: "Holding steady" },
-  none: { icon: "waves", label: "Weekly outlook" },
+const TREND_LABELS = {
+  up: "Trending up",
+  down: "Trending down",
+  steady: "Holding steady",
+  none: "Weekly outlook",
 } as const;
 
 const WATCH_REVEAL_MIN_DURATION_MS = 300;
@@ -96,14 +89,19 @@ const WATCH_REVEAL_EXIT_DURATION_MS = 180;
 
 export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   trackRender("WatchPageLayout");
+  const openCamerasOnArrival =
+    new URLSearchParams(window.location.search).get("view") === "cameras";
   const [sidebarOffsetPx, setSidebarOffsetPx] = useState(0);
   const [recommendedPanelOpen, setRecommendedPanelOpen] = useState(
     () =>
+      openCamerasOnArrival ||
       typeof window === "undefined" ||
       !window.matchMedia?.("(max-width: 760px)").matches,
   );
   const [locationPanelView, setLocationPanelView] =
-    useState<SuggestedPlacesPanelView>("places");
+    useState<SuggestedPlacesPanelView>(
+      openCamerasOnArrival ? "watch" : "places",
+    );
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const { itineraryPlaceIds, setItineraryPlaceIds } = usePersistedItinerary();
@@ -132,24 +130,27 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     useState("");
   const [itineraryMapViewActive, setItineraryMapViewActive] = useState(false);
   const [itineraryAddPulse, setItineraryAddPulse] = useState(false);
-  const [forecastWindowOpen, setForecastWindowOpen] = useState(false);
+  const [forecastWindowOpen, setForecastWindowOpen] = useState(
+    () => window.matchMedia("(min-width: 761px)").matches,
+  );
   const [forecastWindowHeight, setForecastWindowHeight] = useState(102);
   const forecastWindowRef = useRef<HTMLElement | null>(null);
   const [summaryStripHeight, setSummaryStripHeight] = useState(98);
   const summaryStripRef = useRef<HTMLDivElement | null>(null);
   const [thisWeekLoading, setThisWeekLoading] = useState(true);
-  const [hydrophoneLocations, setHydrophoneLocations] = useState<
-    OrcasoundHydrophone[]
-  >([]);
-  const [hydrophoneListenUrl, setHydrophoneListenUrl] = useState(
-    "https://live.orcasound.net/",
-  );
+  const {
+    cameraLocations,
+    poiLocations,
+    hydrophoneLocations,
+    hydrophoneListenUrl,
+    unavailable,
+    retry: retryLocationResources,
+  } = useLocationResources();
   const [selectedHydrophoneId, setSelectedHydrophoneId] = useState<
     string | null
   >(null);
-  const [cameraLocations, setCameraLocations] = useState<WebcamSite[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
-  const [camerasVisible, setCamerasVisible] = useState(false);
+  const [camerasVisible, setCamerasVisible] = useState(openCamerasOnArrival);
   const [hydrophonesVisible, setHydrophonesVisible] = useState(false);
   const [watchRevealMinimumElapsed, setWatchRevealMinimumElapsed] =
     useState(false);
@@ -185,7 +186,6 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     mapResetNonce,
     forecastSelection,
     expectedSummary,
-    forecastPattern,
     currentWeek,
     currentWeekYear,
     usingFallbackForecast,
@@ -193,6 +193,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     suggestedPlaces,
     suggestedPlacesLoading,
     suggestedPlacesError,
+    retrySuggestedPlaces,
     selectedPlaceId,
     setSelectedPlaceId,
     shareSnapshot,
@@ -214,34 +215,8 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
       ? formatWeekRange(requested.year, requested.stat_week)
       : weekRangeLabel;
   }, [forecastSelection.requestedPeriod, weekRangeLabel]);
-  const forecastHeadingLabel = usingFallbackForecast
-    ? `Latest available · ${weekRangeLabel}`
-    : `This week · ${weekRangeLabel}`;
-  const trendPresentation = TREND_PRESENTATION[expectedSummary.trend];
-  const orcaOutlookLabel = useMemo(() => {
-    const current = expectedSummary.current;
-    const baseline = expectedSummary.vs12WeekAvg;
-    if (!Number.isFinite(current ?? NaN)) {
-      const topPlacePotential = suggestedPlaces[0]?.viewingPotential;
-      if (topPlacePotential === "very-high") return "Strong";
-      if (topPlacePotential === "high") return "Likely";
-      if (topPlacePotential === "medium") return "Possible";
-      if (topPlacePotential === "low") return "Lower";
-      if (topPlacePotential === "very-low") return "Very low";
-      return "Awaiting data";
-    }
-    if (!Number.isFinite(baseline ?? NaN) || (baseline ?? 0) <= 0)
-      return trendPresentation.label;
-    const ratio = (current as number) / (baseline as number);
-    if (ratio >= 1.25) return "Strong";
-    if (ratio >= 0.8) return "Likely";
-    if (ratio >= 0.55) return "Possible";
-    return "Lower";
-  }, [expectedSummary, suggestedPlaces, trendPresentation.label]);
-  const orcaOutlookDisplayLabel = useMemo(
-    () => orcaOutlookLabel.replace(/\b\w/g, (letter) => letter.toUpperCase()),
-    [orcaOutlookLabel],
-  );
+  const trendLabel = TREND_LABELS[expectedSummary.trend];
+
   const paletteEntries = useMemo(() => Object.values(PALETTES), []);
   const legendColors = useMemo(
     () => pickLegendColors(PALETTES[selectedPaletteId].colors, true),
@@ -318,38 +293,6 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     );
     return () => window.clearTimeout(timerId);
   }, [thisWeekLoaderComplete]);
-
-  useEffect(() => {
-    let cancelled = false;
-    void Promise.all([loadWebcamSites(), loadPoiData()])
-      .then(([webcamSites, items]) => {
-        if (cancelled) return;
-        setCameraLocations(mergePoiCamerasIntoWebcamSites(webcamSites, items));
-      })
-      .catch((error) =>
-        console.warn("[This Week] failed to load live camera locations", error),
-      );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    void loadOrcasoundHydrophonePayload()
-      .then((payload) => {
-        if (!cancelled) {
-          setHydrophoneLocations(payload.items);
-          setHydrophoneListenUrl(payload.listenUrl);
-        }
-      })
-      .catch((error) =>
-        console.warn("[This Week] failed to load Orcasound hydrophones", error),
-      );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const selectedCamera = useMemo(
     () =>
@@ -549,6 +492,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     selectedHydrophoneId,
     showHydrophones: hydrophonesVisible,
     cameraLocations,
+    poiLocations,
     selectedCameraId,
     showCameras: camerasVisible,
   } satisfies Pick<
@@ -588,6 +532,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
     | "selectedHydrophoneId"
     | "showHydrophones"
     | "cameraLocations"
+    | "poiLocations"
     | "selectedCameraId"
     | "showCameras"
   >;
@@ -611,8 +556,18 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
 
   if (pageLoadError) {
     return (
-      <div className="mapPageRoot mapPageRoot--thisWeek">
+      <div className="mapPageRoot mapPageRoot--thisWeek mapWorkspace">
         <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
+        <ReferenceDataNotice
+          unavailable={[
+            ...unavailable,
+            ...(suggestedPlacesError ? ["recommendations"] : []),
+          ]}
+          onRetry={() => {
+            retryLocationResources();
+            if (suggestedPlacesError) retrySuggestedPlaces();
+          }}
+        />
         <main id="main-content" className="app__main" tabIndex={-1}>
           <WatchPageFailureState
             title="Data failed to load"
@@ -628,8 +583,18 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
   }
 
   return (
-    <div className="mapPageRoot mapPageRoot--thisWeek">
+    <div className="mapPageRoot mapPageRoot--thisWeek mapWorkspace">
       <ForecastLabHeader onOpenMenu={() => setMenuOpen(true)} />
+      <ReferenceDataNotice
+        unavailable={[
+          ...unavailable,
+          ...(suggestedPlacesError ? ["recommendations"] : []),
+        ]}
+        onRetry={() => {
+          retryLocationResources();
+          if (suggestedPlacesError) retrySuggestedPlaces();
+        }}
+      />
 
       <main id="main-content" className="app__main" tabIndex={-1}>
         <div className="visuallyHidden" role="status" aria-live="polite">
@@ -665,60 +630,43 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
               )}
             </div>
 
-            <div
+            <MapWorkspaceSummary
               ref={summaryStripRef}
+              id="thisWeekSummaryTitle"
               className="thisWeekResultsPage__summaryStrip"
-              aria-label="This week forecast summary"
-            >
-              <section
-                className="thisWeekResultsPage__summaryCard"
-                aria-labelledby="thisWeekSummaryTitle"
-              >
+              icon="waves"
+              eyebrow={
+                usingFallbackForecast
+                  ? "This Week · Latest available"
+                  : "This Week"
+              }
+              title={weekRangeLabel}
+              description={
+                usingFallbackForecast ? (
+                  <span role="status">
+                    Requested {requestedWeekRangeLabel} is unavailable.
+                  </span>
+                ) : null
+              }
+              action={
                 <button
                   type="button"
-                  className="thisWeekResultsPage__summaryToggle"
+                  className="mapWorkspaceAction"
                   onClick={toggleForecastWindow}
                   aria-expanded={forecastWindowOpen}
                   aria-controls="this-week-forecast-window"
                   aria-label={`${forecastWindowOpen ? "Close" : "Open"} forecast window and week selector for ${weekRangeLabel}`}
-                />
-                <div
-                  className="thisWeekResultsPage__summaryIcon"
-                  aria-hidden="true"
                 >
-                  <span className="material-symbols-rounded">waves</span>
-                </div>
-                <div className="thisWeekResultsPage__summaryBody">
-                  <p className="thisWeekResultsPage__eyebrow">
-                    {usingFallbackForecast ? "Latest available" : "This week"}
-                  </p>
-                  <div className="thisWeekResultsPage__summaryLine">
-                    <h1 id="thisWeekSummaryTitle">{forecastHeadingLabel}</h1>
-                  </div>
-                  {usingFallbackForecast ? (
-                    <p
-                      className="thisWeekResultsPage__fallbackSummary"
-                      role="status"
-                      aria-live="polite"
-                    >
-                      Requested {requestedWeekRangeLabel} is unavailable.
-                    </p>
-                  ) : null}
-                </div>
-              </section>
-
-              <section className="thisWeekResultsPage__outlookSummary">
-                <img src="/images/icons/whale-tail.png" alt="" />
-                <div>
-                  <p className="thisWeekResultsPage__eyebrow">Orca outlook</p>
-                  <strong className="thisWeekResultsPage__outlookReading">
-                    <span>{orcaOutlookDisplayLabel}</span>
-                    <b aria-hidden="true">|</b>
-                    <span>{forecastPattern}</span>
-                  </strong>
-                </div>
-              </section>
-            </div>
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    date_range
+                  </span>
+                  Weeks
+                  <span className="material-symbols-rounded" aria-hidden="true">
+                    {forecastWindowOpen ? "expand_less" : "expand_more"}
+                  </span>
+                </button>
+              }
+            />
 
             <ActivityLegend
               className="thisWeekResultsPage__floatingLegend"
@@ -1255,7 +1203,7 @@ export function WatchPageLayout({ controller }: WatchPageLayoutProps) {
             </aside>
 
             <footer className="thisWeekItineraryExport__footer">
-              <span>Prepared with OrcaCast · {trendPresentation.label}</span>
+              <span>Prepared with OrcaCast · {trendLabel}</span>
               <button
                 type="button"
                 data-export-exclude="true"

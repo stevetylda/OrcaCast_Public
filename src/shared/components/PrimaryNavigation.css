@@ -1,0 +1,29 @@
+.header.header--home .primaryNavigation a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-color: #ff6458;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 7px;
+}
+@media (max-width: 820px) {
+  .header.header--home .primaryNavigation {
+    display: flex !important;
+    align-items: center;
+    gap: 18px;
+    margin: 0;
+  }
+  .header.header--home .primaryNavigation a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 11px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .header.header--home:has(.primaryNavigation) .brandBtn,
+  .header.header--home:has(.primaryNavigation) .header__right > .iconBtn {
+    display: none !important;
+  }
+}
+@media (max-width: 380px) {
+  .header.header--home .primaryNavigation { gap: 11px; }
+}

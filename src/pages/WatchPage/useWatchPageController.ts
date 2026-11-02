@@ -1,6 +1,6 @@
+import { localPreferences } from "../../shared/storage/browserStorage";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ForecastMapHandle } from "../../features/map";
-import type { GridCellExpandRequest } from "../../features/map/types";
 import {
   buildPeriod,
   readForecastPeriodOverride,
@@ -10,7 +10,6 @@ import {
   getForecastPathForPeriod,
   getSmoothedForecastPath,
   getSmoothedForecastTilePath,
-  type H3Resolution,
 } from "../../shared/config/dataPaths";
 import {
   DEFAULT_FORECAST_ECOTYPE_ID,
@@ -87,7 +86,6 @@ export function useWatchPageController() {
     surfaceMode,
     setSurfaceMode,
     resolution,
-    setResolution,
     forecastIndex,
     setForecastIndex,
     forecastPlaybackPlaying,
@@ -111,18 +109,6 @@ export function useWatchPageController() {
     DEFAULT_FORECAST_ECOTYPE_ID,
   );
   const [modelId, setModelId] = useState(DEFAULT_FORECAST_MODEL_ID);
-  const [toolsOpen, setToolsOpen] = useState(false);
-  const [gridDetailOpen, setGridDetailOpen] = useState(false);
-  const [gridDetailCellId, setGridDetailCellId] = useState<string | null>(null);
-  const [gridDetailResolution, setGridDetailResolution] =
-    useState<H3Resolution>(resolution);
-  const [gridDetailModelId, setGridDetailModelId] = useState(modelId);
-  const [gridDetailSelectedWeek, setGridDetailSelectedWeek] = useState<
-    number | null
-  >(null);
-  const [gridDetailSelectedWeekYear, setGridDetailSelectedWeekYear] = useState<
-    number | null
-  >(null);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [hotspotTotalCells, setHotspotTotalCells] = useState<number | null>(
     null,
@@ -208,10 +194,13 @@ export function useWatchPageController() {
   };
 
   useEffect(() => {
-    const seen = localStorage.getItem("orcacast.welcome.seen");
-    if (!seen) {
+    const seen = localPreferences.getItem("orcacast.welcome.seen");
+    if (
+      !seen &&
+      new URLSearchParams(window.location.search).get("view") !== "cameras"
+    ) {
       setWelcomeOpen(true);
-      localStorage.setItem("orcacast.welcome.seen", "true");
+      localPreferences.setItem("orcacast.welcome.seen", "true");
     }
   }, []);
 
@@ -222,6 +211,10 @@ export function useWatchPageController() {
     loadPeriodsForResolution(resolution, forecastDirectory)
       .then((list) => {
         if (!active) return;
+        if (list.length === 0)
+          throw new Error(
+            "No forecast files are published for this resolution.",
+          );
         const resolved = resolvePeriodsForSelection(
           list,
           override,
@@ -306,6 +299,7 @@ export function useWatchPageController() {
     places: suggestedPlaces,
     isLoading: suggestedPlacesLoading,
     error: suggestedPlacesError,
+    retry: retrySuggestedPlaces,
   } = useSuggestedPlaces({
     resolution,
     activityValues: forecastDataset?.values ?? null,
@@ -462,12 +456,6 @@ export function useWatchPageController() {
   );
 
   const handleResetMap = () => {
-    setToolsOpen(false);
-    setGridDetailOpen(false);
-    setGridDetailCellId(null);
-    setGridDetailSelectedWeek(null);
-    setGridDetailSelectedWeekYear(null);
-    setResolution("H6");
     setForecastEcotypeId(DEFAULT_FORECAST_ECOTYPE_ID);
     setModelId(DEFAULT_FORECAST_MODEL_ID);
     setHotspotsEnabled(false);
@@ -496,22 +484,9 @@ export function useWatchPageController() {
     setForecastDataset(null);
     setPageLoadError(null);
     setForecastIndex(0);
-    setGridDetailOpen(false);
-    setGridDetailCellId(null);
-    setGridDetailSelectedWeek(null);
-    setGridDetailSelectedWeekYear(null);
     setReloadToken((value) => value + 1);
     setSelectedPlaceId(null);
     setMapResetNonce((value) => value + 1);
-  };
-
-  const openGridDetail = (request: GridCellExpandRequest) => {
-    setGridDetailCellId(request.h3);
-    setGridDetailResolution(request.resolution);
-    setGridDetailModelId(request.modelId);
-    setGridDetailSelectedWeek(request.selectedWeek);
-    setGridDetailSelectedWeekYear(request.selectedWeekYear);
-    setGridDetailOpen(true);
   };
 
   const reportFatalDataError = (error: DataLoadError) => {
@@ -583,7 +558,6 @@ export function useWatchPageController() {
     surfaceMode,
     setSurfaceMode,
     resolution,
-    setResolution,
     modelId,
     setModelId,
     forecastEcotypeId,
@@ -607,15 +581,6 @@ export function useWatchPageController() {
     setSelectedPaletteId,
     infoOpen,
     setInfoOpen,
-    toolsOpen,
-    setToolsOpen,
-    gridDetailOpen,
-    setGridDetailOpen,
-    gridDetailCellId,
-    gridDetailResolution,
-    gridDetailModelId,
-    gridDetailSelectedWeek,
-    gridDetailSelectedWeekYear,
     welcomeOpen,
     setWelcomeOpen,
     hotspotTotalCells,
@@ -633,12 +598,12 @@ export function useWatchPageController() {
     suggestedPlaces,
     suggestedPlacesLoading,
     suggestedPlacesError,
+    retrySuggestedPlaces,
     selectedPlaceId,
     setSelectedPlaceId,
     shareSnapshot,
     downloadSnapshotAction,
     handleResetMap,
-    openGridDetail,
     setMenuOpen,
   };
 }

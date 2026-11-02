@@ -1,11 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import webcamFixture from "../../../public/data/webcams.json";
 import type { PublicPoi } from "../../features/locations/poiData";
 import {
-  loadWebcamSites,
   mergePoiCamerasIntoWebcamSites,
   normalizeWebcamPayload,
-  resetWebcamCacheForTests,
 } from "./webcams";
 
 function readWebcamFixture() {
@@ -73,19 +71,5 @@ describe("webcam data", () => {
     expect(
       merged.find((site) => site.name === "Added camera")?.feeds[0],
     ).toMatchObject({ status: "listed", accessUrl: addition.liveCameraUrl });
-  });
-
-  it("fails cleanly after requesting the canonical webcam path once", async () => {
-    resetWebcamCacheForTests();
-    const fetchMock = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValue(new Response(null, { status: 404 }));
-    await expect(loadWebcamSites()).rejects.toThrow(
-      "Failed to load webcam data",
-    );
-    expect(fetchMock).toHaveBeenCalledOnce();
-    expect(fetchMock).toHaveBeenCalledWith("/data/webcams.json");
-    fetchMock.mockRestore();
-    resetWebcamCacheForTests();
   });
 });

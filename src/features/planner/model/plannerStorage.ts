@@ -1,3 +1,4 @@
+import { sessionPreferences } from "../../../shared/storage/browserStorage";
 import type {
   TripPlanSelection,
   TripPlannerDraft,
@@ -20,10 +21,6 @@ function isIsoDate(value: unknown): value is string {
     !Number.isNaN(parsed.getTime()) &&
     parsed.toISOString().slice(0, 10) === value
   );
-}
-
-function defaultSessionStorage(): PlannerStorage | null {
-  return typeof window === "undefined" ? null : window.sessionStorage;
 }
 
 export function parsePlannerSelection(
@@ -56,7 +53,7 @@ export function parsePlannerSelection(
 }
 
 export function readStoredPlannerSelection(
-  storage: PlannerStorage | null = defaultSessionStorage(),
+  storage: PlannerStorage | null = sessionPreferences,
 ): TripPlanSelection | null {
   if (!storage) return null;
   try {
@@ -69,7 +66,7 @@ export function readStoredPlannerSelection(
 
 export function writeStoredPlannerSelection(
   selection: TripPlanSelection | null,
-  storage: PlannerStorage | null = defaultSessionStorage(),
+  storage: PlannerStorage | null = sessionPreferences,
 ) {
   if (!storage) return;
   if (selection)
@@ -79,7 +76,7 @@ export function writeStoredPlannerSelection(
 
 export function readStoredPlannerOpen(
   defaultValue: boolean,
-  storage: PlannerStorage | null = defaultSessionStorage(),
+  storage: PlannerStorage | null = sessionPreferences,
 ) {
   if (!storage) return defaultValue;
   const stored = storage.getItem(PLANNER_OPEN_STORAGE_KEY);
@@ -90,13 +87,13 @@ export function readStoredPlannerOpen(
 
 export function writeStoredPlannerOpen(
   open: boolean,
-  storage: PlannerStorage | null = defaultSessionStorage(),
+  storage: PlannerStorage | null = sessionPreferences,
 ) {
   storage?.setItem(PLANNER_OPEN_STORAGE_KEY, open ? "true" : "false");
 }
 
 export function readStoredPlannerDraft(
-  storage: PlannerStorage | null = defaultSessionStorage(),
+  storage: PlannerStorage | null = sessionPreferences,
 ): TripPlannerDraft | null {
   if (!storage) return null;
   try {
@@ -126,7 +123,7 @@ export function readStoredPlannerDraft(
 
 export function writeStoredPlannerDraft(
   draft: TripPlannerDraft | null,
-  storage: PlannerStorage | null = defaultSessionStorage(),
+  storage: PlannerStorage | null = sessionPreferences,
 ) {
   if (!storage) return;
   if (draft) storage.setItem(PLANNER_DRAFT_STORAGE_KEY, JSON.stringify(draft));
@@ -134,7 +131,7 @@ export function writeStoredPlannerDraft(
 }
 
 export function clearStoredPlannerState(
-  storage: PlannerStorage | null = defaultSessionStorage(),
+  storage: PlannerStorage | null = sessionPreferences,
 ) {
   if (!storage) return;
   storage.removeItem(PLANNER_SELECTION_STORAGE_KEY);

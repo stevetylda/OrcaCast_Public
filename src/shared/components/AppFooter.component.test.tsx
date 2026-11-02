@@ -20,7 +20,7 @@ describe("AppFooter location views", () => {
         poiFilters={{ Park: false, Marina: false, Ferry: false }}
         onTogglePoiAll={vi.fn()}
         onTogglePoiType={vi.fn()}
-        selectedPaletteId="mediterranean_atlas"
+        selectedPaletteId="forecast_lab"
         onPaletteChange={vi.fn()}
       />,
     );

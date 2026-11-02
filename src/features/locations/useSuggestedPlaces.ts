@@ -39,6 +39,7 @@ type UseSuggestedPlacesResult = {
   places: SuggestedPlace[];
   isLoading: boolean;
   error: string | null;
+  retry: () => void;
 };
 
 type PlannerPoiMetadata = {
@@ -453,6 +454,7 @@ export function useSuggestedPlaces(
     limit,
     poiFilters = NO_POI_FILTERS,
   } = args;
+  const [retryKey, setRetryKey] = useState(0);
   const [places, setPlaces] = useState<SuggestedPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -543,11 +545,13 @@ export function useSuggestedPlaces(
     includeMarinas,
     includeParks,
     resolution,
+    retryKey,
   ]);
 
   return {
     places: effectivePlaces,
     isLoading: effectiveIsLoading,
     error: effectiveError,
+    retry: () => setRetryKey((value) => value + 1),
   };
 }

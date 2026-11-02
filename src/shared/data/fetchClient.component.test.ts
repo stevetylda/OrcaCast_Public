@@ -23,3 +23,36 @@ describe("fetch client path resolution", () => {
     );
   });
 });
+
+it("times out while reading a stalled response body", async () => {
+  vi.useFakeTimers();
+  let release!: (value: string) => void;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockImplementation((_url, { signal }) =>
+      Promise.resolve({
+        ok: true,
+        text: () =>
+          new Promise<string>((resolve, reject) => {
+            release = resolve;
+            signal.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError")),
+            );
+          }),
+      }),
+    ),
+  );
+  try {
+    const result = fetchText("/data/stalled.json", {
+      timeoutMs: 25,
+      retries: 0,
+    }).catch((error) => error);
+    await vi.advanceTimersByTimeAsync(30);
+    release("late body");
+    expect(await result).toMatchObject({ kind: "timeout" });
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  }
+});

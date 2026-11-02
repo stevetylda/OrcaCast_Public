@@ -69,7 +69,7 @@ export const APP_ROUTES = {
       description:
         "A forthcoming OrcaCast guide to whales, responsible whale watching, identification tips, and other wildlife of the Salish Sea.",
     },
-    navigation: { primary: 30, drawer: 40, notFound: 30 },
+    navigation: { drawer: 40, notFound: 30 },
     drawerIcon: "explore",
     activeMatch: "exact",
     navigable: true,
@@ -83,7 +83,7 @@ export const APP_ROUTES = {
       description:
         "Learn what OrcaCast is, how to interpret its outlooks, where its data comes from, and how to use forecasts responsibly.",
     },
-    navigation: { drawer: 50, notFound: 40 },
+    navigation: { primary: 30, drawer: 50, notFound: 40 },
     drawerIcon: "info",
     activeMatch: "prefix",
     navigable: true,

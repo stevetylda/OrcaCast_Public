@@ -1,3 +1,4 @@
+import { localPreferences } from "../storage/browserStorage";
 import {
   isoWeekFromDate,
   isoWeekToDateRange,
@@ -68,7 +69,7 @@ export function readForecastPeriodOverride(): ForecastPeriodOverride | null {
   if (queryOverride) return { ...queryOverride, source: "query" };
 
   const storageOverride = parseForecastPeriodOverride(
-    window.localStorage.getItem(FORECAST_PERIOD_OVERRIDE_STORAGE_KEY),
+    localPreferences.getItem(FORECAST_PERIOD_OVERRIDE_STORAGE_KEY),
   );
   if (storageOverride) return storageOverride;
 

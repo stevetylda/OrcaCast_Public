@@ -157,7 +157,7 @@ test("forecast header underlines the active route in orange", async ({
   );
   for (const route of getNavigationRoutes("primary")) {
     await page.goto(route.path, { waitUntil: "domcontentloaded" });
-    const activeLink = page.getByRole("link", {
+    const activeLink = page.locator(".primaryNavigation").getByRole("link", {
       name: route.navigationLabel,
       exact: true,
     });
@@ -192,6 +192,12 @@ test("This Week renders the live map, forecast, places, details, and itinerary",
   await expect(page.locator("canvas.maplibregl-canvas").first()).toBeVisible({
     timeout: 45_000,
   });
+  await expect(
+    page.getByText("Explore the selected week's modeled activity."),
+  ).toHaveCount(0);
+  const summary = page.locator(".thisWeekResultsPage__summaryStrip");
+  await expect(summary.getByText("Weekly forecast")).toHaveCount(0);
+  await expect(summary.getByText(/Orca outlook/)).toHaveCount(0);
   await expect(page.getByRole("article").first()).toBeVisible({
     timeout: 45_000,
   });
@@ -548,15 +554,13 @@ test("Planner loads date-weighted historical smooth weeks by default", async ({
       const stack = document.querySelector<HTMLElement>(
         ".plannerResultsPage__leftTripStack",
       );
-      const card = stack?.querySelector<HTMLElement>(
-        ".plannerResultsPage__sidebarTripCard",
-      );
+      const card = stack?.querySelector<HTMLElement>(".mapWorkspaceSummary");
       if (!stack || !card) return null;
       const stackRect = stack.getBoundingClientRect();
       const cardRect = card.getBoundingClientRect();
       const target = document.elementFromPoint(
         stackRect.left + stackRect.width / 2,
-        Math.min(stackRect.bottom - 20, cardRect.bottom + 44),
+        cardRect.bottom + 44,
       );
       return {
         className: target?.className ?? "",
@@ -608,10 +612,75 @@ test("Planner loads date-weighted historical smooth weeks by default", async ({
     await page
       .getByRole("button", { name: "Activity likelihood color scale" })
       .click();
+    const floatingLegend = page.locator(".activityLegend:visible");
+    const paletteList = floatingLegend.locator(".activityLegend__paletteList");
+    await expect(
+      floatingLegend.locator(".activityLegend__ramp").locator(":scope > span"),
+    ).toHaveCount(5);
+    await expect(
+      paletteList
+        .locator(".activityLegend__paletteSwatches")
+        .first()
+        .locator(":scope > span"),
+    ).toHaveCount(5);
+    const [legendBox, paletteBox] = await Promise.all([
+      floatingLegend.boundingBox(),
+      paletteList.boundingBox(),
+    ]);
+    expect(legendBox).not.toBeNull();
+    expect(paletteBox).not.toBeNull();
+    expect(paletteBox!.x).toBeGreaterThanOrEqual(0);
+    expect(paletteBox!.y).toBeGreaterThanOrEqual(
+      legendBox!.y + legendBox!.height,
+    );
     await expect(
       page.getByRole("option", { name: "Rose Noir" }),
     ).toHaveAttribute("aria-selected", "true");
   }
+});
+
+test("This Week legend opens beside the map with five clear colors", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name.startsWith("mobile"),
+    "Desktop map legend regression",
+  );
+  await page.goto(routePath("watch"), { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-map-ready="true"]')).toBeVisible({
+    timeout: 45_000,
+  });
+
+  const floatingLegend = page.locator(".thisWeekResultsPage__floatingLegend");
+  await floatingLegend
+    .getByRole("button", { name: "Activity likelihood color scale" })
+    .click();
+  const paletteList = floatingLegend.locator(".activityLegend__paletteList");
+  await expect(
+    floatingLegend.locator(".activityLegend__ramp").locator(":scope > span"),
+  ).toHaveCount(5);
+  await expect(
+    paletteList
+      .locator(".activityLegend__paletteSwatches")
+      .first()
+      .locator(":scope > span"),
+  ).toHaveCount(5);
+  await expect(
+    paletteList.getByRole("option", { name: "Mediterranean Atlas" }),
+  ).toHaveCount(0);
+
+  const [legendBox, paletteBox, summaryBox] = await Promise.all([
+    floatingLegend.boundingBox(),
+    paletteList.boundingBox(),
+    page.locator(".thisWeekResultsPage__summaryStrip").boundingBox(),
+  ]);
+  expect(legendBox).not.toBeNull();
+  expect(paletteBox).not.toBeNull();
+  expect(summaryBox).not.toBeNull();
+  expect(paletteBox!.x).toBeGreaterThanOrEqual(legendBox!.x + legendBox!.width);
+  expect(paletteBox!.y).toBeGreaterThanOrEqual(
+    summaryBox!.y + summaryBox!.height,
+  );
 });
 
 test("Planner sidebar stays right after a This Week round trip", async ({
@@ -739,9 +808,9 @@ test("This Week exposes its mobile page heading", async ({
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /^(This week|Latest available)\s*·/i,
+      name: /^[A-Z][a-z]{2} \d+\s*–/,
     }),
-  ).toBeAttached();
+  ).toBeVisible();
 });
 
 test("mobile Field Picks starts collapsed and expands from five to 25", async ({
@@ -788,4 +857,66 @@ test("favicons, manifest, fonts, style, and CORS-enabled map resources respond",
   );
   expect(mapStyle.ok()).toBeTruthy();
   expect(mapStyle.headers()["access-control-allow-origin"]).toBeTruthy();
+});
+
+test("Home and Planner remain usable when browser storage is blocked", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    for (const method of ["getItem", "setItem", "removeItem"] as const) {
+      Storage.prototype[method] = () => {
+        throw new DOMException("Storage blocked", "SecurityError");
+      };
+    }
+  });
+  for (const path of [routePath("home"), routePath("planner")]) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+  }
+  expect(errors).toEqual([]);
+});
+
+test("Planner and This Week share a readable summary and primary destinations", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem(
+      "orcacast.planner.selection",
+      JSON.stringify({
+        city: "Friday Harbor, WA",
+        arrivalDate: "2026-06-29",
+        departureDate: "2026-07-08",
+      }),
+    );
+  });
+  const summaries: Array<{ x: number; width: number }> = [];
+  for (const [path, basis] of [
+    [plannerResumePath, "Seasonal context"],
+    [routePath("watch"), "Weekly forecast"],
+  ]) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    const summary = page.locator(".mapWorkspaceSummary");
+    await expect(summary).toBeVisible({ timeout: 45_000 });
+    await expect(summary.getByText(basis, { exact: true })).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Forecast navigation" });
+    for (const name of ["This Week", "Plan a Trip", "About"])
+      await expect(nav.getByRole("link", { name, exact: true })).toBeVisible();
+    const layout = await summary.evaluate((element) => {
+      const heading = element.querySelector("h1")!;
+      const rect = element.getBoundingClientRect();
+      return {
+        x: rect.x,
+        width: rect.width,
+        fits: heading.scrollWidth <= heading.clientWidth + 1,
+        withinViewport: rect.left >= 0 && rect.right <= innerWidth,
+      };
+    });
+    expect(layout.fits).toBe(true);
+    expect(layout.withinViewport).toBe(true);
+    summaries.push(layout);
+  }
+  expect(summaries[0].x).toBeCloseTo(summaries[1].x, 0);
+  expect(summaries[0].width).toBeCloseTo(summaries[1].width, 0);
 });

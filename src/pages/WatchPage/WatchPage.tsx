@@ -5,6 +5,7 @@ import { WatchPageLayout } from "./WatchPageLayout";
 import { useWatchPageController } from "./useWatchPageController";
 import "./WatchPlannerShared.css";
 import "./WatchPage.css";
+import "../../shared/components/map-workspace/MapWorkspace.css";
 
 const InfoModal = lazy(() =>
   import("../../shared/components/InfoModal").then((m) => ({

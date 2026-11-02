@@ -3,9 +3,6 @@ import { fetchJson } from "./fetchClient";
 import { getDataVersionToken } from "./meta";
 import { resolveAppAssetPath } from "../config/basePath";
 
-export type TripLengthOption =
-  "1 day" | "2 days" | "3 days" | "5 days" | "Weekend";
-
 export type TripPlannerRange = {
   startDate: string;
   endDate: string;
@@ -84,12 +81,6 @@ function parseTripDate(value: string): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function addDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
 function formatIsoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
@@ -100,46 +91,6 @@ function formatDisplayDate(date: Date): string {
     day: "numeric",
     timeZone: "UTC",
   }).format(date);
-}
-
-export function daysForTripLength(length: TripLengthOption | string): number {
-  if (length === "Weekend") return 2;
-  const parsedDays = Number(
-    String(length).match(/^(\d+)\s*days?$/i)?.[1] ?? Number.NaN,
-  );
-  if (Number.isFinite(parsedDays) && parsedDays > 0)
-    return Math.round(parsedDays);
-  if (length === "5 days") return 5;
-  if (length === "2 days") return 2;
-  if (length === "3 days") return 3;
-  return 1;
-}
-
-export function buildTripPlannerRange(
-  startDate: string,
-  tripLength: TripLengthOption | string,
-): TripPlannerRange | null {
-  const start = parseTripDate(startDate);
-  if (!start) return null;
-  const dayCount = daysForTripLength(tripLength);
-  const end = addDays(start, Math.max(0, dayCount - 1));
-  const startDay = dayOfYear(start);
-  const endDay = dayOfYear(end);
-  const crossesYear =
-    start.getUTCFullYear() !== end.getUTCFullYear() || endDay < startDay;
-  const label =
-    dayCount <= 1
-      ? formatDisplayDate(start)
-      : `${formatDisplayDate(start)} to ${formatDisplayDate(end)}`;
-  return {
-    startDate: formatIsoDate(start),
-    endDate: formatIsoDate(end),
-    startDayOfYear: startDay,
-    endDayOfYear: endDay,
-    dayCount,
-    crossesYear,
-    label,
-  };
 }
 
 export function buildTripPlannerRangeFromDates(

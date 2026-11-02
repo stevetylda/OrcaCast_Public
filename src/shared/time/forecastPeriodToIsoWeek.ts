@@ -20,37 +20,6 @@ export function isoWeekYearFromDate(date: Date): number {
   return temp.getUTCFullYear();
 }
 
-function parseIsoDateAsUtc(dateStr: string): Date {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
-  if (!match) return new Date(dateStr);
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  return new Date(Date.UTC(year, month - 1, day));
-}
-
-export function forecastPeriodToIsoWeek(period: {
-  mode: "single" | "range";
-  date?: string;
-  start?: string;
-  end?: string;
-}): number {
-  const dateStr = period.mode === "single" ? period.date : period.start;
-  if (!dateStr) return isoWeekFromDate(new Date());
-  return isoWeekFromDate(parseIsoDateAsUtc(dateStr));
-}
-
-export function forecastPeriodToIsoWeekYear(period: {
-  mode: "single" | "range";
-  date?: string;
-  start?: string;
-  end?: string;
-}): number {
-  const dateStr = period.mode === "single" ? period.date : period.start;
-  if (!dateStr) return isoWeekYearFromDate(new Date());
-  return isoWeekYearFromDate(parseIsoDateAsUtc(dateStr));
-}
-
 function formatIsoDate(date: Date): string {
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");

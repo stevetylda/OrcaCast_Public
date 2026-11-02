@@ -1,3 +1,6 @@
+import { createCachedLoader } from "../../shared/data/cachedLoader";
+import { fetchJson } from "../../shared/data/fetchClient";
+import { getDataVersionToken } from "../../shared/data/meta";
 import type { Feature, Geometry } from "geojson";
 import { resolveAppAssetPath } from "../../shared/config/basePath";
 import type { PoiType } from "./types";
@@ -26,7 +29,7 @@ export type PoiDataBundle = {
   sourceItems: PublicPoi[];
 };
 
-let poiDataBundlePromise: Promise<PoiDataBundle> | null = null;
+const pois = createCachedLoader(fetchPoiDataBundle, getDataVersionToken);
 
 export function normalizePoiType(value: unknown): PoiType {
   const normalized = String(value ?? "")
@@ -182,16 +185,14 @@ function normalizePayload(payload: unknown): PoiDataBundle {
 
 async function fetchPoiDataBundle(): Promise<PoiDataBundle> {
   const url = resolveAppAssetPath("data/places_of_interest.json");
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to load POI data (${response.status}) from ${url}`);
-  }
-  return normalizePayload(await response.json());
+  const { data } = await fetchJson<unknown>(url, {
+    cacheToken: getDataVersionToken(),
+  });
+  return normalizePayload(data);
 }
 
 export function loadPoiDataBundle() {
-  poiDataBundlePromise ??= fetchPoiDataBundle();
-  return poiDataBundlePromise;
+  return pois.load();
 }
 
 export async function loadPoiData() {
@@ -199,5 +200,5 @@ export async function loadPoiData() {
 }
 
 export function resetPoiDataCacheForTests() {
-  poiDataBundlePromise = null;
+  pois.reset();
 }

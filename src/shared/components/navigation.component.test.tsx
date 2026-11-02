@@ -39,7 +39,7 @@ describe("application navigation", () => {
 
       expect(
         screen.getAllByRole("link").map((link) => link.textContent),
-      ).toEqual(["This Week", "Plan a Trip", "Explore"]);
+      ).toEqual(["This Week", "Plan a Trip", "About"]);
     },
   );
 

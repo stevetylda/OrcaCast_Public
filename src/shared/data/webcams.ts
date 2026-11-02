@@ -1,3 +1,6 @@
+import { createCachedLoader } from "./cachedLoader";
+import { fetchJson } from "./fetchClient";
+import { getDataVersionToken } from "./meta";
 import type { PublicPoi } from "../../features/locations/poiData";
 import type {
   WebcamFeed,
@@ -20,7 +23,7 @@ const WEBCAM_STATUSES = new Set<WebcamStatus>([
   "seasonal",
 ]);
 
-let webcamPayloadPromise: Promise<WebcamPayload> | null = null;
+const webcams = createCachedLoader(fetchWebcamPayload, getDataVersionToken);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -155,13 +158,10 @@ export function normalizeWebcamPayload(payload: unknown): WebcamPayload {
 
 async function fetchWebcamPayload(): Promise<WebcamPayload> {
   const url = resolveAppAssetPath("data/webcams.json");
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to load webcam data (${response.status}) from ${url}`,
-    );
-  }
-  return normalizeWebcamPayload(await response.json());
+  const { data } = await fetchJson<unknown>(url, {
+    cacheToken: getDataVersionToken(),
+  });
+  return normalizeWebcamPayload(data);
 }
 
 function cameraSlug(value: string) {
@@ -222,8 +222,7 @@ export function mergePoiCamerasIntoWebcamSites(
 }
 
 export function loadWebcamPayload() {
-  webcamPayloadPromise ??= fetchWebcamPayload();
-  return webcamPayloadPromise;
+  return webcams.load();
 }
 
 export async function loadWebcamSites() {
@@ -231,5 +230,5 @@ export async function loadWebcamSites() {
 }
 
 export function resetWebcamCacheForTests() {
-  webcamPayloadPromise = null;
+  webcams.reset();
 }

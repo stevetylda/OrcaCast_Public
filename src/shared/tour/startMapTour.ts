@@ -1,3 +1,4 @@
+import { localPreferences } from "../storage/browserStorage";
 import { driver } from "driver.js";
 
 type TourStepDef = {
@@ -81,9 +82,10 @@ const ALL_STEPS: TourStepDef[] = [
   },
   {
     id: "info",
-    title: "Info",
-    description: "Re-open this modal any time for sources and the tour.",
-    detail: "Great for explaining the forecast to someone new.",
+    title: "About OrcaCast",
+    description:
+      "Open the guide to the outlook, responsible viewing, methodology, and sources.",
+    detail: "Use it when you want more context behind the forecast.",
     targetSelector: '[data-tour="info"]',
     side: "bottom",
     align: "center",
@@ -187,16 +189,6 @@ const ALL_STEPS: TourStepDef[] = [
     detail: "Try alternatives if you want a different bias.",
     targetSelector: '[data-tour="model-selector"]',
     side: "top",
-    align: "center",
-    offset: 12,
-  },
-  {
-    id: "re-run",
-    title: "Re-run the tour",
-    description: "You can start this walkthrough any time from the info menu.",
-    detail: "If anything changes, this tour stays up to date.",
-    targetSelector: '[data-tour="info"]',
-    side: "bottom",
     align: "center",
     offset: 12,
   },
@@ -396,11 +388,12 @@ export function startMapTour() {
 
       const tour = driver({
         showProgress: true,
-        overlayOpacity: 0.65,
+        overlayColor: "#061d3c",
+        overlayOpacity: 0.52,
         animate: true,
         allowClose: true,
-        stagePadding: 12,
-        stageRadius: 14,
+        stagePadding: 10,
+        stageRadius: 18,
         popoverClass: "orcacast-tour",
         nextBtnText: "Next",
         prevBtnText: "Back",
@@ -417,7 +410,7 @@ export function startMapTour() {
           updateProgress(current.id);
         },
         onDestroyed: () => {
-          localStorage.setItem("orcacast.tour.seen", "true");
+          localPreferences.setItem("orcacast.tour.seen", "true");
           setMapInteractions(true);
           document.documentElement.style.removeProperty("--tour-progress");
           const spotlight = document.getElementById(SPOTLIGHT_ID);

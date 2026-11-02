@@ -2,7 +2,6 @@ export type PaletteId =
   | "rose_noir"
   | "basalt_fire"
   | "cividis_safe"
-  | "mediterranean_atlas"
   | "northern_lights"
   | "forecast_lab"
   | "forecast_lab_glow";
@@ -18,7 +17,7 @@ export type PaletteDef<TId extends string = PaletteId> = {
   dominant: string;
 };
 
-export const DEFAULT_PALETTE_ID: PaletteId = "mediterranean_atlas";
+export const DEFAULT_PALETTE_ID: PaletteId = "forecast_lab";
 
 export const PALETTES: Record<PaletteId, PaletteDef> = {
   rose_noir: {
@@ -65,21 +64,6 @@ export const PALETTES: Record<PaletteId, PaletteDef> = {
       "#FDE945",
     ],
     dominant: "#8FA56B",
-  },
-  mediterranean_atlas: {
-    id: "mediterranean_atlas",
-    name: "Mediterranean Atlas",
-    colors: [
-      "#D7E1DF",
-      "#B8CCCE",
-      "#8EB5BD",
-      "#5AA0AE",
-      "#278AA2",
-      "#0B718D",
-      "#075672",
-      "#08364F",
-    ],
-    dominant: "#0B718D",
   },
   northern_lights: {
     id: "northern_lights",
@@ -136,26 +120,11 @@ export const VIEWABILITY_PALETTE_OPTIONS: PaletteDef<ViewabilityPaletteId>[] = [
   ...Object.values(VIEWABILITY_ONLY_PALETTES),
 ];
 
-export function getPalette(paletteId: PaletteId): PaletteDef {
-  return PALETTES[paletteId];
-}
-
 export function getPaletteOrDefault(
   paletteId: string | null | undefined,
 ): PaletteDef {
   if (!paletteId) return PALETTES[DEFAULT_PALETTE_ID];
   return PALETTES[paletteId as PaletteId] ?? PALETTES[DEFAULT_PALETTE_ID];
-}
-
-export function getViewabilityPaletteOrDefault(
-  paletteId: string | null | undefined,
-): PaletteDef<ViewabilityPaletteId> {
-  if (!paletteId) return PALETTES.mediterranean_atlas;
-  return (
-    PALETTES[paletteId as PaletteId] ??
-    VIEWABILITY_ONLY_PALETTES[paletteId as ViewabilityOnlyPaletteId] ??
-    PALETTES.mediterranean_atlas
-  );
 }
 
 if (import.meta.env.DEV) {

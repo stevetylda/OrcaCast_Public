@@ -1,3 +1,4 @@
+import "./PrimaryNavigation.css";
 import { Link, useLocation } from "react-router-dom";
 import { getNavigationRoutes, isRouteActive } from "../config/routes";
 
@@ -14,7 +15,10 @@ export function PrimaryNavigation({
   const routes = getNavigationRoutes("primary");
 
   return (
-    <nav className={className} aria-label={ariaLabel}>
+    <nav
+      className={`primaryNavigation ${className ?? ""}`}
+      aria-label={ariaLabel}
+    >
       {routes.map((route) => (
         <Link
           key={route.id}

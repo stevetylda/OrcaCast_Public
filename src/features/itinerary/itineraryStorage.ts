@@ -1,18 +1,10 @@
+import { sessionPreferences } from "../../shared/storage/browserStorage";
 export const PLANNER_ITINERARY_STORAGE_KEY = "orcacast.planner.itinerary.v1";
 
 export type ItineraryStorage = Pick<
   Storage,
   "getItem" | "setItem" | "removeItem"
 >;
-
-function defaultSessionStorage(): ItineraryStorage | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return window.sessionStorage;
-  } catch {
-    return null;
-  }
-}
 
 export function parseItineraryPlaceIds(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -27,7 +19,7 @@ export function parseItineraryPlaceIds(value: unknown): string[] {
 }
 
 export function readStoredItinerary(
-  storage: ItineraryStorage | null = defaultSessionStorage(),
+  storage: ItineraryStorage | null = sessionPreferences,
 ): string[] {
   if (!storage) return [];
   try {
@@ -40,7 +32,7 @@ export function readStoredItinerary(
 
 export function writeStoredItinerary(
   placeIds: readonly string[],
-  storage: ItineraryStorage | null = defaultSessionStorage(),
+  storage: ItineraryStorage | null = sessionPreferences,
 ): void {
   if (!storage) return;
   const normalized = parseItineraryPlaceIds(placeIds);
@@ -52,7 +44,7 @@ export function writeStoredItinerary(
 }
 
 export function clearStoredItinerary(
-  storage: ItineraryStorage | null = defaultSessionStorage(),
+  storage: ItineraryStorage | null = sessionPreferences,
 ): void {
   storage?.removeItem(PLANNER_ITINERARY_STORAGE_KEY);
 }

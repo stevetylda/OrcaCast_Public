@@ -1,3 +1,5 @@
+import { fetchJson } from "./fetchClient";
+import { getDataVersionToken } from "./meta";
 export type PlannerBaseLocation = {
   name: string;
   latitude: number;
@@ -21,13 +23,9 @@ function isPlannerBaseLocation(value: unknown): value is PlannerBaseLocation {
 export async function loadPlannerBaseLocations(): Promise<
   PlannerBaseLocation[]
 > {
-  const response = await fetch(BASE_LOCATION_URL);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to load planner base locations (${response.status})`,
-    );
-  }
-  const payload = (await response.json()) as unknown;
+  const { data: payload } = await fetchJson<unknown>(BASE_LOCATION_URL, {
+    cacheToken: getDataVersionToken(),
+  });
   if (!Array.isArray(payload)) {
     throw new Error("Planner base locations payload must be an array");
   }

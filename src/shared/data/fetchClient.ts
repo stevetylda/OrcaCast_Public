@@ -54,8 +54,8 @@ export async function fetchText(
         cache,
         signal: controller.signal,
       });
-      window.clearTimeout(timeoutId);
       if (!response.ok) {
+        window.clearTimeout(timeoutId);
         const error = new DataLoadError({
           kind: "http",
           url: resolvedUrl,
@@ -92,6 +92,8 @@ export async function fetchText(
       }
       lastError = error;
       break;
+    } finally {
+      window.clearTimeout(timeoutId);
     }
   }
 

@@ -1,3 +1,4 @@
+import { localPreferences } from "../../shared/storage/browserStorage";
 import {
   useEffect,
   type Dispatch,
@@ -106,7 +107,7 @@ export function useActivityOverlayData({
       typeof window !== "undefined" &&
       ((window as { __ORCACAST_DEBUG_MAP?: boolean }).__ORCACAST_DEBUG_MAP ===
         true ||
-        window.localStorage?.getItem("orcacast.debug.map") === "true");
+        localPreferences.getItem("orcacast.debug.map") === "true");
 
     const applyScaleToCurrentValues = (values: Record<string, number>) => {
       const scaleSourceValues =

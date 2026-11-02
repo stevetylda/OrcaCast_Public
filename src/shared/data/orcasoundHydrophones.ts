@@ -1,3 +1,6 @@
+import { createCachedLoader } from "./cachedLoader";
+import { fetchJson } from "./fetchClient";
+import { getDataVersionToken } from "./meta";
 export type OrcasoundHydrophone = {
   id: string;
   name: string;
@@ -11,7 +14,10 @@ type OrcasoundHydrophonePayload = {
   items: OrcasoundHydrophone[];
 };
 
-let hydrophonePayloadPromise: Promise<OrcasoundHydrophonePayload> | null = null;
+const hydrophones = createCachedLoader(
+  fetchHydrophonePayload,
+  getDataVersionToken,
+);
 
 function isValidHydrophone(value: unknown): value is OrcasoundHydrophone {
   if (!value || typeof value !== "object") return false;
@@ -45,25 +51,17 @@ function normalizePayload(payload: unknown): OrcasoundHydrophonePayload {
 
 async function fetchHydrophonePayload(): Promise<OrcasoundHydrophonePayload> {
   const url = resolveAppAssetPath("data/orcasound_hydrophones.json");
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to load Orcasound hydrophone data (${response.status}) from ${url}`,
-    );
-  }
-  return normalizePayload(await response.json());
+  const { data } = await fetchJson<unknown>(url, {
+    cacheToken: getDataVersionToken(),
+  });
+  return normalizePayload(data);
 }
 
 export function loadOrcasoundHydrophonePayload() {
-  hydrophonePayloadPromise ??= fetchHydrophonePayload();
-  return hydrophonePayloadPromise;
-}
-
-export async function loadOrcasoundHydrophones() {
-  return (await loadOrcasoundHydrophonePayload()).items;
+  return hydrophones.load();
 }
 
 export function resetOrcasoundHydrophonesCacheForTests() {
-  hydrophonePayloadPromise = null;
+  hydrophones.reset();
 }
 import { resolveAppAssetPath } from "../config/basePath";
